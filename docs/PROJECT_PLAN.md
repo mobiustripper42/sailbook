@@ -56,7 +56,8 @@ Students can find and sign up for courses.
 - [ ] 2.6 — Duplicate enrollment prevention
 - [ ] 2.7 — My courses page — enrolled courses with session schedule
 - [ ] 2.8 — RLS policies for enrollments table
-- [ ] 2.9 — Student list view for admin (AS-15)
+- [ ] 2.9 — Student list + edit for admin — view all students, edit profile details
+- [ ] 2.10 — Instructor edit for admin — edit profile details (name, phone, etc.)
 
 **Demo:** Student browses courses, registers for ASA 101 Weekend, sees it in "My Courses" with session dates. Admin sees enrollment.
 
