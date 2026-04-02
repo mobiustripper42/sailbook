@@ -19,9 +19,9 @@ Get the project running locally with auth working end-to-end.
 - [x] 0.8 — Create root layout with auth provider
 - [x] 0.9 — Build login page + registration page
 - [x] 0.10 — Verify: can create account, log in, get redirected by role
-- [ ] 0.11 — Connect Vercel to GitHub repo, verify deploy
+- [x] 0.11 — Connect Vercel to GitHub repo, verify deploy
 - [x] 0.12 — Write CLAUDE.md for Claude Code (project context, conventions, file structure)
-- [ ] 0.13 — Set up RLS policies for profiles table
+- [x] 0.13 — Set up RLS policies for profiles table
 
 **Demo:** Log in as admin, student, or instructor → land on correct (empty) dashboard.
 
