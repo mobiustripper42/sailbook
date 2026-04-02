@@ -5,6 +5,22 @@ Format: append newest entry at the top.
 
 ---
 
+## Session 3 — 2026-04-02
+**Task:** Schema review with Andy + course status / enrollment confirmation
+**Completed:** 5 schema comments reviewed. Added draft/active/completed/cancelled course statuses (default now draft). Added Publish/Complete/Cancel buttons to course detail. Added enrollment Confirm/Cancel actions. Logged DEC-013 (experience_level static), DEC-014 (enrollment status lifecycle). Added 2.0 multi-role migration as first Phase 2 task. Added 5.11 duplicate course to Phase 5. Logged AI season setup agent as V2. Verified unique constraint on enrollments already existed. Build clean throughout.
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:**
+1. Commit current work
+2. Start Phase 2 with task 2.0 — migrate role model to boolean flags (is_admin, is_instructor, is_student)
+3. Then 2.1 student dashboard, 2.2 course browse, etc.
+**Context:**
+- Course status default is now 'draft' — new courses won't be student-visible until published
+- Enrollment confirmed = payment received in V1 (manual admin action)
+- Multi-role migration (2.0) must happen before any Phase 2 student role logic is built
+
+---
+
 ## Session 2 — 2026-04-02
 **Task:** Phase 1 — Admin Course Catalog
 **Completed:** All 9 tasks (1.1–1.9). Admin layout with sidebar nav. Dashboard stat cards. Course types CRUD (list/create/edit/deactivate). Course list + detail + edit pages. Course creation form with dynamic session rows. Add/delete sessions from detail page. Instructor list + deactivate. RLS SQL migration file. Manual types.ts.

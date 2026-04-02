@@ -35,7 +35,7 @@ export type Course = {
   description: string | null
   capacity: number
   price: number | null
-  status: string
+  status: 'draft' | 'active' | 'completed' | 'cancelled'
   notes: string | null
   created_at: string
   updated_at: string

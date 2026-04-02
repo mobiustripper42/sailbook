@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import AddSessionForm from '@/components/admin/add-session-form'
 import SessionActions from '@/components/admin/session-actions'
 import CourseStatusActions from '@/components/admin/course-status-actions'
+import EnrollmentActions from '@/components/admin/enrollment-actions'
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -145,6 +146,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   <TableHead>Email</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Enrolled</TableHead>
+                  <TableHead className="w-32" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -155,10 +157,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                       <TableCell>{student ? `${student.first_name} ${student.last_name}` : '—'}</TableCell>
                       <TableCell>{student?.email ?? '—'}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{e.status}</Badge>
+                        <Badge variant={e.status === 'confirmed' ? 'default' : 'secondary'}>
+                          {e.status}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         {new Date(e.enrolled_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <EnrollmentActions enrollmentId={e.id} courseId={id} status={e.status} />
                       </TableCell>
                     </TableRow>
                   )

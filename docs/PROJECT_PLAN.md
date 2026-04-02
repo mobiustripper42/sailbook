@@ -47,6 +47,7 @@ Admin can set up the school's offerings.
 ## Phase 2: Student — Browse & Register (Days 8–12)
 Students can find and sign up for courses.
 
+- [ ] 2.0 — Migrate role model: replace single `role` column with `is_admin`, `is_instructor`, `is_student` boolean flags. Update proxy.ts, RLS policies, registration, and types. (Do this first — Phase 2 bakes role assumptions in deeper.)
 - [ ] 2.1 — Student dashboard page (my enrollments)
 - [ ] 2.2 — Course browse page — available courses with spots remaining
 - [ ] 2.3 — Course detail view (student-facing) — type, schedule, instructor, price
@@ -103,6 +104,7 @@ Make it production-ready.
 - [ ] 5.8 — Bug fixes from walkthrough
 - [ ] 5.9 — Production environment variables on Vercel
 - [ ] 5.10 — DNS / custom domain (if wanted)
+- [ ] 5.11 — Duplicate course — one-click copy of a course (no sessions), drop into edit mode
 
 **Demo:** Andy walks through full flow — creates a course, student registers, instructor views roster, session gets cancelled, makeup scheduled. Everything works.
 

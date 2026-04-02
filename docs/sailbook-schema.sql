@@ -52,7 +52,7 @@ CREATE TABLE courses (
   description TEXT,                         -- optional override or additions
   capacity INT NOT NULL DEFAULT 4,
   price DECIMAL(10, 2),                     -- display only for MVP, no payment processing
-  status VARCHAR(20) DEFAULT 'active',      -- 'active', 'cancelled'
+  status VARCHAR(20) DEFAULT 'draft',       -- 'draft', 'active', 'completed', 'cancelled'
   notes TEXT,                               -- internal admin notes
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),

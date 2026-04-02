@@ -52,3 +52,14 @@
 ## DEC-012: Vercel for hosting
 **Decision:** Vercel free tier for frontend hosting.
 **Why:** Built Next.js, zero-config deployment, auto-deploy from GitHub, free tier sufficient for MVP traffic. Best DX available.
+
+## DEC-013: experience_level is static in V1
+**Decision:** `profiles.experience_level` is set at registration and never updated automatically.
+**Why:** Automatically updating skill level based on completed courses is non-trivial — it requires defining progression rules per course type, handling partial completions, and surfacing it meaningfully in the UI. Out of scope for May 15.
+**Known limitation:** A student who completes ASA 101 still shows as 'beginner' until manually updated. Admin can edit profiles directly in Supabase for now.
+**V2 path:** This field is the seed of the student skill tracking feature already on the V2 list. When that ships, completed enrollments drive automatic level progression.
+
+## DEC-014: Enrollment status lifecycle — manual confirmation in V1
+**Decision:** Enrollment statuses are `registered → confirmed → cancelled / completed`. In V1, admin manually moves a student from `registered` to `confirmed` after receiving payment (cash, Venmo, check). `confirmed` is the payment signal for V1 — no separate `paid` boolean needed.
+**Why:** Payment processing is out of scope for May 15. The status column provides the right hook for a future payment integration without any schema change — a Stripe webhook would simply set `status = 'confirmed'` on successful charge.
+**V2 path:** Payment flow sets `confirmed` automatically. A 24-hour hold period (registered but not yet confirmed/charged) is a natural extension of this model.

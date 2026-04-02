@@ -73,6 +73,28 @@ export async function updateCourse(id: string, prevState: string | null, formDat
   redirect(`/admin/courses/${id}`)
 }
 
+export async function publishCourse(id: string) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('courses')
+    .update({ status: 'active', updated_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/courses')
+  revalidatePath(`/admin/courses/${id}`)
+}
+
+export async function completeCourse(id: string) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('courses')
+    .update({ status: 'completed', updated_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/courses')
+  revalidatePath(`/admin/courses/${id}`)
+}
+
 export async function cancelCourse(id: string) {
   const supabase = await createClient()
   const { error } = await supabase
