@@ -9,16 +9,16 @@
 ## Phase 0: Infrastructure (Days 1–2)
 Get the project running locally with auth working end-to-end.
 
-- [ ] 0.1 — Create GitHub repo, initialize Next.js 14+ with App Router
-- [ ] 0.2 — Install and configure Tailwind CSS + shadcn/ui
-- [ ] 0.3 — Create Supabase project, run schema SQL
-- [ ] 0.4 — Configure Supabase Auth (email/password)
-- [ ] 0.5 — Set up environment variables (.env.local)
-- [ ] 0.6 — Wire up Supabase client in Next.js
-- [ ] 0.7 — Build middleware.ts (auth guard + role routing)
-- [ ] 0.8 — Create root layout with auth provider
-- [ ] 0.9 — Build login page + registration page
-- [ ] 0.10 — Verify: can create account, log in, get redirected by role
+- [x] 0.1 — Create GitHub repo, initialize Next.js 14+ with App Router
+- [x] 0.2 — Install and configure Tailwind CSS + shadcn/ui
+- [x] 0.3 — Create Supabase project, run schema SQL
+- [x] 0.4 — Configure Supabase Auth (email/password)
+- [x] 0.5 — Set up environment variables (.env.local)
+- [x] 0.6 — Wire up Supabase client in Next.js
+- [x] 0.7 — Build middleware.ts (auth guard + role routing)
+- [x] 0.8 — Create root layout with auth provider
+- [x] 0.9 — Build login page + registration page
+- [x] 0.10 — Verify: can create account, log in, get redirected by role
 - [ ] 0.11 — Connect Vercel to GitHub repo, verify deploy
 - [x] 0.12 — Write CLAUDE.md for Claude Code (project context, conventions, file structure)
 - [ ] 0.13 — Set up RLS policies for profiles table

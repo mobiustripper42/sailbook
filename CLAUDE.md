@@ -45,18 +45,21 @@ sailbook/
 │   │   │   └── register/page.tsx
 │   │   ├── (admin)/
 │   │   │   ├── layout.tsx
-│   │   │   ├── dashboard/page.tsx
-│   │   │   ├── courses/
-│   │   │   ├── course-types/
-│   │   │   ├── sessions/
-│   │   │   └── students/
+│   │   │   └── admin/
+│   │   │       ├── dashboard/page.tsx
+│   │   │       ├── courses/
+│   │   │       ├── course-types/
+│   │   │       ├── sessions/
+│   │   │       └── students/
 │   │   ├── (instructor)/
 │   │   │   ├── layout.tsx
-│   │   │   └── dashboard/page.tsx
+│   │   │   └── instructor/
+│   │   │       └── dashboard/page.tsx
 │   │   ├── (student)/
 │   │   │   ├── layout.tsx
-│   │   │   ├── dashboard/page.tsx
-│   │   │   └── courses/
+│   │   │   └── student/
+│   │   │       ├── dashboard/page.tsx
+│   │   │       └── courses/
 │   │   └── layout.tsx
 │   ├── components/
 │   │   ├── ui/           # shadcn/ui components (do not edit directly)
@@ -67,7 +70,7 @@ sailbook/
 │   │   │   ├── server.ts     # server client (Server Components / Server Actions)
 │   │   │   └── types.ts      # generated DB types
 │   │   └── utils.ts
-│   └── middleware.ts
+│   └── proxy.ts
 ├── docs/             # project documentation
 ├── session-log.md    # session continuity log
 └── CLAUDE.md         # this file
