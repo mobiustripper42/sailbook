@@ -5,6 +5,26 @@ Format: append newest entry at the top.
 
 ---
 
+## Session 2 — 2026-04-02
+**Task:** Phase 1 — Admin Course Catalog
+**Completed:** All 9 tasks (1.1–1.9). Admin layout with sidebar nav. Dashboard stat cards. Course types CRUD (list/create/edit/deactivate). Course list + detail + edit pages. Course creation form with dynamic session rows. Add/delete sessions from detail page. Instructor list + deactivate. RLS SQL migration file. Manual types.ts.
+**In Progress:** Nothing — needs RLS migration applied and lint/build check
+**Blocked:** Nothing
+**Next Steps:**
+1. Run `docs/migrations/001_rls_phase1.sql` in Supabase SQL Editor
+2. Run `npm run lint` and fix any issues
+3. Run `npm run build` to confirm no TypeScript errors
+4. Create Andy's admin account in Supabase Auth (role: 'admin' in user_metadata)
+5. Smoke test: create a course type → create a course with sessions → view detail
+6. Start Phase 2 (student browse + register)
+**Context:**
+- Course creation form uses indexed hidden inputs (`session_date_0`, `session_start_0`, etc.) to pass dynamic session rows through FormData — server action loops until no `session_date_{i}` found
+- Supabase join syntax: `instructor:profiles!courses_instructor_id_fkey` — required because profiles is referenced twice (instructor + created_by)
+- Sign out is a Server Action calling `supabase.auth.signOut()` in `(auth)/actions.ts`
+- No admin-side instructor creation — instructors self-register at /register (role stored in user_metadata)
+
+---
+
 ## Session 1 — 2026-04-01
 **Task:** Phase 0 — Infrastructure
 **Completed:** All 13 tasks. Next.js 16 + Tailwind v4 + shadcn/ui scaffolded. Supabase project created, schema applied, Auth configured. Supabase browser/server clients wired up. proxy.ts (auth guard + role routing). Root layout with Geist font. Login + register pages with server actions. Role-based dashboard placeholders. RLS policies on profiles table. Vercel deployed and verified.

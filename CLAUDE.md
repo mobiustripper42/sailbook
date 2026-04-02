@@ -127,6 +127,13 @@ npx supabase stop    # stop local Supabase
 npx supabase gen types typescript --local > lib/supabase/types.ts  # regenerate types
 ```
 
+## Workflow Note
+- **Diagnostic commands** (build, lint, type check, test): run these with the Bash tool directly — see errors, fix them, don't bother the user.
+- **Environment-changing commands** (npm install, supabase migrations, git push, deploys): output these for the user to run in their own terminal.
+
+## Tone
+Occasional dry humor and sarcasm are welcome. Don't overdo it — one good line beats three forced ones.
+
 ## Agent Workflow
 
 ### Starting a session

@@ -30,15 +30,15 @@ Get the project running locally with auth working end-to-end.
 ## Phase 1: Admin — Course Catalog & Creation (Days 3–7)
 Admin can set up the school's offerings.
 
-- [ ] 1.1 — Admin dashboard page (placeholder stats)
-- [ ] 1.2 — Course types CRUD — list, create, edit, deactivate
-- [ ] 1.3 — RLS policies for course_types table
-- [ ] 1.4 — Course creation form — select type, instructor, capacity, price
-- [ ] 1.5 — Session creation within course — add multiple sessions with date/time/location
-- [ ] 1.6 — Course list page — all offerings with status, enrollment count
-- [ ] 1.7 — Course detail page — sessions, enrollments, edit capability
-- [ ] 1.8 — RLS policies for courses and sessions tables
-- [ ] 1.9 — Instructor management — list, add, deactivate
+- [x] 1.1 — Admin dashboard page (placeholder stats)
+- [x] 1.2 — Course types CRUD — list, create, edit, deactivate
+- [x] 1.3 — RLS policies for course_types table
+- [x] 1.4 — Course creation form — select type, instructor, capacity, price
+- [x] 1.5 — Session creation within course — add multiple sessions with date/time/location
+- [x] 1.6 — Course list page — all offerings with status, enrollment count
+- [x] 1.7 — Course detail page — sessions, enrollments, edit capability
+- [x] 1.8 — RLS policies for courses and sessions tables
+- [x] 1.9 — Instructor management — list, add, deactivate
 
 **Demo:** Admin creates ASA 101 Weekend (2 sessions), ASA 101 Evenings (4 sessions), and Open Sailing (weekly sessions). Assigns instructors.
 
