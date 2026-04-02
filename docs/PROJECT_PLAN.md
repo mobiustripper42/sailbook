@@ -20,7 +20,7 @@ Get the project running locally with auth working end-to-end.
 - [ ] 0.9 — Build login page + registration page
 - [ ] 0.10 — Verify: can create account, log in, get redirected by role
 - [ ] 0.11 — Connect Vercel to GitHub repo, verify deploy
-- [ ] 0.12 — Write CLAUDE.md for Claude Code (project context, conventions, file structure)
+- [x] 0.12 — Write CLAUDE.md for Claude Code (project context, conventions, file structure)
 - [ ] 0.13 — Set up RLS policies for profiles table
 
 **Demo:** Log in as admin, student, or instructor → land on correct (empty) dashboard.
@@ -131,7 +131,8 @@ Make it production-ready.
 
 ## Key Files for Claude Code
 - `CLAUDE.md` — project conventions, file structure, commands
-- `SPEC.md` — what we're building
-- `DECISIONS.md` — why we made each choice
-- `USER_STORIES.md` — what each role does
-- `schema.sql` — database schema
+- `docs/SPEC.md` — what we're building
+- `docs/DECISIONS.md` — why we made each choice
+- `docs/USER_STORIES.md` — what each role does
+- `docs/sailbook-schema.sql` — database schema
+- `session-log.md` — session continuity log
