@@ -1,12 +1,12 @@
 -- SailBook MVP Schema
 -- Single school, Supabase-direct, Next.js + Vercel
--- Roles: admin, instructor (extensible via role column)
+-- Roles: boolean flags (is_admin, is_instructor, is_student) — multi-role capable
 -- Students: self-register, Supabase Auth for all users
 
 -- ============================================================
 -- PROFILES
 -- Extends Supabase Auth. Every authenticated user gets a profile.
--- Role determines access: 'admin', 'instructor', 'student'
+-- Role flags: is_admin, is_instructor, is_student (not mutually exclusive)
 -- ============================================================
 CREATE TABLE profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -14,7 +14,9 @@ CREATE TABLE profiles (
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
   phone VARCHAR(20),
-  role VARCHAR(20) NOT NULL DEFAULT 'student',  -- 'admin', 'instructor', 'student'
+  is_admin BOOLEAN NOT NULL DEFAULT FALSE,
+  is_instructor BOOLEAN NOT NULL DEFAULT FALSE,
+  is_student BOOLEAN NOT NULL DEFAULT FALSE,
   experience_level VARCHAR(20),                  -- students only: 'beginner', 'intermediate', 'advanced'
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -115,7 +117,9 @@ CREATE TABLE session_attendance (
 -- ============================================================
 -- INDEXES
 -- ============================================================
-CREATE INDEX idx_profiles_role ON profiles(role);
+CREATE INDEX idx_profiles_is_admin ON profiles(is_admin) WHERE is_admin = TRUE;
+CREATE INDEX idx_profiles_is_instructor ON profiles(is_instructor) WHERE is_instructor = TRUE;
+CREATE INDEX idx_profiles_is_student ON profiles(is_student) WHERE is_student = TRUE;
 CREATE INDEX idx_profiles_email ON profiles(email);
 CREATE INDEX idx_courses_type ON courses(course_type_id);
 CREATE INDEX idx_courses_instructor ON courses(instructor_id);

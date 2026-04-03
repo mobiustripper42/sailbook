@@ -30,7 +30,7 @@ export async function register(_: unknown, formData: FormData) {
     email,
     password,
     options: {
-      data: { role: 'student', first_name: firstName, last_name: lastName },
+      data: { is_admin: false, is_instructor: false, is_student: true, first_name: firstName, last_name: lastName },
     },
   })
 
@@ -43,7 +43,9 @@ export async function register(_: unknown, formData: FormData) {
       first_name: firstName,
       last_name: lastName,
       phone,
-      role: 'student',
+      is_admin: false,
+      is_instructor: false,
+      is_student: true,
       experience_level: experienceLevel,
     })
 

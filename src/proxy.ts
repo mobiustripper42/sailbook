@@ -2,10 +2,11 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const PUBLIC_ROUTES = ['/login', '/register']
-const ROLE_HOME: Record<string, string> = {
-  admin: '/admin/dashboard',
-  instructor: '/instructor/dashboard',
-  student: '/student/dashboard',
+
+function getPrimaryHome(meta: Record<string, unknown>): string {
+  if (meta.is_admin) return '/admin/dashboard'
+  if (meta.is_instructor) return '/instructor/dashboard'
+  return '/student/dashboard'
 }
 
 export async function proxy(request: NextRequest) {
@@ -33,7 +34,7 @@ export async function proxy(request: NextRequest) {
 
   // Refresh session — must be called before any auth checks
   const { data: { user } } = await supabase.auth.getUser()
-  const role = user?.user_metadata?.role as string | undefined
+  const meta = (user?.user_metadata ?? {}) as Record<string, unknown>
 
   const isPublicRoute = PUBLIC_ROUTES.includes(pathname)
   const isRoot = pathname === '/'
@@ -45,20 +46,19 @@ export async function proxy(request: NextRequest) {
 
   // Logged in on a public route or root — send to role dashboard
   if (user && (isPublicRoute || isRoot)) {
-    const home = role ? ROLE_HOME[role] : '/student/dashboard'
-    return NextResponse.redirect(new URL(home, request.url))
+    return NextResponse.redirect(new URL(getPrimaryHome(meta), request.url))
   }
 
   // Role-based route guard
-  if (user && role) {
-    if (pathname.startsWith('/admin') && role !== 'admin') {
-      return NextResponse.redirect(new URL(ROLE_HOME[role] ?? '/login', request.url))
+  if (user) {
+    if (pathname.startsWith('/admin') && !meta.is_admin) {
+      return NextResponse.redirect(new URL(getPrimaryHome(meta), request.url))
     }
-    if (pathname.startsWith('/instructor') && role !== 'instructor') {
-      return NextResponse.redirect(new URL(ROLE_HOME[role] ?? '/login', request.url))
+    if (pathname.startsWith('/instructor') && !meta.is_instructor) {
+      return NextResponse.redirect(new URL(getPrimaryHome(meta), request.url))
     }
-    if (pathname.startsWith('/student') && role !== 'student') {
-      return NextResponse.redirect(new URL(ROLE_HOME[role] ?? '/login', request.url))
+    if (pathname.startsWith('/student') && !meta.is_student) {
+      return NextResponse.redirect(new URL(getPrimaryHome(meta), request.url))
     }
   }
 

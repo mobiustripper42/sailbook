@@ -7,7 +7,9 @@ export type Profile = {
   first_name: string
   last_name: string
   phone: string | null
-  role: string
+  is_admin: boolean
+  is_instructor: boolean
+  is_student: boolean
   experience_level: string | null
   is_active: boolean
   created_at: string

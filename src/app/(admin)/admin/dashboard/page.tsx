@@ -12,7 +12,7 @@ async function getStats() {
       .eq('status', 'scheduled')
       .gte('date', new Date().toISOString().slice(0, 10)),
     supabase.from('enrollments').select('id', { count: 'exact', head: true }).eq('status', 'registered'),
-    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'instructor').eq('is_active', true),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_instructor', true).eq('is_active', true),
   ])
 
   return {

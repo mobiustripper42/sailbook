@@ -15,7 +15,7 @@ export default async function InstructorsPage() {
   const { data: instructors, error } = await supabase
     .from('profiles')
     .select('id, first_name, last_name, email, phone, is_active, created_at')
-    .eq('role', 'instructor')
+    .eq('is_instructor', true)
     .order('last_name')
 
   if (error) return <div className="p-8 text-destructive">{error.message}</div>
@@ -27,7 +27,7 @@ export default async function InstructorsPage() {
       </div>
 
       <p className="text-sm text-muted-foreground mb-4">
-        Instructors register at <strong>/register</strong> with their email. Their account is created with the &quot;instructor&quot; role.
+        Instructors register at <strong>/register</strong> with their email. Andy then sets their account to instructor in Supabase Auth.
       </p>
 
       {instructors?.length === 0 ? (

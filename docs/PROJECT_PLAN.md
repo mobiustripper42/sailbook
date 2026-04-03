@@ -47,9 +47,9 @@ Admin can set up the school's offerings.
 ## Phase 2: Student — Browse & Register (Days 8–12)
 Students can find and sign up for courses.
 
-- [ ] 2.0 — Migrate role model: replace single `role` column with `is_admin`, `is_instructor`, `is_student` boolean flags. Update proxy.ts, RLS policies, registration, and types. (Do this first — Phase 2 bakes role assumptions in deeper.)
-- [ ] 2.1 — Student dashboard page (my enrollments)
-- [ ] 2.2 — Course browse page — available courses with spots remaining
+- [x] 2.0 — Migrate role model: replace single `role` column with `is_admin`, `is_instructor`, `is_student` boolean flags. Update proxy.ts, RLS policies, registration, and types. (Do this first — Phase 2 bakes role assumptions in deeper.)
+- [x] 2.1 — Student dashboard page (my enrollments)
+- [x] 2.2 — Course browse page — available courses with spots remaining
 - [ ] 2.3 — Course detail view (student-facing) — type, schedule, instructor, price
 - [ ] 2.4 — Registration flow — enroll in a course
 - [ ] 2.5 — Capacity enforcement — can't register if full

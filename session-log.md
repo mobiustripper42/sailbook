@@ -5,6 +5,30 @@ Format: append newest entry at the top.
 
 ---
 
+## Session 4 — 2026-04-03
+**Task:** Phase 2.0–2.2 — Role migration, fix Codespaces Server Actions, course browse page
+**Completed:**
+- Diagnosed and fixed "Invalid Server Actions request" 500 — caused by Codespaces port forwarding sending mismatched `x-forwarded-host` / `origin` headers. Fixed via `serverActions.allowedOrigins: ['*.app.github.dev']` in `next.config.ts`.
+- Added missing `"Users can insert own profile"` RLS policy to `docs/migrations/003_role_booleans.sql` (migration 003 drops service-role insert policy but had no self-insert replacement — new users couldn't create their own profile).
+- Created `docs/sql-helpers.sql` with reusable SQL snippets: make admin, make instructor, deactivate user, partial and full dev data wipe.
+- Built student layout + sidebar nav (Dashboard / Browse Courses / My Courses).
+- Built `/student/courses` browse page — card grid of active courses, spots remaining (filtered to non-cancelled enrollments), date range from sessions, "Full" badge when at capacity.
+- Marked 2.0, 2.1, 2.2 complete in PROJECT_PLAN.md.
+**In Progress:** Nothing — 2.2 untested (pushed to main to test tomorrow)
+**Blocked:** Migration 003 still needs to be applied to cloud Supabase before registration works correctly
+**Next Steps:**
+1. Apply `docs/migrations/003_role_booleans.sql` in Supabase SQL Editor (if not done yet)
+2. Test registration flow + student browse page
+3. Start 2.3 — course detail view (student-facing)
+4. Then 2.4 — registration/enroll flow, 2.5 capacity enforcement, 2.6 duplicate prevention
+**Context:**
+- Codespaces fix: `next.config.ts` now has `experimental.serverActions.allowedOrigins` — any Codespace URL works, no need to update per session
+- After migration 003: update Andy's `raw_user_meta_data` in Supabase Auth to `{is_admin: true, ...}` — see `docs/sql-helpers.sql`
+- Browse page links to `/student/courses/[id]` — that route doesn't exist yet (2.3)
+- Spots remaining counts only non-cancelled enrollments against capacity
+
+---
+
 ## Session 3 — 2026-04-02
 **Task:** Schema review with Andy + course status / enrollment confirmation
 **Completed:** 5 schema comments reviewed. Added draft/active/completed/cancelled course statuses (default now draft). Added Publish/Complete/Cancel buttons to course detail. Added enrollment Confirm/Cancel actions. Logged DEC-013 (experience_level static), DEC-014 (enrollment status lifecycle). Added 2.0 multi-role migration as first Phase 2 task. Added 5.11 duplicate course to Phase 5. Logged AI season setup agent as V2. Verified unique constraint on enrollments already existed. Build clean throughout.

@@ -9,7 +9,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
   const [{ data: course }, { data: courseTypes }, { data: instructors }] = await Promise.all([
     supabase.from('courses').select('*').eq('id', id).single(),
     supabase.from('course_types').select('id, name, short_code, max_students').eq('is_active', true).order('name'),
-    supabase.from('profiles').select('id, first_name, last_name').eq('role', 'instructor').eq('is_active', true).order('last_name'),
+    supabase.from('profiles').select('id, first_name, last_name').eq('is_instructor', true).eq('is_active', true).order('last_name'),
   ])
 
   if (!course) notFound()
