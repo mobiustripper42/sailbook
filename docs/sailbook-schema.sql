@@ -49,7 +49,7 @@ CREATE TABLE course_types (
 CREATE TABLE courses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   course_type_id UUID NOT NULL REFERENCES course_types(id),
-  instructor_id UUID NOT NULL REFERENCES profiles(id),
+  instructor_id UUID REFERENCES profiles(id),          -- NULL = unassigned, assign before publishing
   title VARCHAR(255),                       -- optional override, e.g. 'ASA 101 — Weekend Intensive'
   description TEXT,                         -- optional override or additions
   capacity INT NOT NULL DEFAULT 4,

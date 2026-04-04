@@ -9,6 +9,7 @@ const links = [
   { href: '/admin/courses', label: 'Courses' },
   { href: '/admin/course-types', label: 'Course Types' },
   { href: '/admin/instructors', label: 'Instructors' },
+  { href: '/admin/students', label: 'Students' },
 ]
 
 export default function AdminNav() {

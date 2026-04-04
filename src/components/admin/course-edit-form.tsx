@@ -45,12 +45,15 @@ export default function CourseEditForm({ course, courseTypes, instructors }: Pro
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="instructor_id">Instructor</Label>
-        <Select name="instructor_id" defaultValue={course.instructor_id} required>
+        <Label htmlFor="instructor_id">
+          Instructor <span className="text-muted-foreground">(optional)</span>
+        </Label>
+        <Select name="instructor_id" defaultValue={course.instructor_id ?? 'none'}>
           <SelectTrigger id="instructor_id">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none">— Unassigned —</SelectItem>
             {instructors.map((i) => (
               <SelectItem key={i.id} value={i.id}>{i.first_name} {i.last_name}</SelectItem>
             ))}

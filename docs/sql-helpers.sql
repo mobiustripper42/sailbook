@@ -32,6 +32,42 @@ SET raw_user_meta_data = raw_user_meta_data
 WHERE email = 'instructor@example.com';
 
 -- ============================================================
+-- ADD A ROLE TO A USER
+-- Adds a role without touching other flags.
+-- User must log out and back in for JWT to pick up the change.
+-- ============================================================
+
+-- Add instructor role
+UPDATE profiles SET is_instructor = TRUE WHERE email = 'user@example.com';
+UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || '{"is_instructor": true}' WHERE email = 'user@example.com';
+
+-- Add admin role
+UPDATE profiles SET is_admin = TRUE WHERE email = 'user@example.com';
+UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || '{"is_admin": true}' WHERE email = 'user@example.com';
+
+-- Add student role
+UPDATE profiles SET is_student = TRUE WHERE email = 'user@example.com';
+UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || '{"is_student": true}' WHERE email = 'user@example.com';
+
+-- ============================================================
+-- REMOVE A ROLE FROM A USER
+-- Removes a role without touching other flags.
+-- User must log out and back in for JWT to pick up the change.
+-- ============================================================
+
+-- Remove instructor role
+UPDATE profiles SET is_instructor = FALSE WHERE email = 'user@example.com';
+UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || '{"is_instructor": false}' WHERE email = 'user@example.com';
+
+-- Remove admin role
+UPDATE profiles SET is_admin = FALSE WHERE email = 'user@example.com';
+UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || '{"is_admin": false}' WHERE email = 'user@example.com';
+
+-- Remove student role
+UPDATE profiles SET is_student = FALSE WHERE email = 'user@example.com';
+UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || '{"is_student": false}' WHERE email = 'user@example.com';
+
+-- ============================================================
 -- DEACTIVATE A USER
 -- Soft delete — keeps history intact.
 -- ============================================================

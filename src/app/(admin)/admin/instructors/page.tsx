@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -55,7 +56,13 @@ export default async function InstructorsPage() {
                       {i.is_active ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="space-x-2">
+                    <Link
+                      href={`/admin/instructors/${i.id}/edit`}
+                      className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2"
+                    >
+                      Edit
+                    </Link>
                     <InstructorActions id={i.id} isActive={i.is_active} />
                   </TableCell>
                 </TableRow>

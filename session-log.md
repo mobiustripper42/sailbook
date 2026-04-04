@@ -5,6 +5,69 @@ Format: append newest entry at the top.
 
 ---
 
+## Session 6 — 2026-04-04
+**Task:** Phase 2.8–2.10, RLS fixes, /dev page improvements, PM update
+**Completed:**
+- 2.8 — RLS policies for enrollments table (`docs/migrations/006_rls_enrollments.sql`)
+- 2.9 — Student list + edit for admin (`/admin/students`, `/admin/students/[id]/edit`)
+- 2.10 — Instructor edit for admin (`/admin/instructors/[id]/edit`) — shared `ProfileEditForm` component + `updateProfile` server action
+- Fixed `/dev` page redirect — logged-in users were being bounced to their dashboard; exempted `/dev` from the auth redirect in `proxy.ts:48`
+- Added copy buttons to all emails and password on `/dev` page (`src/app/dev/copy-button.tsx`)
+- Grouped edge case scenarios by user on `/dev` page
+- Fixed seed data bug — Dan was enrolled in Evening Series (should have zero enrollments); swapped for Sarah
+- Fixed RLS bug: students couldn't see completed/cancelled courses in My Courses — added enrollment-based course + session policies (`docs/migrations/005_student_enrolled_rls.sql`)
+- Fixed RLS infinite recursion — courses policy → enrollments → courses loop; created `SECURITY DEFINER` helper functions (`docs/migrations/007_fix_rls_recursion.sql`)
+- Added granular add/remove role SQL helpers to `docs/sql-helpers.sql`
+- Added task 5.14 (admin role management UI, may defer to V2)
+- PM updated PROJECT_PLAN.md — revised effort estimates, added cuttable tasks list
+- **Phase 2 is fully complete (11/11 tasks)**
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:**
+1. Start Phase 3 — begin with 3.1 (attendance page for admin) and 3.2 (auto-create attendance records on enrollment)
+2. 3.2 may need to come first or alongside 3.1 since the attendance page needs records to display
+3. Watch for more RLS recursion issues — `session_attendance` joins through enrollments, courses, and profiles
+**Context:**
+- RLS recursion fix pattern: use `SECURITY DEFINER` functions (`get_enrolled_course_ids`, `get_instructor_course_ids`) to break cross-table policy cycles. These live in migration 007.
+- Migrations 005, 006, 007 have all been applied to cloud Supabase
+- Seed data updated: Evening Series 4 seats = Alice, Bob, Sarah, Carol (not Dan)
+- `ProfileEditForm` is shared between student and instructor edit pages — experience_level field only renders when `is_student` is true
+- Profile edit updates `profiles` table only — does NOT sync `auth.users.raw_user_meta_data`. Role changes still require SQL (see sql-helpers.sql). Task 5.14 may add a UI for this.
+- PM estimates ~26-36 hrs remaining. Target: start Phase 5 by April 25 to leave room for Andy walkthrough + bug fixes.
+
+---
+
+## Session 5 — 2026-04-03
+**Task:** Phase 2.3–2.7 + dev tooling + bug fixes
+**Completed:**
+- 2.3 — Student course detail page (`/student/courses/[id]`) — type, schedule, instructor, price, spots
+- 2.4 — Enroll server action with capacity + duplicate guards
+- 2.5/2.6 — Capacity enforcement + duplicate prevention (handles re-enroll after cancellation)
+- 2.7 — My Courses page (`/student/my-courses`) — card/list toggle, upcoming/past/all filter
+- Rebuilt student dashboard (2.1) — stat cards, next session highlight, upcoming courses list
+- Built instructor dashboard + layout — stat cards, upcoming sessions list with roster counts
+- Made `courses.instructor_id` nullable — migration 004, form + action updates, Course type updated
+- Created `docs/dev-seed.sql` — 8 test users, 5 course types, 6 courses, sessions, enrollments, edge cases
+- Created `/dev` page — credentials, course inventory, edge case checklist, workflows, reset instructions
+- Fixed `/dev` gating: local dev + Codespaces (`CODESPACES=true`) + Vercel preview (`VERCEL_ENV=preview`)
+- Added `/dev` to PUBLIC_ROUTES in proxy.ts
+- Debugged seed login failure (3 root causes fixed in script + applied to cloud): missing `raw_app_meta_data`, missing `auth.identities` with `provider_id`, token columns must be `''` not NULL
+- Added tasks: 5.13 Docker evaluation, updated 5.1 with courses-without-instructors tile
+- Saved QA workflow memory for next project
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:**
+1. Start 2.8 — RLS policies for enrollments table (`docs/migrations/005_rls_enrollments.sql`)
+2. Then 2.9 — Student list + edit for admin
+3. Then 2.10 — Instructor edit for admin
+**Context:**
+- Seed login root cause: GoTrue scans `auth.users` into Go struct where token fields are `string` not `*string` — NULL panics. Always set `confirmation_token`, `recovery_token`, `email_change`, `email_change_token_new`, `email_change_token_current`, `reauthentication_token` to `''` in direct auth.users inserts
+- `auth.identities` required for `signInWithPassword` — needs `provider_id` (= email) in newer Supabase
+- Instructor dashboard links to `/admin/courses/[id]` for roster — Phase 4 adds instructor-specific view
+- `/dev` page is the handoff artifact for testers — share with Andy before any test session
+
+---
+
 ## Session 4 — 2026-04-03
 **Task:** Phase 2.0–2.2 — Role migration, fix Codespaces Server Actions, course browse page
 **Completed:**

@@ -1,0 +1,83 @@
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import { Badge } from '@/components/ui/badge'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+
+export default async function StudentsPage() {
+  const supabase = await createClient()
+
+  const { data: students, error } = await supabase
+    .from('profiles')
+    .select(`
+      id, first_name, last_name, email, phone, experience_level, is_active, created_at,
+      enrollments:enrollments(id, status)
+    `)
+    .eq('is_student', true)
+    .order('last_name')
+
+  if (error) return <div className="p-8 text-destructive">{error.message}</div>
+
+  return (
+    <div className="p-8">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold">Students</h1>
+        <p className="text-sm text-muted-foreground">{students?.length ?? 0} total</p>
+      </div>
+
+      {students?.length === 0 ? (
+        <p className="text-muted-foreground">No students yet.</p>
+      ) : (
+        <div className="rounded-xl border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Experience</TableHead>
+                <TableHead>Enrollments</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="w-16" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {students?.map((s) => {
+                const enrollments = (s.enrollments ?? []) as { id: string; status: string }[]
+                const activeCount = enrollments.filter((e) => e.status !== 'cancelled').length
+                return (
+                  <TableRow key={s.id}>
+                    <TableCell className="font-medium">{s.first_name} {s.last_name}</TableCell>
+                    <TableCell>{s.email}</TableCell>
+                    <TableCell>{s.phone ?? '—'}</TableCell>
+                    <TableCell className="capitalize">{s.experience_level ?? '—'}</TableCell>
+                    <TableCell>{activeCount}</TableCell>
+                    <TableCell>
+                      <Badge variant={s.is_active ? 'default' : 'secondary'}>
+                        {s.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Link
+                        href={`/admin/students/${s.id}/edit`}
+                        className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2"
+                      >
+                        Edit
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  )
+}

@@ -1,8 +1,8 @@
 # SailBook — Project Plan
 
 **Target:** May 15, 2026
-**Today:** April 1, 2026
-**Available:** ~6 weeks
+**Today:** April 4, 2026
+**Available:** 41 days (6 weeks)
 
 ---
 
@@ -48,16 +48,16 @@ Admin can set up the school's offerings.
 Students can find and sign up for courses.
 
 - [x] 2.0 — Migrate role model: replace single `role` column with `is_admin`, `is_instructor`, `is_student` boolean flags. Update proxy.ts, RLS policies, registration, and types. (Do this first — Phase 2 bakes role assumptions in deeper.)
-- [x] 2.1 — Student dashboard page (my enrollments)
+- [x] 2.1 — Student dashboard — stat cards (enrolled courses, upcoming sessions), next session highlight, upcoming courses list
 - [x] 2.2 — Course browse page — available courses with spots remaining
-- [ ] 2.3 — Course detail view (student-facing) — type, schedule, instructor, price
-- [ ] 2.4 — Registration flow — enroll in a course
-- [ ] 2.5 — Capacity enforcement — can't register if full
-- [ ] 2.6 — Duplicate enrollment prevention
-- [ ] 2.7 — My courses page — enrolled courses with session schedule
-- [ ] 2.8 — RLS policies for enrollments table
-- [ ] 2.9 — Student list + edit for admin — view all students, edit profile details
-- [ ] 2.10 — Instructor edit for admin — edit profile details (name, phone, etc.)
+- [x] 2.3 — Course detail view (student-facing) — type, schedule, instructor, price
+- [x] 2.4 — Registration flow — enroll in a course
+- [x] 2.5 — Capacity enforcement — can't register if full
+- [x] 2.6 — Duplicate enrollment prevention
+- [x] 2.7 — My courses page — enrolled courses with session schedule; list view with line/card toggle; filter by status (upcoming, past, all)
+- [x] 2.8 — RLS policies for enrollments table
+- [x] 2.9 — Student list + edit for admin — view all students, edit profile details
+- [x] 2.10 — Instructor edit for admin — edit profile details (name, phone, etc.)
 
 **Demo:** Student browses courses, registers for ASA 101 Weekend, sees it in "My Courses" with session dates. Admin sees enrollment.
 
@@ -83,7 +83,7 @@ The real operational value — tracking who showed up.
 ## Phase 4: Instructor Views (Days 19–21)
 Instructors see their assignments.
 
-- [ ] 4.1 — Instructor dashboard — my upcoming sessions
+- [ ] 4.1 — Instructor dashboard — stat cards (upcoming sessions, total students), upcoming sessions list with course name/date/time/roster count
 - [ ] 4.2 — Session roster view — enrolled students, attendance status
 - [ ] 4.3 — Identify makeup students in roster (from other courses)
 - [ ] 4.4 — RLS policies — instructors see only their own courses/sessions
@@ -95,7 +95,7 @@ Instructors see their assignments.
 ## Phase 5: Polish & Ship (Days 22–28)
 Make it production-ready.
 
-- [ ] 5.1 — Admin dashboard — real stats (total courses, enrollments, upcoming sessions)
+- [ ] 5.1 — Admin dashboard — real stats (total courses, enrollments, upcoming sessions) + "courses without instructors" warning tile
 - [ ] 5.2 — Instructor swap on individual sessions (AS-9)
 - [ ] 5.3 — Error handling — form validation, API errors, empty states
 - [ ] 5.4 — Loading states and optimistic UI
@@ -106,21 +106,32 @@ Make it production-ready.
 - [ ] 5.9 — Production environment variables on Vercel
 - [ ] 5.10 — DNS / custom domain (if wanted)
 - [ ] 5.11 — Duplicate course — one-click copy of a course (no sessions), drop into edit mode
+- [ ] 5.12 — Student calendar view — monthly calendar of enrolled sessions with filter (same filters as list view in 2.7); stretch goal, skip if time is tight
+- [ ] 5.13 — Evaluate Docker for local dev
+- [ ] 5.14 — Admin UI for role management — add/remove admin, instructor, student flags from profile edit pages (may defer to V2)
 
 **Demo:** Andy walks through full flow — creates a course, student registers, instructor views roster, session gets cancelled, makeup scheduled. Everything works.
 
 ---
 
 ## Estimated Effort
-| Phase | Effort | Notes |
-|-------|--------|-------|
-| 0 — Infrastructure | 4–6 hrs | Mostly config, one-time |
-| 1 — Admin Catalog | 10–14 hrs | Heaviest CRUD |
-| 2 — Student Browse | 8–10 hrs | Simpler views, enrollment logic |
-| 3 — Attendance | 10–14 hrs | Most complex business logic |
-| 4 — Instructor | 4–6 hrs | Read-only views |
-| 5 — Polish | 8–12 hrs | Bug fixes, UX, deploy |
-| **Total** | **44–62 hrs** | With Claude Code as collaborator |
+| Phase | Original Est. | Actual / Revised | Notes |
+|-------|---------------|------------------|-------|
+| 0 — Infrastructure | 4–6 hrs | **~4 hrs** (actual) | Clean run, one session |
+| 1 — Admin Catalog | 10–14 hrs | **~8 hrs** (actual) | Faster than expected — Claude Code carried the CRUD |
+| 2 — Student Browse | 8–10 hrs | **~14 hrs** (actual) | Underestimated: role migration (2.0), RLS recursion bug, seed/dev tooling, 3 extra tasks (2.8-2.10) |
+| 3 — Attendance | 10–14 hrs | **12–16 hrs** (revised) | Cross-course makeup logic is the hardest thing in the app. RLS will bite again. |
+| 4 — Instructor | 4–6 hrs | **4–6 hrs** (revised) | Read-only views, most queries already exist from admin side |
+| 5 — Polish | 8–12 hrs | **10–14 hrs** (revised) | 5.11 duplicate course + 5.14 role mgmt added. Mobile pass always takes longer than you think. |
+| **Total** | **44–62 hrs** | **~52–62 hrs** | Phases 0–2 actual: ~26 hrs. Remaining: ~26–36 hrs. |
+
+### Cuttable tasks (if time is tight)
+- **5.12** — Student calendar view. Explicitly labeled "stretch goal" in the task. Cut first.
+- **5.13** — Docker evaluation. Nice-to-have process improvement, zero user value.
+- **5.14** — Admin role management UI. Can manage roles via Supabase dashboard or SQL for V1.
+- **5.10** — Custom domain. Vercel subdomain works fine for launch.
+- **3.5/3.6** — Cross-course makeup. If tight, ship same-course makeups only and add cross-course in V1.1.
+- **5.4** — Loading states / optimistic UI. Functional without it, just feels slower.
 
 ---
 

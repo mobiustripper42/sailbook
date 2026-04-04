@@ -57,6 +57,17 @@ CREATE POLICY "Students can read active courses"
     AND status = 'active'
   );
 
+CREATE POLICY "Students can read their enrolled courses"
+  ON courses
+  FOR SELECT
+  TO authenticated
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'student'
+    AND id IN (
+      SELECT course_id FROM enrollments WHERE student_id = auth.uid()
+    )
+  );
+
 -- ============================================================
 -- SESSIONS (task 1.8)
 -- Admin: full CRUD
@@ -92,5 +103,16 @@ CREATE POLICY "Students can read sessions for active courses"
     (auth.jwt() -> 'user_metadata' ->> 'role') = 'student'
     AND course_id IN (
       SELECT id FROM courses WHERE status = 'active'
+    )
+  );
+
+CREATE POLICY "Students can read sessions for their enrolled courses"
+  ON sessions
+  FOR SELECT
+  TO authenticated
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'student'
+    AND course_id IN (
+      SELECT course_id FROM enrollments WHERE student_id = auth.uid()
     )
   );

@@ -1,0 +1,118 @@
+'use client'
+
+import { useTransition, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { updateProfile } from '@/actions/profiles'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+
+type Profile = {
+  id: string
+  first_name: string
+  last_name: string
+  email: string
+  phone: string | null
+  experience_level: string | null
+  is_active: boolean
+  is_student: boolean
+  is_instructor: boolean
+}
+
+export default function ProfileEditForm({
+  profile,
+  returnPath,
+}: {
+  profile: Profile
+  returnPath: string
+}) {
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+
+  function handleSubmit(formData: FormData) {
+    setError(null)
+    startTransition(async () => {
+      const result = await updateProfile(formData)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        router.push(returnPath)
+      }
+    })
+  }
+
+  return (
+    <form action={handleSubmit} className="space-y-6 max-w-lg">
+      <input type="hidden" name="id" value={profile.id} />
+      <input type="hidden" name="return_path" value={returnPath} />
+
+      {error && (
+        <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
+          {error}
+        </p>
+      )}
+
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input id="email" value={profile.email} disabled className="bg-muted" />
+        <p className="text-xs text-muted-foreground">Email is managed through Supabase Auth and cannot be changed here.</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="first_name">First Name</Label>
+          <Input id="first_name" name="first_name" defaultValue={profile.first_name} required />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="last_name">Last Name</Label>
+          <Input id="last_name" name="last_name" defaultValue={profile.last_name} required />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="phone">Phone</Label>
+        <Input id="phone" name="phone" defaultValue={profile.phone ?? ''} />
+      </div>
+
+      {profile.is_student && (
+        <div className="space-y-2">
+          <Label htmlFor="experience_level">Experience Level</Label>
+          <select
+            id="experience_level"
+            name="experience_level"
+            defaultValue={profile.experience_level ?? '—'}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="—">Not set</option>
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <Label htmlFor="is_active">Status</Label>
+        <select
+          id="is_active"
+          name="is_active"
+          defaultValue={profile.is_active ? 'true' : 'false'}
+          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
+        </select>
+      </div>
+
+      <div className="flex gap-3">
+        <Button type="submit" disabled={pending}>
+          {pending ? 'Saving…' : 'Save Changes'}
+        </Button>
+        <Button type="button" variant="outline" onClick={() => router.push(returnPath)}>
+          Cancel
+        </Button>
+      </div>
+    </form>
+  )
+}

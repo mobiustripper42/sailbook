@@ -9,9 +9,10 @@ export async function createCourse(prevState: string | null, formData: FormData)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return 'Not authenticated'
 
+  const rawInstructorId = formData.get('instructor_id') as string | null
   const courseData = {
     course_type_id: formData.get('course_type_id') as string,
-    instructor_id: formData.get('instructor_id') as string,
+    instructor_id: rawInstructorId && rawInstructorId !== 'none' ? rawInstructorId : null,
     title: (formData.get('title') as string) || null,
     description: (formData.get('description') as string) || null,
     capacity: Number(formData.get('capacity')) || 4,
@@ -54,9 +55,10 @@ export async function createCourse(prevState: string | null, formData: FormData)
 export async function updateCourse(id: string, prevState: string | null, formData: FormData) {
   const supabase = await createClient()
 
+  const rawInstructorId = formData.get('instructor_id') as string | null
   const payload = {
     course_type_id: formData.get('course_type_id') as string,
-    instructor_id: formData.get('instructor_id') as string,
+    instructor_id: rawInstructorId && rawInstructorId !== 'none' ? rawInstructorId : null,
     title: (formData.get('title') as string) || null,
     description: (formData.get('description') as string) || null,
     capacity: Number(formData.get('capacity')) || 4,

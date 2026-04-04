@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const PUBLIC_ROUTES = ['/login', '/register']
+const PUBLIC_ROUTES = ['/login', '/register', '/dev']
 
 function getPrimaryHome(meta: Record<string, unknown>): string {
   if (meta.is_admin) return '/admin/dashboard'
@@ -45,7 +45,8 @@ export async function proxy(request: NextRequest) {
   }
 
   // Logged in on a public route or root — send to role dashboard
-  if (user && (isPublicRoute || isRoot)) {
+  // /dev is always accessible regardless of auth state
+  if (user && (isPublicRoute || isRoot) && pathname !== '/dev') {
     return NextResponse.redirect(new URL(getPrimaryHome(meta), request.url))
   }
 

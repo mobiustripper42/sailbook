@@ -32,7 +32,7 @@ export type CourseType = {
 export type Course = {
   id: string
   course_type_id: string
-  instructor_id: string
+  instructor_id: string | null
   title: string | null
   description: string | null
   capacity: number
