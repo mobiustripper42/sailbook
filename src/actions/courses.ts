@@ -81,9 +81,10 @@ export async function publishCourse(id: string) {
     .from('courses')
     .update({ status: 'active', updated_at: new Date().toISOString() })
     .eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/courses')
   revalidatePath(`/admin/courses/${id}`)
+  return { error: null }
 }
 
 export async function completeCourse(id: string) {
@@ -92,9 +93,10 @@ export async function completeCourse(id: string) {
     .from('courses')
     .update({ status: 'completed', updated_at: new Date().toISOString() })
     .eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/courses')
   revalidatePath(`/admin/courses/${id}`)
+  return { error: null }
 }
 
 export async function cancelCourse(id: string) {
@@ -103,7 +105,8 @@ export async function cancelCourse(id: string) {
     .from('courses')
     .update({ status: 'cancelled', updated_at: new Date().toISOString() })
     .eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/courses')
   revalidatePath(`/admin/courses/${id}`)
+  return { error: null }
 }

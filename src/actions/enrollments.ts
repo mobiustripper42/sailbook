@@ -9,8 +9,9 @@ export async function confirmEnrollment(enrollmentId: string, courseId: string) 
     .from('enrollments')
     .update({ status: 'confirmed', updated_at: new Date().toISOString() })
     .eq('id', enrollmentId)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath(`/admin/courses/${courseId}`)
+  return { error: null }
 }
 
 export async function cancelEnrollment(enrollmentId: string, courseId: string) {
@@ -19,6 +20,7 @@ export async function cancelEnrollment(enrollmentId: string, courseId: string) {
     .from('enrollments')
     .update({ status: 'cancelled', updated_at: new Date().toISOString() })
     .eq('id', enrollmentId)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath(`/admin/courses/${courseId}`)
+  return { error: null }
 }

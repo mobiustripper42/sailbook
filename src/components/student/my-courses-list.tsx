@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { fmtTime } from '@/lib/utils'
 
 type Session = {
   id: string
@@ -29,12 +30,6 @@ type CourseEntry = {
 type Filter = 'upcoming' | 'past' | 'all'
 type ViewMode = 'list' | 'card'
 
-function fmtTime(t: string) {
-  const [h, m] = t.split(':').map(Number)
-  const ampm = h < 12 ? 'am' : 'pm'
-  const hour = h % 12 || 12
-  return `${hour}:${String(m).padStart(2, '0')}${ampm}`
-}
 
 function fmtDate(d: string) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-US', {

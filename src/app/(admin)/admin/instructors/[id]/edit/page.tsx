@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ProfileEditForm from '@/components/admin/profile-edit-form'
@@ -17,6 +18,12 @@ export default async function EditInstructorPage({ params }: { params: Promise<{
 
   return (
     <div className="p-8">
+      <p className="text-sm text-muted-foreground mb-1">
+        <Link href="/admin/instructors" className="hover:underline">Instructors</Link>
+        {' / '}
+        {profile.first_name} {profile.last_name}
+        {' / Edit'}
+      </p>
       <h1 className="text-2xl font-semibold mb-6">
         Edit Instructor — {profile.first_name} {profile.last_name}
       </h1>

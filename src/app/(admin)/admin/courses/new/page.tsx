@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import CourseForm from '@/components/admin/course-form'
@@ -16,6 +17,10 @@ export default async function NewCoursePage() {
 
   return (
     <div className="p-8 max-w-2xl">
+      <p className="text-sm text-muted-foreground mb-1">
+        <Link href="/admin/courses" className="hover:underline">Courses</Link>
+        {' / New'}
+      </p>
       <h1 className="text-2xl font-semibold mb-6">New Course</h1>
       <CourseForm courseTypes={courseTypes} instructors={instructors ?? []} />
     </div>

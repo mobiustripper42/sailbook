@@ -26,6 +26,7 @@ export async function addSession(courseId: string, prevState: string | null, for
 export async function deleteSession(sessionId: string, courseId: string) {
   const supabase = await createClient()
   const { error } = await supabase.from('sessions').delete().eq('id', sessionId)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath(`/admin/courses/${courseId}`)
+  return { error: null }
 }

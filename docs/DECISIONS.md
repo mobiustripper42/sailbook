@@ -63,3 +63,15 @@
 **Decision:** Enrollment statuses are `registered → confirmed → cancelled / completed`. In V1, admin manually moves a student from `registered` to `confirmed` after receiving payment (cash, Venmo, check). `confirmed` is the payment signal for V1 — no separate `paid` boolean needed.
 **Why:** Payment processing is out of scope for May 15. The status column provides the right hook for a future payment integration without any schema change — a Stripe webhook would simply set `status = 'confirmed'` on successful charge.
 **V2 path:** Payment flow sets `confirmed` automatically. A 24-hour hold period (registered but not yet confirmed/charged) is a natural extension of this model.
+
+## DEC-015: Server action error handling — two patterns, both return errors
+**Decision:** Two error patterns based on how the action is called. No `throw` in server actions.
+
+1. **Form actions** (used with `useActionState`, accept `prevState`): return `string | null`. `null` means success. A string is the error message displayed inline by the form.
+2. **Button-triggered actions** (called via `useTransition`): return `{ error: string | null }`. Callers check the result and show inline feedback.
+
+**Why:** The previous codebase had three patterns — the two above plus `throw new Error(...)`. Throwing sends the user to an error boundary with no recovery path except refreshing the page. For a button click that fails (RLS denial, network blip, race condition), that's a dead end. Returning errors lets components show inline feedback and keep the user in context.
+
+The `string | null` form pattern stays because it's React's own `useActionState` convention — changing it would mean fighting the framework.
+
+**Applies to:** All files in `src/actions/`. Seven existing actions using `throw` need migration: `publishCourse`, `completeCourse`, `cancelCourse`, `toggleCourseTypeActive`, `confirmEnrollment`, `cancelEnrollment`, `deleteSession`, `toggleInstructorActive`.

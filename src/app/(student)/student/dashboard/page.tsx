@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { fmtTime } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,12 +14,6 @@ function fmtDate(d: string) {
   })
 }
 
-function fmtTime(t: string) {
-  const [h, m] = t.split(':').map(Number)
-  const ampm = h < 12 ? 'am' : 'pm'
-  const hour = h % 12 || 12
-  return `${hour}:${String(m).padStart(2, '0')}${ampm}`
-}
 
 export default async function StudentDashboard() {
   const supabase = await createClient()

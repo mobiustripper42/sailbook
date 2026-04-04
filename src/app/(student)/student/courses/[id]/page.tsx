@@ -12,14 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { fmtTime } from '@/lib/utils'
 import EnrollButton from '@/components/student/enroll-button'
 
-function fmtTime(t: string) {
-  const [h, m] = t.split(':').map(Number)
-  const ampm = h < 12 ? 'am' : 'pm'
-  const hour = h % 12 || 12
-  return `${hour}:${String(m).padStart(2, '0')}${ampm}`
-}
 
 function fmtDate(d: string) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-US', {

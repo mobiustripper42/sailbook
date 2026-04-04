@@ -1,25 +1,33 @@
 'use client'
 
 import Link from 'next/link'
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { toggleCourseTypeActive } from '@/actions/course-types'
 import { Button } from '@/components/ui/button'
 
 export default function CourseTypeActions({ id, isActive }: { id: string; isActive: boolean }) {
   const [pending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
 
   function handleToggle() {
-    startTransition(() => toggleCourseTypeActive(id, isActive))
+    setError(null)
+    startTransition(async () => {
+      const result = await toggleCourseTypeActive(id, isActive)
+      if (result.error) setError(result.error)
+    })
   }
 
   return (
-    <div className="flex gap-2">
-      <Button variant="ghost" size="sm" asChild>
-        <Link href={`/admin/course-types/${id}/edit`}>Edit</Link>
-      </Button>
-      <Button variant="ghost" size="sm" onClick={handleToggle} disabled={pending}>
-        {isActive ? 'Deactivate' : 'Activate'}
-      </Button>
+    <div>
+      <div className="flex gap-2">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href={`/admin/course-types/${id}/edit`}>Edit</Link>
+        </Button>
+        <Button variant="ghost" size="sm" onClick={handleToggle} disabled={pending}>
+          {isActive ? 'Deactivate' : 'Activate'}
+        </Button>
+      </div>
+      {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
   )
 }

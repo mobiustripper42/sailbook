@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { fmtTime } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -58,6 +59,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     <div className="p-8 space-y-6">
       <div className="flex items-start justify-between">
         <div>
+          <p className="text-sm text-muted-foreground mb-1">
+            <Link href="/admin/courses" className="hover:underline">Courses</Link>
+            {' / '}
+            {course.title ?? type?.name}
+          </p>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold">{course.title ?? type?.name}</h1>
             <Badge variant={course.status === 'active' ? 'default' : 'secondary'}>{course.status}</Badge>
@@ -117,7 +123,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <SessionActions sessionId={s.id} courseId={id} />
+                        <div className="flex gap-1">
+                          <Button variant="outline" size="sm" asChild>
+                            <Link href={`/admin/courses/${id}/sessions/${s.id}/attendance`}>
+                              Attendance
+                            </Link>
+                          </Button>
+                          <SessionActions sessionId={s.id} courseId={id} />
+                        </div>
                       </TableCell>
                     </TableRow>
                   )
@@ -179,9 +192,3 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   )
 }
 
-function fmtTime(t: string) {
-  const [h, m] = t.split(':').map(Number)
-  const ampm = h < 12 ? 'am' : 'pm'
-  const hour = h % 12 || 12
-  return `${hour}:${String(m).padStart(2, '0')}${ampm}`
-}

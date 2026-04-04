@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import CourseEditForm from '@/components/admin/course-edit-form'
@@ -16,6 +17,12 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
 
   return (
     <div className="p-8 max-w-2xl">
+      <p className="text-sm text-muted-foreground mb-1">
+        <Link href="/admin/courses" className="hover:underline">Courses</Link>
+        {' / '}
+        <Link href={`/admin/courses/${id}`} className="hover:underline">{course.title ?? 'Course'}</Link>
+        {' / Edit'}
+      </p>
       <h1 className="text-2xl font-semibold mb-6">Edit Course</h1>
       <CourseEditForm course={course} courseTypes={courseTypes ?? []} instructors={instructors ?? []} />
     </div>

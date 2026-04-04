@@ -70,13 +70,13 @@ The real operational value — tracking who showed up.
 - [ ] 3.2 — Auto-create attendance records when student enrolls (status: expected)
 - [ ] 3.3 — Cancel session flow — mark reason, flip attendance to missed
 - [ ] 3.4 — Create makeup session flow — new session, assign affected students
-- [ ] 3.5 — Cross-course makeup — assign students from different courses
-- [ ] 3.6 — Makeup tracking — link makeup_session_id on attendance records
+- ~~3.5 — Cross-course makeup — assign students from different courses~~ **(deferred to V2 — PO decision 2026-04-04)**
+- ~~3.6 — Makeup tracking — link makeup_session_id on attendance records~~ **(deferred to V2 — PO decision 2026-04-04)**
 - [ ] 3.7 — Admin view: students with outstanding missed sessions
 - [ ] 3.8 — Student view: my attendance history + missed sessions needing makeup
 - [ ] 3.9 — RLS policies for session_attendance table
 
-**Demo:** Admin cancels a Saturday session (weather). Creates Wednesday makeup. Student from a different course also joins makeup. Attendance tracked correctly.
+**Demo:** Admin cancels a Saturday session (weather). Creates makeup. Assigns affected students. Attendance tracked correctly. *(Cross-course makeup deferred to V2.)*
 
 ---
 
@@ -109,6 +109,7 @@ Make it production-ready.
 - [ ] 5.12 — Student calendar view — monthly calendar of enrolled sessions with filter (same filters as list view in 2.7); stretch goal, skip if time is tight
 - [ ] 5.13 — Evaluate Docker for local dev
 - [ ] 5.14 — Admin UI for role management — add/remove admin, instructor, student flags from profile edit pages (may defer to V2)
+- [ ] 5.15 — OAuth login — Google (and others if Supabase makes it easy); email/password remains the fallback
 
 **Demo:** Andy walks through full flow — creates a course, student registers, instructor views roster, session gets cancelled, makeup scheduled. Everything works.
 
@@ -130,7 +131,7 @@ Make it production-ready.
 - **5.13** — Docker evaluation. Nice-to-have process improvement, zero user value.
 - **5.14** — Admin role management UI. Can manage roles via Supabase dashboard or SQL for V1.
 - **5.10** — Custom domain. Vercel subdomain works fine for launch.
-- **3.5/3.6** — Cross-course makeup. If tight, ship same-course makeups only and add cross-course in V1.1.
+- ~~**3.5/3.6** — Cross-course makeup.~~ **Cut — deferred to V2 per PO (2026-04-04).**
 - **5.4** — Loading states / optimistic UI. Functional without it, just feels slower.
 
 ---

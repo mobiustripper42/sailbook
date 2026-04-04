@@ -62,7 +62,9 @@ export default async function CoursesPage() {
                   <TableRow key={c.id}>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{c.title ?? type?.name ?? '—'}</p>
+                        <Link href={`/admin/courses/${c.id}`} className="font-medium hover:underline underline-offset-2">
+                          {c.title ?? type?.name ?? '—'}
+                        </Link>
                         {c.title && <p className="text-xs text-muted-foreground">{type?.name}</p>}
                       </div>
                     </TableCell>
