@@ -120,3 +120,33 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 - [ X] Cancel a session where all students were "attended" → makeup creates session with no attendance records (no one was missed)
 - [ X] Create a second makeup for the same cancelled session → only unlinked missed students get assigned (students already linked to first makeup are skipped)
 - [ X] Makeup form cancel button collapses the form without creating anything
+
+### 3.7 — Admin view: students with outstanding missed sessions
+
+**Navigate to missed sessions**
+- [x ] Sidebar shows "Missed Sessions" link
+- [x ] Click it → `/admin/missed-sessions` loads with page title and subtitle
+- [x ] Page shows student cards grouped by student, sorted by most missed first
+
+**Verify correct records shown**
+- [x ] Only `status = 'missed'` records with `makeup_session_id IS NULL` appear
+- [x ] Students with missed sessions that HAVE a makeup linked do NOT appear
+- [x ] Students with `attended` or `excused` status do NOT appear
+
+**Card content**
+- [x ] Each card shows student name, email, and a badge with missed count
+- [x ] Each missed session row shows course name, date, time range, and location
+- [x ] Student name links to `/admin/students/<id>/edit`
+- [x ] Course name links to `/admin/courses/<id>`
+- [x ] "View attendance" links to the correct attendance page for that session
+
+**Empty state**
+- [X ] Mark all missed sessions as attended (or assign makeups) → page shows "No outstanding missed sessions. Everyone's accounted for."
+
+**After scheduling a makeup**
+- [X ] From a course, schedule a makeup for a cancelled session
+- [x ] Return to `/admin/missed-sessions` → students linked to that makeup no longer appear (or their count decreases)
+
+**Summary line**
+- [x ] Summary text shows correct count: "X missed sessions across Y students"
+- [x ] Singular/plural is correct for 1 session / 1 student

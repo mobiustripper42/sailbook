@@ -9,9 +9,12 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const name = `${user.user_metadata?.first_name ?? ''} ${user.user_metadata?.last_name ?? ''}`.trim() || user.email
+  const firstName = user.user_metadata?.first_name ?? ''
+  const name = `${firstName} ${user.user_metadata?.last_name ?? ''}`.trim() || user.email
 
   return (
+    <>
+    <title>{firstName ? `SailBook - ${firstName}` : 'SailBook'}</title>
     <div className="flex min-h-screen">
       <aside className="w-56 border-r bg-white flex flex-col shrink-0">
         <div className="px-4 py-5 border-b">
@@ -37,5 +40,6 @@ export default async function StudentLayout({ children }: { children: React.Reac
         {children}
       </main>
     </div>
+    </>
   )
 }

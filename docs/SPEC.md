@@ -47,3 +47,4 @@ May 15, 2026 — first day of sailing season.
 
 ## V2 Ideas
 - AI season setup agent — admin describes the summer schedule in plain English ("10 ASA 101 weekends May–August, Open Sailing every Wednesday June–August"), agent creates all courses and sessions automatically
+- Admin impersonation mode — "view as student" button lets Andy see the student dashboard without logging out. Useful for verifying what students see and debugging their experience

@@ -107,7 +107,7 @@ CREATE TABLE session_attendance (
   session_id UUID NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
   enrollment_id UUID NOT NULL REFERENCES enrollments(id) ON DELETE CASCADE,
   status VARCHAR(20) DEFAULT 'expected',    -- 'expected', 'attended', 'missed', 'excused'
-  makeup_session_id UUID REFERENCES sessions(id),  -- if missed, which session they made it up in
+  makeup_session_id UUID REFERENCES sessions(id) ON DELETE SET NULL,  -- if missed, which session they made it up in
   notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
