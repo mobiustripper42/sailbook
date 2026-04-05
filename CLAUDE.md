@@ -137,6 +137,7 @@ Occasional dry humor and sarcasm are welcome. Don't overdo it — one good line 
 ## Agent Workflow
 
 ### Starting a session
+0. Log session start: append `## [Session Name] — [Date] [Time]–` to `session-log.md` immediately
 1. Check `session-log.md` for last entry — read "Next Steps" and "In Progress"
 2. Check `docs/PROJECT_PLAN.md` for current phase task list
 3. Open a named session for the task: `claude -n "phase-X-task-name"`
@@ -148,10 +149,11 @@ Occasional dry humor and sarcasm are welcome. Don't overdo it — one good line 
 ### Ending a session
 1. Commit all work
 2. Run `/compact` if above 50% context
-3. Append a session summary to `session-log.md` in this format:
+3. Complete the session log entry — fill in end time, compute duration (round to nearest 0.25 hr), and append the full summary:
 
 ```markdown
-## [Session Name] — [Date] [Time]
+## [Session Name] — [Date] [Start Time]–[End Time] ([X.XX hrs])
+**Duration:** X.XX hours
 **Task:** What you were working on
 **Completed:** What got done
 **In Progress:** What's partially done (with file paths and line numbers)

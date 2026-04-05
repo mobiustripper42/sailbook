@@ -66,15 +66,15 @@ Students can find and sign up for courses.
 ## Phase 3: Attendance & Cancellations (Days 13–18)
 The real operational value — tracking who showed up.
 
-- [ ] 3.1 — Attendance page for admin — select session, mark each student
-- [ ] 3.2 — Auto-create attendance records when student enrolls (status: expected)
-- [ ] 3.3 — Cancel session flow — mark reason, flip attendance to missed
-- [ ] 3.4 — Create makeup session flow — new session, assign affected students
+- [x] 3.1 — Attendance page for admin — select session, mark each student `[effort: 4]`
+- [x] 3.2 — Auto-create attendance records when student enrolls (status: expected) `[effort: 2]`
+- [ ] 3.3 — Cancel session flow — mark reason, flip attendance to missed `[effort: 3]`
+- [ ] 3.4 — Create makeup session flow — new session, assign affected students `[effort: 4]`
 - ~~3.5 — Cross-course makeup — assign students from different courses~~ **(deferred to V2 — PO decision 2026-04-04)**
 - ~~3.6 — Makeup tracking — link makeup_session_id on attendance records~~ **(deferred to V2 — PO decision 2026-04-04)**
-- [ ] 3.7 — Admin view: students with outstanding missed sessions
-- [ ] 3.8 — Student view: my attendance history + missed sessions needing makeup
-- [ ] 3.9 — RLS policies for session_attendance table
+- [ ] 3.7 — Admin view: students with outstanding missed sessions `[effort: 2]`
+- [ ] 3.8 — Student view: my attendance history + missed sessions needing makeup `[effort: 3]`
+- [ ] 3.9 — RLS policies for session_attendance table `[effort: 3]`
 
 **Demo:** Admin cancels a Saturday session (weather). Creates makeup. Assigns affected students. Attendance tracked correctly. *(Cross-course makeup deferred to V2.)*
 
@@ -83,10 +83,10 @@ The real operational value — tracking who showed up.
 ## Phase 4: Instructor Views (Days 19–21)
 Instructors see their assignments.
 
-- [ ] 4.1 — Instructor dashboard — stat cards (upcoming sessions, total students), upcoming sessions list with course name/date/time/roster count
-- [ ] 4.2 — Session roster view — enrolled students, attendance status
-- [ ] 4.3 — Identify makeup students in roster (from other courses)
-- [ ] 4.4 — RLS policies — instructors see only their own courses/sessions
+- [ ] 4.1 — Instructor dashboard — stat cards (upcoming sessions, total students), upcoming sessions list with course name/date/time/roster count `[effort: 3]`
+- [ ] 4.2 — Session roster view — enrolled students, attendance status `[effort: 2]`
+- [ ] 4.3 — Identify makeup students in roster (from other courses) `[effort: 2]`
+- [ ] 4.4 — RLS policies — instructors see only their own courses/sessions `[effort: 3]`
 
 **Demo:** Instructor logs in, sees this week's sessions, views roster with attendance.
 
@@ -95,36 +95,36 @@ Instructors see their assignments.
 ## Phase 5: Polish & Ship (Days 22–28)
 Make it production-ready.
 
-- [ ] 5.1 — Admin dashboard — real stats (total courses, enrollments, upcoming sessions) + "courses without instructors" warning tile
-- [ ] 5.2 — Instructor swap on individual sessions (AS-9)
-- [ ] 5.3 — Error handling — form validation, API errors, empty states
-- [ ] 5.4 — Loading states and optimistic UI
-- [ ] 5.5 — Mobile responsiveness pass (admin will use desktop, students may use phone)
-- [ ] 5.6 — Seed data — create LTSC course types, Andy as admin, test instructor/student
-- [ ] 5.7 — End-to-end walkthrough with Andy
-- [ ] 5.8 — Bug fixes from walkthrough
-- [ ] 5.9 — Production environment variables on Vercel
-- [ ] 5.10 — DNS / custom domain (if wanted)
-- [ ] 5.11 — Duplicate course — one-click copy of a course (no sessions), drop into edit mode
-- [ ] 5.12 — Student calendar view — monthly calendar of enrolled sessions with filter (same filters as list view in 2.7); stretch goal, skip if time is tight
-- [ ] 5.13 — Evaluate Docker for local dev
-- [ ] 5.14 — Admin UI for role management — add/remove admin, instructor, student flags from profile edit pages (may defer to V2)
-- [ ] 5.15 — OAuth login — Google (and others if Supabase makes it easy); email/password remains the fallback
+- [ ] 5.1 — Admin dashboard — real stats (total courses, enrollments, upcoming sessions) + "courses without instructors" warning tile `[effort: 3]`
+- [ ] 5.2 — Instructor swap on individual sessions (AS-9) `[effort: 2]`
+- [ ] 5.3 — Error handling — form validation, API errors, empty states `[effort: 3]`
+- [ ] 5.4 — Loading states and optimistic UI `[effort: 2]`
+- [ ] 5.5 — Mobile responsiveness pass (admin will use desktop, students may use phone) `[effort: 3]`
+- [ ] 5.6 — Seed data — create LTSC course types, Andy as admin, test instructor/student `[effort: 1]`
+- [ ] 5.7 — End-to-end walkthrough with Andy `[effort: 2]`
+- [ ] 5.8 — Bug fixes from walkthrough `[effort: 4]`
+- [ ] 5.9 — Production environment variables on Vercel `[effort: 1]`
+- [ ] 5.10 — DNS / custom domain (if wanted) `[effort: 1]`
+- [ ] 5.11 — Duplicate course — one-click copy of a course (no sessions), drop into edit mode `[effort: 2]`
+- [ ] 5.12 — Student calendar view — monthly calendar of enrolled sessions with filter (same filters as list view in 2.7); stretch goal, skip if time is tight `[effort: 4]`
+- [ ] 5.13 — Evaluate Docker for local dev `[effort: 1]`
+- [ ] 5.14 — Admin UI for role management — add/remove admin, instructor, student flags from profile edit pages (may defer to V2) `[effort: 2]`
+- [ ] 5.15 — OAuth login — Google (and others if Supabase makes it easy); email/password remains the fallback `[effort: 2]`
 
 **Demo:** Andy walks through full flow — creates a course, student registers, instructor views roster, session gets cancelled, makeup scheduled. Everything works.
 
 ---
 
 ## Estimated Effort
-| Phase | Original Est. | Actual / Revised | Notes |
-|-------|---------------|------------------|-------|
-| 0 — Infrastructure | 4–6 hrs | **~4 hrs** (actual) | Clean run, one session |
-| 1 — Admin Catalog | 10–14 hrs | **~8 hrs** (actual) | Faster than expected — Claude Code carried the CRUD |
-| 2 — Student Browse | 8–10 hrs | **~14 hrs** (actual) | Underestimated: role migration (2.0), RLS recursion bug, seed/dev tooling, 3 extra tasks (2.8-2.10) |
-| 3 — Attendance | 10–14 hrs | **12–16 hrs** (revised) | Cross-course makeup logic is the hardest thing in the app. RLS will bite again. |
-| 4 — Instructor | 4–6 hrs | **4–6 hrs** (revised) | Read-only views, most queries already exist from admin side |
-| 5 — Polish | 8–12 hrs | **10–14 hrs** (revised) | 5.11 duplicate course + 5.14 role mgmt added. Mobile pass always takes longer than you think. |
-| **Total** | **44–62 hrs** | **~52–62 hrs** | Phases 0–2 actual: ~26 hrs. Remaining: ~26–36 hrs. |
+| Phase | Effort Pts | Est. Hours | Actual Hours | Hrs/Point | Notes |
+|-------|-----------|------------|--------------|-----------|-------|
+| 0 — Infrastructure | — | 4–6 | ~4 | — | Pre-tracking |
+| 1 — Admin Catalog | — | 10–14 | ~8 | — | Pre-tracking |
+| 2 — Student Browse | — | 8–10 | ~14 | — | Pre-tracking |
+| 3 — Attendance | 21 | 12–16 | — | — | First tracked phase |
+| 4 — Instructor | 10 | 4–6 | — | — | |
+| 5 — Polish | 33 | 10–14 | — | — | |
+| **Total** | **64** | **48–66** | **~26** | — | Phases 0–2 actual: ~26 hrs. Remaining: ~26–36 hrs. |
 
 ### Cuttable tasks (if time is tight)
 - **5.12** — Student calendar view. Explicitly labeled "stretch goal" in the task. Cut first.

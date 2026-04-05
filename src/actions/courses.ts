@@ -106,6 +106,22 @@ export async function cancelCourse(id: string) {
     .update({ status: 'cancelled', updated_at: new Date().toISOString() })
     .eq('id', id)
   if (error) return { error: error.message }
+
+  // Flip all outstanding attendance records for this course to 'missed'
+  const { data: enrollments } = await supabase
+    .from('enrollments')
+    .select('id')
+    .eq('course_id', id)
+
+  if (enrollments && enrollments.length > 0) {
+    const enrollmentIds = enrollments.map((e) => e.id)
+    await supabase
+      .from('session_attendance')
+      .update({ status: 'missed', updated_at: new Date().toISOString() })
+      .in('enrollment_id', enrollmentIds)
+      .eq('status', 'expected')
+  }
+
   revalidatePath('/admin/courses')
   revalidatePath(`/admin/courses/${id}`)
   return { error: null }

@@ -224,51 +224,92 @@ INSERT INTO courses (id, course_type_id, instructor_id, title, capacity, price, 
 -- Dates: upcoming = May 2026, past = March 2026
 -- ============================================================
 
-INSERT INTO sessions (course_id, date, start_time, end_time, location, status) VALUES
+INSERT INTO sessions (id, course_id, date, start_time, end_time, location, status) VALUES
 
   -- ASA 101 Weekend Intensive (c001) — 2 upcoming sessions
-  ('c0000000-0000-0000-0000-000000000001', '2026-05-09', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
-  ('c0000000-0000-0000-0000-000000000001', '2026-05-10', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
+  ('d0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', '2026-05-09', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
+  ('d0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001', '2026-05-10', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
 
   -- ASA 101 Evening Series (c002) — 4 upcoming sessions
-  ('c0000000-0000-0000-0000-000000000002', '2026-05-06', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('c0000000-0000-0000-0000-000000000002', '2026-05-13', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('c0000000-0000-0000-0000-000000000002', '2026-05-20', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('c0000000-0000-0000-0000-000000000002', '2026-05-27', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002', '2026-05-06', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d0000000-0000-0000-0000-000000000004', 'c0000000-0000-0000-0000-000000000002', '2026-05-13', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d0000000-0000-0000-0000-000000000005', 'c0000000-0000-0000-0000-000000000002', '2026-05-20', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d0000000-0000-0000-0000-000000000006', 'c0000000-0000-0000-0000-000000000002', '2026-05-27', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
 
   -- ASA 103 (c003) — no sessions yet (tests "no sessions scheduled" empty state)
 
   -- Dinghy draft (c004) — 1 session (shouldn't matter, draft not visible)
-  ('c0000000-0000-0000-0000-000000000004', '2026-06-07', '10:00', '14:00', null, 'scheduled'),
+  ('d0000000-0000-0000-0000-000000000007', 'c0000000-0000-0000-0000-000000000004', '2026-06-07', '10:00', '14:00', null, 'scheduled'),
 
   -- Cancelled Open Sailing (c005) — 1 cancelled session
-  ('c0000000-0000-0000-0000-000000000005', '2026-04-12', '09:00', '12:00', 'Edgewater Marina, Dock A', 'cancelled'),
+  ('d0000000-0000-0000-0000-000000000008', 'c0000000-0000-0000-0000-000000000005', '2026-04-12', '09:00', '12:00', 'Edgewater Marina, Dock A', 'cancelled'),
 
   -- ASA 101 March (c006) — 2 completed past sessions
-  ('c0000000-0000-0000-0000-000000000006', '2026-03-14', '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed'),
-  ('c0000000-0000-0000-0000-000000000006', '2026-03-15', '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed');
+  ('d0000000-0000-0000-0000-000000000009', 'c0000000-0000-0000-0000-000000000006', '2026-03-14', '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed'),
+  ('d0000000-0000-0000-0000-000000000010', 'c0000000-0000-0000-0000-000000000006', '2026-03-15', '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed');
 
 -- ============================================================
 -- ENROLLMENTS
 -- ============================================================
 
-INSERT INTO enrollments (course_id, student_id, status) VALUES
+INSERT INTO enrollments (id, course_id, student_id, status) VALUES
 
   -- Alice in c001 (active, upcoming) — registered
-  ('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000004', 'registered'),
+  ('e0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000004', 'registered'),
 
   -- Full course (c002) — 4 enrollments to hit capacity (Alice, Bob, Sarah, Carol)
   -- Alice also in c002 (confirmed — tests multi-enrollment)
-  ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000004', 'confirmed'),
-  ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000005', 'registered'),
-  ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000003', 'registered'),
-  ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000006', 'registered'),
+  ('e0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000004', 'confirmed'),
+  ('e0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000005', 'registered'),
+  ('e0000000-0000-0000-0000-000000000004', 'c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000003', 'registered'),
+  ('e0000000-0000-0000-0000-000000000005', 'c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000006', 'registered'),
 
   -- Bob has a CANCELLED enrollment in c001 — can re-enroll (tests duplicate prevention bypass)
-  ('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000005', 'cancelled'),
+  ('e0000000-0000-0000-0000-000000000006', 'c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000005', 'cancelled'),
 
   -- Eve in completed course (c006) — completed
-  ('c0000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000008', 'completed');
+  ('e0000000-0000-0000-0000-000000000007', 'c0000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000008', 'completed');
+
+-- ============================================================
+-- SESSION ATTENDANCE
+-- Auto-created when students enroll. Seed mirrors what the app would create.
+-- ============================================================
+
+INSERT INTO session_attendance (session_id, enrollment_id, status) VALUES
+
+  -- Alice in c001 Weekend Intensive (e001) — 2 sessions, both expected
+  ('d0000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'expected'),
+  ('d0000000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000001', 'expected'),
+
+  -- c002 Evening Series — 4 sessions × 4 enrollments = 16 attendance records
+  -- Alice (e002)
+  ('d0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000002', 'expected'),
+  ('d0000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000002', 'expected'),
+  ('d0000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000002', 'expected'),
+  ('d0000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000002', 'expected'),
+  -- Bob (e003)
+  ('d0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000003', 'expected'),
+  ('d0000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000003', 'expected'),
+  ('d0000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000003', 'expected'),
+  ('d0000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000003', 'expected'),
+  -- Sarah (e004)
+  ('d0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000004', 'expected'),
+  ('d0000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000004', 'expected'),
+  ('d0000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000004', 'expected'),
+  ('d0000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000004', 'expected'),
+  -- Carol (e005)
+  ('d0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000005', 'expected'),
+  ('d0000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000005', 'expected'),
+  ('d0000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000005', 'expected'),
+  ('d0000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000005', 'expected'),
+
+  -- Bob cancelled enrollment in c001 (e006) — attendance flipped to missed
+  ('d0000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000006', 'missed'),
+  ('d0000000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000006', 'missed'),
+
+  -- Eve in completed c006 (e007) — both sessions attended
+  ('d0000000-0000-0000-0000-000000000009', 'e0000000-0000-0000-0000-000000000007', 'attended'),
+  ('d0000000-0000-0000-0000-000000000010', 'e0000000-0000-0000-0000-000000000007', 'attended');
 
 -- Dan (a007) has no enrollments at all — tests empty My Courses state
 -- ASA 103 (c003) has no enrollments — tests zero-enrollment course detail
@@ -293,3 +334,20 @@ INSERT INTO enrollments (course_id, student_id, status) VALUES
 --   c004 Dinghy Intro               draft        not visible to students
 --   c005 Open Sailing April         cancelled
 --   c006 ASA 101 March              completed    past sessions, Eve enrolled
+--
+-- Sessions (d-series UUIDs)
+--   d001-d002  c001 Weekend (May 9-10)
+--   d003-d006  c002 Evening (May 6, 13, 20, 27)
+--   d007       c004 Dinghy draft (Jun 7)
+--   d008       c005 Open Sailing cancelled (Apr 12)
+--   d009-d010  c006 March completed (Mar 14-15)
+--
+-- Enrollments (e-series UUIDs)
+--   e001 Alice→c001  e002 Alice→c002  e003 Bob→c002  e004 Sarah→c002
+--   e005 Carol→c002  e006 Bob→c001(cancelled)  e007 Eve→c006(completed)
+--
+-- Attendance: 22 records total
+--   Alice c001: 2 expected | Alice c002: 4 expected
+--   Bob c002: 4 expected   | Sarah c002: 4 expected | Carol c002: 4 expected
+--   Bob c001: 2 missed (cancelled enrollment)
+--   Eve c006: 2 attended (completed course)

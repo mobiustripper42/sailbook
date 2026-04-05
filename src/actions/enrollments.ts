@@ -21,6 +21,14 @@ export async function cancelEnrollment(enrollmentId: string, courseId: string) {
     .update({ status: 'cancelled', updated_at: new Date().toISOString() })
     .eq('id', enrollmentId)
   if (error) return { error: error.message }
+
+  // Flip outstanding attendance records to 'missed'
+  await supabase
+    .from('session_attendance')
+    .update({ status: 'missed', updated_at: new Date().toISOString() })
+    .eq('enrollment_id', enrollmentId)
+    .eq('status', 'expected')
+
   revalidatePath(`/admin/courses/${courseId}`)
   return { error: null }
 }
