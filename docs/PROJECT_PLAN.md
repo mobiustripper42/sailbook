@@ -1,8 +1,8 @@
 # SailBook — Project Plan
 
 **Target:** May 15, 2026
-**Today:** April 4, 2026
-**Available:** 41 days (6 weeks)
+**Today:** April 5, 2026
+**Available:** 40 days (6 weeks)
 
 ---
 
@@ -72,8 +72,8 @@ The real operational value — tracking who showed up.
 - [x] 3.4 — Create makeup session flow — new session, assign affected students `[effort: 4]`
 - ~~3.5 — Cross-course makeup — assign students from different courses~~ **(deferred to V2 — PO decision 2026-04-04)**
 - ~~3.6 — Makeup tracking — link makeup_session_id on attendance records~~ **(deferred to V2 — PO decision 2026-04-04)**
-- [ ] 3.7 — Admin view: students with outstanding missed sessions `[effort: 2]`
-- [ ] 3.8 — Student view: my attendance history + missed sessions needing makeup `[effort: 3]`
+- [x] 3.7 — Admin view: students with outstanding missed sessions `[effort: 2]` <!-- completed 2026-04-05 -->
+- [x] 3.8 — Student view: my attendance history + missed sessions needing makeup `[effort: 3]` <!-- completed 2026-04-05 -->
 - [ ] 3.9 — RLS policies for session_attendance table `[effort: 3]`
 - [ ] 3.10 — Student course view: show session status (cancelled badge, missed indicator) and filter/dim cancelled sessions `[effort: 2]`
 

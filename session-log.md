@@ -3,6 +3,25 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 11 — 2026-04-05 (0.25 hrs)
+**Duration:** 0.25 hours
+**Task:** Phase 3.8 — Student attendance history + missed sessions needing makeup
+**Completed:**
+- New `/student/attendance` page showing per-course attendance history grouped by course
+- Status badges per session (Attended, Missed, Excused, Upcoming)
+- Missed-sessions-needing-makeup highlighted with destructive badge and "Needs makeup" indicator
+- Alert banner at top when student has outstanding missed sessions
+- Cancelled sessions shown with strikethrough + badge
+- "Makeup scheduled" label for missed sessions with makeup already assigned
+- Added "Attendance" to student sidebar nav
+- Courses sorted: those with missed sessions first, then alphabetically
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** Task 3.9 — RLS policies for session_attendance table (effort: 3). Then 3.10 — Student course view session status indicators (effort: 2). Phase 3 nearly complete.
+**Context:** Phase 3 at 6/8 tasks complete (3.5/3.6 deferred V2). Query uses inner join filter on enrollment.student_id to scope to current user. Build and lint pass clean.
+
+---
+
 ## Session 10 — 2026-04-05 (0.75 hrs)
 **Duration:** 0.75 hours
 **Task:** Phase 3.7 — Admin missed sessions view + misc improvements
