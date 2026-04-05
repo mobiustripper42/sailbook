@@ -3,7 +3,22 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 10 — 2026-04-05 –
+## Session 10 — 2026-04-05 (0.75 hrs)
+**Duration:** 0.75 hours
+**Task:** Phase 3.7 — Admin missed sessions view + misc improvements
+**Completed:**
+- New `/admin/missed-sessions` page showing students with unresolved missed sessions, grouped by student
+- Added "Missed Sessions" to admin sidebar nav
+- Extracted `fmtDate` to `lib/utils` for shared date formatting
+- Error handling matching other admin pages (code review fix)
+- Browser tab title shows "SailBook - {firstName}" across all three role layouts
+- Schema fix: `makeup_session_id` FK changed to `ON DELETE SET NULL` (prevents delete errors)
+- Added admin impersonation mode to V2 Ideas in SPEC.md
+- QA test cases for 3.7 (all passing)
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** Task 3.8 — Student view: attendance history + missed sessions needing makeup (effort: 3). Consider `/student/attendance` or integrating into My Courses. `fmtDate` utility ready for reuse.
+**Context:** Phase 3 at 5/8 tasks complete (3.5/3.6 deferred V2). ~3.75 hrs actual vs 12-16 estimated. Velocity ~0.20 hrs/effort point. 40 days to May 15, no risk.
 
 ---
 
