@@ -30,3 +30,28 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 - [ x] Course with no enrollments → "No enrolled students for this session."
 - [ x] Cancelled enrollment student does NOT appear in the list
 - [ x] Saving twice without changes → no error
+
+### 3.2 — Auto-create attendance records on enrollment
+
+**New enrollment**
+- [ ] Log in as a student (e.g. dan@ltsc.test — zero enrollments)
+- [ ] Enroll in a course with sessions (e.g. ASA 101 Weekend Intensive)
+- [ ] Check `session_attendance` table → one row per session, all `status = 'expected'`, linked to the new enrollment ID
+
+**Re-enrollment after cancellation**
+- [ ] Log in as bob@ltsc.test (has cancelled enrollment in c001)
+- [ ] Re-enroll in ASA 101 Weekend Intensive
+- [ ] Check `session_attendance` → records upserted back to `expected` (not duplicated)
+
+**Cancel enrollment cascade**
+- [ ] As admin, cancel a student's enrollment from the course detail page
+- [ ] Check `session_attendance` → all `expected` records for that enrollment flipped to `missed`
+- [ ] Any `attended` or `excused` records are NOT changed
+
+**Cancel course cascade**
+- [ ] As admin, cancel an entire course (use course status actions)
+- [ ] Check `session_attendance` → all `expected` records across all enrollments in that course flipped to `missed`
+
+**Edge cases**
+- [ ] Enroll in a course with zero sessions → enrollment succeeds, no attendance rows created
+- [ ] Check that attendance records have correct `session_id` / `enrollment_id` foreign keys (no orphans)
