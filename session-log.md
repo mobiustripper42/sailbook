@@ -5,6 +5,29 @@ Format: append newest entry at the top.
 
 ---
 
+## Session 9 — 2026-04-05 09:00–09:36 ET (0.50 hrs)
+**Duration:** 0.50 hours (0.75 actual minus 0.25 for non-task time)
+**Task:** Phase 3.4 — Create makeup session flow
+**Completed:**
+- 3.4 — Makeup session flow: `createMakeupSession` server action, `MakeupSessionForm` inline component, student count indicator, makeup-already-scheduled state
+- Bug fix: attendance page was showing all enrolled students for makeup sessions instead of only assigned students — rewrote to drive student list from `session_attendance` records, not enrollments
+- Gap fix: `addSession` now auto-creates `expected` attendance records for existing enrollees (enrollment did this for existing sessions, but adding a session didn't reciprocate)
+- Seed data updated: d003 (Evening Series) now cancelled with mixed attendance (Alice=attended, Bob=missed, Sarah=excused, Carol=missed) for makeup testing
+- QA test cases for 3.4 — all passing
+- Added task 3.10 (student course view: session status indicators) per PO priority
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:**
+1. Phase 3.7 — Admin view: students with outstanding missed sessions (effort: 2)
+2. Then 3.8 (student attendance history), 3.9 (RLS for session_attendance), 3.10 (student session status indicators)
+**Context:**
+- Attendance page now driven by `session_attendance` records joined through enrollments — no more `?? 'expected'` fallback. This is cleaner but means every session MUST have attendance records created (addSession and enrollment both handle this now).
+- `MakeupSessionForm` shows student counts: "Schedule Makeup (2 students)" or "Makeup scheduled (2 students)" when all missed students already linked. Queries `makeupCounts` map on the course detail page.
+- Course detail page is 234 lines (over 200 convention). Will need extraction when next touched.
+- CLAUDE.md updated with bug report workflow: explain cause, wait for approval before changing code.
+
+---
+
 ## Session 8 — 2026-04-04 22:24–23:03 ET (0.75 hrs)
 **Duration:** 0.75 hours
 **Task:** Phase 3.3 — Cancel session flow
