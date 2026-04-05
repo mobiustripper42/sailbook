@@ -68,7 +68,7 @@ The real operational value — tracking who showed up.
 
 - [x] 3.1 — Attendance page for admin — select session, mark each student `[effort: 4]`
 - [x] 3.2 — Auto-create attendance records when student enrolls (status: expected) `[effort: 2]`
-- [ ] 3.3 — Cancel session flow — mark reason, flip attendance to missed `[effort: 3]`
+- [x] 3.3 — Cancel session flow — mark reason, flip attendance to missed `[effort: 3]`
 - [ ] 3.4 — Create makeup session flow — new session, assign affected students `[effort: 4]`
 - ~~3.5 — Cross-course makeup — assign students from different courses~~ **(deferred to V2 — PO decision 2026-04-04)**
 - ~~3.6 — Makeup tracking — link makeup_session_id on attendance records~~ **(deferred to V2 — PO decision 2026-04-04)**

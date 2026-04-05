@@ -118,7 +118,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                         {si ? `${si.first_name} ${si.last_name}` : 'Course default'}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={s.status === 'scheduled' ? 'default' : 'secondary'}>
+                        <Badge
+                          variant={s.status === 'scheduled' ? 'default' : s.status === 'cancelled' ? 'destructive' : 'secondary'}
+                          title={s.status === 'cancelled' && s.cancel_reason ? s.cancel_reason : undefined}
+                        >
                           {s.status}
                         </Badge>
                       </TableCell>
@@ -129,7 +132,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                               Attendance
                             </Link>
                           </Button>
-                          <SessionActions sessionId={s.id} courseId={id} />
+                          <SessionActions sessionId={s.id} courseId={id} status={s.status} />
                         </div>
                       </TableCell>
                     </TableRow>

@@ -5,6 +5,63 @@ Format: append newest entry at the top.
 
 ---
 
+## Session 8 — 2026-04-04 22:24–23:03 ET (0.75 hrs)
+**Duration:** 0.75 hours
+**Task:** Phase 3.3 — Cancel session flow
+**Completed:**
+- 3.3 — Cancel session flow — `cancelSession` server action, cancel reason prompt, attendance cascade (expected→missed), destructive badge with tooltip, cancelled session banner on attendance page
+- Code review fixes: attendance cascade error handling, status prop union type, banner text clarification, attendance form stays editable for cancelled sessions
+- QA test cases for 3.3 added to `docs/QA.md` — all passing
+- Seed data updated: Alice's d003 attendance → `attended` for mixed-status testing
+- Session log backfilled for 7a (3.1) and 7b (3.2)
+- Multi-session time tracking workflow established
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:**
+1. Phase 3.4 — Create makeup session flow (effort: 4)
+2. Then 3.7 (admin missed-sessions view), 3.8 (student attendance history), 3.9 (RLS for session_attendance)
+**Context:**
+- `cancelSession` action in `src/actions/sessions.ts` — follows same pattern as `cancelCourse`
+- Cancel only flips `expected` attendance to `missed` — `attended`/`excused` preserved
+- Attendance page remains accessible and editable for cancelled sessions (admin may need to correct)
+- Browser `prompt()` used for cancel reason — native dialog, works on mobile. Polish to custom modal deferred to Phase 5.
+
+---
+
+## Session 7b — 2026-04-04 (1.00 hrs)
+**Duration:** 1.00 hours
+**Task:** Phase 3.2 — Auto-create attendance records on enrollment
+**Completed:**
+- 3.2 — Auto-create attendance records when student enrolls (status: expected)
+- Velocity tracking setup in PROJECT_PLAN.md
+- Seed data update for attendance records
+- QA test cases for task 3.2
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 3.3 — Cancel session flow
+**Context:**
+- Attendance records auto-created via database trigger or server action on enrollment
+- QA test cases committed separately (af4d622)
+
+---
+
+## Session 7a — 2026-04-04 (0.75 hrs)
+**Duration:** 0.75 hours
+**Task:** Phase 3.1 — Admin attendance page
+**Completed:**
+- 3.1 — Admin attendance page — select session, mark each student present/absent/excused
+- Breadcrumb navigation added
+- Error handling standardization
+- General cleanup
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 3.2 — Auto-create attendance records on enrollment
+**Context:**
+- Attendance page at /admin/attendance (or /admin/sessions/[id]/attendance)
+- Error handling pattern standardized during this session — follow same pattern going forward
+
+---
+
 ## Session 6 — 2026-04-04
 **Task:** Phase 2.8–2.10, RLS fixes, /dev page improvements, PM update
 **Completed:**

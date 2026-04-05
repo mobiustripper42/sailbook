@@ -100,7 +100,7 @@ export default async function AttendancePage({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant={session.status === 'scheduled' ? 'default' : 'secondary'}>
+          <Badge variant={session.status === 'scheduled' ? 'default' : session.status === 'cancelled' ? 'destructive' : 'secondary'}>
             {session.status}
           </Badge>
           <Button variant="outline" asChild>
@@ -108,6 +108,13 @@ export default async function AttendancePage({
           </Button>
         </div>
       </div>
+
+      {session.status === 'cancelled' && (
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm">
+          This session was cancelled{session.cancel_reason ? `: ${session.cancel_reason}` : '.'}
+          {' '}Outstanding attendance records were marked as missed.
+        </div>
+      )}
 
       <Card>
         <CardHeader>

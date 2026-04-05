@@ -34,14 +34,14 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 ### 3.2 — Auto-create attendance records on enrollment
 
 **New enrollment**
-- [ ] Log in as a student (e.g. dan@ltsc.test — zero enrollments)
-- [ ] Enroll in a course with sessions (e.g. ASA 101 Weekend Intensive)
-- [ ] Check `session_attendance` table → one row per session, all `status = 'expected'`, linked to the new enrollment ID
+- [x ] Log in as a student (e.g. dan@ltsc.test — zero enrollments)
+- [x ] Enroll in a course with sessions (e.g. ASA 101 Weekend Intensive)
+- [x ] Check `session_attendance` table → one row per session, all `status = 'expected'`, linked to the new enrollment ID
 
 **Re-enrollment after cancellation**
-- [ ] Log in as bob@ltsc.test (has cancelled enrollment in c001)
-- [ ] Re-enroll in ASA 101 Weekend Intensive
-- [ ] Check `session_attendance` → records upserted back to `expected` (not duplicated)
+- [x ] Log in as bob@ltsc.test (has cancelled enrollment in c001)
+- [x ] Re-enroll in ASA 101 Weekend Intensive
+- [x ] Check `session_attendance` → records upserted back to `expected` (not duplicated)
 
 **Cancel enrollment cascade**
 - [ ] As admin, cancel a student's enrollment from the course detail page
@@ -49,9 +49,50 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 - [ ] Any `attended` or `excused` records are NOT changed
 
 **Cancel course cascade**
-- [ ] As admin, cancel an entire course (use course status actions)
-- [ ] Check `session_attendance` → all `expected` records across all enrollments in that course flipped to `missed`
+- [x ] As admin, cancel an entire course (use course status actions)
+- [x ] Check `session_attendance` → all `expected` records across all enrollments in that course flipped to `missed`
 
 **Edge cases**
 - [ ] Enroll in a course with zero sessions → enrollment succeeds, no attendance rows created
 - [ ] Check that attendance records have correct `session_id` / `enrollment_id` foreign keys (no orphans)
+
+### 3.3 — Cancel session flow
+
+**Setup:** Use seed data as-is. ASA 101 Evening Series (c002) has 4 sessions with 4 enrolled students. First session (d003, May 6) has Alice marked as `attended`, everyone else `expected`.
+
+**Cancel a session with reason**
+- [ x] Go to `/admin/courses/<c002-id>` → sessions table
+- [ x] Click "Cancel" on the May 6 session (d003)
+- [ x] Browser prompt appears asking for reason → enter "weather"
+- [ x] Session status badge changes to red "cancelled"
+- [ x] Hover over the cancelled badge → tooltip shows "weather"
+- [ x] "Attendance" button still visible for cancelled session (admin may need to review/correct)
+- [ x] "Cancel" button is no longer shown for the cancelled session (Delete still visible)
+
+**Attendance cascade**
+- [ X] Check `session_attendance` for session d003:
+  - Alice (e002) stays `attended` — was NOT flipped (already non-expected)
+  - Bob (e003) flipped to `missed` (was `expected`)
+  - Sarah (e004) flipped to `missed` (was `expected`)
+  - Carol (e005) flipped to `missed` (was `expected`)
+
+**Cancel a session without reason**
+- [ X] Click "Cancel" on another scheduled session (e.g. May 13, d004)
+- [ X] Leave reason blank (just press OK on the prompt)
+- [ X] Session shows cancelled badge, no tooltip text
+- [ X] All `expected` attendance records for that session flipped to `missed`
+
+**Cancel prompt dismissed**
+- [ X] Click "Cancel" on a scheduled session → press Cancel/Escape on the browser prompt
+- [X ] Nothing happens — session stays `scheduled`, no attendance changed
+
+**Attendance page for cancelled session**
+- [ x] Click "Attendance" on the cancelled session (or navigate to `/admin/courses/<c002-id>/sessions/<d003-id>/attendance`)
+- [ x] Red banner shows: "This session was cancelled: weather. Attendance records were marked as missed."
+- [ x] Badge shows red "cancelled"
+- [ x] Attendance form still renders and is editable (admin may need to correct records after cancellation)
+
+**Edge cases**
+- [ X] Cancel a session that has zero enrollments (use c003 — add a session first, then cancel it) → no errors
+- [ X] Cancel a session where all students already have `attended` status → no records flipped, session still marked cancelled
+- [ X] Delete a cancelled session → session is removed (hard delete works)

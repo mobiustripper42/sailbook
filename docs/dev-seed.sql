@@ -282,8 +282,8 @@ INSERT INTO session_attendance (session_id, enrollment_id, status) VALUES
   ('d0000000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000001', 'expected'),
 
   -- c002 Evening Series — 4 sessions × 4 enrollments = 16 attendance records
-  -- Alice (e002)
-  ('d0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000002', 'expected'),
+  -- Alice (e002) — first session attended (tests that cancel doesn't flip non-expected)
+  ('d0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000002', 'attended'),
   ('d0000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000002', 'expected'),
   ('d0000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000002', 'expected'),
   ('d0000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000002', 'expected'),
@@ -347,7 +347,7 @@ INSERT INTO session_attendance (session_id, enrollment_id, status) VALUES
 --   e005 Carol→c002  e006 Bob→c001(cancelled)  e007 Eve→c006(completed)
 --
 -- Attendance: 22 records total
---   Alice c001: 2 expected | Alice c002: 4 expected
+--   Alice c001: 2 expected | Alice c002: 1 attended (d003) + 3 expected
 --   Bob c002: 4 expected   | Sarah c002: 4 expected | Carol c002: 4 expected
 --   Bob c001: 2 missed (cancelled enrollment)
 --   Eve c006: 2 attended (completed course)
