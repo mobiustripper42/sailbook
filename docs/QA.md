@@ -1,6 +1,6 @@
 # SailBook — QA Test Cases
 
-Manual test cases by task. Prerequisites unless noted: seed data loaded, logged in as admin (andy@ltsc.test / Test1234!).
+Manual test cases by task. Prerequisites unless noted: seed data loaded, logged in as admin (andy@ltsc.test / qwert12345).
 
 ---
 
@@ -150,3 +150,61 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 **Summary line**
 - [x ] Summary text shows correct count: "X missed sessions across Y students"
 - [x ] Singular/plural is correct for 1 session / 1 student
+
+### 3.8 — Student view: attendance history + missed sessions needing makeup
+
+**Prerequisites:** Seed data loaded. Test with multiple student logins.
+
+**Navigate to attendance**
+- [X ] Log in as alice@ltsc.test → sidebar shows "Attendance" link
+- [x ] Click "Attendance" → `/student/attendance` loads with title and subtitle
+- [x ] Page grouped by course, each course in its own card
+
+**Alice (mixed statuses, no missed needing makeup)**
+- [x ] Shows 2 course cards: ASA 101 Weekend Intensive, ASA 101 Evening Series
+- [x ] Weekend Intensive (c001): 2 sessions, both showing "Upcoming" badge
+- [x ] Evening Series (c002): 4 sessions — d003 shows "Attended" badge, d004–d006 show "Upcoming"
+- [x ] Cancelled session (d003) shows date with strikethrough + "Cancelled" badge
+- [x ] No alert banner at top (Alice has no missed sessions needing makeup)
+- [x ] No "needs makeup" badges on any course card
+
+**Bob (missed sessions needing makeup + cancelled enrollment)**
+- [ X] Log in as bob@ltsc.test → go to `/student/attendance`
+- [ x] Alert banner appears: "You have X missed sessions that need a makeup..."
+- [ x] Evening Series (c002): d003 shows "Missed" badge + "Needs makeup" text, d004–d006 show "Upcoming"
+- [ x] Course card has red badge showing missed count needing makeup
+- [ x] **Edge case:** Check whether cancelled enrollment (c001) attendance shows — Bob has 2 missed records from cancelled enrollment e006. Note behavior for follow-up.
+
+**Carol (missed session needing makeup)**
+- [ x] Log in as carol@ltsc.test → go to `/student/attendance`
+- [ x] Alert banner shows 1 missed session needing makeup
+- [ x] Evening Series (c002): d003 shows "Missed" + "Needs makeup", rest show "Upcoming"
+- [ x] Badge on course card: "1 needs makeup"
+
+**Sarah (excused, instructor+student)**
+- [ x] Log in as sarah@ltsc.test → go to `/student/attendance`
+- [ x] Evening Series (c002): d003 shows "Excused" badge (not "Missed")
+- [ x] No alert banner (excused is not "missed needing makeup")
+
+**Dan (no enrollments — empty state)**
+- [ x] Log in as dan@ltsc.test → go to `/student/attendance`
+- [ x] Shows "No attendance records yet. Enroll in a course to get started."
+
+**Eve (completed course, all attended)**
+- [ x] Log in as eve@ltsc.test → go to `/student/attendance`
+- [ x] ASA 101 March (c006): 2 sessions, both showing "Attended" badge
+- [ x] No alert banner, no missed badges
+
+**Session details**
+- [ x] Each session row shows formatted date (e.g. "May 6"), time range, and location
+- [ x] Sessions within a course sorted by date ascending
+- [ x] Courses with missed sessions sort before courses without
+
+**Plural/singular**
+- [ x] Badge: "1 needs makeup" vs "2 need makeup"
+- [ x] Alert: "1 missed session that needs" vs "2 missed sessions that need"
+
+**After admin schedules a makeup**
+- [ x] Admin schedules makeup for d003 (links to Bob/Carol)
+- [ x] Bob/Carol reload `/student/attendance` → missed session now shows "Makeup scheduled" instead of "Needs makeup"
+- [ x] Alert banner count decreases (or disappears if all resolved)

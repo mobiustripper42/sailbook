@@ -3,22 +3,27 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 11 — 2026-04-05 (0.25 hrs)
-**Duration:** 0.25 hours
+## Session 11 — 2026-04-05 (0.75 hrs)
+**Duration:** 0.75 hours
 **Task:** Phase 3.8 — Student attendance history + missed sessions needing makeup
 **Completed:**
 - New `/student/attendance` page showing per-course attendance history grouped by course
-- Status badges per session (Attended, Missed, Excused, Upcoming)
+- Extracted `CourseAttendanceCard` component to `components/student/course-attendance-card.tsx` (code review: file length)
+- Status badges per session (Attended, Missed, Excused, Upcoming) with proper `AttendanceStatus` union type
 - Missed-sessions-needing-makeup highlighted with destructive badge and "Needs makeup" indicator
 - Alert banner at top when student has outstanding missed sessions
-- Cancelled sessions shown with strikethrough + badge
+- Cancelled sessions shown with strikethrough + badge (derived from `session.status`, not a `cancelled` column)
 - "Makeup scheduled" label for missed sessions with makeup already assigned
 - Added "Attendance" to student sidebar nav
 - Courses sorted: those with missed sessions first, then alphabetically
+- Fixed browser tab title: replaced raw `<title>` tags with `generateMetadata` in all 3 role layouts + template in root layout — title now persists across client-side navigation
+- Changed test password from `Test1234!` to `qwert12345` across seed, QA, and dev page
+- QA test cases for 3.8 written and all passing
+- Plural/singular fix on badge ("1 needs" vs "2 need")
 **In Progress:** Nothing
 **Blocked:** Nothing
-**Next Steps:** Task 3.9 — RLS policies for session_attendance table (effort: 3). Then 3.10 — Student course view session status indicators (effort: 2). Phase 3 nearly complete.
-**Context:** Phase 3 at 6/8 tasks complete (3.5/3.6 deferred V2). Query uses inner join filter on enrollment.student_id to scope to current user. Build and lint pass clean.
+**Next Steps:** Task 3.9 — RLS policies for session_attendance table (effort: 3). Then 3.10 — Student course view session status indicators (effort: 2). Phase 3 nearly complete. Polish note saved: badges and buttons look alike (Phase 5).
+**Context:** Phase 3 at 6/8 tasks complete (3.5/3.6 deferred V2). Bob's cancelled enrollment (e006) shows missed attendance on student page — noted as edge case, may want to filter cancelled enrollments in future. `generateMetadata` pattern is now the standard for browser titles.
 
 ---
 

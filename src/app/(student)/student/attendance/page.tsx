@@ -1,25 +1,24 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { fmtDate, fmtTime } from '@/lib/utils'
+import { Card, CardContent } from '@/components/ui/card'
+import CourseAttendanceCard from '@/components/student/course-attendance-card'
 
-type AttendanceRecord = {
-  sessionId: string
-  sessionDate: string
-  startTime: string
-  endTime: string
-  location: string | null
-  status: string
-  makeupSessionId: string | null
-  cancelled: boolean
-}
+type AttendanceStatus = 'expected' | 'attended' | 'missed' | 'excused'
 
 type CourseAttendance = {
   courseId: string
   courseName: string
   instructorName: string | null
-  records: AttendanceRecord[]
+  records: {
+    sessionId: string
+    sessionDate: string
+    startTime: string
+    endTime: string
+    location: string | null
+    status: AttendanceStatus
+    makeupSessionId: string | null
+    cancelled: boolean
+  }[]
   missedCount: number
 }
 
@@ -32,7 +31,7 @@ async function getAttendanceHistory(userId: string) {
       status,
       makeup_session_id,
       session:sessions!session_attendance_session_id_fkey (
-        id, date, start_time, end_time, location, cancelled,
+        id, date, start_time, end_time, location, status,
         course:courses!sessions_course_id_fkey (
           id, title,
           course_types ( name ),
@@ -50,7 +49,7 @@ async function getAttendanceHistory(userId: string) {
 
   type RawSession = {
     id: string; date: string; start_time: string; end_time: string
-    location: string | null; cancelled: boolean
+    location: string | null; status: string
     course: {
       id: string; title: string | null
       course_types: { name: string } | null
@@ -58,7 +57,6 @@ async function getAttendanceHistory(userId: string) {
     }
   }
 
-  // Group by course
   const courseMap = new Map<string, CourseAttendance>()
 
   for (const row of data ?? []) {
@@ -91,30 +89,21 @@ async function getAttendanceHistory(userId: string) {
       startTime: session.start_time,
       endTime: session.end_time,
       location: session.location,
-      status: row.status as string,
+      status: row.status as AttendanceStatus,
       makeupSessionId: row.makeup_session_id as string | null,
-      cancelled: session.cancelled,
+      cancelled: session.status === 'cancelled',
     })
   }
 
-  // Sort records within each course by date
   for (const group of courseMap.values()) {
     group.records.sort((a, b) => a.sessionDate.localeCompare(b.sessionDate))
   }
 
-  // Sort courses: those with missed sessions first, then alphabetically
   const courses = Array.from(courseMap.values()).sort((a, b) =>
     b.missedCount - a.missedCount || a.courseName.localeCompare(b.courseName)
   )
 
   return { error: null, data: courses }
-}
-
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  attended: { label: 'Attended', variant: 'default' },
-  missed: { label: 'Missed', variant: 'destructive' },
-  excused: { label: 'Excused', variant: 'secondary' },
-  expected: { label: 'Upcoming', variant: 'outline' },
 }
 
 export default async function StudentAttendancePage() {
@@ -156,63 +145,7 @@ export default async function StudentAttendancePage() {
       ) : (
         <div className="space-y-4">
           {courses.map((course) => (
-            <Card key={course.courseId}>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">{course.courseName}</CardTitle>
-                  {course.missedCount > 0 && (
-                    <Badge variant="destructive">
-                      {course.missedCount} needs makeup
-                    </Badge>
-                  )}
-                </div>
-                {course.instructorName && (
-                  <p className="text-xs text-muted-foreground">
-                    Instructor: {course.instructorName}
-                  </p>
-                )}
-              </CardHeader>
-              <CardContent>
-                <div className="divide-y">
-                  {course.records.map((r) => {
-                    const config = statusConfig[r.status] ?? statusConfig.expected
-                    const needsMakeup = r.status === 'missed' && !r.makeupSessionId
-
-                    return (
-                      <div
-                        key={r.sessionId}
-                        className="flex items-center justify-between py-2 text-sm first:pt-0 last:pb-0"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className={r.cancelled ? 'line-through text-muted-foreground' : ''}>
-                            {fmtDate(r.sessionDate)} · {fmtTime(r.startTime)}–{fmtTime(r.endTime)}
-                          </span>
-                          {r.location && (
-                            <span className="text-muted-foreground">· {r.location}</span>
-                          )}
-                          {r.cancelled && (
-                            <Badge variant="outline" className="text-xs">Cancelled</Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {needsMakeup && (
-                            <span className="text-xs text-destructive font-medium">
-                              Needs makeup
-                            </span>
-                          )}
-                          {r.status === 'missed' && r.makeupSessionId && (
-                            <span className="text-xs text-muted-foreground">
-                              Makeup scheduled
-                            </span>
-                          )}
-                          <Badge variant={config.variant}>{config.label}</Badge>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+            <CourseAttendanceCard key={course.courseId} course={course} />
           ))}
         </div>
       )}

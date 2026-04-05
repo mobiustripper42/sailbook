@@ -13,7 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SailBook",
+  title: {
+    default: 'SailBook',
+    template: '%s',
+  },
   description: "Course scheduling for Learn To Sail Cleveland",
 };
 

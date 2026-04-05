@@ -1,19 +1,24 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/app/(auth)/actions'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const firstName = user?.user_metadata?.first_name
+  return { title: firstName ? `SailBook - ${firstName}` : 'SailBook' }
+}
 
 export default async function InstructorLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const firstName = user.user_metadata?.first_name ?? ''
-  const name = `${firstName} ${user.user_metadata?.last_name ?? ''}`.trim() || user.email
+  const name = `${user.user_metadata?.first_name ?? ''} ${user.user_metadata?.last_name ?? ''}`.trim() || user.email
 
   return (
-    <>
-    <title>{firstName ? `SailBook - ${firstName}` : 'SailBook'}</title>
     <div className="flex min-h-screen">
       <aside className="w-56 border-r bg-white flex flex-col shrink-0">
         <div className="px-4 py-5 border-b">
@@ -43,6 +48,5 @@ export default async function InstructorLayout({ children }: { children: React.R
         {children}
       </main>
     </div>
-    </>
   )
 }

@@ -21,7 +21,7 @@ export default function DevPage() {
             </span>
           </div>
           <p className="text-muted-foreground mt-1">
-            All test users share password: <code className="bg-gray-100 px-1.5 py-0.5 rounded font-mono text-xs">Test1234!</code><CopyButton text="Test1234!" />
+            All test users share password: <code className="bg-gray-100 px-1.5 py-0.5 rounded font-mono text-xs">qwert12345</code><CopyButton text="qwert12345" />
             &nbsp;· Seed script: <code className="bg-gray-100 px-1.5 py-0.5 rounded font-mono text-xs">docs/dev-seed.sql</code>
             &nbsp;· Wipe script: <code className="bg-gray-100 px-1.5 py-0.5 rounded font-mono text-xs">docs/sql-helpers.sql</code>
           </p>

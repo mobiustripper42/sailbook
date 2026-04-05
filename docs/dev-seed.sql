@@ -1,6 +1,6 @@
 -- SailBook Dev Seed Data
 -- Run in the Supabase SQL Editor after a full wipe (see sql-helpers.sql).
--- All test users share password: Test1234!
+-- All test users share password: qwert12345
 -- Fixed UUIDs — safe to reference in queries / re-run after wipe.
 --
 -- Edge cases covered:
@@ -36,7 +36,7 @@ INSERT INTO auth.users (
   ('a0000000-0000-0000-0000-000000000001',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'andy@ltsc.test',
-   crypt('Test1234!', gen_salt('bf')), now(),
+   crypt('qwert12345', gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Andy","last_name":"Admin","is_admin":true,"is_instructor":false,"is_student":false}',
@@ -46,7 +46,7 @@ INSERT INTO auth.users (
   ('a0000000-0000-0000-0000-000000000002',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'dave@ltsc.test',
-   crypt('Test1234!', gen_salt('bf')), now(),
+   crypt('qwert12345', gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Dave","last_name":"Instructor","is_admin":false,"is_instructor":true,"is_student":false}',
@@ -56,7 +56,7 @@ INSERT INTO auth.users (
   ('a0000000-0000-0000-0000-000000000003',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'sarah@ltsc.test',
-   crypt('Test1234!', gen_salt('bf')), now(),
+   crypt('qwert12345', gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Sarah","last_name":"Instructor","is_admin":false,"is_instructor":true,"is_student":true}',
@@ -66,7 +66,7 @@ INSERT INTO auth.users (
   ('a0000000-0000-0000-0000-000000000004',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'alice@ltsc.test',
-   crypt('Test1234!', gen_salt('bf')), now(),
+   crypt('qwert12345', gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Alice","last_name":"Student","is_admin":false,"is_instructor":false,"is_student":true}',
@@ -76,7 +76,7 @@ INSERT INTO auth.users (
   ('a0000000-0000-0000-0000-000000000005',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'bob@ltsc.test',
-   crypt('Test1234!', gen_salt('bf')), now(),
+   crypt('qwert12345', gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Bob","last_name":"Student","is_admin":false,"is_instructor":false,"is_student":true}',
@@ -86,7 +86,7 @@ INSERT INTO auth.users (
   ('a0000000-0000-0000-0000-000000000006',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'carol@ltsc.test',
-   crypt('Test1234!', gen_salt('bf')), now(),
+   crypt('qwert12345', gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Carol","last_name":"Student","is_admin":false,"is_instructor":false,"is_student":true}',
@@ -96,7 +96,7 @@ INSERT INTO auth.users (
   ('a0000000-0000-0000-0000-000000000007',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'dan@ltsc.test',
-   crypt('Test1234!', gen_salt('bf')), now(),
+   crypt('qwert12345', gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Dan","last_name":"Student","is_admin":false,"is_instructor":false,"is_student":true}',
@@ -106,7 +106,7 @@ INSERT INTO auth.users (
   ('a0000000-0000-0000-0000-000000000008',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'eve@ltsc.test',
-   crypt('Test1234!', gen_salt('bf')), now(),
+   crypt('qwert12345', gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Eve","last_name":"Student","is_admin":false,"is_instructor":false,"is_student":true}',
@@ -323,7 +323,7 @@ INSERT INTO session_attendance (session_id, enrollment_id, status) VALUES
 -- ============================================================
 -- QUICK REFERENCE
 -- ============================================================
--- Logins (all password: Test1234!)
+-- Logins (all password: qwert12345)
 --   andy@ltsc.test   → admin
 --   dave@ltsc.test   → instructor
 --   sarah@ltsc.test  → instructor + student
