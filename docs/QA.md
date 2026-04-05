@@ -96,3 +96,27 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 - [ X] Cancel a session that has zero enrollments (use c003 — add a session first, then cancel it) → no errors
 - [ X] Cancel a session where all students already have `attended` status → no records flipped, session still marked cancelled
 - [ X] Delete a cancelled session → session is removed (hard delete works)
+
+### 3.4 — Create makeup session flow
+
+**Schedule makeup from cancelled session**
+- [ x] Go to `/admin/courses` → pick a course with a cancelled session (e.g., Evening Series c002, session d003)
+- [ x] Cancelled session row shows a "Schedule Makeup" button below it
+- [ x] Click "Schedule Makeup" → inline form appears with date (empty), start/end time pre-filled from original, location pre-filled
+- [ x] Enter a future date, adjust time/location if needed → click "Create Makeup"
+- [ x] Redirects back to course detail page — new makeup session appears in the sessions table
+- [ x] Makeup session has status "scheduled" and notes visible on its attendance page
+
+**Attendance auto-creation for makeup**
+- [ x] Navigate to the new makeup session's attendance page
+- [ x] Students who had "missed" status on the cancelled session appear with "expected" status
+- [ x] Students who had "attended" or "excused" on the cancelled session do NOT appear in the makeup
+
+**Makeup linkage on original records**
+- [X ] Check the cancelled session's attendance — missed records should now have `makeup_session_id` set (verify via Supabase dashboard or SQL: `select * from session_attendance where session_id = '<cancelled-session-id>'`)
+
+**Edge cases**
+- [X ] Cancel a session with zero enrollments → "Schedule Makeup" still appears, creates empty session (no attendance records)
+- [ X] Cancel a session where all students were "attended" → makeup creates session with no attendance records (no one was missed)
+- [ X] Create a second makeup for the same cancelled session → only unlinked missed students get assigned (students already linked to first makeup are skipped)
+- [ X] Makeup form cancel button collapses the form without creating anything

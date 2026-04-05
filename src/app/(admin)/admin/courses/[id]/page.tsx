@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -15,6 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import AddSessionForm from '@/components/admin/add-session-form'
 import SessionActions from '@/components/admin/session-actions'
+import MakeupSessionForm from '@/components/admin/makeup-session-form'
 import CourseStatusActions from '@/components/admin/course-status-actions'
 import EnrollmentActions from '@/components/admin/enrollment-actions'
 
@@ -42,6 +44,23 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     `)
     .eq('course_id', id)
     .order('date')
+
+  // For cancelled sessions, check how many missed students still need a makeup
+  const cancelledSessionIds = (sessions ?? []).filter((s) => s.status === 'cancelled').map((s) => s.id)
+  const makeupCounts = new Map<string, { missed: number; linked: number }>()
+  if (cancelledSessionIds.length > 0) {
+    const { data: missedRows } = await supabase
+      .from('session_attendance')
+      .select('session_id, makeup_session_id')
+      .in('session_id', cancelledSessionIds)
+      .eq('status', 'missed')
+    for (const row of missedRows ?? []) {
+      const entry = makeupCounts.get(row.session_id) ?? { missed: 0, linked: 0 }
+      entry.missed++
+      if (row.makeup_session_id) entry.linked++
+      makeupCounts.set(row.session_id, entry)
+    }
+  }
 
   const { data: enrollments } = await supabase
     .from('enrollments')
@@ -109,33 +128,51 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <TableBody>
                 {sessions?.map((s) => {
                   const si = s.instructor as { first_name: string; last_name: string } | null
+                  const isCancelled = s.status === 'cancelled'
                   return (
-                    <TableRow key={s.id}>
-                      <TableCell>{new Date(s.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</TableCell>
-                      <TableCell className="whitespace-nowrap">{fmtTime(s.start_time)} – {fmtTime(s.end_time)}</TableCell>
-                      <TableCell>{s.location ?? '—'}</TableCell>
-                      <TableCell>
-                        {si ? `${si.first_name} ${si.last_name}` : 'Course default'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={s.status === 'scheduled' ? 'default' : s.status === 'cancelled' ? 'destructive' : 'secondary'}
-                          title={s.status === 'cancelled' && s.cancel_reason ? s.cancel_reason : undefined}
-                        >
-                          {s.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button variant="outline" size="sm" asChild>
-                            <Link href={`/admin/courses/${id}/sessions/${s.id}/attendance`}>
-                              Attendance
-                            </Link>
-                          </Button>
-                          <SessionActions sessionId={s.id} courseId={id} status={s.status} />
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    <Fragment key={s.id}>
+                      <TableRow>
+                        <TableCell>{new Date(s.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</TableCell>
+                        <TableCell className="whitespace-nowrap">{fmtTime(s.start_time)} – {fmtTime(s.end_time)}</TableCell>
+                        <TableCell>{s.location ?? '—'}</TableCell>
+                        <TableCell>
+                          {si ? `${si.first_name} ${si.last_name}` : 'Course default'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={s.status === 'scheduled' ? 'default' : isCancelled ? 'destructive' : 'secondary'}
+                            title={isCancelled && s.cancel_reason ? s.cancel_reason : undefined}
+                          >
+                            {s.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button variant="outline" size="sm" asChild>
+                              <Link href={`/admin/courses/${id}/sessions/${s.id}/attendance`}>
+                                Attendance
+                              </Link>
+                            </Button>
+                            <SessionActions sessionId={s.id} courseId={id} status={s.status} />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      {isCancelled && (
+                        <TableRow>
+                          <TableCell colSpan={6} className="bg-muted/30">
+                            <MakeupSessionForm
+                              originalSessionId={s.id}
+                              courseId={id}
+                              defaultStartTime={s.start_time}
+                              defaultEndTime={s.end_time}
+                              defaultLocation={s.location}
+                              missedCount={makeupCounts.get(s.id)?.missed ?? 0}
+                              linkedCount={makeupCounts.get(s.id)?.linked ?? 0}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </Fragment>
                   )
                 })}
               </TableBody>

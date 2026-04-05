@@ -174,3 +174,9 @@ Features explicitly out of scope:
 - Automated makeup suggestions
 - Multi-school / multi-tenant
 - Waitlists
+
+## Bug Reports & Questions
+When I report a bug or ask a question:
+1. Explain the cause and your proposed fix
+2. Wait for my approval before making any changes
+3. Do not edit files, run commands, or implement fixes until I say "go" or "do it"

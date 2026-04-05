@@ -14,6 +14,7 @@
 --   • Past/completed course with historical enrollment
 --   • Inactive course type (shouldn't appear in create form)
 --   • Session with location vs. without
+--   • Cancelled session with mixed attendance (makeup flow test)
 
 -- ============================================================
 -- USERS  (auth.users + profiles)
@@ -230,8 +231,8 @@ INSERT INTO sessions (id, course_id, date, start_time, end_time, location, statu
   ('d0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', '2026-05-09', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
   ('d0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001', '2026-05-10', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
 
-  -- ASA 101 Evening Series (c002) — 4 upcoming sessions
-  ('d0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002', '2026-05-06', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  -- ASA 101 Evening Series (c002) — 3 upcoming + 1 cancelled (makeup test)
+  ('d0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002', '2026-05-06', '18:00', '21:00', 'Edgewater Marina, Dock B', 'cancelled'),
   ('d0000000-0000-0000-0000-000000000004', 'c0000000-0000-0000-0000-000000000002', '2026-05-13', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
   ('d0000000-0000-0000-0000-000000000005', 'c0000000-0000-0000-0000-000000000002', '2026-05-20', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
   ('d0000000-0000-0000-0000-000000000006', 'c0000000-0000-0000-0000-000000000002', '2026-05-27', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
@@ -247,6 +248,9 @@ INSERT INTO sessions (id, course_id, date, start_time, end_time, location, statu
   -- ASA 101 March (c006) — 2 completed past sessions
   ('d0000000-0000-0000-0000-000000000009', 'c0000000-0000-0000-0000-000000000006', '2026-03-14', '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed'),
   ('d0000000-0000-0000-0000-000000000010', 'c0000000-0000-0000-0000-000000000006', '2026-03-15', '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed');
+
+-- Set cancel reason on d003 (can't include in INSERT — column not in the insert list)
+UPDATE sessions SET cancel_reason = 'Weather — thunderstorm warning' WHERE id = 'd0000000-0000-0000-0000-000000000003';
 
 -- ============================================================
 -- ENROLLMENTS
@@ -282,23 +286,25 @@ INSERT INTO session_attendance (session_id, enrollment_id, status) VALUES
   ('d0000000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000001', 'expected'),
 
   -- c002 Evening Series — 4 sessions × 4 enrollments = 16 attendance records
-  -- Alice (e002) — first session attended (tests that cancel doesn't flip non-expected)
+  -- d003 is cancelled: Alice=attended, Bob=missed, Sarah=excused, Carol=missed
+  -- (mirrors what cancelSession does: expected→missed, attended/excused preserved)
+  -- Alice (e002) — attended before cancel (preserved)
   ('d0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000002', 'attended'),
   ('d0000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000002', 'expected'),
   ('d0000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000002', 'expected'),
   ('d0000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000002', 'expected'),
-  -- Bob (e003)
-  ('d0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000003', 'expected'),
+  -- Bob (e003) — was expected, flipped to missed by cancel
+  ('d0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000003', 'missed'),
   ('d0000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000003', 'expected'),
   ('d0000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000003', 'expected'),
   ('d0000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000003', 'expected'),
-  -- Sarah (e004)
-  ('d0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000004', 'expected'),
+  -- Sarah (e004) — excused before cancel (preserved)
+  ('d0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000004', 'excused'),
   ('d0000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000004', 'expected'),
   ('d0000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000004', 'expected'),
   ('d0000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000004', 'expected'),
-  -- Carol (e005)
-  ('d0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000005', 'expected'),
+  -- Carol (e005) — was expected, flipped to missed by cancel
+  ('d0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000005', 'missed'),
   ('d0000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000005', 'expected'),
   ('d0000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000005', 'expected'),
   ('d0000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000005', 'expected'),
@@ -337,7 +343,7 @@ INSERT INTO session_attendance (session_id, enrollment_id, status) VALUES
 --
 -- Sessions (d-series UUIDs)
 --   d001-d002  c001 Weekend (May 9-10)
---   d003-d006  c002 Evening (May 6, 13, 20, 27)
+--   d003-d006  c002 Evening (May 6 CANCELLED, 13, 20, 27)
 --   d007       c004 Dinghy draft (Jun 7)
 --   d008       c005 Open Sailing cancelled (Apr 12)
 --   d009-d010  c006 March completed (Mar 14-15)
@@ -347,7 +353,10 @@ INSERT INTO session_attendance (session_id, enrollment_id, status) VALUES
 --   e005 Carol→c002  e006 Bob→c001(cancelled)  e007 Eve→c006(completed)
 --
 -- Attendance: 22 records total
---   Alice c001: 2 expected | Alice c002: 1 attended (d003) + 3 expected
---   Bob c002: 4 expected   | Sarah c002: 4 expected | Carol c002: 4 expected
+--   Alice c001: 2 expected | Alice c002: d003 attended + 3 expected
+--   Bob c002: d003 missed + 3 expected | Sarah c002: d003 excused + 3 expected
+--   Carol c002: d003 missed + 3 expected
 --   Bob c001: 2 missed (cancelled enrollment)
 --   Eve c006: 2 attended (completed course)
+--   Makeup test: cancel d003 → Bob & Carol missed, Alice attended, Sarah excused
+--     → "Schedule Makeup" should assign Bob & Carol only

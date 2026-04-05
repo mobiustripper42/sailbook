@@ -38,39 +38,32 @@ export default async function AttendancePage({
   }
   const sessionInstructor = session.session_instructor as { first_name: string; last_name: string } | null
 
-  // Fetch enrollments (non-cancelled) with student profiles
-  const { data: enrollments } = await supabase
-    .from('enrollments')
-    .select(`
-      id,
-      student:profiles!enrollments_student_id_fkey ( id, first_name, last_name, email )
-    `)
-    .eq('course_id', courseId)
-    .neq('status', 'cancelled')
-    .order('enrolled_at')
-
-  // Fetch existing attendance records for this session
-  const { data: existingAttendance } = await supabase
+  // Fetch attendance records with student profiles via enrollment
+  const { data: attendanceRecords } = await supabase
     .from('session_attendance')
-    .select('enrollment_id, status, notes')
+    .select(`
+      enrollment_id, status, notes,
+      enrollment:enrollments!session_attendance_enrollment_id_fkey (
+        id,
+        student:profiles!enrollments_student_id_fkey ( id, first_name, last_name, email )
+      )
+    `)
     .eq('session_id', sessionId)
 
-  const attendanceMap = new Map(
-    (existingAttendance ?? []).map((a) => [a.enrollment_id, a])
-  )
-
-  // Build student list with current attendance status
-  const students = (enrollments ?? []).map((e) => {
-    const student = e.student as unknown as { id: string; first_name: string; last_name: string; email: string }
-    const existing = attendanceMap.get(e.id)
+  // Build student list from attendance records
+  const students = (attendanceRecords ?? []).map((a) => {
+    const enrollment = a.enrollment as unknown as {
+      id: string
+      student: { id: string; first_name: string; last_name: string; email: string }
+    }
     return {
-      enrollment_id: e.id,
-      student_id: student.id,
-      first_name: student.first_name,
-      last_name: student.last_name,
-      email: student.email,
-      current_status: (existing?.status ?? 'expected') as 'expected' | 'attended' | 'missed' | 'excused',
-      notes: existing?.notes ?? null,
+      enrollment_id: a.enrollment_id,
+      student_id: enrollment.student.id,
+      first_name: enrollment.student.first_name,
+      last_name: enrollment.student.last_name,
+      email: enrollment.student.email,
+      current_status: a.status as 'expected' | 'attended' | 'missed' | 'excused',
+      notes: a.notes ?? null,
     }
   })
 
@@ -108,6 +101,12 @@ export default async function AttendancePage({
           </Button>
         </div>
       </div>
+
+      {session.notes && (
+        <div className="rounded-md border bg-muted/50 p-4 text-sm text-muted-foreground">
+          {session.notes}
+        </div>
+      )}
 
       {session.status === 'cancelled' && (
         <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm">

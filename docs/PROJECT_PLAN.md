@@ -69,12 +69,13 @@ The real operational value — tracking who showed up.
 - [x] 3.1 — Attendance page for admin — select session, mark each student `[effort: 4]`
 - [x] 3.2 — Auto-create attendance records when student enrolls (status: expected) `[effort: 2]`
 - [x] 3.3 — Cancel session flow — mark reason, flip attendance to missed `[effort: 3]`
-- [ ] 3.4 — Create makeup session flow — new session, assign affected students `[effort: 4]`
+- [x] 3.4 — Create makeup session flow — new session, assign affected students `[effort: 4]`
 - ~~3.5 — Cross-course makeup — assign students from different courses~~ **(deferred to V2 — PO decision 2026-04-04)**
 - ~~3.6 — Makeup tracking — link makeup_session_id on attendance records~~ **(deferred to V2 — PO decision 2026-04-04)**
 - [ ] 3.7 — Admin view: students with outstanding missed sessions `[effort: 2]`
 - [ ] 3.8 — Student view: my attendance history + missed sessions needing makeup `[effort: 3]`
 - [ ] 3.9 — RLS policies for session_attendance table `[effort: 3]`
+- [ ] 3.10 — Student course view: show session status (cancelled badge, missed indicator) and filter/dim cancelled sessions `[effort: 2]`
 
 **Demo:** Admin cancels a Saturday session (weather). Creates makeup. Assigns affected students. Attendance tracked correctly. *(Cross-course makeup deferred to V2.)*
 
