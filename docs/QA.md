@@ -175,11 +175,11 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 - [ x] Course card has red badge showing missed count needing makeup
 - [ x] **Edge case:** Check whether cancelled enrollment (c001) attendance shows — Bob has 2 missed records from cancelled enrollment e006. Note behavior for follow-up.
 
-**Carol (missed session needing makeup)**
-- [ x] Log in as carol@ltsc.test → go to `/student/attendance`
-- [ x] Alert banner shows 1 missed session needing makeup
-- [ x] Evening Series (c002): d003 shows "Missed" + "Needs makeup", rest show "Upcoming"
-- [ x] Badge on course card: "1 needs makeup"
+**Carol (missed session with makeup scheduled)**
+- [ ] Log in as carol@ltsc.test → go to `/student/attendance`
+- [ ] No alert banner (Carol's missed session has a makeup linked)
+- [ ] Evening Series (c002): d003 shows "Missed" + "Makeup scheduled", rest show "Upcoming"
+- [ ] No "needs makeup" badge on course card
 
 **Sarah (excused, instructor+student)**
 - [ x] Log in as sarah@ltsc.test → go to `/student/attendance`
@@ -424,3 +424,27 @@ RESET request.jwt.claims;
 - [ X] Cancelled enrollment student (Bob in c001) excluded from roster — only active enrollments shown
 - [ X] Sarah appears as a student in her own roster (she's enrolled in c002 via e004) — correct behavior
 - [ X] Attendance with `makeup_session_id` set → shows "Makeup scheduled" instead of "Needs makeup" (test after admin schedules a makeup for d003)
+
+### 4.3 — Identify makeup students in roster
+
+**Prerequisites:** Seed data loaded (Carol's d003 attendance has `makeup_session_id = d004`). Login: sarah@ltsc.test / qwert12345.
+
+**Makeup badge on roster (Sarah → d004)**
+- [ ] Log in as sarah@ltsc.test → dashboard → click "Roster →" on May 13 session (d004)
+- [ ] Carol's row shows "Makeup from Wednesday, May 6, 2026" badge (secondary/gray variant) next to her name
+- [ ] Other students (Alice, Bob, Sarah) do NOT show a makeup badge
+- [ ] Attendance column still works normally — all 4 students show "Upcoming" badge
+
+**No makeup badges on other sessions**
+- [ ] Navigate to d005 (May 20) roster → no makeup badges on any student
+- [ ] Navigate to d006 (May 27) roster → no makeup badges on any student
+
+**Cancelled session roster (d003)**
+- [ ] Navigate to d003 (May 6, cancelled) roster
+- [ ] Bob: "Missed" + "Needs makeup" (no makeup_session_id)
+- [ ] Carol: "Missed" + "Makeup scheduled" (has makeup_session_id → d004)
+- [ ] No makeup badges in Name column (d003 is not anyone's makeup destination)
+
+**Edge cases**
+- [ ] Session with no makeup students (d001/d002 in c001) → no badges, roster unchanged from 4.2
+- [ ] Verify badge does not appear for students whose own attendance row has `makeup_session_id` (that means THEY missed and have a makeup elsewhere — different from attending HERE as a makeup)

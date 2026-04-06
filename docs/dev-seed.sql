@@ -317,6 +317,12 @@ INSERT INTO session_attendance (session_id, enrollment_id, status) VALUES
   ('d0000000-0000-0000-0000-000000000009', 'e0000000-0000-0000-0000-000000000007', 'attended'),
   ('d0000000-0000-0000-0000-000000000010', 'e0000000-0000-0000-0000-000000000007', 'attended');
 
+-- Carol missed d003, making it up in d004 — tests makeup badge on instructor roster (Phase 4.3)
+UPDATE session_attendance
+SET makeup_session_id = 'd0000000-0000-0000-0000-000000000004'
+WHERE session_id = 'd0000000-0000-0000-0000-000000000003'
+  AND enrollment_id = 'e0000000-0000-0000-0000-000000000005';
+
 -- Dan (a007) has no enrollments at all — tests empty My Courses state
 -- ASA 103 (c003) has no enrollments — tests zero-enrollment course detail
 
@@ -359,4 +365,6 @@ INSERT INTO session_attendance (session_id, enrollment_id, status) VALUES
 --   Bob c001: 2 missed (cancelled enrollment)
 --   Eve c006: 2 attended (completed course)
 --   Makeup test: cancel d003 → Bob & Carol missed, Alice attended, Sarah excused
---     → "Schedule Makeup" should assign Bob & Carol only
+--     → Carol's d003 has makeup_session_id=d004 (tests instructor makeup badge)
+--     → Bob's d003 has no makeup (tests "Needs makeup" indicator)
+--     → "Schedule Makeup" from d003 should assign Bob only (Carol already linked)
