@@ -3,6 +3,45 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 19 — 2026-04-06 (1.25 hrs)
+**Duration:** 1.25 hours (1.5 elapsed minus 15 min away from desk)
+**Task:** Phase 5.17 — Student enrollment RLS + enrollment count bugs
+**Completed:**
+- Migration 010: added student INSERT + UPDATE policies on `session_attendance` — enrollment flow was creating the `enrollments` row but silently failing on the `session_attendance` upsert (RLS had SELECT only). Students saw an error on screen; admin saw the enrollment; no attendance records were created.
+- Migration 011: added `get_course_active_enrollment_count()` and `get_all_course_enrollment_counts()` SECURITY DEFINER helpers — direct enrollment count queries run as the student's session client and returned 0 or 1 (student's own row only), breaking capacity enforcement and spots-remaining display
+- Fixed `enrollInCourse` action to use RPC for capacity gate (was bypassable by any unenrolled student)
+- Fixed student course detail page and browse page to use RPC for enrollment counts
+- Fixed admin courses list and course detail page to exclude `cancelled` enrollments from capacity display (was counting all statuses including cancelled)
+- Added task 5.19 to PROJECT_PLAN.md: student "Pending confirmation" badge on course detail + attendance pages
+- Added V2 items to SPEC.md: first-come-first-served approval (`enrolled_at` already captured), payment + inventory control
+- QA.md: added full 5.17 section with UI walkthrough + 5 SQL verification tests; fixed invalid LIMIT on UPDATE; strengthened UPDATE tests to SELECT before/after to confirm RLS actually blocked (not just 0 rows from empty result set)
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:**
+- 5.2 — Instructor swap on individual sessions (AS-9, effort 2). Sessions already have nullable `instructor_id` (DEC-007 — NULL means use course default). Need: dropdown on session row in admin course detail, server action to update `sessions.instructor_id`, display update on course detail + attendance pages. No RLS changes needed.
+- After 5.2: knock out 5.18 (effort 1, dashboard pending count) and 5.19 (effort 1, student pending badge) as a quick pair — both close out enrollment status display work started this session.
+**Context:**
+- Velocity running at 0.46 hrs/pt this phase vs 0.22 lifetime avg. Cause is identifiable (5.1 scope creep + 5.17 was deeper than estimated). PM says it will normalize once effort-1 tasks land. Re-flag after 5.5 (mobile pass, effort 5, most likely to balloon).
+- Dan's orphaned enrollment from pre-fix testing is cleaned up by the reseed.
+- SECURITY DEFINER enrollment count helpers follow the same pattern as `get_student_enrollment_ids` from migration 008.
+
+## Session 19 — 2026-04-06 (1.25 hrs)
+**Duration:** 1.25 hours (1.5 hrs elapsed minus 15 min away-from-desk)
+**Task:** Phase 5.17 — Student enrollment RLS bug fix
+**Completed:**
+- 5.17 — Migration 010: added student INSERT/UPDATE policies on session_attendance so attendance records are actually created on enrollment (was silently failing since Phase 2)
+- Migration 011: SECURITY DEFINER enrollment count helpers to fix broken capacity enforcement and spots-remaining display (broken as a consequence of the RLS gap)
+- Bonus: fixed admin enrollment count bug — was counting cancelled enrollments toward totals; now filters to active only
+- Added task 5.19 to PROJECT_PLAN.md: student pending confirmation badge (effort: 1)
+- Added V2 items to SPEC.md
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** Work from top of remaining Phase 5 list — next unchecked task is 5.2 (instructor swap on individual sessions, effort: 2), then 5.3 (error handling/form validation/empty states, effort: 3)
+**Context:**
+- The RLS gap on session_attendance INSERT/UPDATE had been live since Phase 2 — every student enrollment in the system silently created no attendance records. Migration 010+011 fix this but existing records may need a backfill depending on test data state.
+- Admin enrollment count fix was not a planned task — discovered during 5.17 QA. No separate task added; captured here.
+- 5.19 (pending confirmation badge) was added this session — effort 1, fits naturally after 5.18 (pending count/link restore) since both touch enrollment status display.
+
 ## Session 18 — 2026-04-06 (~1.5 hrs)
 **Duration:** ~1.5 hours (2 hrs elapsed minus 30 min downtime)
 **Task:** Phase 5.1 — Admin dashboard real stats + operational panels

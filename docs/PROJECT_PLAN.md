@@ -112,7 +112,7 @@ Make it production-ready.
 - [ ] 5.14 — Admin UI for role management — add/remove admin, instructor, student flags from profile edit pages (may defer to V2) `[effort: 3]`
 - [ ] 5.15 — OAuth login — Google (and others if Supabase makes it easy); email/password remains the fallback `[effort: 2]`
 - [ ] 5.16 — Development database — separate Supabase project for dev, seed data pipeline, so prod isn't polluted with test data `[effort: 3]`
-- [ ] 5.17 — Bug: student enrollment RLS — missing INSERT/UPDATE policy on session_attendance means attendance records silently fail to create on enrollment `[effort: 2]`
+- [x] 5.17 — Bug: student enrollment RLS — missing INSERT/UPDATE policy on session_attendance means attendance records silently fail to create on enrollment `[effort: 2]` <!-- completed 2026-04-06 -->
 - [ ] 5.18 — Dashboard: restore pending confirmation total count + "View all (N)" link when > 10 enrollments `[effort: 1]`
 - [ ] 5.19 — Student enrollment status badge — show "Pending confirmation" on course detail and attendance pages when enrollment status is `registered` (vs `confirmed`), so students know Andy hasn't reviewed it yet `[effort: 1]`
 
@@ -128,8 +128,8 @@ Make it production-ready.
 | 2 — Student Browse | — | 8–10 | ~14 | — | Pre-tracking |
 | 3 — Attendance | 21 | 12–16 | ~5.5 | ~0.26 | First tracked phase (3.5/3.6 deferred V2) |
 | 4 — Instructor | 10 | 4–6 | 1.75 | 0.175 | 4/4 complete |
-| 5 — Polish | 46 | 7–9 | 1.5 (in progress) | 0.375 (so far) | 4 pts done (5.1). Added 5.17+5.18 (+3 pts). Forecast: 0.22 hrs/pt x 46 = ~10 hrs |
-| **Total** | **77** | **48–66** | **~34.75** | — | Phases 0–4 actual: ~33.25 hrs. Phase 5 in progress: 1.5 hrs. |
+| 5 — Polish | 46 | 7–9 | 2.75 (in progress) | 0.46 (so far) | 6 pts done (5.1 + 5.17). Forecast: 0.22 hrs/pt x 46 = ~10 hrs |
+| **Total** | **77** | **48–66** | **~36** | — | Phases 0–4 actual: ~33.25 hrs. Phase 5 in progress: 2.75 hrs. |
 
 ### Cuttable tasks (if time is tight)
 - **5.12** — Student calendar view. Explicitly labeled "stretch goal" in the task. Cut first.
