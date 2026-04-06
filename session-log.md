@@ -3,6 +3,42 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Sessions 12+13 — 2026-04-05 (~1.5 hrs estimated)
+**Duration:** ~1.5 hours (estimated — compute crash lost timing for session 12)
+**Task:** Phase 3.9 — RLS policies for session_attendance table
+**Completed:**
+- Created `docs/migrations/008_rls_session_attendance.sql` with full RLS policies
+- Admin: full CRUD via `is_admin` metadata flag
+- Students: read own attendance via `get_student_enrollment_ids()` SECURITY DEFINER helper
+- Instructors: read attendance for their sessions via `get_instructor_session_ids()` SECURITY DEFINER helper
+- Instructor helper handles both course-level and session-level instructor assignment (DEC-007)
+- Added `DROP POLICY IF EXISTS` guards for idempotent re-runs (partial run hit duplicate policy error)
+- Migration ran successfully in Supabase SQL Editor
+- QA tests all passing: cross-student isolation, write denial verified via pg_policies, edge cases (zero enrollments, cancelled enrollment)
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** Task 3.10 — Student course view: show session status (cancelled badge, missed indicator) and filter/dim cancelled sessions (effort: 2). Last task in Phase 3. Then Phase 4 — Instructor Views.
+**Context:** Follows same SECURITY DEFINER pattern as migrations 005/006/007. Two new helper functions: `get_student_enrollment_ids(user_id)` and `get_instructor_session_ids(user_id)`. The instructor helper uses LEFT JOIN to catch both `courses.instructor_id` and `sessions.instructor_id` matches. Session 12 died to compute crash — no timing available, user estimated ~1.5 hrs combined.
+
+---
+
+## Session 12 — 2026-04-05 (0.25 hrs)
+**Duration:** 0.25 hours
+**Task:** Phase 3.9 — RLS policies for session_attendance table
+**Completed:**
+- Created `docs/migrations/008_rls_session_attendance.sql` with full RLS policies
+- Admin: full CRUD via `is_admin` metadata flag
+- Students: read own attendance via `get_student_enrollment_ids()` SECURITY DEFINER helper (avoids enrollments RLS recursion)
+- Instructors: read attendance for their sessions via `get_instructor_session_ids()` SECURITY DEFINER helper (avoids sessions + courses RLS recursion)
+- Instructor helper handles both course-level and session-level instructor assignment (DEC-007)
+- Marked 3.9 complete in PROJECT_PLAN.md
+**In Progress:** Nothing
+**Blocked:** Migration needs to be run in Supabase SQL Editor
+**Next Steps:** Run `docs/migrations/008_rls_session_attendance.sql` in Supabase SQL Editor. Then task 3.10 — Student course view session status indicators (effort: 2). Phase 3 nearly complete (7/8 tasks done).
+**Context:** Follows same SECURITY DEFINER pattern as migrations 005/006/007. Two new helper functions: `get_student_enrollment_ids(user_id)` and `get_instructor_session_ids(user_id)`. The instructor helper uses LEFT JOIN to catch both `courses.instructor_id` and `sessions.instructor_id` matches.
+
+---
+
 ## Session 11 — 2026-04-05 (0.75 hrs)
 **Duration:** 0.75 hours
 **Task:** Phase 3.8 — Student attendance history + missed sessions needing makeup

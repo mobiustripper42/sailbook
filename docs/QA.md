@@ -208,3 +208,42 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 - [ x] Admin schedules makeup for d003 (links to Bob/Carol)
 - [ x] Bob/Carol reload `/student/attendance` → missed session now shows "Makeup scheduled" instead of "Needs makeup"
 - [ x] Alert banner count decreases (or disappears if all resolved)
+
+### 3.9 — RLS policies for session_attendance table
+
+**Prerequisites:** Run `docs/migrations/008_rls_session_attendance.sql` in Supabase SQL Editor. Seed data loaded.
+
+**Admin access (andy@ltsc.test)**
+- [x ] Go to any course → session → attendance page → student list loads normally
+- [x ] Mark a student as "Attended" → save → persists (admin has write access)
+- [ x] Go to `/admin/missed-sessions` → all missed records across all students load
+
+**Student read — own attendance only (alice@ltsc.test)**
+- [x] Go to `/student/attendance` → shows Alice's attendance records grouped by course
+- [x ] Records match what's in the database for Alice's enrollments
+- [x ] No records from other students leak through (verify: Alice should NOT see Bob's or Carol's attendance)
+
+**Student read — another student (bob@ltsc.test)**
+- [ x] Log in as bob@ltsc.test → `/student/attendance` → shows only Bob's records
+- [ x] Bob sees his missed sessions, not Alice's or Carol's
+
+**Instructor read — own courses (sarah@ltsc.test)**
+- [x ] Sarah is instructor on Evening Series (c002) → her session queries should return attendance for c002 sessions
+- [x ] If Sarah navigates to a page that queries attendance (Phase 4 will add this), records load for her assigned courses only
+
+**Student cannot write attendance**
+- [x] Verified via `pg_policies`: student policy is SELECT only — INSERT/UPDATE/DELETE denied by definition
+- [x] No student UI exposes write operations on session_attendance
+
+**Instructor cannot write attendance**
+- [x] Verified via `pg_policies`: instructor policy is SELECT only — INSERT/UPDATE/DELETE denied by definition
+- [x] No instructor UI exposes write operations on session_attendance (admin marks attendance via admin-only policy)
+
+**Cross-student isolation**
+- [x] Service role: `SELECT count(*) FROM session_attendance` → 22 total records
+- [x] Alice's helper: `get_student_enrollment_ids(alice)` → 6 records (e001: 2 + e002: 4)
+- [x] Difference confirms RLS filtering works correctly
+
+**Edge cases**
+- [x] Dan (zero enrollments): `get_student_enrollment_ids(dan)` → 0 records, no errors
+- [x] Bob (cancelled enrollment e006 for c001): `get_student_enrollment_ids(bob)` → 6 records (e003: 4 + e006: 2) — cancelled enrollment attendance still readable

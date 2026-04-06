@@ -74,7 +74,7 @@ The real operational value — tracking who showed up.
 - ~~3.6 — Makeup tracking — link makeup_session_id on attendance records~~ **(deferred to V2 — PO decision 2026-04-04)**
 - [x] 3.7 — Admin view: students with outstanding missed sessions `[effort: 2]` <!-- completed 2026-04-05 -->
 - [x] 3.8 — Student view: my attendance history + missed sessions needing makeup `[effort: 3]` <!-- completed 2026-04-05 -->
-- [ ] 3.9 — RLS policies for session_attendance table `[effort: 3]`
+- [x] 3.9 — RLS policies for session_attendance table `[effort: 3]` <!-- completed 2026-04-05 -->
 - [ ] 3.10 — Student course view: show session status (cancelled badge, missed indicator) and filter/dim cancelled sessions `[effort: 2]`
 
 **Demo:** Admin cancels a Saturday session (weather). Creates makeup. Assigns affected students. Attendance tracked correctly. *(Cross-course makeup deferred to V2.)*
@@ -122,10 +122,10 @@ Make it production-ready.
 | 0 — Infrastructure | — | 4–6 | ~4 | — | Pre-tracking |
 | 1 — Admin Catalog | — | 10–14 | ~8 | — | Pre-tracking |
 | 2 — Student Browse | — | 8–10 | ~14 | — | Pre-tracking |
-| 3 — Attendance | 21 | 12–16 | — | — | First tracked phase |
+| 3 — Attendance | 21 | 12–16 | ~5.5 | ~0.26 | First tracked phase (3.5/3.6 deferred V2) |
 | 4 — Instructor | 10 | 4–6 | — | — | |
 | 5 — Polish | 33 | 10–14 | — | — | |
-| **Total** | **64** | **48–66** | **~26** | — | Phases 0–2 actual: ~26 hrs. Remaining: ~26–36 hrs. |
+| **Total** | **64** | **48–66** | **~31.5** | — | Phases 0–3 actual: ~31.5 hrs. Remaining: ~17–35 hrs. |
 
 ### Cuttable tasks (if time is tight)
 - **5.12** — Student calendar view. Explicitly labeled "stretch goal" in the task. Cut first.
