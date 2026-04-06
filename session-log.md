@@ -3,33 +3,33 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 17 — 2026-04-06–
-
-**Duration:** TBD
+## Session 17 — 2026-04-06 (0.75 hrs)
+**Duration:** 0.75 hours
 **Task:** Phase 4.4 — RLS policies for instructors
-**Status:** In progress — migration written, QA written, awaiting user to run migration and test
-
 **Completed:**
 - Analyzed all 8 existing migrations — identified 4 gaps in instructor RLS:
   1. courses policy: only checked course-level `instructor_id`, missed session-level overrides (DEC-007)
   2. sessions policy: direct subquery on courses (recursion risk), missed session-level overrides
   3. enrollments helper: `get_instructor_course_ids()` was course-level only
   4. profiles: no instructor policy at all — roster page joins on profiles silently returned null for non-admin users
+- Discovered 2 rogue policies on profiles from initial setup never dropped by migrations:
+  - "Authenticated users can read profiles" (qual: true) — let anyone read all profiles
+  - "Admins can update any profile" — used old `role='admin'` string
 - Created `docs/migrations/009_rls_instructor_policies.sql`:
+  - Drops rogue policies
   - Updated `get_instructor_course_ids()` to UNION session-level assignments
   - Added `get_instructor_student_ids()` SECURITY DEFINER helper for profiles access
   - Replaced courses policy to use helper (both assignment levels)
   - Replaced sessions policy to use `get_instructor_session_ids()` (both assignment levels)
   - Added profiles SELECT policy for instructors
   - Enrollments policy auto-benefits from updated helper (no change needed)
-- Added comprehensive QA section to `docs/QA.md` (4.4) with:
-  - UI verification tests (dashboard, roster, isolation, auth)
-  - SQL impersonation tests: Dave isolation, Sarah isolation, session-level override (DEC-007), write denial
-  - Helper function verification queries
-**In Progress:** User needs to run migration 009 and execute QA
+- Fixed instructor roster 404 → now redirects to `/instructor/dashboard` instead of blank page
+- QA: all SQL impersonation tests pass (Dave isolation, Sarah isolation, DEC-007 session-level override, write denial)
+- Phase 4 complete. Merged dev → main and pushed.
+**In Progress:** Nothing
 **Blocked:** Nothing
-**Next Steps:** Run migration, QA, then mark 4.4 complete → Phase 4 done. Phase 5 begins.
-**Context:** The profiles bug (no instructor SELECT policy) was a silent failure — roster page worked for admin testing but would have shown null names for actual instructor logins. Session-level override test requires temporary seed data manipulation (included in QA SQL, with cleanup).
+**Next Steps:** Phase 5 — Polish & Ship. Start with 5.1 (admin dashboard real stats) or 5.2 (instructor swap on sessions).
+**Context:** The rogue "Authenticated users can read profiles" policy was masking the profiles RLS gap — everything appeared to work because everyone could read all profiles. Both bugs cancelled each other out in testing but were independently wrong. Phase 4 velocity: 1.75 hrs / 10 pts = 0.175 hrs/pt.
 
 ---
 
