@@ -336,5 +336,17 @@ Format: append newest entry at the top.
 - Schema SQL is in `docs/sailbook-schema.sql` — ready to run once Supabase project exists
 - Read `docs/PROJECT_PLAN.md` Phase 0 checklist before starting
 
-## Session 15 — 2026-04-05 — Phase 4.1 Instructor Dashboard
-**Start:** 23:03
+## Session 15 — 2026-04-05 23:03–23:30 (0.5 hrs)
+**Duration:** 0.5 hours
+**Task:** Phase 4.1 — Instructor dashboard
+**Completed:**
+- Cleaned up instructor dashboard: removed duplicate unused query, dead types
+- Fixed Total Students to count unique students (was double-counting across sessions)
+- Fixed "Roster →" link from `/admin/courses/` to `/instructor/sessions/` (4.2 target)
+- Extracted `StatCard` component matching admin dashboard pattern
+- Added `courses.status = 'active'` filter — draft/cancelled/completed courses excluded
+- Wrote QA test cases for 4.1 in docs/QA.md — all passing
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** Phase 4.2 — Session roster view (enrolled students, attendance status)
+**Context:** Roster → link will 404 until 4.2 builds `/instructor/sessions/[id]`

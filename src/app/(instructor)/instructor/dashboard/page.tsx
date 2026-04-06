@@ -53,6 +53,7 @@ export default async function InstructorDashboard() {
     .eq('status', 'scheduled')
     .gte('date', today)
     .eq('courses.instructor_id', user.id)
+    .eq('courses.status', 'active')
     .order('date')
     .order('start_time')
 

@@ -322,3 +322,59 @@ VALUES ('d0000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-0000000
 RESET role;
 RESET request.jwt.claims;
 ```
+
+---
+
+## Phase 4: Instructor Views
+
+### 4.1 — Instructor dashboard
+
+**Prerequisites:** Seed data loaded. Two instructor logins: dave@ltsc.test (courses c001, c004, c005, c006) and sarah@ltsc.test (course c002). Password: qwert12345.
+
+**Dave's dashboard (dave@ltsc.test)**
+- [X ] Log in as dave@ltsc.test → redirects to `/instructor/dashboard`
+- [X ] Welcome message: "Welcome back, Dave."
+- [X ] Subtitle: "Your upcoming schedule."
+
+**Dave's stat cards**
+- [X] Active Courses: **1** (c001 Weekend Intensive — c004 Dinghy is draft, excluded)
+- [X ] Upcoming Sessions: **2** (d001 May 9, d002 May 10)
+- [X ] Total Students: **1** (Alice in c001 — Bob's cancelled enrollment excluded)
+
+**Dave's upcoming sessions list**
+- [X ] 2 session rows displayed, sorted by date
+- [X ] Row 1: "ASA 101 — Weekend Intensive" · Saturday, May 9 · 8:00 AM – 4:00 PM · Edgewater Marina, Dock A · badge "1 / 4"
+- [X ] Row 2: "ASA 101 — Weekend Intensive" · Sunday, May 10 · 8:00 AM – 4:00 PM · Edgewater Marina, Dock A · badge "1 / 4"
+- [X ] Each row has "Roster →" link (will 404 until task 4.2 — just verify it renders)
+- [X ] No Dinghy Sailing Intro row (c004 is draft, not shown)
+
+**Sarah's dashboard (sarah@ltsc.test)**
+- [X ] Log in as sarah@ltsc.test → `/instructor/dashboard`
+- [X ] Welcome message: "Welcome back, Sarah."
+
+**Sarah's stat cards**
+- [ X] Active Courses: **1** (c002 Evening Series)
+- [ X] Upcoming Sessions: **3** (d004 May 13, d005 May 20, d006 May 27 — d003 is cancelled, filtered out)
+- [ X] Total Students: **4** (Alice, Bob, Sarah herself, Carol — all non-cancelled enrollments)
+
+**Sarah's upcoming sessions list**
+- [ X] 3 session rows, all "ASA 101 — Evening Series"
+- [ X] Row 1: Wednesday, May 13 · 6:00 PM – 9:00 PM · Edgewater Marina, Dock B · badge "4 / 4"
+- [ X] Row 2: Wednesday, May 20 · same time/location · badge "4 / 4"
+- [ X] Row 3: Wednesday, May 27 · same time/location · badge "4 / 4"
+- [ X] Cancelled session d003 (May 6) does NOT appear in the list
+
+**Empty state**
+- [X ] If an instructor has no upcoming scheduled sessions, shows: "No upcoming sessions assigned to you."
+- [X ] (To test: temporarily remove Dave's instructor_id from courses, or use a fresh instructor account)
+
+**Layout and navigation**
+- [X ] Sidebar shows "SailBook" logo, "Instructor" subtitle, "Dashboard" nav link (active state)
+- [X ] Instructor name displayed at bottom of sidebar
+- [X ] "Sign out" link works — returns to login page
+
+**Edge cases**
+- [X ] Dave does NOT see c004 (Dinghy draft) sessions — dashboard filters to active courses only. Draft/cancelled/completed courses excluded.
+- [X ] Sarah appears as her own student in Total Students count (she's enrolled in c002 via e004) — correct behavior, she is a student in that course.
+- [X ] Cancelled enrollment (Bob's e006 in c001) is excluded from roster count and Total Students — verify badge shows "1 / 4" not "2 / 4" for c001 sessions.
+- [X ] Non-instructor user (e.g. alice@ltsc.test) accessing `/instructor/dashboard` → middleware should redirect to student view

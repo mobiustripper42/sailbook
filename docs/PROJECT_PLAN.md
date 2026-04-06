@@ -84,7 +84,7 @@ The real operational value — tracking who showed up.
 ## Phase 4: Instructor Views (Days 19–21)
 Instructors see their assignments.
 
-- [ ] 4.1 — Instructor dashboard — stat cards (upcoming sessions, total students), upcoming sessions list with course name/date/time/roster count `[effort: 3]`
+- [x] 4.1 — Instructor dashboard — stat cards (upcoming sessions, total students), upcoming sessions list with course name/date/time/roster count `[effort: 3]`
 - [ ] 4.2 — Session roster view — enrolled students, attendance status `[effort: 2]`
 - [ ] 4.3 — Identify makeup students in roster (from other courses) `[effort: 2]`
 - [ ] 4.4 — RLS policies — instructors see only their own courses/sessions `[effort: 3]`
@@ -96,20 +96,20 @@ Instructors see their assignments.
 ## Phase 5: Polish & Ship (Days 22–28)
 Make it production-ready.
 
-- [ ] 5.1 — Admin dashboard — real stats (total courses, enrollments, upcoming sessions) + "courses without instructors" warning tile `[effort: 3]`
+- [ ] 5.1 — Admin dashboard — real stats (total courses, enrollments, upcoming sessions) + "courses without instructors" warning tile `[effort: 4]`
 - [ ] 5.2 — Instructor swap on individual sessions (AS-9) `[effort: 2]`
 - [ ] 5.3 — Error handling — form validation, API errors, empty states `[effort: 3]`
 - [ ] 5.4 — Loading states and optimistic UI `[effort: 2]`
-- [ ] 5.5 — Mobile responsiveness pass (admin will use desktop, students may use phone) `[effort: 3]`
+- [ ] 5.5 — Mobile responsiveness pass (admin will use desktop, students may use phone) `[effort: 5]`
 - [ ] 5.6 — Seed data — create LTSC course types, Andy as admin, test instructor/student `[effort: 1]`
-- [ ] 5.7 — End-to-end walkthrough with Andy `[effort: 2]`
-- [ ] 5.8 — Bug fixes from walkthrough `[effort: 4]`
+- [ ] 5.7 — End-to-end walkthrough with Andy `[effort: 4]`
+- [ ] 5.8 — Bug fixes from walkthrough `[effort: 5]`
 - [ ] 5.9 — Production environment variables on Vercel `[effort: 1]`
 - [ ] 5.10 — DNS / custom domain (if wanted) `[effort: 1]`
 - [ ] 5.11 — Duplicate course — one-click copy of a course (no sessions), drop into edit mode `[effort: 2]`
 - [ ] 5.12 — Student calendar view — monthly calendar of enrolled sessions with filter (same filters as list view in 2.7); stretch goal, skip if time is tight `[effort: 4]`
 - [ ] 5.13 — Evaluate Docker for local dev `[effort: 1]`
-- [ ] 5.14 — Admin UI for role management — add/remove admin, instructor, student flags from profile edit pages (may defer to V2) `[effort: 2]`
+- [ ] 5.14 — Admin UI for role management — add/remove admin, instructor, student flags from profile edit pages (may defer to V2) `[effort: 3]`
 - [ ] 5.15 — OAuth login — Google (and others if Supabase makes it easy); email/password remains the fallback `[effort: 2]`
 
 **Demo:** Andy walks through full flow — creates a course, student registers, instructor views roster, session gets cancelled, makeup scheduled. Everything works.
