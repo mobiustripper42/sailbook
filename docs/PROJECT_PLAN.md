@@ -75,7 +75,7 @@ The real operational value — tracking who showed up.
 - [x] 3.7 — Admin view: students with outstanding missed sessions `[effort: 2]` <!-- completed 2026-04-05 -->
 - [x] 3.8 — Student view: my attendance history + missed sessions needing makeup `[effort: 3]` <!-- completed 2026-04-05 -->
 - [x] 3.9 — RLS policies for session_attendance table `[effort: 3]` <!-- completed 2026-04-05 -->
-- [ ] 3.10 — Student course view: show session status (cancelled badge, missed indicator) and filter/dim cancelled sessions `[effort: 2]`
+- [x] 3.10 — Student course view: show session status (cancelled badge, missed indicator) and filter/dim cancelled sessions `[effort: 2]` <!-- completed 2026-04-05 -->
 
 **Demo:** Admin cancels a Saturday session (weather). Creates makeup. Assigns affected students. Attendance tracked correctly. *(Cross-course makeup deferred to V2.)*
 

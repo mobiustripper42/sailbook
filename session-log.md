@@ -3,6 +3,25 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 14 — 2026-04-05 (0.5 hrs)
+**Duration:** 0.5 hours
+**Task:** Phase 3.10 — Student course view session status + attendance indicators
+**Completed:**
+- Enhanced `/student/courses/[id]/page.tsx` with cancelled session styling (dimmed rows, strikethrough, "Cancelled" badge)
+- Added attendance column for enrolled students (Attended/Missed/Excused/Upcoming badges, "Needs makeup" / "Makeup scheduled" indicators)
+- Sessions stat card shows cancelled count when applicable
+- Extracted shared `AttendanceStatus` type and `attendanceStatusConfig` to `src/lib/attendance.ts` (was duplicated in 3 files)
+- Added `fmtDateLong` to `src/lib/utils.ts` (weekday-inclusive format), fixed shadowed `fmtDate` inconsistency
+- Updated `course-attendance-card.tsx` and `attendance/page.tsx` to use shared attendance module
+- QA test cases added to `docs/QA.md` including RLS SQL verification
+- All QA passed. Phase 3 complete.
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** Phase 4 — Instructor Views. Task 4.1: Instructor dashboard with upcoming sessions and roster counts.
+**Context:** Phase 3 is fully done (8/8 tasks, 3.5/3.6 deferred to V2). Shared attendance config now in `src/lib/attendance.ts` — use it for any future attendance badge rendering.
+
+---
+
 ## Sessions 12+13 — 2026-04-05 (~1.5 hrs estimated)
 **Duration:** ~1.5 hours (estimated — compute crash lost timing for session 12)
 **Task:** Phase 3.9 — RLS policies for session_attendance table
