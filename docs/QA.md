@@ -439,11 +439,8 @@ RESET request.jwt.claims;
 - [ ] Navigate to d005 (May 20) roster → no makeup badges on any student
 - [ ] Navigate to d006 (May 27) roster → no makeup badges on any student
 
-**Cancelled session roster (d003)**
-- [ ] Navigate to d003 (May 6, cancelled) roster
-- [ ] Bob: "Missed" + "Needs makeup" (no makeup_session_id)
-- [ ] Carol: "Missed" + "Makeup scheduled" (has makeup_session_id → d004)
-- [ ] No makeup badges in Name column (d003 is not anyone's makeup destination)
+**No false positives on cancelled session (d003)**
+- [ ] Navigate to d003 (May 6, cancelled) roster → no "Makeup from..." badges on any student (d003 is not anyone's makeup destination)
 
 **Edge cases**
 - [ ] Session with no makeup students (d001/d002 in c001) → no badges, roster unchanged from 4.2
