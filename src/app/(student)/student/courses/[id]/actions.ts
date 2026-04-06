@@ -34,13 +34,12 @@ export async function enrollInCourse(courseId: string) {
   }
 
   // 2.5 — capacity enforcement
-  const { count } = await supabase
-    .from('enrollments')
-    .select('id', { count: 'exact', head: true })
-    .eq('course_id', courseId)
-    .neq('status', 'cancelled')
+  // Must use RPC (SECURITY DEFINER) — direct count query is filtered by student RLS
+  // to the student's own rows, which would always return 0 and bypass the gate.
+  const { data: enrollmentCount } = await supabase
+    .rpc('get_course_active_enrollment_count', { p_course_id: courseId })
 
-  if ((count ?? 0) >= course.capacity) {
+  if ((enrollmentCount ?? 0) >= course.capacity) {
     return { error: 'This course is full.' }
   }
 

@@ -48,3 +48,5 @@ May 15, 2026 — first day of sailing season.
 ## V2 Ideas
 - AI season setup agent — admin describes the summer schedule in plain English ("10 ASA 101 weekends May–August, Open Sailing every Wednesday June–August"), agent creates all courses and sessions automatically
 - Admin impersonation mode — "view as student" button lets Andy see the student dashboard without logging out. Useful for verifying what students see and debugging their experience
+- First-come-first-served enrollment approval — surface `enrolled_at` timestamp prominently on the course enrollments list so Andy can approve in queue order. Data is already captured; this is a display/workflow change only. Prerequisite for fair manual approval before payments are in place.
+- Payment processing + inventory control — tie enrollment `confirmed` status to payment receipt, hold spots during checkout, release on timeout. Once payments land, capacity enforcement moves from "honor system" to hard inventory control. Student self-cancellation ships alongside this (cancellation triggers refund logic).

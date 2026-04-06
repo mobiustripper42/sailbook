@@ -646,3 +646,167 @@ RESET request.jwt.claims;
 - [ ] Dan (student, no enrollments) sees zero courses when accessing instructor routes → redirected by middleware
 - [ ] Andy (admin) can still do everything — admin policies unchanged
 - [ ] Sarah (instructor+student) sees c002 via instructor policy AND student-enrolled policy without duplication (Postgres ORs multiple passing policies)
+
+---
+
+## Phase 5: Polish & Ship
+
+### 5.17 — RLS fix: student INSERT/UPDATE on session_attendance
+
+**Prerequisites:** Run `docs/migrations/010_rls_student_attendance_write.sql` in Supabase SQL Editor. Clean seed data loaded (reseed after migration). Login credentials: password `qwert12345` for all test accounts.
+
+**What changed:** Added `FOR INSERT` and `FOR UPDATE` RLS policies for students on `session_attendance`. Students can only write rows where `enrollment_id` belongs to them, and only to `status = 'expected'`. Before this migration, the enrollment flow silently failed — the enrollment row was created but all attendance records were dropped by RLS.
+
+---
+
+**Happy path — Dan enrolls in a course**
+
+- [X ] Log in as dan@ltsc.test
+- [X ] Navigate to `/student/courses` → pick any active course with sessions (e.g. ASA 101 Weekend Intensive)
+- [X ] Click "View & Enroll" → course detail page loads
+- [X ] Click "Enroll in This Course" → button shows "Enrolling…" briefly
+- [X ] **No error message appears** (this was the bug — error appeared before the fix)
+- [X ] Page reloads enrolled state: "Enrolled" badge visible, Attendance column added to sessions table
+- [X ] All sessions show "Upcoming" badge in the Attendance column
+- [ X] Navigate to `/student/attendance` → Dan's course appears with one row per session, all `expected`
+
+**Admin confirms the enrollment is complete**
+
+- [x ] Log in as andy@ltsc.test
+- [x ] Go to `/admin/courses` → open the course Dan enrolled in
+- [x ] Dan appears in the enrollments list with status "registered"
+- [x ] Navigate to any session's attendance page → Dan appears in the student list with status "Expected"
+
+**Re-enrollment after cancellation (upsert path)**
+
+- [x ] As andy@ltsc.test, cancel Dan's enrollment from the course detail page
+- [x ] Log in as dan@ltsc.test → re-enroll in the same course
+- [x ] No error appears
+- [x ] Navigate to `/student/attendance` → attendance records show "Upcoming" (reset from "Missed" back to "expected")
+- [x ] Check via SQL: `SELECT status FROM session_attendance WHERE enrollment_id = '<dan-enrollment-id>'` → all rows show `expected` (not duplicated)
+
+---
+
+**SQL verification — run in Supabase SQL Editor**
+
+```sql
+-- ============================================================
+-- TEST 1: Verify new policies exist
+-- ============================================================
+SELECT policyname, cmd
+FROM pg_policies
+WHERE tablename = 'session_attendance'
+  AND policyname IN (
+    'Students can insert own attendance',
+    'Students can update own attendance'
+  );
+-- Expected: 2 rows (INSERT and UPDATE policies)
+
+-- ============================================================
+-- TEST 2: Impersonate Dan — INSERT succeeds for own enrollment
+-- ============================================================
+-- First: enroll Dan via the UI, note his enrollment ID, then run:
+SET request.jwt.claims = '{"sub":"a0000000-0000-0000-0000-000000000007","role":"authenticated","email":"dan@ltsc.test","user_metadata":{"is_admin":false,"is_instructor":false,"is_student":true}}';
+SET role = 'authenticated';
+
+-- Confirm Dan has enrollment rows (replace with actual enrollment ID after seeding)
+SELECT id FROM enrollments WHERE student_id = 'a0000000-0000-0000-0000-000000000007';
+-- Expected: 1+ rows after enrolling via UI
+
+-- Dan can read his own attendance
+SELECT * FROM session_attendance
+WHERE enrollment_id IN (SELECT get_student_enrollment_ids('a0000000-0000-0000-0000-000000000007'));
+-- Expected: rows with status = 'expected', one per session in his enrolled course
+
+RESET role;
+RESET request.jwt.claims;
+
+-- ============================================================
+-- TEST 3: Student cannot insert with non-'expected' status
+-- ============================================================
+SET request.jwt.claims = '{"sub":"a0000000-0000-0000-0000-000000000007","role":"authenticated","email":"dan@ltsc.test","user_metadata":{"is_admin":false,"is_instructor":false,"is_student":true}}';
+SET role = 'authenticated';
+
+-- Try to insert a fake 'attended' record for Dan's own enrollment
+-- (replace IDs with actual values from seed)
+INSERT INTO session_attendance (session_id, enrollment_id, status)
+SELECT
+  s.id,
+  e.id,
+  'attended'
+FROM sessions s
+JOIN enrollments e ON e.course_id = s.course_id
+WHERE e.student_id = 'a0000000-0000-0000-0000-000000000007'
+LIMIT 1;
+-- Expected: ERROR — violates row-level security (status must be 'expected')
+
+-- Verify Dan's attendance rows actually exist before testing the update
+SELECT id, status FROM session_attendance
+WHERE enrollment_id IN (
+  SELECT get_student_enrollment_ids('a0000000-0000-0000-0000-000000000007')
+);
+-- Expected: 1+ rows with status = 'expected' (if 0 rows, Dan isn't enrolled — enroll him first)
+
+-- Try to update own record to 'attended'
+UPDATE session_attendance
+SET status = 'attended'
+WHERE enrollment_id IN (
+  SELECT get_student_enrollment_ids('a0000000-0000-0000-0000-000000000007')
+);
+
+-- Confirm the status did NOT change (update was silently blocked by WITH CHECK)
+SELECT id, status FROM session_attendance
+WHERE enrollment_id IN (
+  SELECT get_student_enrollment_ids('a0000000-0000-0000-0000-000000000007')
+);
+-- Expected: all rows still show status = 'expected', not 'attended'
+
+RESET role;
+RESET request.jwt.claims;
+
+-- ============================================================
+-- TEST 4: Student cannot insert for another student's enrollment
+-- ============================================================
+SET request.jwt.claims = '{"sub":"a0000000-0000-0000-0000-000000000007","role":"authenticated","email":"dan@ltsc.test","user_metadata":{"is_admin":false,"is_instructor":false,"is_student":true}}';
+SET role = 'authenticated';
+
+-- Try to insert an attendance row using Alice's enrollment ID (e0000000-0000-0000-0000-000000000001)
+INSERT INTO session_attendance (session_id, enrollment_id, status)
+VALUES ('d0000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'expected');
+-- Expected: ERROR — violates row-level security (enrollment not Dan's)
+
+RESET role;
+RESET request.jwt.claims;
+
+-- ============================================================
+-- TEST 5: Admin policy unchanged — still full access
+-- ============================================================
+SET request.jwt.claims = '{"sub":"a0000000-0000-0000-0000-000000000001","role":"authenticated","email":"andy@ltsc.test","user_metadata":{"is_admin":true,"is_instructor":false,"is_student":false}}';
+SET role = 'authenticated';
+
+-- Admin can mark any attendance
+UPDATE session_attendance
+SET status = 'attended'
+WHERE session_id = 'd0000000-0000-0000-0000-000000000001'
+  AND enrollment_id = 'e0000000-0000-0000-0000-000000000001';
+
+-- Confirm the update actually took effect
+SELECT status FROM session_attendance
+WHERE session_id = 'd0000000-0000-0000-0000-000000000001'
+  AND enrollment_id = 'e0000000-0000-0000-0000-000000000001';
+-- Expected: status = 'attended'
+
+-- Reset it
+UPDATE session_attendance
+SET status = 'expected'
+WHERE session_id = 'd0000000-0000-0000-0000-000000000001'
+  AND enrollment_id = 'e0000000-0000-0000-0000-000000000001';
+
+RESET role;
+RESET request.jwt.claims;
+```
+
+**Edge cases**
+- [ ] Student with zero sessions in their enrolled course → enrollment succeeds, no attendance rows attempted, no error
+- [ ] Student enrolls in a course where another student already has attendance records → no cross-contamination (verify via SQL after both enroll)
+- [ ] Instructor (sarah@ltsc.test) cannot INSERT attendance via these policies — instructor policy is still SELECT only (covered by 3.9 / 4.4 tests above)

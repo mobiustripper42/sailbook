@@ -90,7 +90,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           {course.title && <p className="text-muted-foreground">{type?.name}</p>}
           <p className="text-sm text-muted-foreground mt-1">
             Instructor: {instructor ? `${instructor.first_name} ${instructor.last_name}` : '—'} ·
-            Capacity: {enrollments?.length ?? 0} / {course.capacity}
+            Capacity: {enrollments?.filter(e => e.status !== 'cancelled').length ?? 0} / {course.capacity}
             {course.price != null && ` · $${course.price}`}
           </p>
         </div>

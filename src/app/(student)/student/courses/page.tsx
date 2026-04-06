@@ -23,19 +23,27 @@ function formatDateRange(dates: string[]): string {
 export default async function CourseBrowsePage() {
   const supabase = await createClient()
 
-  const { data: courses, error } = await supabase
-    .from('courses')
-    .select(`
-      id, title, capacity, price,
-      course_types ( name, short_code, description ),
-      instructor:profiles!courses_instructor_id_fkey ( first_name, last_name ),
-      sessions ( date ),
-      enrollments ( id, status )
-    `)
-    .eq('status', 'active')
-    .order('created_at', { ascending: true })
+  const [{ data: courses, error }, { data: enrollmentCounts }] = await Promise.all([
+    supabase
+      .from('courses')
+      .select(`
+        id, title, capacity, price,
+        course_types ( name, short_code, description ),
+        instructor:profiles!courses_instructor_id_fkey ( first_name, last_name ),
+        sessions ( date )
+      `)
+      .eq('status', 'active')
+      .order('created_at', { ascending: true }),
+    // Must use RPC (SECURITY DEFINER) — direct query is filtered by student RLS
+    // to the student's own rows, breaking the "Full" badge for unenrolled students.
+    supabase.rpc('get_all_course_enrollment_counts'),
+  ])
 
   if (error) return <div className="p-8 text-destructive">{error.message}</div>
+
+  const countMap = new Map<string, number>(
+    enrollmentCounts?.map(({ course_id, active_count }: { course_id: string; active_count: number }) => [course_id, active_count]) ?? []
+  )
 
   return (
     <div className="p-8">
@@ -54,9 +62,8 @@ export default async function CourseBrowsePage() {
             const type = c.course_types as unknown as { name: string; short_code: string; description: string | null } | null
             const instructor = c.instructor as unknown as { first_name: string; last_name: string } | null
             const sessions = (c.sessions as unknown as { date: string }[]) ?? []
-            const enrollments = (c.enrollments as unknown as { id: string; status: string }[]) ?? []
 
-            const activeEnrollments = enrollments.filter((e) => e.status !== 'cancelled').length
+            const activeEnrollments = countMap.get(c.id) ?? 0
             const spotsRemaining = c.capacity - activeEnrollments
             const isFull = spotsRemaining <= 0
 

@@ -46,11 +46,10 @@ export default async function StudentCourseDetailPage({
     .order('date')
 
   // Count active enrollments for spots remaining
-  const { count: activeEnrollments } = await supabase
-    .from('enrollments')
-    .select('id', { count: 'exact', head: true })
-    .eq('course_id', id)
-    .neq('status', 'cancelled')
+  // Must use RPC (SECURITY DEFINER) — direct count query is filtered by student RLS
+  // to the student's own rows, so unenrolled students always see count = 0.
+  const { data: activeEnrollments } = await supabase
+    .rpc('get_course_active_enrollment_count', { p_course_id: id })
 
   // Check current user's enrollment status
   const { data: myEnrollment } = user

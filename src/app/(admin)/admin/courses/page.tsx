@@ -20,7 +20,7 @@ export default async function CoursesPage() {
       course_types ( name, short_code ),
       instructor:profiles!courses_instructor_id_fkey ( first_name, last_name ),
       sessions ( id ),
-      enrollments ( id )
+      enrollments ( id, status )
     `)
     .order('created_at', { ascending: false })
 
@@ -56,7 +56,9 @@ export default async function CoursesPage() {
                 const type = c.course_types as unknown as { name: string; short_code: string } | null
                 const instructor = c.instructor as unknown as { first_name: string; last_name: string } | null
                 const sessionCount = Array.isArray(c.sessions) ? c.sessions.length : 0
-                const enrollmentCount = Array.isArray(c.enrollments) ? c.enrollments.length : 0
+                const enrollmentCount = Array.isArray(c.enrollments)
+                  ? c.enrollments.filter((e: { id: string; status: string }) => e.status !== 'cancelled').length
+                  : 0
 
                 return (
                   <TableRow key={c.id}>

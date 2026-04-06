@@ -114,6 +114,7 @@ Make it production-ready.
 - [ ] 5.16 — Development database — separate Supabase project for dev, seed data pipeline, so prod isn't polluted with test data `[effort: 3]`
 - [ ] 5.17 — Bug: student enrollment RLS — missing INSERT/UPDATE policy on session_attendance means attendance records silently fail to create on enrollment `[effort: 2]`
 - [ ] 5.18 — Dashboard: restore pending confirmation total count + "View all (N)" link when > 10 enrollments `[effort: 1]`
+- [ ] 5.19 — Student enrollment status badge — show "Pending confirmation" on course detail and attendance pages when enrollment status is `registered` (vs `confirmed`), so students know Andy hasn't reviewed it yet `[effort: 1]`
 
 **Demo:** Andy walks through full flow — creates a course, student registers, instructor views roster, session gets cancelled, makeup scheduled. Everything works.
 
