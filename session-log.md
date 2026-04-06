@@ -3,6 +3,27 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 18 — 2026-04-06 (~1.5 hrs)
+**Duration:** ~1.5 hours (2 hrs elapsed minus 30 min downtime)
+**Task:** Phase 5.1 — Admin dashboard real stats + operational panels
+**Completed:**
+- Replaced 4 placeholder stat cards with live Supabase queries
+- Replaced "Upcoming Sessions (7 days)" count card with "Sessions in Next 7 Days" table: course name (links to attendance page), date/time, instructor (amber warning if unassigned), enrolled/capacity
+- Replaced "Enrollments" count card with "Pending Confirmation" table: student name, course (links to `/admin/courses/[id]`), enrolled date, capped at 10
+- Replaced "No Instructor Assigned" warning card with `InstructorCard` that shows "All Instructors Assigned" + ✓ when count = 0, amber warning when > 0
+- Fixed `Array.isArray` inconsistency — aligned with `as unknown as` cast pattern used throughout codebase
+- Fixed stat card numbers to right-align at consistent vertical position via fixed `h-14` CardHeader
+- Added tasks 5.17 (RLS bug: student enrollment session_attendance INSERT/UPDATE) and 5.18 (dashboard pending count) to PROJECT_PLAN.md
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:**
+- 5.17 first — it's a silent data corruption bug since Phase 2: student enrollment succeeds but session_attendance records are never created because RLS has no INSERT/UPDATE policy for students. Fix is `docs/migrations/010_rls_student_attendance_write.sql` adding student INSERT + UPDATE policies using existing `get_student_enrollment_ids()` helper. Propose fix → wait for approval → add migration → test with seed student enrolling.
+- 5.18 after — add `pendingCount` query back to `getDashboardData()`, pass `totalCount` to `PendingEnrollments`, restore "View all (N)" link when > 10.
+**Context:**
+- `as unknown as` cast pattern is a known workaround for hand-written `types.ts` lacking DB relationship types — tracked in memory as `project_types_debt.md`. Proper fix is `npx supabase gen types typescript --local` once Docker/local Supabase is set up.
+- Velocity this session: 0.375 hrs/pt (5.1 was 4 pts). PM flagged as above lifetime avg (0.22). Likely because 5.1 had scope creep (architect-approved) — the two table panels weren't in the original spec.
+- Phase 5 forecast: ~10 hrs remaining at lifetime velocity. 39 days to May 15.
+
 ## Session 17 — 2026-04-06 (0.75 hrs)
 **Duration:** 0.75 hours
 **Task:** Phase 4.4 — RLS policies for instructors
