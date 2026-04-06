@@ -378,3 +378,49 @@ RESET request.jwt.claims;
 - [X ] Sarah appears as her own student in Total Students count (she's enrolled in c002 via e004) — correct behavior, she is a student in that course.
 - [X ] Cancelled enrollment (Bob's e006 in c001) is excluded from roster count and Total Students — verify badge shows "1 / 4" not "2 / 4" for c001 sessions.
 - [X ] Non-instructor user (e.g. alice@ltsc.test) accessing `/instructor/dashboard` → middleware should redirect to student view
+
+### 4.2 — Session roster view
+
+**Prerequisites:** Seed data loaded. Instructor logins: sarah@ltsc.test (c002) and dave@ltsc.test (c001). Password: qwert12345.
+
+**Navigate from dashboard (Sarah → c002 session d004)**
+- [X ] Log in as sarah@ltsc.test → dashboard shows 3 upcoming sessions
+- [X ] Click "Roster →" on the May 13 session (d004) → `/instructor/sessions/<d004-id>` loads
+- [X ] Back link "← Back to dashboard" works
+
+**Session header**
+- [ X] Title: "ASA 101 — Evening Series"
+- [ X] Date/time: "Wed, May 13 · 6:00pm – 9:00pm · Edgewater Marina, Dock B"
+- [X ] Enrolled: "4 / 4"
+- [X ] Status: "scheduled"
+
+**Roster table — d004 (all expected)**
+- [X ] 4 student rows: Instructor, Alice; Instructor, Sarah; Student, Bob; Student, Carol (sorted by enrollment created_at)
+- [X ] All 4 show "Upcoming" outline badge (all attendance is `expected` for d004)
+- [X ] Email column shows each student's email
+
+**Roster table — d003 (cancelled, mixed attendance)**
+- [X ] Navigate directly to `/instructor/sessions/<d003-id>` (cancelled session)
+- [ X] "Cancelled" badge appears next to title
+- [ X] Alice: "Attended" badge (default variant)
+- [ X] Bob: "Missed" badge (destructive/red) + "Needs makeup" text
+- [ X] Sarah: "Excused" badge (secondary variant)
+- [ X] Carol: "Missed" badge + "Needs makeup" text
+
+**Dave's roster — c001 session d001**
+- [X] Log in as dave@ltsc.test → click "Roster →" on May 9 session
+- [X ] 1 student row: Student, Alice — "Upcoming" badge
+- [X ] Bob does NOT appear (his enrollment e006 is cancelled)
+- [X ] Enrolled shows "1 / 4"
+
+**Authorization — wrong instructor**
+- [X ] As dave@ltsc.test, navigate to `/instructor/sessions/<d004-id>` (Sarah's session) → 404 page
+- [X ] As alice@ltsc.test (student, not instructor), navigate to `/instructor/sessions/<d001-id>` → middleware redirects to student view
+
+**Empty roster**
+- [X ] If a session has zero active enrollments → shows "No students enrolled."
+
+**Edge cases**
+- [ X] Cancelled enrollment student (Bob in c001) excluded from roster — only active enrollments shown
+- [ X] Sarah appears as a student in her own roster (she's enrolled in c002 via e004) — correct behavior
+- [ X] Attendance with `makeup_session_id` set → shows "Makeup scheduled" instead of "Needs makeup" (test after admin schedules a makeup for d003)

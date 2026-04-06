@@ -3,6 +3,25 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 15 — 2026-04-05 (0.5 hrs)
+**Duration:** 0.5 hours
+**Task:** Phase 4.2 — Session roster view for instructors
+**Completed:**
+- Created `/instructor/sessions/[id]/page.tsx` — read-only roster page linked from dashboard "Roster →"
+- Shows session header (course title, date/time/location, cancelled badge), enrolled/capacity stat, session status
+- Roster table: student name (last, first), email, attendance badge using shared `attendanceStatusConfig`
+- Missed sessions show "Needs makeup" or "Makeup scheduled" indicators
+- Authorization: verifies logged-in instructor owns the course, returns 404 otherwise
+- Bug fix: `.order('created_at')` → `.order('enrolled_at')` (enrollments table uses `enrolled_at`, not `created_at` — caused empty roster)
+- QA test cases added to `docs/QA.md` — all passing
+- Updated `docs/PROJECT_PLAN.md` with velocity (0.20 hrs/pt, 2/4 tasks, 5/10 pts)
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** Phase 4.3 — Identify makeup students in roster (from other courses). Then 4.4 — RLS policies for instructors.
+**Context:** No new seed data needed — existing seed covers all roster scenarios. The Performance.measure negative timestamp error in Next.js dev tools is a known dev-mode bug, harmless. Dashboard has a local `fmtDate` that should be unified with shared `fmtDateLong` — deferred to Phase 5 polish.
+
+---
+
 ## Session 14 — 2026-04-05 (0.5 hrs)
 **Duration:** 0.5 hours
 **Task:** Phase 3.10 — Student course view session status + attendance indicators
