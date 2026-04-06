@@ -13,6 +13,21 @@ function fmtDate(d: string) {
   })
 }
 
+type SessionRow = {
+  id: string
+  date: string
+  start_time: string
+  end_time: string
+  location: string | null
+  status: string
+  courses: {
+    id: string
+    title: string | null
+    capacity: number
+    course_types: { name: string } | null
+    enrollments: { student_id: string; status: string }[]
+  }
+}
 
 export default async function InstructorDashboard() {
   const supabase = await createClient()
@@ -23,42 +38,16 @@ export default async function InstructorDashboard() {
   const firstName = user.user_metadata?.first_name as string | undefined
 
   // Upcoming sessions for courses this instructor is assigned to
-  const { data: sessions } = await supabase
-    .from('sessions')
-    .select(`
-      id, date, start_time, end_time, location, status,
-      courses (
-        id, title, capacity,
-        course_types ( name ),
-        enrollments ( id, status )
-      )
-    `)
-    .eq('status', 'scheduled')
-    .gte('date', today)
-    .order('date')
-    .order('start_time')
-
-  // Filter to sessions on courses where this instructor is the course instructor
-  // (session-level instructor override is Phase 4 / 5.2)
-  type RawEnrollment = { id: string; status: string }
-  type RawCourse = {
-    id: string
-    title: string | null
-    capacity: number
-    course_types: { name: string } | null
-    enrollments: RawEnrollment[]
-    instructor_id?: string
-  }
-
-  // Re-fetch with instructor_id on the course so we can filter
+  // Note: session-level instructor override (DEC-007) is Phase 5.2;
+  // for now we scope by courses.instructor_id only.
   const { data: mySessions } = await supabase
     .from('sessions')
     .select(`
       id, date, start_time, end_time, location, status,
       courses!inner (
-        id, title, capacity, instructor_id,
+        id, title, capacity,
         course_types ( name ),
-        enrollments ( id, status )
+        enrollments ( student_id, status )
       )
     `)
     .eq('status', 'scheduled')
@@ -67,27 +56,19 @@ export default async function InstructorDashboard() {
     .order('date')
     .order('start_time')
 
-  type SessionRow = {
-    id: string
-    date: string
-    start_time: string
-    end_time: string
-    location: string | null
-    status: string
-    courses: RawCourse
-  }
-
   const rows = (mySessions ?? []) as unknown as SessionRow[]
 
   const upcomingCount = rows.length
-  const totalStudents = rows.reduce((sum, s) => {
-    const active = s.courses.enrollments.filter((e) => e.status !== 'cancelled').length
-    return sum + active
-  }, 0)
 
-  // Unique active courses
+  // Count unique active students across all upcoming sessions
+  const studentIds = new Set<string>()
+  for (const s of rows) {
+    for (const e of s.courses.enrollments) {
+      if (e.status !== 'cancelled') studentIds.add(e.student_id)
+    }
+  }
+
   const courseIds = new Set(rows.map((s) => s.courses.id))
-  const activeCourseCount = courseIds.size
 
   return (
     <div className="p-8 space-y-8 max-w-3xl">
@@ -100,30 +81,9 @@ export default async function InstructorDashboard() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Courses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{activeCourseCount}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Upcoming Sessions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{upcomingCount}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Students</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{totalStudents}</p>
-          </CardContent>
-        </Card>
+        <StatCard label="Active Courses" value={courseIds.size} />
+        <StatCard label="Upcoming Sessions" value={upcomingCount} />
+        <StatCard label="Total Students" value={studentIds.size} />
       </div>
 
       {/* Upcoming sessions */}
@@ -152,7 +112,7 @@ export default async function InstructorDashboard() {
                       {activeEnrollments} / {course.capacity}
                     </Badge>
                     <Link
-                      href={`/admin/courses/${course.id}`}
+                      href={`/instructor/sessions/${s.id}`}
                       className="text-xs text-muted-foreground hover:text-foreground"
                     >
                       Roster →
@@ -165,5 +125,18 @@ export default async function InstructorDashboard() {
         </div>
       )}
     </div>
+  )
+}
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-3xl font-semibold">{value}</p>
+      </CardContent>
+    </Card>
   )
 }

@@ -335,3 +335,6 @@ Format: append newest entry at the top.
 - Supabase project has not been created yet — do that alongside 0.3
 - Schema SQL is in `docs/sailbook-schema.sql` — ready to run once Supabase project exists
 - Read `docs/PROJECT_PLAN.md` Phase 0 checklist before starting
+
+## Session 15 — 2026-04-05 — Phase 4.1 Instructor Dashboard
+**Start:** 23:03
