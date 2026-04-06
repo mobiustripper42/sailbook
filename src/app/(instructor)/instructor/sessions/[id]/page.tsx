@@ -23,6 +23,7 @@ type StudentRow = {
   email: string
   attendance_status: AttendanceStatus | null
   makeup_session_id: string | null
+  makeup_from_date: string | null
 }
 
 export default async function InstructorSessionRosterPage({
@@ -82,6 +83,19 @@ export default async function InstructorSessionRosterPage({
     attendanceRecords?.map((a) => [a.enrollment_id, a]) ?? []
   )
 
+  // Fetch students making up a missed session here
+  const { data: makeupRecords } = await supabase
+    .from('session_attendance')
+    .select('enrollment_id, sessions!session_attendance_session_id_fkey ( date )')
+    .eq('makeup_session_id', id)
+
+  const makeupMap = new Map(
+    makeupRecords?.map((r) => {
+      const missed = r.sessions as unknown as { date: string } | null
+      return [r.enrollment_id, missed?.date ?? null]
+    }) ?? []
+  )
+
   const students: StudentRow[] = (enrollments ?? []).map((e) => {
     const profile = e.profiles as unknown as {
       first_name: string
@@ -97,6 +111,7 @@ export default async function InstructorSessionRosterPage({
       email: profile.email,
       attendance_status: (attendance?.status as AttendanceStatus) ?? null,
       makeup_session_id: attendance?.makeup_session_id ?? null,
+      makeup_from_date: makeupMap.get(e.id) ?? null,
     }
   })
 
@@ -156,7 +171,14 @@ export default async function InstructorSessionRosterPage({
                 {students.map((s) => (
                   <TableRow key={s.enrollment_id}>
                     <TableCell className="font-medium">
-                      {s.last_name}, {s.first_name}
+                      <div className="flex items-center gap-2">
+                        {s.last_name}, {s.first_name}
+                        {s.makeup_from_date && (
+                          <Badge variant="secondary" className="text-xs font-normal">
+                            Makeup from {fmtDateLong(s.makeup_from_date)}
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {s.email}
