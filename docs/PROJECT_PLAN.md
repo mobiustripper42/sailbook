@@ -96,7 +96,7 @@ Instructors see their assignments.
 ## Phase 5: Polish & Ship (Days 22–28)
 Make it production-ready.
 
-- [ ] 5.1 — Admin dashboard — real stats (total courses, enrollments, upcoming sessions) + "courses without instructors" warning tile `[effort: 4]`
+- [x] 5.1 — Admin dashboard — real stats (total courses, enrollments, upcoming sessions) + "courses without instructors" warning tile `[effort: 4]` <!-- completed 2026-04-06 -->
 - [ ] 5.2 — Instructor swap on individual sessions (AS-9) `[effort: 2]`
 - [ ] 5.3 — Error handling — form validation, API errors, empty states `[effort: 3]`
 - [ ] 5.4 — Loading states and optimistic UI `[effort: 2]`
@@ -111,6 +111,9 @@ Make it production-ready.
 - [ ] 5.13 — Evaluate Docker for local dev `[effort: 1]`
 - [ ] 5.14 — Admin UI for role management — add/remove admin, instructor, student flags from profile edit pages (may defer to V2) `[effort: 3]`
 - [ ] 5.15 — OAuth login — Google (and others if Supabase makes it easy); email/password remains the fallback `[effort: 2]`
+- [ ] 5.16 — Development database — separate Supabase project for dev, seed data pipeline, so prod isn't polluted with test data `[effort: 3]`
+- [ ] 5.17 — Bug: student enrollment RLS — missing INSERT/UPDATE policy on session_attendance means attendance records silently fail to create on enrollment `[effort: 2]`
+- [ ] 5.18 — Dashboard: restore pending confirmation total count + "View all (N)" link when > 10 enrollments `[effort: 1]`
 
 **Demo:** Andy walks through full flow — creates a course, student registers, instructor views roster, session gets cancelled, makeup scheduled. Everything works.
 
@@ -123,9 +126,9 @@ Make it production-ready.
 | 1 — Admin Catalog | — | 10–14 | ~8 | — | Pre-tracking |
 | 2 — Student Browse | — | 8–10 | ~14 | — | Pre-tracking |
 | 3 — Attendance | 21 | 12–16 | ~5.5 | ~0.26 | First tracked phase (3.5/3.6 deferred V2) |
-| 4 — Instructor | 10 | 4–6 | 1.25 | 0.18 | 3/4 tasks, 7/10 pts |
-| 5 — Polish | 33 | 10–14 | — | — | |
-| **Total** | **64** | **48–66** | **~32.25** | — | Phases 0–4 actual: ~32.25 hrs. Remaining: ~16–34 hrs. |
+| 4 — Instructor | 10 | 4–6 | 1.75 | 0.175 | 4/4 complete |
+| 5 — Polish | 40 | 7–9 | — | — | Forecast: 0.22 hrs/pt x 40 = ~9 hrs |
+| **Total** | **71** | **48–66** | **~33.25** | — | Phases 0–4 actual: ~33.25 hrs. Remaining: ~7–9 hrs. |
 
 ### Cuttable tasks (if time is tight)
 - **5.12** — Student calendar view. Explicitly labeled "stretch goal" in the task. Cut first.
