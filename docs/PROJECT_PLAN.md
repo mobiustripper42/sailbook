@@ -1,7 +1,7 @@
 # SailBook — Project Plan
 
 **Target:** May 15, 2026
-**Today:** April 5, 2026
+**Today:** April 6, 2026
 **Available:** 40 days (6 weeks)
 
 ---
@@ -86,7 +86,7 @@ Instructors see their assignments.
 
 - [x] 4.1 — Instructor dashboard — stat cards (upcoming sessions, total students), upcoming sessions list with course name/date/time/roster count `[effort: 3]` <!-- completed 2026-04-05 -->
 - [x] 4.2 — Session roster view — enrolled students, attendance status `[effort: 2]` <!-- completed 2026-04-05 -->
-- [ ] 4.3 — Identify makeup students in roster (from other courses) `[effort: 2]`
+- [x] 4.3 — Identify makeup students in roster (from other courses) `[effort: 2]` <!-- completed 2026-04-06 -->
 - [ ] 4.4 — RLS policies — instructors see only their own courses/sessions `[effort: 3]`
 
 **Demo:** Instructor logs in, sees this week's sessions, views roster with attendance.
@@ -123,9 +123,9 @@ Make it production-ready.
 | 1 — Admin Catalog | — | 10–14 | ~8 | — | Pre-tracking |
 | 2 — Student Browse | — | 8–10 | ~14 | — | Pre-tracking |
 | 3 — Attendance | 21 | 12–16 | ~5.5 | ~0.26 | First tracked phase (3.5/3.6 deferred V2) |
-| 4 — Instructor | 10 | 4–6 | 1.0 | 0.20 | 2/4 tasks, 5/10 pts |
+| 4 — Instructor | 10 | 4–6 | 1.25 | 0.18 | 3/4 tasks, 7/10 pts |
 | 5 — Polish | 33 | 10–14 | — | — | |
-| **Total** | **64** | **48–66** | **~32** | — | Phases 0–4 actual: ~32 hrs. Remaining: ~16–34 hrs. |
+| **Total** | **64** | **48–66** | **~32.25** | — | Phases 0–4 actual: ~32.25 hrs. Remaining: ~16–34 hrs. |
 
 ### Cuttable tasks (if time is tight)
 - **5.12** — Student calendar view. Explicitly labeled "stretch goal" in the task. Cut first.

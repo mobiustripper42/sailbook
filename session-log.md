@@ -3,6 +3,23 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 16 — 2026-04-06 (0.25 hrs)
+**Duration:** 0.25 hours
+**Task:** Phase 4.3 — Identify makeup students in instructor roster
+**Completed:**
+- Added query for `session_attendance WHERE makeup_session_id = this session` to find students attending as a makeup
+- Joins missed session to get its date, displays "Makeup from [date]" secondary badge next to student name
+- Updated `dev-seed.sql`: Carol's d003 attendance now has `makeup_session_id = d004` for testable scenario
+- QA test cases added to `docs/QA.md` for 4.3; updated Carol's 3.8 test (now "Makeup scheduled" instead of "Needs makeup")
+- Code review flagged: cross-course keying (enrollment_id vs student_id) won't work for V2 cross-course makeups — acceptable for V1 same-course only
+- File is 216 lines (just over 200-line convention) — defer split to Phase 5 if it grows
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** Phase 4.4 — RLS policies for instructors (effort: 3). Last task in Phase 4.
+**Context:** Re-seed required to pick up Carol's makeup linkage. The makeup query uses `enrollment_id` keying which only works for same-course makeups — needs refactor to `student_id` when cross-course makeups land in V2.
+
+---
+
 ## Session 15 — 2026-04-05 (0.5 hrs)
 **Duration:** 0.5 hours
 **Task:** Phase 4.2 — Session roster view for instructors
