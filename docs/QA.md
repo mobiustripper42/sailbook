@@ -430,18 +430,219 @@ RESET request.jwt.claims;
 **Prerequisites:** Seed data loaded (Carol's d003 attendance has `makeup_session_id = d004`). Login: sarah@ltsc.test / qwert12345.
 
 **Makeup badge on roster (Sarah → d004)**
-- [ ] Log in as sarah@ltsc.test → dashboard → click "Roster →" on May 13 session (d004)
-- [ ] Carol's row shows "Makeup from Wednesday, May 6, 2026" badge (secondary/gray variant) next to her name
-- [ ] Other students (Alice, Bob, Sarah) do NOT show a makeup badge
-- [ ] Attendance column still works normally — all 4 students show "Upcoming" badge
+- [X ] Log in as sarah@ltsc.test → dashboard → click "Roster →" on May 13 session (d004)
+- [X ] Carol's row shows "Makeup from Wednesday, May 6, 2026" badge (secondary/gray variant) next to her name
+- [X ] Other students (Alice, Bob, Sarah) do NOT show a makeup badge
+- [X ] Attendance column still works normally — all 4 students show "Upcoming" badge
 
 **No makeup badges on other sessions**
-- [ ] Navigate to d005 (May 20) roster → no makeup badges on any student
-- [ ] Navigate to d006 (May 27) roster → no makeup badges on any student
+- [X ] Navigate to d005 (May 20) roster → no makeup badges on any student
+- [X ] Navigate to d006 (May 27) roster → no makeup badges on any student
 
 **No false positives on cancelled session (d003)**
-- [ ] Navigate to d003 (May 6, cancelled) roster → no "Makeup from..." badges on any student (d003 is not anyone's makeup destination)
+- [X ] Navigate to d003 (May 6, cancelled) roster → no "Makeup from..." badges on any student (d003 is not anyone's makeup destination)
 
 **Edge cases**
-- [ ] Session with no makeup students (d001/d002 in c001) → no badges, roster unchanged from 4.2
-- [ ] Verify badge does not appear for students whose own attendance row has `makeup_session_id` (that means THEY missed and have a makeup elsewhere — different from attending HERE as a makeup)
+- [X ] Session with no makeup students (d001/d002 in c001) → no badges, roster unchanged from 4.2
+- [X ] Verify badge does not appear for students whose own attendance row has `makeup_session_id` (that means THEY missed and have a makeup elsewhere — different from attending HERE as a makeup)
+
+### 4.4 — RLS policies for instructors
+
+**Prerequisites:** Run `docs/migrations/009_rls_instructor_policies.sql` in Supabase SQL Editor. Seed data loaded.
+
+**What changed:**
+- `get_instructor_course_ids()` now includes courses where instructor has session-level assignment (not just course-level)
+- Sessions policy now uses `get_instructor_session_ids()` helper (handles both assignment levels)
+- Courses policy now uses `get_instructor_course_ids()` helper (handles both assignment levels)
+- New policy: instructors can read student profiles for their courses (roster fix)
+
+**Instructor can read their courses (dave@ltsc.test)**
+- [X ] Log in as dave@ltsc.test → `/instructor/dashboard` loads normally
+- [X ] Dashboard shows Dave's courses/sessions (same as 4.1 — no regression)
+
+**Instructor can read roster with student profiles (sarah@ltsc.test)**
+- [X ] Log in as sarah@ltsc.test → dashboard → click "Roster →" on May 13 (d004)
+- [X ] Student names and emails load correctly (not null/blank) — this verifies the new profiles policy
+- [X ] All 4 students visible: Alice, Bob, Sarah, Carol
+
+**Instructor isolation — Dave cannot see Sarah's data**
+- [X ] As dave@ltsc.test, navigate to `/instructor/sessions/<d004-id>` → 404 (Dave doesn't own c002)
+
+**Instructor isolation — Sarah cannot see Dave's data**
+- [X ] As sarah@ltsc.test, navigate to `/instructor/sessions/<d001-id>` → 404 (Sarah doesn't own c001)
+
+**Student cannot see instructor-only data**
+- [X] As alice@ltsc.test, navigate to `/instructor/dashboard` → middleware redirects away
+
+**SQL verification — run in Supabase SQL Editor:**
+
+```sql
+-- ============================================================
+-- TEST 1: Verify updated helper functions
+-- ============================================================
+
+-- get_instructor_course_ids for Dave (course-level: c001, c004, c005, c006)
+SELECT get_instructor_course_ids('a0000000-0000-0000-0000-000000000002');
+-- Expected: 4 rows (c001, c004, c005, c006)
+
+-- get_instructor_course_ids for Sarah (course-level: c002)
+SELECT get_instructor_course_ids('a0000000-0000-0000-0000-000000000003');
+-- Expected: 1 row (c002)
+
+-- get_instructor_session_ids for Dave
+SELECT get_instructor_session_ids('a0000000-0000-0000-0000-000000000002');
+-- Expected: 6 rows (d001-d002 from c001, d007 from c004, d008 from c005, d009-d010 from c006)
+
+-- get_instructor_session_ids for Sarah
+SELECT get_instructor_session_ids('a0000000-0000-0000-0000-000000000003');
+-- Expected: 4 rows (d003-d006 from c002)
+
+-- get_instructor_student_ids for Dave
+SELECT get_instructor_student_ids('a0000000-0000-0000-0000-000000000002');
+-- Expected: 3 rows (Alice from c001, Bob from c001, Eve from c006)
+
+-- get_instructor_student_ids for Sarah
+SELECT get_instructor_student_ids('a0000000-0000-0000-0000-000000000003');
+-- Expected: 4 rows (Alice, Bob, Sarah, Carol from c002)
+
+-- ============================================================
+-- TEST 2: Impersonate Dave — courses isolation
+-- ============================================================
+SET request.jwt.claims = '{"sub":"a0000000-0000-0000-0000-000000000002","role":"authenticated","email":"dave@ltsc.test","user_metadata":{"is_admin":false,"is_instructor":true,"is_student":false}}';
+SET role = 'authenticated';
+
+-- Dave should see his 4 courses (c001, c004, c005, c006)
+SELECT id, title, status FROM courses ORDER BY title;
+-- Expected: 4 rows
+
+-- Dave should NOT see c002 (Sarah's) or c003 (no instructor)
+SELECT id FROM courses WHERE id = 'c0000000-0000-0000-0000-000000000002';
+-- Expected: 0 rows
+
+-- Dave's sessions (7 total)
+SELECT s.id, s.date, c.title
+FROM sessions s JOIN courses c ON s.course_id = c.id
+ORDER BY s.date;
+-- Expected: 6 rows (d001-d002, d007, d008, d009-d010)
+
+-- Dave should NOT see Sarah's sessions
+SELECT id FROM sessions WHERE id = 'd0000000-0000-0000-0000-000000000004';
+-- Expected: 0 rows
+
+-- Dave can read student profiles for his courses
+SELECT id, first_name, last_name FROM profiles
+WHERE id IN ('a0000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000008');
+-- Expected: 2 rows (Alice, Eve) — Dave's students
+
+-- Dave cannot read Sarah's profile (she's not his student)
+-- Note: Sarah IS enrolled in c002, but c002 is Sarah's own course, not Dave's
+SELECT id FROM profiles WHERE id = 'a0000000-0000-0000-0000-000000000003';
+-- Expected: 0 rows
+
+-- Dave can read enrollments for his courses
+SELECT id, course_id, student_id FROM enrollments ORDER BY course_id;
+-- Expected: 3 rows (e001 Alice→c001, e006 Bob→c001 cancelled, e007 Eve→c006)
+
+RESET role;
+RESET request.jwt.claims;
+
+-- ============================================================
+-- TEST 3: Impersonate Sarah — courses isolation
+-- ============================================================
+SET request.jwt.claims = '{"sub":"a0000000-0000-0000-0000-000000000003","role":"authenticated","email":"sarah@ltsc.test","user_metadata":{"is_admin":false,"is_instructor":true,"is_student":true}}';
+SET role = 'authenticated';
+
+-- Sarah should see c002 (her course) + active courses as student
+SELECT id, title, status FROM courses ORDER BY title;
+-- Expected: c002 via instructor policy + c001/c002/c003 via student active policy
+
+-- Sarah should see sessions for c002 (via instructor) + c001/c002/c003 sessions (via student)
+SELECT s.id, s.date FROM sessions s
+WHERE s.course_id = 'c0000000-0000-0000-0000-000000000002'
+ORDER BY s.date;
+-- Expected: 4 rows (d003-d006) via instructor policy
+
+-- Sarah should NOT see Dave's draft/cancelled/completed course sessions via instructor policy
+-- (she may see some via student enrolled policy if enrolled)
+SELECT id FROM sessions WHERE id = 'd0000000-0000-0000-0000-000000000007';
+-- Expected: 0 rows (d007 is draft c004, Sarah not enrolled)
+
+-- Sarah can read her students' profiles
+SELECT id, first_name, last_name FROM profiles
+WHERE id = 'a0000000-0000-0000-0000-000000000004';
+-- Expected: 1 row (Alice — enrolled in c002)
+
+RESET role;
+RESET request.jwt.claims;
+
+-- ============================================================
+-- TEST 4: Session-level instructor override (DEC-007)
+-- ============================================================
+-- Temporarily assign Sarah as session-level instructor on d001 (Dave's c001 course)
+UPDATE sessions SET instructor_id = 'a0000000-0000-0000-0000-000000000003'
+WHERE id = 'd0000000-0000-0000-0000-000000000001';
+
+-- Verify helper picks up session-level assignment
+SELECT get_instructor_course_ids('a0000000-0000-0000-0000-000000000003');
+-- Expected: 2 rows (c002 via course-level + c001 via session-level)
+
+SELECT get_instructor_session_ids('a0000000-0000-0000-0000-000000000003');
+-- Expected: 5 rows (d003-d006 from c002 + d001 from c001 session override)
+
+-- Impersonate Sarah — she should now see c001 too
+SET request.jwt.claims = '{"sub":"a0000000-0000-0000-0000-000000000003","role":"authenticated","email":"sarah@ltsc.test","user_metadata":{"is_admin":false,"is_instructor":true,"is_student":true}}';
+SET role = 'authenticated';
+
+SELECT id, title FROM courses WHERE id = 'c0000000-0000-0000-0000-000000000001';
+-- Expected: 1 row (c001 visible via session-level assignment)
+
+SELECT id FROM sessions WHERE id = 'd0000000-0000-0000-0000-000000000001';
+-- Expected: 1 row (d001 visible via session-level assignment)
+
+-- Sarah can also read c001 enrollments now
+SELECT id, student_id FROM enrollments WHERE course_id = 'c0000000-0000-0000-0000-000000000001';
+-- Expected: 2 rows (e001 Alice, e006 Bob cancelled)
+
+-- Sarah can read Alice's profile (c001 student via session-level)
+SELECT id, first_name FROM profiles WHERE id = 'a0000000-0000-0000-0000-000000000004';
+-- Expected: 1 row (Alice)
+
+RESET role;
+RESET request.jwt.claims;
+
+-- Clean up: remove session-level override
+UPDATE sessions SET instructor_id = NULL
+WHERE id = 'd0000000-0000-0000-0000-000000000001';
+
+-- ============================================================
+-- TEST 5: Instructor cannot write (no INSERT/UPDATE/DELETE policies)
+-- ============================================================
+SET request.jwt.claims = '{"sub":"a0000000-0000-0000-0000-000000000002","role":"authenticated","email":"dave@ltsc.test","user_metadata":{"is_admin":false,"is_instructor":true,"is_student":false}}';
+SET role = 'authenticated';
+
+-- Instructor cannot update course
+UPDATE courses SET title = 'Hacked' WHERE id = 'c0000000-0000-0000-0000-000000000001';
+-- Expected: 0 rows updated (no UPDATE policy for instructors)
+
+-- Instructor cannot delete session
+DELETE FROM sessions WHERE id = 'd0000000-0000-0000-0000-000000000001';
+-- Expected: 0 rows deleted (no DELETE policy for instructors)
+
+-- Instructor cannot modify enrollment
+UPDATE enrollments SET status = 'cancelled' WHERE id = 'e0000000-0000-0000-0000-000000000001';
+-- Expected: 0 rows updated (no UPDATE policy for instructors)
+
+-- Instructor cannot modify attendance
+UPDATE session_attendance SET status = 'attended'
+WHERE session_id = 'd0000000-0000-0000-0000-000000000001'
+  AND enrollment_id = 'e0000000-0000-0000-0000-000000000001';
+-- Expected: 0 rows updated (no UPDATE policy for instructors)
+
+RESET role;
+RESET request.jwt.claims;
+```
+
+**Edge cases**
+- [ ] Dan (student, no enrollments) sees zero courses when accessing instructor routes → redirected by middleware
+- [ ] Andy (admin) can still do everything — admin policies unchanged
+- [ ] Sarah (instructor+student) sees c002 via instructor policy AND student-enrolled policy without duplication (Postgres ORs multiple passing policies)

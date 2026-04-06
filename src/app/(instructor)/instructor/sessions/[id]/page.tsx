@@ -60,7 +60,7 @@ export default async function InstructorSessionRosterPage({
   }
 
   // Verify this instructor owns the course
-  if (course.instructor_id !== user.id) notFound()
+  if (course.instructor_id !== user.id) redirect('/instructor/dashboard')
 
   // Fetch enrollments with student profiles
   const { data: enrollments } = await supabase

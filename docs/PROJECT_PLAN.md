@@ -87,7 +87,7 @@ Instructors see their assignments.
 - [x] 4.1 — Instructor dashboard — stat cards (upcoming sessions, total students), upcoming sessions list with course name/date/time/roster count `[effort: 3]` <!-- completed 2026-04-05 -->
 - [x] 4.2 — Session roster view — enrolled students, attendance status `[effort: 2]` <!-- completed 2026-04-05 -->
 - [x] 4.3 — Identify makeup students in roster (from other courses) `[effort: 2]` <!-- completed 2026-04-06 -->
-- [ ] 4.4 — RLS policies — instructors see only their own courses/sessions `[effort: 3]`
+- [ ] 4.4 — RLS policies — instructors see only their own courses/sessions `[effort: 3]` <!-- in progress 2026-04-06 -->
 
 **Demo:** Instructor logs in, sees this week's sessions, views roster with attendance.
 
