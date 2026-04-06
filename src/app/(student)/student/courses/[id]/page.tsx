@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
@@ -12,17 +11,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { fmtTime } from '@/lib/utils'
+import { fmtDateLong, fmtTime } from '@/lib/utils'
+import { attendanceStatusConfig } from '@/lib/attendance'
+import type { AttendanceStatus } from '@/lib/attendance'
 import EnrollButton from '@/components/student/enroll-button'
-
-
-function fmtDate(d: string) {
-  return new Date(d + 'T12:00:00').toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  })
-}
 
 export default async function StudentCourseDetailPage({
   params,
@@ -70,6 +62,20 @@ export default async function StudentCourseDetailPage({
         .single()
     : { data: null }
 
+  const isEnrolled = myEnrollment && myEnrollment.status !== 'cancelled'
+
+  // Fetch attendance records if enrolled
+  const { data: myAttendance } = isEnrolled
+    ? await supabase
+        .from('session_attendance')
+        .select('session_id, status, makeup_session_id')
+        .eq('enrollment_id', myEnrollment.id)
+    : { data: null }
+
+  const attendanceMap = new Map(
+    myAttendance?.map((a) => [a.session_id, a]) ?? []
+  )
+
   const type = course.course_types as unknown as {
     name: string
     short_code: string
@@ -80,8 +86,8 @@ export default async function StudentCourseDetailPage({
 
   const spotsRemaining = course.capacity - (activeEnrollments ?? 0)
   const isFull = spotsRemaining <= 0
-  const isEnrolled = myEnrollment && myEnrollment.status !== 'cancelled'
   const description = course.description ?? type?.description
+  const cancelledCount = sessions?.filter((s) => s.status === 'cancelled').length ?? 0
 
   return (
     <div className="p-8 space-y-6 max-w-3xl">
@@ -126,7 +132,12 @@ export default async function StudentCourseDetailPage({
         </div>
         <div>
           <p className="text-muted-foreground">Sessions</p>
-          <p className="font-medium">{sessions?.length ?? 0}</p>
+          <p className="font-medium">
+            {sessions?.length ?? 0}
+            {cancelledCount > 0 && (
+              <span className="text-muted-foreground font-normal"> ({cancelledCount} cancelled)</span>
+            )}
+          </p>
         </div>
         <div>
           <p className="text-muted-foreground">Spots</p>
@@ -154,18 +165,56 @@ export default async function StudentCourseDetailPage({
                   <TableHead>Date</TableHead>
                   <TableHead>Time</TableHead>
                   <TableHead>Location</TableHead>
+                  <TableHead>Status</TableHead>
+                  {isEnrolled && <TableHead>Attendance</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sessions.map((s) => (
-                  <TableRow key={s.id}>
-                    <TableCell>{fmtDate(s.date)}</TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {fmtTime(s.start_time)} – {fmtTime(s.end_time)}
-                    </TableCell>
-                    <TableCell>{s.location ?? '—'}</TableCell>
-                  </TableRow>
-                ))}
+                {sessions.map((s) => {
+                  const isCancelled = s.status === 'cancelled'
+                  const attendance = attendanceMap.get(s.id)
+                  const dimClass = isCancelled ? 'text-muted-foreground' : ''
+
+                  return (
+                    <TableRow key={s.id} className={isCancelled ? 'opacity-60' : ''}>
+                      <TableCell className={isCancelled ? 'line-through text-muted-foreground' : ''}>
+                        {fmtDateLong(s.date)}
+                      </TableCell>
+                      <TableCell className={`whitespace-nowrap ${dimClass}`}>
+                        {fmtTime(s.start_time)} – {fmtTime(s.end_time)}
+                      </TableCell>
+                      <TableCell className={dimClass}>{s.location ?? '—'}</TableCell>
+                      <TableCell>
+                        {isCancelled && (
+                          <Badge variant="outline">Cancelled</Badge>
+                        )}
+                      </TableCell>
+                      {isEnrolled && (
+                        <TableCell>
+                          {attendance ? (
+                            <div className="flex items-center gap-2">
+                              <Badge variant={attendanceStatusConfig[attendance.status as AttendanceStatus].variant}>
+                                {attendanceStatusConfig[attendance.status as AttendanceStatus].label}
+                              </Badge>
+                              {attendance.status === 'missed' && !attendance.makeup_session_id && (
+                                <span className="text-xs text-destructive font-medium">
+                                  Needs makeup
+                                </span>
+                              )}
+                              {attendance.status === 'missed' && attendance.makeup_session_id && (
+                                <span className="text-xs text-muted-foreground">
+                                  Makeup scheduled
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            !isCancelled && <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           )}

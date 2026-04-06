@@ -12,6 +12,14 @@ export function fmtDate(dateStr: string) {
   })
 }
 
+export function fmtDateLong(dateStr: string) {
+  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
 export function fmtTime(t: string) {
   const [h, m] = t.split(':').map(Number)
   const ampm = h < 12 ? 'am' : 'pm'

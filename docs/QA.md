@@ -247,3 +247,78 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 **Edge cases**
 - [x] Dan (zero enrollments): `get_student_enrollment_ids(dan)` → 0 records, no errors
 - [x] Bob (cancelled enrollment e006 for c001): `get_student_enrollment_ids(bob)` → 6 records (e003: 4 + e006: 2) — cancelled enrollment attendance still readable
+
+### 3.10 — Student course view: session status + attendance indicators
+
+**Prerequisites:** Seed data loaded.
+
+**Cancelled session styling (Alice → c002)**
+- Login: `alice@ltsc.test`
+- Navigate: Student Courses → "ASA 101 — Evening Series"
+- [X ] Schedule table has **Status** and **Attendance** columns
+- [X ] May 6 row is dimmed (opacity), date has strikethrough, shows **"Cancelled"** outline badge
+- [X ] May 13, 20, 27 rows are normal styling, Status column is empty
+- [X ] Sessions count in stats shows **"4 (1 cancelled)"**
+
+**Attendance badges — mixed statuses (Alice → c002)**
+Same page as above:
+- [X ] May 6 (cancelled session): **"Attended"** badge (default/dark variant) — Alice attended before cancel
+- [X ] May 13, 20, 27: **"Upcoming"** outline badges
+- [X ] No "Needs makeup" text on any row (Alice isn't missed)
+
+**Needs makeup indicator (Bob → c002)**
+- Login: `bob@ltsc.test`
+- Navigate: Student Courses → "ASA 101 — Evening Series"
+- [X ] May 6: **"Missed"** destructive badge + **"Needs makeup"** red text
+- [X ] May 13, 20, 27: **"Upcoming"** outline badges
+
+**No attendance column when not enrolled (Dan → c001)**
+- Login: `dan@ltsc.test`
+- Navigate: Student Courses → "ASA 101 — Weekend Intensive"
+- [X ] Schedule table shows Date, Time, Location, Status — **no Attendance column**
+- [X ] Enroll button visible at bottom
+
+**All-expected, no cancelled sessions (Alice → c001)**
+- Login: `alice@ltsc.test`
+- Navigate: Student Courses → "ASA 101 — Weekend Intensive"
+- [X ] Both sessions show **"Upcoming"** outline badges in Attendance column
+- [X ] Status column is empty for both rows (both scheduled)
+- [X ] Sessions count shows **"2"** with no cancelled note
+- [X ] "Enrolled" badge at bottom
+
+**Excused status preserved (Sarah → c002)**
+- Login: `sarah@ltsc.test`
+- Navigate: Student Courses → "ASA 101 — Evening Series"
+- [X] May 6: **"Excused"** secondary badge (no "Needs makeup" text)
+- [X ] May 13, 20, 27: **"Upcoming"** outline badges
+
+**Completed course 404 (Eve)**
+- Login: `eve@ltsc.test`
+- Note: c006 is `status: 'completed'` — page filters on `status: 'active'`, so navigating to it should **404**
+
+**RLS — student cannot write attendance**
+Run in Supabase SQL Editor (see SQL below):
+- [X ] UPDATE own attendance → 0 rows updated
+- [X ] INSERT fake attendance → denied by RLS
+
+```sql
+-- Impersonate Alice
+SET request.jwt.claims = '{"sub":"a0000000-0000-0000-0000-000000000004","role":"authenticated","email":"alice@ltsc.test"}';
+SET role = 'authenticated';
+
+-- Try to flip her own attendance from expected to attended (should be denied)
+UPDATE session_attendance
+SET status = 'attended'
+WHERE session_id = 'd0000000-0000-0000-0000-000000000004'
+  AND enrollment_id = 'e0000000-0000-0000-0000-000000000002';
+-- Expected: 0 rows updated (students have SELECT only)
+
+-- Try to insert a fake attendance record (should be denied)
+INSERT INTO session_attendance (session_id, enrollment_id, status)
+VALUES ('d0000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000002', 'attended');
+-- Expected: denied by RLS policy
+
+-- Reset
+RESET role;
+RESET request.jwt.claims;
+```

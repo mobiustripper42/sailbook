@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { fmtDate, fmtTime } from '@/lib/utils'
-
-type AttendanceStatus = 'expected' | 'attended' | 'missed' | 'excused'
+import { attendanceStatusConfig } from '@/lib/attendance'
+import type { AttendanceStatus } from '@/lib/attendance'
 
 type AttendanceRecord = {
   sessionId: string
@@ -21,13 +21,6 @@ type CourseAttendance = {
   instructorName: string | null
   records: AttendanceRecord[]
   missedCount: number
-}
-
-const statusConfig: Record<AttendanceStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  attended: { label: 'Attended', variant: 'default' },
-  missed: { label: 'Missed', variant: 'destructive' },
-  excused: { label: 'Excused', variant: 'secondary' },
-  expected: { label: 'Upcoming', variant: 'outline' },
 }
 
 export default function CourseAttendanceCard({ course }: { course: CourseAttendance }) {
@@ -51,7 +44,7 @@ export default function CourseAttendanceCard({ course }: { course: CourseAttenda
       <CardContent>
         <div className="divide-y">
           {course.records.map((r) => {
-            const config = statusConfig[r.status]
+            const config = attendanceStatusConfig[r.status]
             const needsMakeup = r.status === 'missed' && !r.makeupSessionId
 
             return (

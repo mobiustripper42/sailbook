@@ -2,8 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent } from '@/components/ui/card'
 import CourseAttendanceCard from '@/components/student/course-attendance-card'
-
-type AttendanceStatus = 'expected' | 'attended' | 'missed' | 'excused'
+import type { AttendanceStatus } from '@/lib/attendance'
 
 type CourseAttendance = {
   courseId: string
