@@ -17,7 +17,7 @@ Format: append newest entry at the top.
 - Debug artifacts (yellow `<pre>` block, `console.log` lines) stripped before commit
 - QA cases in `docs/QA.md` (5.20 section) confirmed passing
 - Build passes clean
-**Incident:** Multiple conflicting Next.js dev server processes caused the server to become unresponsive mid-session. Required full computer reboot to clear. Root cause: stale `.next` cache + zombie processes from prior sessions. Resolution: reboot, `npm run dev` clean start.
+**Incident:** Multiple conflicting Next.js dev server processes caused the server to become unresponsive mid-session. Required full computer reboot to clear. `pkill -f node` was attempted and did not resolve it. Root cause: zombie processes not killable without full restart.
 **In Progress:** Nothing
 **Blocked:** Nothing
 **Next Steps:**
@@ -25,7 +25,7 @@ Format: append newest entry at the top.
 - 5.4 (effort 2) — Loading states / optimistic UI (cuttable per plan if time is tight)
 **Context:**
 - `force-dynamic` on the courses browse page is intentional — without it, Next.js caches the pre-auth render and enrollment badges don't appear even for logged-in users
-- If dev server behaves strangely: kill all node processes (`pkill -f node`) before restarting, or `rm -rf .next` first
+- If dev server becomes unresponsive, a full computer reboot may be required — `pkill -f node` is not guaranteed to work
 
 ## Session 23 — 2026-04-07 13:30–14:56 (1.25 hrs)
 **Duration:** 1.25 hours (1.5 hrs elapsed, −0.25 away from desk)
