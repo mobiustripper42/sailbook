@@ -232,8 +232,14 @@ export default async function StudentCourseDetailPage({
       <div className="pt-2">
         {isEnrolled ? (
           <div className="flex items-center gap-3">
-            <Badge className="text-sm px-3 py-1">Enrolled</Badge>
-            <span className="text-sm text-muted-foreground capitalize">{myEnrollment.status}</span>
+            {myEnrollment.status === 'registered' ? (
+              <>
+                <Badge variant="secondary" className="text-sm px-3 py-1">Pending confirmation</Badge>
+                <span className="text-sm text-muted-foreground">Pending admin review.</span>
+              </>
+            ) : (
+              <Badge className="text-sm px-3 py-1">Enrolled</Badge>
+            )}
           </div>
         ) : (
           <EnrollButton

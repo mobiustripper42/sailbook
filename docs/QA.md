@@ -1055,3 +1055,101 @@ The following components display errors inline. Verify errors are dark red (matc
 **SQL verification — none required for this task**
 
 All changes are UI-layer (error classes, empty state text, form validation messages). No schema changes, no RLS changes, no new migrations.
+
+---
+
+### 5.18 — Admin dashboard: pending confirmation count + overflow notice
+
+**Prerequisites:** Seed data loaded. Login: andy@ltsc.test / qwert12345.
+
+**Seed state to know:**
+- 4 pending enrollments with `status = 'registered'`: e001 (Alice→c001), e003 (Bob→c002), e004 (Sarah→c002), e005 (Carol→c002)
+
+---
+
+**Card header shows total count**
+
+- [ ] Go to `/admin/dashboard`
+- [ ] "Pending Confirmation" card header reads **"Pending Confirmation (4)"**
+- [ ] All 4 registrations appear in the table (Alice, Bob, Sarah, Carol)
+
+**Confirmed enrollment does NOT appear**
+
+- [ ] Alice's enrollment in c002 (e002) has `status = 'confirmed'` — she does NOT appear in the pending table
+- [ ] Verify: only 4 rows, not 5
+
+**Zero pending state**
+
+- [ ] Confirm all 4 pending enrollments via admin (set status → confirmed)
+- [ ] Header reads **"Pending Confirmation"** (no count shown when 0)
+- [ ] Card body shows: "No enrollments pending confirmation."
+
+**Overflow notice (> 10 pending)**
+
+- [ ] SQL: insert 7+ additional `registered` enrollments (or confirm some to reset count, then add > 10 total)
+- [ ] Table still shows at most 10 rows
+- [ ] Below table: **"Showing 10 of N pending"** text appears (right-aligned, muted)
+- [ ] No link — the notice is informational only
+
+```sql
+-- Verify pending count matches card display
+SELECT COUNT(*) FROM enrollments WHERE status = 'registered';
+-- Expected with seed: 4
+
+-- To test overflow notice: insert 7 more registered enrollments
+-- (use any existing student/course combo not already enrolled)
+-- e.g.:
+INSERT INTO enrollments (course_id, student_id, status)
+SELECT
+  'c0000000-0000-0000-0000-000000000001',
+  'a0000000-0000-0000-0000-000000000007',
+  'registered'
+-- Repeat as needed to hit 11+ total registered enrollments
+```
+
+---
+
+### 5.19 — Student enrollment status badge: "Pending confirmation"
+
+**Prerequisites:** Seed data loaded. Alice (alice@ltsc.test) has:
+- e001 → c001 (ASA 101 Weekend Intensive): `registered`
+- e002 → c002 (ASA 101 Evening Series): `confirmed`
+
+---
+
+**My Courses — card view (alice@ltsc.test)**
+
+- [ ] Log in as alice@ltsc.test → go to `/student/my-courses`
+- [ ] View is set to "Cards" (default)
+- [ ] Weekend Intensive card: enrollment badge reads **"Pending confirmation"** (secondary/gray variant)
+- [ ] Evening Series card: enrollment badge reads **"Enrolled"** (default/dark variant)
+- [ ] Neither badge shows raw DB values ("registered" or "confirmed")
+
+**My Courses — list view**
+
+- [ ] Switch to "List" view
+- [ ] Weekend Intensive row: badge reads **"Pending confirmation"**
+- [ ] Evening Series row: badge reads **"Enrolled"**
+
+**Course detail page — registered enrollment (alice@ltsc.test → c001)**
+
+- [ ] Navigate to `/student/courses/<c001-id>` (ASA 101 Weekend Intensive)
+- [ ] Bottom of page shows **"Pending confirmation"** badge (secondary/gray variant)
+- [ ] Next to badge: text "Pending admin review." (muted gray)
+- [ ] No "Enroll" button shown
+
+**Course detail page — confirmed enrollment (alice@ltsc.test → c002)**
+
+- [ ] Navigate to `/student/courses/<c002-id>` (ASA 101 Evening Series)
+- [ ] Bottom of page shows **"Enrolled"** badge (default/dark variant)
+- [ ] No explanation text next to badge
+- [ ] No "Enroll" button shown
+
+**Other enrollment status labels**
+
+- [ ] Bob's cancelled enrollment (e006, c001): badge reads **"Cancelled"** (outline variant) on My Courses list
+- [ ] Eve's completed enrollment (e007, c006): badge reads **"Completed"** — note c006 is `status: 'completed'` so it won't appear in the active courses browse, but it shows on `/student/my-courses` under "Past" filter
+
+**SQL verification — none required**
+
+All changes are UI-layer only. Labels are derived from the existing `status` column values — no schema changes.

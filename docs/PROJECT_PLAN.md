@@ -113,8 +113,10 @@ Make it production-ready.
 - [ ] 5.15 — OAuth login — Google (and others if Supabase makes it easy); email/password remains the fallback `[effort: 2]`
 - [ ] 5.16 — Development database — separate Supabase project for dev, seed data pipeline, so prod isn't polluted with test data `[effort: 3]`
 - [x] 5.17 — Bug: student enrollment RLS — missing INSERT/UPDATE policy on session_attendance means attendance records silently fail to create on enrollment `[effort: 2]` <!-- completed 2026-04-06 -->
-- [ ] 5.18 — Dashboard: restore pending confirmation total count + "View all (N)" link when > 10 enrollments `[effort: 1]`
-- [ ] 5.19 — Student enrollment status badge — show "Pending confirmation" on course detail and attendance pages when enrollment status is `registered` (vs `confirmed`), so students know Andy hasn't reviewed it yet `[effort: 1]`
+- [x] 5.18 — Dashboard: restore pending confirmation total count + "Showing N of M" notice when > 10 enrollments `[effort: 1]` <!-- completed 2026-04-07 -->
+- [x] 5.19 — Student enrollment status badge — show "Pending confirmation" on course detail, my-courses, and attendance pages when enrollment status is `registered` (vs `confirmed`) `[effort: 1]` <!-- completed 2026-04-07 -->
+- [ ] 5.20 — Student course browse: show enrollment status on course cards — enrolled students see "Enrolled" or "Pending" badge and a "View" button instead of "View & Enroll" `[effort: 2]`
+- [ ] 5.21 — Student attendance page: show enrollment status badge (Enrolled / Pending) per course alongside session attendance badges `[effort: 1]`
 
 **Demo:** Andy walks through full flow — creates a course, student registers, instructor views roster, session gets cancelled, makeup scheduled. Everything works.
 
@@ -128,8 +130,8 @@ Make it production-ready.
 | 2 — Student Browse | — | 8–10 | ~14 | — | Pre-tracking |
 | 3 — Attendance | 21 | 12–16 | ~5.5 | ~0.26 | First tracked phase (3.5/3.6 deferred V2) |
 | 4 — Instructor | 10 | 4–6 | 1.75 | 0.175 | 4/4 complete |
-| 5 — Polish | 46 | 7–9 | 5.75 (in progress) | 0.52 (so far) | 11 pts done (5.1+5.17+5.2+5.3). Forecast: 0.52 hrs/pt x 35 remaining = ~18 hrs |
-| **Total** | **77** | **48–66** | **~39.0** | — | Phases 0–4 actual: ~33.25 hrs. Phase 5 in progress: 5.75 hrs. |
+| 5 — Polish | 49 | 7–9 | 7.75 (in progress) | 0.60 (so far) | 13 pts done (5.1+5.17+5.2+5.3+5.18+5.19). Forecast: 0.60 hrs/pt x 36 remaining = ~21.6 hrs |
+| **Total** | **80** | **48–66** | **~41.00** | — | Phases 0–4 actual: ~33.25 hrs. Phase 5 in progress: 7.75 hrs. |
 
 ### Cuttable tasks (if time is tight)
 - **5.12** — Student calendar view. Explicitly labeled "stretch goal" in the task. Cut first.

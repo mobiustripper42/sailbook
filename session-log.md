@@ -3,6 +3,43 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 23 — 2026-04-07 13:30–14:56 (1.25 hrs)
+**Duration:** 1.25 hours (1.5 hrs elapsed, −0.25 away from desk)
+**Task:** Phase 5.18 + 5.19 — admin dashboard pending count, student enrollment status badges
+**Completed:**
+- 5.18 — Admin dashboard "Pending Confirmation (N)" count in card header; "Showing 10 of N pending" overflow notice when >10; two-query approach (separate `head: true` count) required — `count: 'exact'` on complex join select does not populate `.count` in Supabase JS
+- 5.19 — Student enrollment status labels throughout: `my-courses-list.tsx` (card + list view), student course detail page bottom CTA; `enrollmentStatusLabel()` helper with explicit branches; "Pending confirmation" for `registered`, "Enrolled" for `confirmed`
+- QA cases added to `docs/QA.md` for 5.18 and 5.19
+- Added 5.20 (course browse enrollment status) and 5.21 (attendance page enrollment status) to PROJECT_PLAN.md as Phase 5 must-haves
+- Added "Relative Upcoming badge" to SPEC.md V2 Ideas
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:**
+- 5.20 (effort 2) — Student course browse: show "Enrolled" / "Pending" badge on cards, change button to "View" when enrolled
+- 5.21 (effort 1) — Student attendance page: enrollment status badge per course
+**Context:**
+- `count: 'exact'` on `.select()` with embedded joins returns null for `.count` — always use a separate `head: true` count query for the enrollments table
+- Dev vs local Supabase confusion cost debugging time — double-check `NEXT_PUBLIC_SUPABASE_URL` in `.env.local` when results look wrong
+
+## Session 22 — 2026-04-06 22:18–23:05 (0.75 hrs)
+**Duration:** 0.75 hours
+**Task:** Phase 5.3 QA pass + UI consistency polish
+**Completed:**
+- QA pass on Phase 5.3 (error handling, empty states, form validation) — all checks pass
+- Standardized navigation buttons to "New [Entity]" across courses and course-types pages
+- Removed verbose subtitle `<p>` tags from: instructors, missed-sessions, student attendance, student courses (Available Courses), student my-courses pages
+- Replaced ad-hoc Card empty states with shared `EmptyState` component (student attendance, admin missed-sessions)
+- Upgraded "Browse available courses" inline link → `Button` on My Courses empty state
+- Added unsaved-changes guard to V2 ideas in SPEC.md
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:**
+- 5.18 (effort 1) — dashboard pending count restore
+- 5.19 (effort 1) — student pending badge
+- Then 5.4 (effort 2) — loading states
+**Context:**
+- All 5.3 work is done and QA'd — clean starting point for 5.18/5.19
+
 ## Session 21 — 2026-04-06 19:05–20:53 (1.75 hrs)
 **Duration:** 1.75 hours (estimated — no recorded start; prior session ended ~19:00; scope consistent with ~1.75 hrs)
 **Task:** Phase 5.3 — Error handling, form validation, empty states

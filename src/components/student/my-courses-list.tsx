@@ -45,6 +45,14 @@ function enrollmentStatusVariant(status: string): 'default' | 'secondary' | 'out
   return 'outline'
 }
 
+function enrollmentStatusLabel(status: string): string {
+  if (status === 'registered') return 'Pending confirmation'
+  if (status === 'confirmed') return 'Enrolled'
+  if (status === 'cancelled') return 'Cancelled'
+  if (status === 'completed') return 'Completed'
+  return status
+}
+
 function isUpcoming(lastSessionDate: string | null): boolean {
   if (!lastSessionDate) return true
   return new Date(lastSessionDate + 'T23:59:59') >= new Date()
@@ -136,8 +144,8 @@ export default function MyCoursesList({ courses }: Props) {
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-2">
                   <CardTitle className="text-base leading-snug">{c.title}</CardTitle>
-                  <Badge variant={enrollmentStatusVariant(c.enrollmentStatus)} className="shrink-0 capitalize">
-                    {c.enrollmentStatus}
+                  <Badge variant={enrollmentStatusVariant(c.enrollmentStatus)} className="shrink-0">
+                    {enrollmentStatusLabel(c.enrollmentStatus)}
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">{c.typeName}</p>
@@ -194,8 +202,8 @@ export default function MyCoursesList({ courses }: Props) {
                   >
                     {c.title}
                   </Link>
-                  <Badge variant={enrollmentStatusVariant(c.enrollmentStatus)} className="capitalize text-xs">
-                    {c.enrollmentStatus}
+                  <Badge variant={enrollmentStatusVariant(c.enrollmentStatus)} className="text-xs">
+                    {enrollmentStatusLabel(c.enrollmentStatus)}
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">

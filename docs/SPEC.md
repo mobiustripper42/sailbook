@@ -47,6 +47,7 @@ May 15, 2026 — first day of sailing season.
 
 ## V2 Ideas
 - Unsaved changes navigation guard — warn before leaving a form with edits in progress. Requires `beforeunload` + App Router link interception (no clean built-in; may need a community package). Priority: early V2.
+- Relative "Upcoming" session badge — instead of a flat "Upcoming" badge, show context-aware labels: "Tomorrow", "This week", "Next week", "In a month". Applies to student course detail and attendance pages.
 - AI season setup agent — admin describes the summer schedule in plain English ("10 ASA 101 weekends May–August, Open Sailing every Wednesday June–August"), agent creates all courses and sessions automatically
 - Admin impersonation mode — "view as student" button lets Andy see the student dashboard without logging out. Useful for verifying what students see and debugging their experience
 - First-come-first-served enrollment approval — surface `enrolled_at` timestamp prominently on the course enrollments list so Andy can approve in queue order. Data is already captured; this is a display/workflow change only. Prerequisite for fair manual approval before payments are in place.
