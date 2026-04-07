@@ -116,7 +116,7 @@ Make it production-ready.
 - [x] 5.18 — Dashboard: restore pending confirmation total count + "Showing N of M" notice when > 10 enrollments `[effort: 1]` <!-- completed 2026-04-07 -->
 - [x] 5.19 — Student enrollment status badge — show "Pending confirmation" on course detail, my-courses, and attendance pages when enrollment status is `registered` (vs `confirmed`) `[effort: 1]` <!-- completed 2026-04-07 -->
 - [x] 5.20 — Student course browse: show enrollment status on course cards — enrolled students see "Enrolled" or "Pending" badge and a "View" button instead of "View & Enroll" `[effort: 2]` <!-- completed 2026-04-07 -->
-- [ ] 5.21 — Student attendance page: show enrollment status badge (Enrolled / Pending) per course alongside session attendance badges `[effort: 1]`
+- [x] 5.21 — Student attendance page: show enrollment status badge (Enrolled / Pending) per course alongside session attendance badges `[effort: 1]` <!-- completed 2026-04-07 -->
 
 **Demo:** Andy walks through full flow — creates a course, student registers, instructor views roster, session gets cancelled, makeup scheduled. Everything works.
 
@@ -130,8 +130,8 @@ Make it production-ready.
 | 2 — Student Browse | — | 8–10 | ~14 | — | Pre-tracking |
 | 3 — Attendance | 21 | 12–16 | ~5.5 | ~0.26 | First tracked phase (3.5/3.6 deferred V2) |
 | 4 — Instructor | 10 | 4–6 | 1.75 | 0.175 | 4/4 complete |
-| 5 — Polish | 49 | 7–9 | 10.00 (in progress) | 0.67 (so far) | 15 pts done (5.1+5.17+5.2+5.3+5.18+5.19+5.20). Forecast: 0.67 hrs/pt x 34 remaining = ~22.8 hrs |
-| **Total** | **80** | **48–66** | **~43.25** | — | Phases 0–4 actual: ~33.25 hrs. Phase 5 in progress: 10.00 hrs. |
+| 5 — Polish | 49 | 7–9 | 10.25 (in progress) | 0.64 (so far) | 16 pts done (5.1+5.17+5.2+5.3+5.18+5.19+5.20+5.21). Forecast: 0.64 hrs/pt x 33 remaining = ~21.1 hrs |
+| **Total** | **80** | **48–66** | **~43.50** | — | Phases 0–4 actual: ~33.25 hrs. Phase 5 in progress: 10.25 hrs. |
 
 ### Cuttable tasks (if time is tight)
 - **5.12** — Student calendar view. Explicitly labeled "stretch goal" in the task. Cut first.

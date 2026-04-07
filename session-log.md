@@ -3,6 +3,20 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 23 — 2026-04-07 16:10–16:34 (0.25 hrs)
+**Duration:** 0.25 hours
+**Task:** Phase 5.21 — Student attendance page: enrollment status badge
+**Completed:**
+- 5.21 — Enrollment status badge ("Enrolled" / "Pending confirmation") on each course card on the student attendance page
+  - `src/app/(student)/student/attendance/page.tsx` — added `status` to enrollment select, added `enrollmentStatus` to `CourseAttendance` type, threaded through courseMap build
+  - `src/components/student/course-attendance-card.tsx` — added `enrollmentStatusVariant()` + `enrollmentStatusLabel()` helpers, rendered badge in card header alongside existing "needs makeup" badge
+- Updated `docs/QA.md` with 5 test cases under `### 5.21`
+- No seed data changes needed — existing Alice/Bob/Eve enrollments cover all badge states
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 5.4 (loading states), 5.5 (mobile responsiveness), or 5.6 (production seed for Andy walkthrough) — pick based on priority
+**Context:** 5.21 was genuinely a 1-pointer. enrollment.status was already queryable via the existing join — just wasn't being selected. CourseAttendanceCard is a server component so no client complexity added.
+
 ## Session 22 — 2026-04-07 15:18–17:30 (2.25 hrs, includes full computer reboot)
 **Duration:** 2.25 hours (extended by ~45 min due to dev server incident)
 **Task:** Phase 5.20 — Student course browse: enrollment status on course cards

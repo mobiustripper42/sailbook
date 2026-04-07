@@ -8,6 +8,7 @@ import type { AttendanceStatus } from '@/lib/attendance'
 type CourseAttendance = {
   courseId: string
   courseName: string
+  enrollmentStatus: string
   instructorName: string | null
   records: {
     sessionId: string
@@ -41,7 +42,8 @@ async function getAttendanceHistory(userId: string) {
         )
       ),
       enrollment:enrollments!session_attendance_enrollment_id_fkey (
-        student_id
+        student_id,
+        status
       )
     `)
     .eq('enrollment.student_id', userId)
@@ -63,7 +65,7 @@ async function getAttendanceHistory(userId: string) {
   const courseMap = new Map<string, CourseAttendance>()
 
   for (const row of data ?? []) {
-    const enrollment = row.enrollment as unknown as { student_id: string } | null
+    const enrollment = row.enrollment as unknown as { student_id: string; status: string } | null
     if (!enrollment) continue
 
     const session = row.session as unknown as RawSession
@@ -76,6 +78,7 @@ async function getAttendanceHistory(userId: string) {
       group = {
         courseId,
         courseName: course.title ?? course.course_types?.name ?? 'Course',
+        enrollmentStatus: enrollment.status,
         instructorName: instructor ? `${instructor.first_name} ${instructor.last_name}` : null,
         records: [],
         missedCount: 0,

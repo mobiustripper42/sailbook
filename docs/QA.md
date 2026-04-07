@@ -1222,3 +1222,65 @@ UPDATE courses SET capacity = 1 WHERE id = 'c0000000-0000-0000-0000-000000000001
 -- Reset:
 UPDATE courses SET capacity = 12 WHERE id = 'c0000000-0000-0000-0000-000000000001';
 ```
+
+---
+
+### 5.21 — Student attendance page: enrollment status badge
+
+**Prerequisites:** Seed data loaded. Alice (alice@ltsc.test) has:
+- e001 → c001 (ASA 101 Weekend Intensive): `registered`
+- e002 → c002 (ASA 101 Evening Series): `confirmed`
+
+Bob (bob@ltsc.test) has:
+- e003 → c002 (ASA 101 Evening Series): `registered`, with one missed session that needs a makeup
+
+**No new seed data required.**
+
+---
+
+**Registered enrollment — alice@ltsc.test → c001**
+
+- [ ] Log in as alice@ltsc.test → go to `/student/attendance`
+- [ ] ASA 101 Weekend Intensive card header shows badge **"Pending confirmation"** (secondary/gray variant)
+- [ ] Badge does NOT read "registered" (raw DB value)
+
+**Confirmed enrollment — alice@ltsc.test → c002**
+
+- [ ] ASA 101 Evening Series card header shows badge **"Enrolled"** (dark/default variant)
+- [ ] Badge does NOT read "confirmed"
+
+**Both badges present on same page**
+
+- [ ] Both course cards visible on Alice's attendance page simultaneously
+- [ ] Correct badge on each — no cross-contamination (Enrolled on c002, Pending on c001)
+
+**Enrollment badge + "needs makeup" badge coexist**
+
+- [ ] Log in as bob@ltsc.test → go to `/student/attendance`
+- [ ] ASA 101 Evening Series card shows **both** the enrollment status badge ("Pending confirmation") AND the "needs makeup" badge
+- [ ] Badges render side-by-side without overlap or wrapping issues
+
+**Completed enrollment — eve@ltsc.test → c006**
+
+- [ ] Log in as eve@ltsc.test → go to `/student/attendance`
+- [ ] ASA 101 March card shows badge **"Completed"** (outline variant)
+
+**SQL verification**
+
+```sql
+-- Confirm enrollment statuses for Alice
+SELECT e.id, e.course_id, e.status
+FROM enrollments e
+WHERE e.student_id = 'a0000000-0000-0000-0000-000000000004';
+-- Expected: e001 → c001 registered, e002 → c002 confirmed
+
+-- Confirm Bob has a missed session with no makeup in c002
+SELECT sa.session_id, sa.status, sa.makeup_session_id
+FROM session_attendance sa
+JOIN enrollments e ON e.id = sa.enrollment_id
+WHERE e.student_id = 'a0000000-0000-0000-0000-000000000005'
+  AND e.course_id = 'c0000000-0000-0000-0000-000000000002'
+  AND sa.status = 'missed'
+  AND sa.makeup_session_id IS NULL;
+-- Expected: 1 row (d003)
+```
