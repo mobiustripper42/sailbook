@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/empty-state'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -55,7 +56,7 @@ export default async function CourseBrowsePage() {
       </div>
 
       {courses?.length === 0 ? (
-        <p className="text-muted-foreground">No courses are available right now.</p>
+        <EmptyState message="No courses are available right now. Check back soon." />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {courses?.map((c) => {

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/empty-state'
 import {
   Table,
   TableBody,
@@ -32,7 +33,7 @@ export default async function InstructorsPage() {
       </p>
 
       {instructors?.length === 0 ? (
-        <p className="text-muted-foreground">No instructors yet.</p>
+        <EmptyState message="No instructors yet. Instructors register at /register, then Andy sets their role." />
       ) : (
         <div className="rounded-xl border bg-card">
           <Table>

@@ -3,18 +3,52 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 20 — 2026-04-06 (0.25 hrs)
-**Duration:** 0.25 hours
-**Task:** Phase 5.2 — Instructor swap on individual sessions
+## Session 21 — 2026-04-06 —20:53 (~hrs)
+**Duration:** TBD (add start time in morning)
+**Task:** Phase 5.3 — Error handling, form validation, empty states
 **Completed:**
-- Added `updateSessionInstructor` server action to `src/actions/sessions.ts`
-- Created `src/components/admin/session-instructor-select.tsx` — client `<select>` dropdown (Course default + all instructors), calls action on change
-- Updated `src/app/(admin)/admin/courses/[id]/page.tsx`: fetches all instructors, renders dropdown in session table Instructor column
-- Updated `src/app/(admin)/admin/courses/[id]/sessions/[sessionId]/attendance/page.tsx`: fetches course instructor as fallback, shows `effectiveInstructor = sessionInstructor ?? course.course_instructor`
+- `src/components/empty-state.tsx` — new shared `EmptyState` component (centered text + optional ReactNode action)
+- `docs/DECISIONS.md` — added DEC-016 (empty state pattern), ordered after DEC-015
+- `src/actions/courses.ts` — null guard for `course_type_id` in both `createCourse` and `updateCourse`; auth guard added to `updateCourse` (was inconsistent with `createCourse`)
+- `src/components/admin/course-form.tsx` — removed `required` from shadcn `<Select name="course_type_id">` to eliminate browser native tooltip fighting with the dropdown; server-side guard handles it
+- `text-destructive` sweep — 6 files changed from `text-red-600`: `course-status-actions`, `enrollment-actions`, `course-type-actions`, `instructor-actions`, `session-actions`, `attendance-form`
+- `admin/courses/page.tsx`, `admin/course-types/page.tsx` — EmptyState with CTA button
+- `admin/students/page.tsx`, `admin/instructors/page.tsx`, `student/courses/page.tsx` — EmptyState without CTA
+- `docs/QA.md` — Phase 5.3 section added with full UI walkthrough
+- `docs/dev-seed.sql` — edge case comment updated
+- `docs/PROJECT_PLAN.md` — 5.3 marked complete
 **In Progress:** Nothing
 **Blocked:** Nothing
-**Next Steps:** Start 5.3 — next task in Phase 5 (check PROJECT_PLAN.md)
-**Context:** Dropdown uses `defaultValue` (uncontrolled) + `onChange` with `useTransition`. No RLS changes needed — sessions write policy already covers admin.
+**Next Steps:**
+- QA pass on 5.3 using QA.md section — focus on: course type null guard (submit with nothing selected), empty states on list pages, error color consistency
+- After QA: 5.18 (effort 1 — dashboard pending count restore) + 5.19 (effort 1 — student pending badge) as a quick pair
+- Then: 5.4 (loading states, effort 2)
+**Context:**
+- Empty states on list pages are hard to hit with seed data. Fastest QA path: fresh wipe before re-seeding, check all 5 pages, then re-seed
+- Inline table empty states (sessions/enrollments inside course detail) intentionally left as `<p>` per DEC-016 — `EmptyState` centered layout doesn't fit inside a Card table
+- Course Type null guard: without seed data and with seed data both work. The UX is: submit with no type selected → "Course type is required" at top of form
+- User noted they don't love the UX of the error-at-top pattern for missing course type, but rolling with it for V1
+
+## Session 20 — 2026-04-06 (1.25 hrs)
+**Duration:** 1.25 hours (1.5 hrs elapsed minus 15 min away from desk)
+**Task:** Phase 5.2 — Instructor swap on individual sessions
+**Completed:**
+- `src/actions/sessions.ts` — added `updateSessionInstructor` server action; updates `sessions.instructor_id`, revalidates course detail path
+- `src/components/admin/session-instructor-select.tsx` — new client component; controlled shadcn `<Select>`, "Course default" as first option (value ""), error surface via inline message, uses `useTransition` for pending state
+- `src/app/(admin)/admin/courses/[id]/page.tsx` — fetches all instructor profiles, passes to `SessionInstructorSelect` in session table Instructor column
+- `src/app/(admin)/admin/courses/[id]/sessions/[sessionId]/attendance/page.tsx` — fetches course instructor as fallback; computes `effectiveInstructor = session.instructor_id ?? course.instructor_id`, displays in attendance header
+- `src/app/(student)/student/courses/[id]/page.tsx` — per-session instructor override display: shows session-level instructor when set, falls back to course default
+- `src/app/(student)/student/courses/[id]/attendance/page.tsx` — same effective-instructor fallback logic for student attendance view
+- `docs/migrations/012_rls_instructor_profiles_read.sql` — RLS fix: admin sessions page was failing to load instructor list because profiles SELECT policy for admins was missing (or narrowly scoped); added explicit admin read policy
+- `dev-seed.sql` — d002 session seeded with an instructor override for testable QA scenario
+- `docs/QA.md` — Section 5.2 added with full UI walkthrough and SQL verification steps
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 5.3 — Error handling, form validation, empty states (effort: 3). Covers form-level validation messages, API error surfacing, and empty-state UI across admin and student views. No dependencies.
+**Context:**
+- `SessionInstructorSelect` uses shadcn `<Select>` (controlled) not a raw `<select>`. Value "" maps to NULL (course default) in the action.
+- Migration 012 RLS fix was unplanned but necessary — instructor dropdown was empty without it. Zero scope impact.
+- Phase 5 velocity now 0.50 hrs/pt (4.0 hrs / 8 pts). Lifetime avg is ~0.22. The gap is driven by 5.1 scope creep and 5.17 depth. Effort-1 tasks (5.18, 5.19) should pull the ratio back down.
 
 ## Session 19 — 2026-04-06 (1.25 hrs)
 **Duration:** 1.25 hours (1.5 elapsed minus 15 min away from desk)

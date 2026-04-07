@@ -75,3 +75,9 @@
 The `string | null` form pattern stays because it's React's own `useActionState` convention — changing it would mean fighting the framework.
 
 **Applies to:** All files in `src/actions/`. Seven existing actions using `throw` need migration: `publishCourse`, `completeCourse`, `cancelCourse`, `toggleCourseTypeActive`, `confirmEnrollment`, `cancelEnrollment`, `deleteSession`, `toggleInstructorActive`.
+
+## DEC-016: Empty state component — shared component, text + optional CTA
+**Decision:** Top-level list views with no data use a shared `EmptyState` component: centered text, optional action button. No icons, no illustrations.
+**Why:** ~5 top-level list pages need empty states. One component, consistent appearance, minimal implementation. Anything more decorative is out of scope for May 15.
+**Applies to:** Top-level admin and student list pages (courses, course types, students, instructors, student course browse).
+**Exceptions:** Inline table sections (sessions within course detail, enrollments within course detail) use short inline `<p>` text — `EmptyState`'s centered layout doesn't fit inside a table card. Contextual empty states with filter-aware messaging (missed sessions, attendance history, my courses filter) keep their existing inline implementations.

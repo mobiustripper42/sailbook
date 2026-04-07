@@ -43,7 +43,7 @@ export default function CourseStatusActions({ id, status }: { id: string; status
           </Button>
         )}
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   )
 }

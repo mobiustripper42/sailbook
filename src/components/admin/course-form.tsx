@@ -54,7 +54,7 @@ export default function CourseForm({ courseTypes, instructors }: Props) {
 
         <div className="space-y-2">
           <Label htmlFor="course_type_id">Course Type</Label>
-          <Select name="course_type_id" required onValueChange={setSelectedTypeId}>
+          <Select name="course_type_id" onValueChange={setSelectedTypeId}>
             <SelectTrigger id="course_type_id">
               <SelectValue placeholder="Select a course type" />
             </SelectTrigger>

@@ -951,3 +951,123 @@ ORDER BY s.date;
 --   d001 (May 9):  "Dave Instructor"   (NULL override → course default)
 --   d002 (May 10): "Sarah Instructor"  (session-level override wins)
 ```
+
+---
+
+### 5.3 — Error handling: form validation, API errors, empty states
+
+**Prerequisites:** Seed data loaded. Login: andy@ltsc.test / qwert12345 for admin tests; dan@ltsc.test for student empty-state tests.
+
+---
+
+#### Error display standardization
+
+**`text-destructive` used consistently across all action components**
+
+The following components display errors inline. Verify errors are dark red (matches `text-destructive`, not the slightly different `text-red-600`):
+
+- [  ] `course-status-actions` — Publish / Mark Completed / Cancel Course buttons → trigger an error (e.g. cancel a course that's already cancelled via SQL, then try again) → error appears in dark red
+- [  ] `enrollment-actions` — Confirm / Cancel enrollment buttons on course detail
+- [  ] `course-type-actions` — Activate/Deactivate on course types list
+- [  ] `instructor-actions` — Activate/Deactivate on instructors list
+- [  ] `session-actions` — Cancel / Delete session buttons on course detail
+- [  ] `attendance-form` — Save Attendance button (force an error via SQL: set a FK constraint violation, or disconnect network mid-save) → "Error..." text appears in dark red; success message appears in muted gray
+
+> **Note:** You won't see `text-red-600` vs `text-destructive` difference with the naked eye in light mode unless you're looking for it. The main thing is that errors appear and are visually distinct from normal text.
+
+---
+
+#### Form validation — course_type_id null guard
+
+**Create Course — no course type selected**
+
+- [  ] Go to `/admin/courses/new`
+- [  ] Fill in Capacity (leave Course Type unselected — the dropdown stays on placeholder)
+- [  ] Add at least one session with valid date/time
+- [  ] Click "Create Course"
+- [  ] Error appears at top of form: "Course type is required" (server-side — no browser tooltip)
+- [  ] Form does NOT submit / navigate away
+
+> **Why this matters:** shadcn `<Select>` does not participate in browser HTML5 `required` validation — the form submits regardless. The server-side guard is the only protection.
+
+**Edit Course — clear course type (if possible)**
+
+- [  ] Open an existing course → click "Edit"
+- [  ] The Course Type dropdown should always be pre-populated (existing courses all have a type)
+- [  ] Verify: the action's null guard runs — if course_type_id were somehow absent, the form returns "Course type is required" rather than a Supabase FK error
+
+---
+
+#### Empty states — admin list pages
+
+**Courses list — empty state with CTA**
+
+- [  ] To test: as andy@ltsc.test, wipe courses (or use a fresh project)
+- [  ] Navigate to `/admin/courses`
+- [  ] Shows centered message: "No courses yet." with a "Create Course" button below
+- [  ] "Create Course" button links to `/admin/courses/new` and works
+- [  ] (Normal state: table renders as before when courses exist)
+
+**Course Types list — empty state with CTA**
+
+- [  ] To test: wipe course_types (careful — courses FK-depend on them)
+- [  ] Navigate to `/admin/course-types`
+- [  ] Shows centered message: "No course types yet." with an "Add Course Type" button
+- [  ] "Add Course Type" button links to `/admin/course-types/new` and works
+
+**Students list — empty state without CTA**
+
+- [  ] To test: remove is_student flag from all profiles (or fresh project)
+- [  ] Navigate to `/admin/students`
+- [  ] Shows centered message: "No students have registered yet."
+- [  ] No button (students self-register — admin can't create them here)
+
+**Instructors list — empty state without CTA**
+
+- [  ] To test: remove is_instructor flag from all profiles (or fresh project)
+- [  ] Navigate to `/admin/instructors`
+- [  ] Shows centered message: "No instructors yet. Instructors register at /register, then Andy sets their role."
+- [  ] No button (same reason — admin can't directly create instructor accounts)
+
+> **Practical test:** The empty states are hard to hit with seed data loaded. Fastest approach: after a fresh wipe (before re-seeding), navigate to each list. Or verify the component in code — the `EmptyState` import and usage is the thing to confirm.
+
+---
+
+#### Empty states — student pages
+
+**Course browse — no active courses**
+
+- [  ] To test: mark all courses as draft (or fresh project before courses exist)
+- [  ] Log in as any student → navigate to `/student/courses`
+- [  ] Shows centered message: "No courses are available right now. Check back soon."
+- [  ] No button (student can't create courses)
+
+**Normal state — verify empty states don't show when data exists**
+
+- [  ] Seed data loaded → all five list pages show their table/card grid as before, not the empty state
+- [  ] Log in as alice@ltsc.test → `/student/courses` shows course cards (not empty state)
+
+---
+
+#### Inline empty states (inside course detail — unchanged, verify no regression)
+
+These were NOT migrated to `EmptyState` (they're inside table Cards, per DEC-016):
+
+- [  ] Open c003 (ASA 103 — no sessions, no enrollments)
+- [  ] Sessions card shows: "No sessions yet." (inline, no CTA — add session form is below it)
+- [  ] Enrollments card shows: "No enrollments yet."
+- [  ] Both are still inline `<p>` elements, not the centered `EmptyState` — this is correct
+
+---
+
+#### updateCourse auth guard (regression check)
+
+- [  ] Log in as andy@ltsc.test → open any course → click "Edit" → make a change → "Save Changes"
+- [  ] Course updates normally — no "Not authenticated" error for a valid admin session
+- [  ] (The auth guard only fires if someone hits the action without a valid session)
+
+---
+
+**SQL verification — none required for this task**
+
+All changes are UI-layer (error classes, empty state text, form validation messages). No schema changes, no RLS changes, no new migrations.

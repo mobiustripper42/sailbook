@@ -139,7 +139,7 @@ export default function AttendanceForm({ courseId, sessionId, students }: Props)
           {pending ? 'Saving…' : 'Save Attendance'}
         </Button>
         {message && (
-          <span className={`text-sm ${message.startsWith('Error') ? 'text-red-600' : 'text-muted-foreground'}`}>
+          <span className={`text-sm ${message.startsWith('Error') ? 'text-destructive' : 'text-muted-foreground'}`}>
             {message}
           </span>
         )}

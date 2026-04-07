@@ -10,8 +10,10 @@ export async function createCourse(prevState: string | null, formData: FormData)
   if (!user) return 'Not authenticated'
 
   const rawInstructorId = formData.get('instructor_id') as string | null
+  const courseTypeId = formData.get('course_type_id') as string | null
+  if (!courseTypeId) return 'Course type is required'
   const courseData = {
-    course_type_id: formData.get('course_type_id') as string,
+    course_type_id: courseTypeId,
     instructor_id: rawInstructorId && rawInstructorId !== 'none' ? rawInstructorId : null,
     title: (formData.get('title') as string) || null,
     description: (formData.get('description') as string) || null,
@@ -54,10 +56,14 @@ export async function createCourse(prevState: string | null, formData: FormData)
 
 export async function updateCourse(id: string, prevState: string | null, formData: FormData) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return 'Not authenticated'
 
   const rawInstructorId = formData.get('instructor_id') as string | null
+  const courseTypeId = formData.get('course_type_id') as string | null
+  if (!courseTypeId) return 'Course type is required'
   const payload = {
-    course_type_id: formData.get('course_type_id') as string,
+    course_type_id: courseTypeId,
     instructor_id: rawInstructorId && rawInstructorId !== 'none' ? rawInstructorId : null,
     title: (formData.get('title') as string) || null,
     description: (formData.get('description') as string) || null,

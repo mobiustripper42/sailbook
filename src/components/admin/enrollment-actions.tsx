@@ -49,7 +49,7 @@ export default function EnrollmentActions({ enrollmentId, courseId, status }: Pr
           {pending ? '…' : 'Cancel'}
         </Button>
       </div>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   )
 }

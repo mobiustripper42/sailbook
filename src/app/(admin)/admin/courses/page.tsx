@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/empty-state'
 import {
   Table,
   TableBody,
@@ -36,7 +37,14 @@ export default async function CoursesPage() {
       </div>
 
       {courses?.length === 0 ? (
-        <p className="text-muted-foreground">No courses yet.</p>
+        <EmptyState
+          message="No courses yet."
+          action={
+            <Button asChild>
+              <Link href="/admin/courses/new">Create Course</Link>
+            </Button>
+          }
+        />
       ) : (
         <div className="rounded-xl border bg-card">
           <Table>

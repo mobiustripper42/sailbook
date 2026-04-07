@@ -47,7 +47,7 @@ export default function SessionActions({
       <Button variant="ghost" size="sm" onClick={handleDelete} disabled={pending}>
         {pending ? '…' : 'Delete'}
       </Button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   )
 }

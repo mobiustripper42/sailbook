@@ -27,7 +27,7 @@ export default function CourseTypeActions({ id, isActive }: { id: string; isActi
           {isActive ? 'Deactivate' : 'Activate'}
         </Button>
       </div>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   )
 }

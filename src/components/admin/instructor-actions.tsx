@@ -21,7 +21,7 @@ export default function InstructorActions({ id, isActive }: { id: string; isActi
       <Button variant="ghost" size="sm" onClick={handleToggle} disabled={pending}>
         {isActive ? 'Deactivate' : 'Activate'}
       </Button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   )
 }

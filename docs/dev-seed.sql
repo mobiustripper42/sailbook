@@ -15,6 +15,8 @@
 --   • Inactive course type (shouldn't appear in create form)
 --   • Session with location vs. without
 --   • Cancelled session with mixed attendance (makeup flow test)
+--   • Empty state coverage: Dan (no enrollments), c003 (no sessions/enrollments), c004 (draft)
+--     All list pages have data with seed loaded — test empty states on fresh wipe before re-seeding
 
 -- ============================================================
 -- USERS  (auth.users + profiles)
