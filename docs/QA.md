@@ -1284,3 +1284,94 @@ WHERE e.student_id = 'a0000000-0000-0000-0000-000000000005'
   AND sa.makeup_session_id IS NULL;
 -- Expected: 1 row (d003)
 ```
+
+---
+
+### 5.4 — Loading states and optimistic UI
+
+**Prerequisites:** Seed data loaded. Login: andy@ltsc.test / qwert12345.
+
+**How to test optimistic updates:** Open DevTools → Network tab → set throttle to "Slow 3G". UI should update instantly on click; server confirmation arrives ~2 seconds later. To test revert behavior, go offline (Network → Offline) before clicking.
+
+**Seed state to know:**
+- e001 Alice→c001: `registered` — shows Confirm + Cancel buttons on c001 course detail
+- e003 Bob→c002: `registered` — shows Confirm + Cancel buttons on c002 course detail
+- e005 Carol→c002: `registered` — shows Confirm + Cancel buttons on c002 course detail
+- b0000000-...-005 (Advanced Racing): `is_active = false` — Deactivate/Activate toggle available
+- dave@ltsc.test: `is_active = true` on instructor list — Deactivate/Activate toggle available
+
+---
+
+#### enrollment-actions — Confirm enrollment (optimistic)
+
+- [x ] Go to `/admin/courses` → open "ASA 101 — Weekend Intensive" (c001)
+- [x ] With Slow 3G throttle: click **Confirm** on Alice's enrollment (e001)
+- [x ] **Immediately** (before server responds): Confirm button disappears, Cancel button remains, button is disabled/spinner visible
+- [x ] After server responds: page re-renders, Alice's status shows "confirmed" — Confirm button permanently gone
+- [x ] Reload page → Alice's row no longer shows Confirm button (status persisted)
+
+#### enrollment-actions — Cancel enrollment (optimistic)
+
+- [x] Open c002 course detail
+- [x ] With Slow 3G throttle: click **Cancel** on Bob's enrollment (e003) → confirm the browser prompt
+- [x ] **Immediately**: both Confirm and Cancel buttons disappear from Bob's row
+- [x ] After server responds: Bob's row is gone (cancelled enrollments not shown, or status updated)
+- [x ] Reload → Bob no longer has actionable buttons
+
+#### enrollment-actions — revert on error
+
+- [x ] Set DevTools to Offline
+- [x ] Click **Confirm** on Carol's enrollment (e005) → Confirm button disappears immediately
+- [x ] After timeout/error: Confirm button reappears, error message shown below the buttons
+- [x ] Error message uses `text-destructive` styling (dark red)
+
+---
+
+#### course-type-actions — Activate/Deactivate (optimistic)
+
+- [ ] Go to `/admin/course-types`
+- [ ] Advanced Racing (b0000000-...-005) is inactive — button reads **"Activate"**
+- [ ] With Slow 3G throttle: click **Activate**
+- [ ] **Immediately**: button label flips to **"Deactivate"**, button is disabled during pending
+- [ ] After server responds: label stays "Deactivate" (persisted)
+- [ ] Click **Deactivate** — label flips back to **"Activate"** immediately
+- [ ] Reload → Advanced Racing shows "Activate" (deactivated state persisted)
+
+#### course-type-actions — revert on error
+
+- [ ] Set DevTools to Offline
+- [ ] Click **Activate** on any course type → label flips to "Deactivate" immediately
+- [ ] After error: label reverts to **"Activate"**, error message appears below in `text-destructive`
+
+---
+
+#### instructor-actions — Activate/Deactivate (optimistic)
+
+- [ ] Go to `/admin/instructors`
+- [ ] Dave (dave@ltsc.test) is active — button reads **"Deactivate"**
+- [ ] With Slow 3G throttle: click **Deactivate**
+- [ ] **Immediately**: button label flips to **"Activate"**, button is disabled during pending
+- [ ] After server responds: label stays "Activate" (persisted)
+- [ ] Click **Activate** → label flips back to **"Deactivate"** immediately
+- [ ] Reload → Dave shows "Deactivate" (active state restored)
+
+#### instructor-actions — revert on error
+
+- [ ] Set DevTools to Offline
+- [ ] Click **Deactivate** on any instructor → label flips to "Activate" immediately
+- [ ] After error: label reverts to **"Deactivate"**, error message appears below in `text-destructive`
+
+---
+
+#### Pre-existing loading states (regression check)
+
+These had loading states before 5.4 — verify no regression:
+
+- [ ] **Enroll button** (`enroll-button`): dan@ltsc.test → enroll in c001 → button shows "Enrolling…" during pending
+- [ ] **Session cancel** (`session-actions`): admin → cancel a session → button shows "…" and is disabled
+- [ ] **Attendance save** (`attendance-form`): mark a student attended → "Save Attendance" shows "Saving…" during pending
+- [ ] **Course publish** (`course-status-actions`): open a draft course (c004) → "Publish" shows "Publishing…" during pending
+
+**SQL verification — none required**
+
+All changes are UI-layer only. The optimistic state is derived from existing DB status values — no schema changes, no RLS changes.

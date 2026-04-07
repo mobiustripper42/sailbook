@@ -23,7 +23,9 @@ export default function CourseStatusActions({ id, status }: { id: string; status
       <div className="flex gap-2">
         {status === 'draft' && (
           <Button onClick={() => handle(() => publishCourse(id))} disabled={pending}>
-            {pending ? 'Publishing…' : 'Publish'}
+            {pending
+              ? <><span className="mr-1 inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />Publishing…</>
+              : 'Publish'}
           </Button>
         )}
         {status === 'active' && (
@@ -31,7 +33,9 @@ export default function CourseStatusActions({ id, status }: { id: string; status
             if (!confirm('Mark this course as completed?')) return
             handle(() => completeCourse(id))
           }} disabled={pending}>
-            {pending ? '…' : 'Mark Completed'}
+            {pending
+              ? <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              : 'Mark Completed'}
           </Button>
         )}
         {status !== 'cancelled' && (
@@ -39,7 +43,9 @@ export default function CourseStatusActions({ id, status }: { id: string; status
             if (!confirm('Cancel this course? This cannot be undone easily.')) return
             handle(() => cancelCourse(id))
           }} disabled={pending}>
-            {pending ? '…' : 'Cancel Course'}
+            {pending
+              ? <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              : 'Cancel Course'}
           </Button>
         )}
       </div>

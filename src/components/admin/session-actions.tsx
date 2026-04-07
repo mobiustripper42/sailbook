@@ -41,11 +41,15 @@ export default function SessionActions({
     <div className="flex gap-1">
       {!isCancelled && (
         <Button variant="ghost" size="sm" onClick={handleCancel} disabled={pending}>
-          {pending ? '…' : 'Cancel'}
+          {pending
+            ? <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            : 'Cancel'}
         </Button>
       )}
       <Button variant="ghost" size="sm" onClick={handleDelete} disabled={pending}>
-        {pending ? '…' : 'Delete'}
+        {pending
+          ? <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          : 'Delete'}
       </Button>
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
