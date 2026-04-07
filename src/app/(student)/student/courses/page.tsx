@@ -1,3 +1,6 @@
+export const dynamic = 'force-dynamic'
+
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
@@ -21,10 +24,25 @@ function formatDateRange(dates: string[]): string {
   return `${fmt(sorted[0])} – ${fmt(sorted[sorted.length - 1])}`
 }
 
+function enrollmentStatusLabel(status: string): string {
+  if (status === 'registered') return 'Pending confirmation'
+  if (status === 'confirmed') return 'Enrolled'
+  if (status === 'cancelled') return 'Cancelled'
+  if (status === 'completed') return 'Completed'
+  return status
+}
+
 export default async function CourseBrowsePage() {
   const supabase = await createClient()
 
-  const [{ data: courses, error }, { data: enrollmentCounts }] = await Promise.all([
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const [
+    { data: courses, error },
+    { data: enrollmentCounts },
+    { data: myEnrollments, error: enrollmentError },
+  ] = await Promise.all([
     supabase
       .from('courses')
       .select(`
@@ -38,12 +56,22 @@ export default async function CourseBrowsePage() {
     // Must use RPC (SECURITY DEFINER) — direct query is filtered by student RLS
     // to the student's own rows, breaking the "Full" badge for unenrolled students.
     supabase.rpc('get_all_course_enrollment_counts'),
+    supabase
+      .from('enrollments')
+      .select('course_id, status')
+      .eq('student_id', user.id)
+      .neq('status', 'cancelled'),
   ])
 
   if (error) return <div className="p-8 text-destructive">{error.message}</div>
+  if (enrollmentError) return <div className="p-8 text-destructive">{enrollmentError.message}</div>
 
   const countMap = new Map<string, number>(
     enrollmentCounts?.map(({ course_id, active_count }: { course_id: string; active_count: number }) => [course_id, active_count]) ?? []
+  )
+
+  const enrollmentMap = new Map<string, string>(
+    myEnrollments?.map(({ course_id, status }: { course_id: string; status: string }) => [course_id, status]) ?? []
   )
 
   return (
@@ -64,6 +92,8 @@ export default async function CourseBrowsePage() {
             const activeEnrollments = countMap.get(c.id) ?? 0
             const spotsRemaining = c.capacity - activeEnrollments
             const isFull = spotsRemaining <= 0
+            const myStatus = enrollmentMap.get(c.id)
+            const isEnrolled = myStatus !== undefined
 
             return (
               <Card key={c.id} className="flex flex-col">
@@ -72,7 +102,11 @@ export default async function CourseBrowsePage() {
                     <CardTitle className="text-base leading-snug">
                       {c.title ?? type?.name ?? '—'}
                     </CardTitle>
-                    {isFull ? (
+                    {isEnrolled ? (
+                      <Badge variant={myStatus === 'confirmed' ? 'default' : 'secondary'} className="shrink-0">
+                        {enrollmentStatusLabel(myStatus!)}
+                      </Badge>
+                    ) : isFull ? (
                       <Badge variant="secondary" className="shrink-0">Full</Badge>
                     ) : (
                       <Badge variant="outline" className="shrink-0 text-xs">
@@ -109,9 +143,14 @@ export default async function CourseBrowsePage() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button asChild className="w-full" variant={isFull ? 'secondary' : 'default'} disabled={isFull}>
+                  <Button
+                    asChild
+                    className="w-full"
+                    variant={!isEnrolled && isFull ? 'secondary' : 'default'}
+                    disabled={!isEnrolled && isFull}
+                  >
                     <Link href={`/student/courses/${c.id}`}>
-                      {isFull ? 'Course Full' : 'View & Enroll'}
+                      {isEnrolled ? 'View' : isFull ? 'Course Full' : 'View & Enroll'}
                     </Link>
                   </Button>
                 </CardFooter>

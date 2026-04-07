@@ -1069,27 +1069,27 @@ All changes are UI-layer (error classes, empty state text, form validation messa
 
 **Card header shows total count**
 
-- [ ] Go to `/admin/dashboard`
-- [ ] "Pending Confirmation" card header reads **"Pending Confirmation (4)"**
-- [ ] All 4 registrations appear in the table (Alice, Bob, Sarah, Carol)
+- [x ] Go to `/admin/dashboard`
+- [x ] "Pending Confirmation" card header reads **"Pending Confirmation (4)"**
+- [x ] All 4 registrations appear in the table (Alice, Bob, Sarah, Carol)
 
 **Confirmed enrollment does NOT appear**
 
-- [ ] Alice's enrollment in c002 (e002) has `status = 'confirmed'` — she does NOT appear in the pending table
-- [ ] Verify: only 4 rows, not 5
+- [x ] Alice's enrollment in c002 (e002) has `status = 'confirmed'` — she does NOT appear in the pending table
+- [x ] Verify: only 4 rows, not 5
 
 **Zero pending state**
 
-- [ ] Confirm all 4 pending enrollments via admin (set status → confirmed)
-- [ ] Header reads **"Pending Confirmation"** (no count shown when 0)
-- [ ] Card body shows: "No enrollments pending confirmation."
+- [X ] Confirm all 4 pending enrollments via admin (set status → confirmed)
+- [X ] Header reads **"Pending Confirmation"** (no count shown when 0)
+- [X ] Card body shows: "No enrollments pending confirmation."
 
 **Overflow notice (> 10 pending)**
 
-- [ ] SQL: insert 7+ additional `registered` enrollments (or confirm some to reset count, then add > 10 total)
-- [ ] Table still shows at most 10 rows
-- [ ] Below table: **"Showing 10 of N pending"** text appears (right-aligned, muted)
-- [ ] No link — the notice is informational only
+- [x ] SQL: insert 7+ additional `registered` enrollments (or confirm some to reset count, then add > 10 total)
+- [x ] Table still shows at most 10 rows
+- [x ] Below table: **"Showing 10 of N pending"** text appears (right-aligned, muted)
+- [x ] No link — the notice is informational only
 
 ```sql
 -- Verify pending count matches card display
@@ -1119,31 +1119,31 @@ SELECT
 
 **My Courses — card view (alice@ltsc.test)**
 
-- [ ] Log in as alice@ltsc.test → go to `/student/my-courses`
-- [ ] View is set to "Cards" (default)
-- [ ] Weekend Intensive card: enrollment badge reads **"Pending confirmation"** (secondary/gray variant)
-- [ ] Evening Series card: enrollment badge reads **"Enrolled"** (default/dark variant)
-- [ ] Neither badge shows raw DB values ("registered" or "confirmed")
+- [X ] Log in as alice@ltsc.test → go to `/student/my-courses`
+- [X ] View is set to "Cards" (default)
+- [X ] Weekend Intensive card: enrollment badge reads **"Pending confirmation"** (secondary/gray variant)
+- [X ] Evening Series card: enrollment badge reads **"Enrolled"** (default/dark variant)
+- [X ] Neither badge shows raw DB values ("registered" or "confirmed")
 
 **My Courses — list view**
 
-- [ ] Switch to "List" view
-- [ ] Weekend Intensive row: badge reads **"Pending confirmation"**
-- [ ] Evening Series row: badge reads **"Enrolled"**
+- [x ] Switch to "List" view
+- [x ] Weekend Intensive row: badge reads **"Pending confirmation"**
+- [x ] Evening Series row: badge reads **"Enrolled"**
 
 **Course detail page — registered enrollment (alice@ltsc.test → c001)**
 
-- [ ] Navigate to `/student/courses/<c001-id>` (ASA 101 Weekend Intensive)
-- [ ] Bottom of page shows **"Pending confirmation"** badge (secondary/gray variant)
-- [ ] Next to badge: text "Pending admin review." (muted gray)
-- [ ] No "Enroll" button shown
+- [x ] Navigate to `/student/courses/<c001-id>` (ASA 101 Weekend Intensive)
+- [x ] Bottom of page shows **"Pending confirmation"** badge (secondary/gray variant)
+- [x ] Next to badge: text "Pending admin review." (muted gray)
+- [x ] No "Enroll" button shown
 
 **Course detail page — confirmed enrollment (alice@ltsc.test → c002)**
 
-- [ ] Navigate to `/student/courses/<c002-id>` (ASA 101 Evening Series)
-- [ ] Bottom of page shows **"Enrolled"** badge (default/dark variant)
-- [ ] No explanation text next to badge
-- [ ] No "Enroll" button shown
+- [x ] Navigate to `/student/courses/<c002-id>` (ASA 101 Evening Series)
+- [x ] Bottom of page shows **"Enrolled"** badge (default/dark variant)
+- [x ] No explanation text next to badge
+- [X ] No "Enroll" button shown
 
 **Other enrollment status labels**
 
@@ -1153,3 +1153,72 @@ SELECT
 **SQL verification — none required**
 
 All changes are UI-layer only. Labels are derived from the existing `status` column values — no schema changes.
+
+---
+
+### 5.20 — Student course browse: enrollment status on course cards
+
+**Prerequisites:** Seed data loaded. Alice (alice@ltsc.test) has:
+- e001 → c001 (ASA 101 Weekend Intensive): `registered`
+- e002 → c002 (ASA 101 Evening Series): `confirmed`
+- e006 is Bob→c001 with `cancelled` — Alice has no cancelled enrollments, but the query excludes `cancelled` status
+
+**No new seed data required.**
+
+---
+
+**Registered enrollment — alice@ltsc.test → c001**
+
+- [X ] ASA 101 Weekend Intensive card: top-right badge reads **"Pending confirmation"** (secondary/gray variant)
+- [X ] Badge does NOT read "registered" (raw DB value)
+- [X ] Button reads **"View"** (not "View & Enroll")
+- [X ] Button is enabled
+
+**Enrolled + spots available (confirmed, open course)**
+
+To test enrolled badge on a non-full course: SQL-reduce c002 capacity, or confirm a student into a low-enrollment course.
+
+```sql
+-- Temporarily open up c002 for badge testing
+UPDATE courses SET capacity = 20 WHERE id = 'c0000000-0000-0000-0000-000000000002';
+-- Reset after:
+UPDATE courses SET capacity = <original> WHERE id = 'c0000000-0000-0000-0000-000000000002';
+```
+
+- [X ] With c002 open: Evening Series card badge reads **"Enrolled"** (dark/default variant)
+- [X ] Badge does NOT read "confirmed"
+- [X ] Button reads **"View"**
+
+**Unenrolled course (not full)**
+
+- [X ] Any course Alice is not enrolled in with spots remaining: badge reads **"N spot(s) left"** (outline variant)
+- [X ] Button reads **"View & Enroll"** (dark/default)
+
+**Unenrolled course (full)**
+
+- [ ] If a course is at capacity and Alice is not enrolled: badge reads **"Full"** (secondary)
+- [ ] Button reads **"Course Full"** and is disabled
+
+**Cancelled enrollment excluded**
+
+- [ ] Log in as a student with a cancelled enrollment (or SQL: add a `cancelled` enrollment for alice@ltsc.test on any course)
+- [ ] That course card behaves as if Alice is not enrolled — shows spots/full badge, "View & Enroll" or "Course Full" button
+- [ ] No badge or button leaks the cancelled state
+
+**SQL verification**
+
+```sql
+-- Verify Alice's active (non-cancelled) enrollments
+SELECT e.course_id, e.status
+FROM enrollments e
+WHERE e.student_id = 'a0000000-0000-0000-0000-000000000004'
+  AND e.status != 'cancelled';
+-- Expected: 2 rows (e001 → c001 registered, e002 → c002 confirmed)
+
+-- To test "enrolled in a full course" edge case:
+-- 1. Fill c001 to capacity via admin, or:
+UPDATE courses SET capacity = 1 WHERE id = 'c0000000-0000-0000-0000-000000000001';
+-- Alice is registered → her card should still show "Pending confirmation" badge and "View" button
+-- Reset:
+UPDATE courses SET capacity = 12 WHERE id = 'c0000000-0000-0000-0000-000000000001';
+```

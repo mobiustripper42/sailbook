@@ -3,6 +3,38 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 22 — 2026-04-07 15:18–16:45 (~1.5 hrs, interrupted — reboot)
+**Duration:** ~1.5 hrs (incomplete, mid-debug)
+**Task:** Phase 5.20 — Student course browse: enrollment status on course cards
+**Completed:**
+- Core logic implemented in `src/app/(student)/student/courses/page.tsx`:
+  - Fetches student's enrollments sequentially (after Promise.all — concurrent RLS query returned empty)
+  - Builds `enrollmentMap` (courseId → status)
+  - Enrolled courses show "Enrolled"/"Pending confirmation" badge; button changes to "View"
+  - `enrollmentStatusLabel()` helper added locally (same as my-courses-list.tsx)
+  - `export const dynamic = 'force-dynamic'` added (suspected caching issue)
+  - `redirect('/login')` guard added; `enrollmentError` surfaced
+- QA cases added to `docs/QA.md` (5.20 section, c002 test corrected)
+- Build passes clean
+**In Progress:** 5.20 enrollment badges NOT yet showing in browser despite correct code
+  - File: `src/app/(student)/student/courses/page.tsx`
+  - Temporary debug `<pre>` block in JSX (yellow box) — remove after diagnosis
+  - Temporary `console.log` lines — remove after diagnosis
+  - `export const dynamic = 'force-dynamic'` at top — keep if it fixes caching
+**Blocked:** Dev server issues (multiple conflicting processes, slow/failed start) — user rebooting
+**Suspected cause:** Next.js data cache serving stale page that was rendered before enrollment existed. `force-dynamic` should fix it but couldn't verify due to dev server problems.
+**Next Steps:**
+1. After reboot: `cd ~/sailbook && npm run dev`
+2. Visit `/student/courses` as Alice — look for yellow debug box
+3. If yellow box shows: read `user.id` and `myEnrollments` values — paste here
+4. If enrollment badges now showing correctly: remove debug code (pre block + console.logs), keep `force-dynamic`, mark 5.20 done
+5. If still broken after reboot: the caching theory is wrong and we need to check if `student_id` in enrollments matches Alice's actual `auth.uid()`
+**Context:**
+- Detail page (`/student/courses/[id]`) correctly shows "Pending confirmation" for c001 — enrollment data exists and RLS allows reads
+- Browse page (`/student/courses`) ignores it — most likely data cache issue
+- `force-dynamic` was added but dev server died before we could verify
+- Debug pre block is temporary — remove before committing
+
 ## Session 23 — 2026-04-07 13:30–14:56 (1.25 hrs)
 **Duration:** 1.25 hours (1.5 hrs elapsed, −0.25 away from desk)
 **Task:** Phase 5.18 + 5.19 — admin dashboard pending count, student enrollment status badges
