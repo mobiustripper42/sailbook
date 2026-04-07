@@ -41,7 +41,7 @@ export default async function CoursesPage() {
           message="No courses yet."
           action={
             <Button asChild>
-              <Link href="/admin/courses/new">Create Course</Link>
+              <Link href="/admin/courses/new">New Course</Link>
             </Button>
           }
         />

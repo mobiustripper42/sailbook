@@ -50,9 +50,6 @@ export default async function CourseBrowsePage() {
     <div className="p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold">Available Courses</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Register for a course to see the full schedule and session details.
-        </p>
       </div>
 
       {courses?.length === 0 ? (

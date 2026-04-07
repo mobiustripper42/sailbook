@@ -27,7 +27,7 @@ export default async function CourseTypesPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">Course Types</h1>
         <Button asChild>
-          <Link href="/admin/course-types/new">Add Course Type</Link>
+          <Link href="/admin/course-types/new">New Course Type</Link>
         </Button>
       </div>
 
@@ -36,7 +36,7 @@ export default async function CourseTypesPage() {
           message="No course types yet."
           action={
             <Button asChild>
-              <Link href="/admin/course-types/new">Add Course Type</Link>
+              <Link href="/admin/course-types/new">New Course Type</Link>
             </Button>
           }
         />

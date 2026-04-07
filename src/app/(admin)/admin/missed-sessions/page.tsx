@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { EmptyState } from '@/components/empty-state'
 import { Badge } from '@/components/ui/badge'
 import { fmtDate, fmtTime } from '@/lib/utils'
 
@@ -94,19 +95,10 @@ export default async function MissedSessionsPage() {
 
   return (
     <div className="p-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Missed Sessions</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Students with outstanding missed sessions (no makeup scheduled)
-        </p>
-      </div>
+      <h1 className="text-2xl font-semibold">Missed Sessions</h1>
 
       {groups.length === 0 ? (
-        <Card>
-          <CardContent className="py-8 text-center text-muted-foreground">
-            No outstanding missed sessions. Everyone&apos;s accounted for.
-          </CardContent>
-        </Card>
+        <EmptyState message="No outstanding missed sessions. Everyone's accounted for." />
       ) : (
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">

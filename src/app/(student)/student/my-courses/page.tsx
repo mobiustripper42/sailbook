@@ -56,9 +56,6 @@ export default async function MyCoursesPage() {
     <div className="p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold">My Courses</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Your enrolled courses and session schedule.
-        </p>
       </div>
       <MyCoursesList courses={courses} />
     </div>

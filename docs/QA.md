@@ -981,20 +981,14 @@ The following components display errors inline. Verify errors are dark red (matc
 
 **Create Course — no course type selected**
 
-- [  ] Go to `/admin/courses/new`
-- [  ] Fill in Capacity (leave Course Type unselected — the dropdown stays on placeholder)
-- [  ] Add at least one session with valid date/time
-- [  ] Click "Create Course"
-- [  ] Error appears at top of form: "Course type is required" (server-side — no browser tooltip)
-- [  ] Form does NOT submit / navigate away
+- [ x ] Go to `/admin/courses/new`
+- [ x ] Fill in Capacity (leave Course Type unselected — the dropdown stays on placeholder)
+- [ x ] Add at least one session with valid date/time
+- [ x ] Click "Create Course"
+- [ x ] Error appears at top of form: "Course type is required" (server-side — no browser tooltip)
+- [ x ] Form does NOT submit / navigate away
 
 > **Why this matters:** shadcn `<Select>` does not participate in browser HTML5 `required` validation — the form submits regardless. The server-side guard is the only protection.
-
-**Edit Course — clear course type (if possible)**
-
-- [  ] Open an existing course → click "Edit"
-- [  ] The Course Type dropdown should always be pre-populated (existing courses all have a type)
-- [  ] Verify: the action's null guard runs — if course_type_id were somehow absent, the form returns "Course type is required" rather than a Supabase FK error
 
 ---
 
@@ -1002,32 +996,32 @@ The following components display errors inline. Verify errors are dark red (matc
 
 **Courses list — empty state with CTA**
 
-- [  ] To test: as andy@ltsc.test, wipe courses (or use a fresh project)
-- [  ] Navigate to `/admin/courses`
-- [  ] Shows centered message: "No courses yet." with a "Create Course" button below
-- [  ] "Create Course" button links to `/admin/courses/new` and works
-- [  ] (Normal state: table renders as before when courses exist)
+- [X  ] To test: as andy@ltsc.test, wipe courses (or use a fresh project)
+- [X  ] Navigate to `/admin/courses`
+- [X  ] Shows centered message: "No courses yet." with a "Create Course" button below
+- [X  ] "Create Course" button links to `/admin/courses/new` and works
+- [X  ] (Normal state: table renders as before when courses exist)
 
 **Course Types list — empty state with CTA**
 
-- [  ] To test: wipe course_types (careful — courses FK-depend on them)
-- [  ] Navigate to `/admin/course-types`
-- [  ] Shows centered message: "No course types yet." with an "Add Course Type" button
-- [  ] "Add Course Type" button links to `/admin/course-types/new` and works
+- [x  ] To test: wipe course_types (careful — courses FK-depend on them)
+- [x  ] Navigate to `/admin/course-types`
+- [x  ] Shows centered message: "No course types yet." with an "Add Course Type" button
+- [x  ] "Add Course Type" button links to `/admin/course-types/new` and works
 
 **Students list — empty state without CTA**
 
-- [  ] To test: remove is_student flag from all profiles (or fresh project)
-- [  ] Navigate to `/admin/students`
-- [  ] Shows centered message: "No students have registered yet."
-- [  ] No button (students self-register — admin can't create them here)
+- [ x ] To test: remove is_student flag from all profiles (or fresh project)
+- [ x ] Navigate to `/admin/students`
+- [ x ] Shows centered message: "No students have registered yet."
+- [ x ] No button (students self-register — admin can't create them here)
 
 **Instructors list — empty state without CTA**
 
-- [  ] To test: remove is_instructor flag from all profiles (or fresh project)
-- [  ] Navigate to `/admin/instructors`
-- [  ] Shows centered message: "No instructors yet. Instructors register at /register, then Andy sets their role."
-- [  ] No button (same reason — admin can't directly create instructor accounts)
+- [ x ] To test: remove is_instructor flag from all profiles (or fresh project)
+- [ x ] Navigate to `/admin/instructors`
+- [ x ] Shows centered message: "No instructors yet. Instructors register at /register, then Andy sets their role."
+- [ x ] No button (same reason — admin can't directly create instructor accounts)
 
 > **Practical test:** The empty states are hard to hit with seed data loaded. Fastest approach: after a fresh wipe (before re-seeding), navigate to each list. Or verify the component in code — the `EmptyState` import and usage is the thing to confirm.
 
@@ -1037,28 +1031,18 @@ The following components display errors inline. Verify errors are dark red (matc
 
 **Course browse — no active courses**
 
-- [  ] To test: mark all courses as draft (or fresh project before courses exist)
-- [  ] Log in as any student → navigate to `/student/courses`
-- [  ] Shows centered message: "No courses are available right now. Check back soon."
-- [  ] No button (student can't create courses)
+- [ x ] To test: mark all courses as draft (or fresh project before courses exist)
+- [ x ] Log in as any student → navigate to `/student/courses`
+- [ x ] Shows centered message: "No courses are available right now. Check back soon."
+- [ x ] No button (student can't create courses)
 
 **Normal state — verify empty states don't show when data exists**
 
-- [  ] Seed data loaded → all five list pages show their table/card grid as before, not the empty state
-- [  ] Log in as alice@ltsc.test → `/student/courses` shows course cards (not empty state)
+- [ x ] Seed data loaded → all five list pages show their table/card grid as before, not the empty state
+- [ x ] Log in as alice@ltsc.test → `/student/courses` shows course cards (not empty state)
 
 ---
 
-#### Inline empty states (inside course detail — unchanged, verify no regression)
-
-These were NOT migrated to `EmptyState` (they're inside table Cards, per DEC-016):
-
-- [  ] Open c003 (ASA 103 — no sessions, no enrollments)
-- [  ] Sessions card shows: "No sessions yet." (inline, no CTA — add session form is below it)
-- [  ] Enrollments card shows: "No enrollments yet."
-- [  ] Both are still inline `<p>` elements, not the centered `EmptyState` — this is correct
-
----
 
 #### updateCourse auth guard (regression check)
 

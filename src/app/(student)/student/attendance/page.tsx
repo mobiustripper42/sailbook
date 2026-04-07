@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent } from '@/components/ui/card'
+import { EmptyState } from '@/components/empty-state'
 import CourseAttendanceCard from '@/components/student/course-attendance-card'
 import type { AttendanceStatus } from '@/lib/attendance'
 
@@ -122,12 +123,7 @@ export default async function StudentAttendancePage() {
 
   return (
     <div className="p-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Attendance</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Your attendance history across all courses.
-        </p>
-      </div>
+      <h1 className="text-2xl font-semibold">Attendance</h1>
 
       {totalMissed > 0 && (
         <Card className="border-destructive/50 bg-destructive/5">
@@ -141,11 +137,7 @@ export default async function StudentAttendancePage() {
       )}
 
       {courses.length === 0 ? (
-        <Card>
-          <CardContent className="py-8 text-center text-muted-foreground">
-            No attendance records yet. Enroll in a course to get started.
-          </CardContent>
-        </Card>
+        <EmptyState message="No attendance records yet." />
       ) : (
         <div className="space-y-4">
           {courses.map((course) => (

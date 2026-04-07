@@ -112,21 +112,20 @@ export default function MyCoursesList({ courses }: Props) {
 
       {/* Empty state */}
       {filtered.length === 0 && (
-        <p className="text-sm text-muted-foreground py-4">
-          {filter === 'upcoming'
-            ? 'No upcoming courses.'
-            : filter === 'past'
-            ? 'No past courses.'
-            : 'You have no enrollments yet.'}
-          {filter !== 'upcoming' ? null : (
-            <>
-              {' '}
-              <Link href="/student/courses" className="underline underline-offset-2 hover:text-foreground">
-                Browse available courses.
-              </Link>
-            </>
+        <div className="py-4 space-y-3">
+          <p className="text-sm text-muted-foreground">
+            {filter === 'upcoming'
+              ? 'No upcoming courses.'
+              : filter === 'past'
+              ? 'No past courses.'
+              : 'You have no enrollments yet.'}
+          </p>
+          {filter === 'upcoming' && (
+            <Button asChild size="sm">
+              <Link href="/student/courses">Browse Available Courses</Link>
+            </Button>
           )}
-        </p>
+        </div>
       )}
 
       {/* Card view */}

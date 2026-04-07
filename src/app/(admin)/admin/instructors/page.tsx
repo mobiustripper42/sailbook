@@ -28,12 +28,8 @@ export default async function InstructorsPage() {
         <h1 className="text-2xl font-semibold">Instructors</h1>
       </div>
 
-      <p className="text-sm text-muted-foreground mb-4">
-        Instructors register at <strong>/register</strong> with their email. Andy then sets their account to instructor in Supabase Auth.
-      </p>
-
       {instructors?.length === 0 ? (
-        <EmptyState message="No instructors yet. Instructors register at /register, then Andy sets their role." />
+        <EmptyState message="No instructors yet." />
       ) : (
         <div className="rounded-xl border bg-card">
           <Table>
