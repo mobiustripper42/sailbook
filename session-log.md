@@ -3,8 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 21 — 2026-04-06 —20:53 (~hrs)
-**Duration:** TBD (add start time in morning)
+## Session 21 — 2026-04-06 19:05–20:53 (1.75 hrs)
+**Duration:** 1.75 hours (estimated — no recorded start; prior session ended ~19:00; scope consistent with ~1.75 hrs)
 **Task:** Phase 5.3 — Error handling, form validation, empty states
 **Completed:**
 - `src/components/empty-state.tsx` — new shared `EmptyState` component (centered text + optional ReactNode action)
