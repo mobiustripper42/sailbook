@@ -142,6 +142,21 @@ export async function createMakeupSession(
   redirect(`/admin/courses/${courseId}`)
 }
 
+export async function updateSessionInstructor(
+  sessionId: string,
+  courseId: string,
+  instructorId: string | null
+) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('sessions')
+    .update({ instructor_id: instructorId, updated_at: new Date().toISOString() })
+    .eq('id', sessionId)
+  if (error) return { error: error.message }
+  revalidatePath(`/admin/courses/${courseId}`)
+  return { error: null }
+}
+
 export async function deleteSession(sessionId: string, courseId: string) {
   const supabase = await createClient()
   const { error } = await supabase.from('sessions').delete().eq('id', sessionId)

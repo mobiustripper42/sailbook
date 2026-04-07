@@ -810,3 +810,144 @@ RESET request.jwt.claims;
 - [ ] Student with zero sessions in their enrolled course → enrollment succeeds, no attendance rows attempted, no error
 - [ ] Student enrolls in a course where another student already has attendance records → no cross-contamination (verify via SQL after both enroll)
 - [ ] Instructor (sarah@ltsc.test) cannot INSERT attendance via these policies — instructor policy is still SELECT only (covered by 3.9 / 4.4 tests above)
+
+---
+
+### 5.2 — Instructor swap on individual sessions
+
+**Prerequisites:** Seed data loaded (includes session-level override: d002 assigned to Sarah, d001 is course default). Login: andy@ltsc.test / qwert12345.
+
+**Seed state to know:**
+- c001 (ASA 101 Weekend Intensive): course instructor = Dave
+  - d001 (May 9): no session override → displays "Course default"
+  - d002 (May 10): session instructor = Sarah → displays "Sarah Instructor"
+
+---
+
+**Instructor column renders as dropdown**
+
+- [x ] Go to `/admin/courses` → open "ASA 101 — Weekend Intensive" (c001)
+- [x ] Sessions table Instructor column shows dropdowns, not plain text
+- [x ] d001 (May 9) dropdown shows "Course default" selected
+- [x ] d002 (May 10) dropdown shows "Sarah Instructor" selected
+- [x ] Dropdown options include "Course default", "Dave Instructor", "Sarah Instructor"
+
+**Override an instructor**
+
+- [x] On d001 (May 9), change dropdown from "Course default" to "Dave Instructor"
+- [x ] Dropdown updates immediately (optimistic)
+- [x ] Reload the page → d001 still shows "Dave Instructor" (persisted)
+
+**Clear an override (set back to course default)**
+
+- [x ] On d002 (May 10), change dropdown from "Sarah Instructor" to "Course default"
+- [x ] Reload the page → d002 shows "Course default"
+- [x ] Check via SQL: `SELECT instructor_id FROM sessions WHERE id = 'd0000000-0000-0000-0000-000000000002'` → `NULL`
+
+**Attendance page — override instructor displayed**
+
+- [x ] Navigate to attendance for d002 (May 10) while it has Sarah as session override
+- [x ] Header line shows "Sarah Instructor" (not Dave, not blank)
+
+**Attendance page — course default fallback**
+
+- [x ] Navigate to attendance for d001 (May 9) with no session override (instructor_id = NULL)
+- [ x] Header line shows "Dave Instructor" (the course-level default)
+
+**Course with no instructor assigned (c003 — ASA 103)**
+
+- [x ] Go to `/admin/courses` → open ASA 103 (c003, no course instructor, no sessions)
+- [x ] Add a session → Instructor column shows "Course default" in the dropdown
+- [x ] Navigate to that session's attendance page → no instructor shown in header (course has none and no override)
+
+**Edge cases**
+
+- [x] Change instructor on a cancelled session → dropdown still works, persists on reload
+- [x] Course with a single session → dropdown renders without error (not just multi-session courses)
+
+---
+
+**SQL verification — run in Supabase SQL Editor**
+
+```sql
+-- ============================================================
+-- TEST 1: Confirm seed state — session-level override on d002
+-- ============================================================
+SELECT
+  s.id,
+  s.date,
+  s.instructor_id,
+  p.first_name || ' ' || p.last_name AS session_instructor,
+  ci.first_name || ' ' || ci.last_name AS course_instructor
+FROM sessions s
+JOIN courses c ON s.course_id = c.id
+LEFT JOIN profiles p ON s.instructor_id = p.id
+LEFT JOIN profiles ci ON c.instructor_id = ci.id
+WHERE s.course_id = 'c0000000-0000-0000-0000-000000000001'
+ORDER BY s.date;
+-- Expected:
+--   d001 (May 9):  instructor_id = NULL,  session_instructor = NULL,  course_instructor = "Dave Instructor"
+--   d002 (May 10): instructor_id = Sarah's UUID, session_instructor = "Sarah Instructor", course_instructor = "Dave Instructor"
+
+-- ============================================================
+-- TEST 2: Admin can update session instructor_id
+-- ============================================================
+-- Impersonate Andy (admin)
+SET request.jwt.claims = '{"sub":"a0000000-0000-0000-0000-000000000001","role":"authenticated","email":"andy@ltsc.test","user_metadata":{"is_admin":true,"is_instructor":false,"is_student":false}}';
+SET role = 'authenticated';
+
+-- Set d001 to Dave override (was NULL)
+UPDATE sessions
+SET instructor_id = 'a0000000-0000-0000-0000-000000000002'
+WHERE id = 'd0000000-0000-0000-0000-000000000001';
+-- Expected: 1 row updated
+
+SELECT instructor_id FROM sessions WHERE id = 'd0000000-0000-0000-0000-000000000001';
+-- Expected: a0000000-0000-0000-0000-000000000002 (Dave)
+
+-- Clear it back to NULL (course default)
+UPDATE sessions SET instructor_id = NULL WHERE id = 'd0000000-0000-0000-0000-000000000001';
+
+SELECT instructor_id FROM sessions WHERE id = 'd0000000-0000-0000-0000-000000000001';
+-- Expected: NULL
+
+RESET role;
+RESET request.jwt.claims;
+
+-- ============================================================
+-- TEST 3: Non-admin cannot update session instructor
+-- ============================================================
+-- Impersonate Dave (instructor, not admin)
+SET request.jwt.claims = '{"sub":"a0000000-0000-0000-0000-000000000002","role":"authenticated","email":"dave@ltsc.test","user_metadata":{"is_admin":false,"is_instructor":true,"is_student":false}}';
+SET role = 'authenticated';
+
+UPDATE sessions
+SET instructor_id = 'a0000000-0000-0000-0000-000000000002'
+WHERE id = 'd0000000-0000-0000-0000-000000000001';
+-- Expected: 0 rows updated (instructor policy is SELECT only)
+
+RESET role;
+RESET request.jwt.claims;
+
+-- ============================================================
+-- TEST 4: Effective instructor resolution (override vs fallback)
+-- ============================================================
+-- This mirrors what the attendance page computes server-side
+SELECT
+  s.id,
+  s.date,
+  COALESCE(
+    override.first_name || ' ' || override.last_name,
+    course_default.first_name || ' ' || course_default.last_name,
+    '(no instructor)'
+  ) AS effective_instructor
+FROM sessions s
+JOIN courses c ON s.course_id = c.id
+LEFT JOIN profiles override ON s.instructor_id = override.id
+LEFT JOIN profiles course_default ON c.instructor_id = course_default.id
+WHERE s.course_id = 'c0000000-0000-0000-0000-000000000001'
+ORDER BY s.date;
+-- Expected:
+--   d001 (May 9):  "Dave Instructor"   (NULL override → course default)
+--   d002 (May 10): "Sarah Instructor"  (session-level override wins)
+```

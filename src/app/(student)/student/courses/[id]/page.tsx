@@ -41,7 +41,10 @@ export default async function StudentCourseDetailPage({
 
   const { data: sessions } = await supabase
     .from('sessions')
-    .select('id, date, start_time, end_time, location, status')
+    .select(`
+      id, date, start_time, end_time, location, status,
+      session_instructor:profiles!sessions_instructor_id_fkey ( first_name, last_name )
+    `)
     .eq('course_id', id)
     .order('date')
 
@@ -173,6 +176,7 @@ export default async function StudentCourseDetailPage({
                   const isCancelled = s.status === 'cancelled'
                   const attendance = attendanceMap.get(s.id)
                   const dimClass = isCancelled ? 'text-muted-foreground' : ''
+                  const sessionInstructor = s.session_instructor as unknown as { first_name: string; last_name: string } | null
 
                   return (
                     <TableRow key={s.id} className={isCancelled ? 'opacity-60' : ''}>
@@ -186,6 +190,11 @@ export default async function StudentCourseDetailPage({
                       <TableCell>
                         {isCancelled && (
                           <Badge variant="outline">Cancelled</Badge>
+                        )}
+                        {sessionInstructor && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {sessionInstructor.first_name} {sessionInstructor.last_name}
+                          </p>
                         )}
                       </TableCell>
                       {isEnrolled && (

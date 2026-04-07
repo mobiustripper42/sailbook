@@ -3,6 +3,19 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 20 — 2026-04-06 (0.25 hrs)
+**Duration:** 0.25 hours
+**Task:** Phase 5.2 — Instructor swap on individual sessions
+**Completed:**
+- Added `updateSessionInstructor` server action to `src/actions/sessions.ts`
+- Created `src/components/admin/session-instructor-select.tsx` — client `<select>` dropdown (Course default + all instructors), calls action on change
+- Updated `src/app/(admin)/admin/courses/[id]/page.tsx`: fetches all instructors, renders dropdown in session table Instructor column
+- Updated `src/app/(admin)/admin/courses/[id]/sessions/[sessionId]/attendance/page.tsx`: fetches course instructor as fallback, shows `effectiveInstructor = sessionInstructor ?? course.course_instructor`
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** Start 5.3 — next task in Phase 5 (check PROJECT_PLAN.md)
+**Context:** Dropdown uses `defaultValue` (uncontrolled) + `onChange` with `useTransition`. No RLS changes needed — sessions write policy already covers admin.
+
 ## Session 19 — 2026-04-06 (1.25 hrs)
 **Duration:** 1.25 hours (1.5 elapsed minus 15 min away from desk)
 **Task:** Phase 5.17 — Student enrollment RLS + enrollment count bugs

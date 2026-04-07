@@ -252,6 +252,10 @@ INSERT INTO sessions (id, course_id, date, start_time, end_time, location, statu
 -- Set cancel reason on d003 (can't include in INSERT — column not in the insert list)
 UPDATE sessions SET cancel_reason = 'Weather — thunderstorm warning' WHERE id = 'd0000000-0000-0000-0000-000000000003';
 
+-- Session-level instructor override (5.2 test): d002 (c001 May 10) assigned to Sarah.
+-- d001 (May 9) stays NULL → "Course default" (Dave). d002 (May 10) shows Sarah as override.
+UPDATE sessions SET instructor_id = 'a0000000-0000-0000-0000-000000000003' WHERE id = 'd0000000-0000-0000-0000-000000000002';
+
 -- ============================================================
 -- ENROLLMENTS
 -- ============================================================
@@ -348,7 +352,7 @@ WHERE session_id = 'd0000000-0000-0000-0000-000000000003'
 --   c006 ASA 101 March              completed    past sessions, Eve enrolled
 --
 -- Sessions (d-series UUIDs)
---   d001-d002  c001 Weekend (May 9-10)
+--   d001-d002  c001 Weekend (May 9-10) — d001 instructor=NULL (course default=Dave), d002 instructor=Sarah (override)
 --   d003-d006  c002 Evening (May 6 CANCELLED, 13, 20, 27)
 --   d007       c004 Dinghy draft (Jun 7)
 --   d008       c005 Open Sailing cancelled (Apr 12)

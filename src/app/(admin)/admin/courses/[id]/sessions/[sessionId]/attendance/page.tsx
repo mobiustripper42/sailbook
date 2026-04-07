@@ -22,7 +22,8 @@ export default async function AttendancePage({
       *,
       course:courses!sessions_course_id_fkey (
         id, title, capacity,
-        course_types ( name, short_code )
+        course_types ( name, short_code ),
+        course_instructor:profiles!courses_instructor_id_fkey ( first_name, last_name )
       ),
       session_instructor:profiles!sessions_instructor_id_fkey ( first_name, last_name )
     `)
@@ -35,8 +36,10 @@ export default async function AttendancePage({
   const course = session.course as {
     id: string; title: string | null; capacity: number
     course_types: { name: string; short_code: string } | null
+    course_instructor: { first_name: string; last_name: string } | null
   }
   const sessionInstructor = session.session_instructor as { first_name: string; last_name: string } | null
+  const effectiveInstructor = sessionInstructor ?? course.course_instructor
 
   // Fetch attendance records with student profiles via enrollment
   const { data: attendanceRecords } = await supabase
@@ -89,7 +92,7 @@ export default async function AttendancePage({
           <p className="text-sm text-muted-foreground mt-1">
             {fmtTime(session.start_time)} – {fmtTime(session.end_time)}
             {session.location && ` · ${session.location}`}
-            {sessionInstructor && ` · ${sessionInstructor.first_name} ${sessionInstructor.last_name}`}
+            {effectiveInstructor && ` · ${effectiveInstructor.first_name} ${effectiveInstructor.last_name}`}
           </p>
         </div>
         <div className="flex items-center gap-2">

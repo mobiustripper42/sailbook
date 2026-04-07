@@ -16,6 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import AddSessionForm from '@/components/admin/add-session-form'
 import SessionActions from '@/components/admin/session-actions'
+import SessionInstructorSelect from '@/components/admin/session-instructor-select'
 import MakeupSessionForm from '@/components/admin/makeup-session-form'
 import CourseStatusActions from '@/components/admin/course-status-actions'
 import EnrollmentActions from '@/components/admin/enrollment-actions'
@@ -44,6 +45,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     `)
     .eq('course_id', id)
     .order('date')
+
+  const { data: instructors } = await supabase
+    .from('profiles')
+    .select('id, first_name, last_name')
+    .eq('is_instructor', true)
+    .order('last_name')
 
   // For cancelled sessions, check how many missed students still need a makeup
   const cancelledSessionIds = (sessions ?? []).filter((s) => s.status === 'cancelled').map((s) => s.id)
@@ -136,7 +143,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                         <TableCell className="whitespace-nowrap">{fmtTime(s.start_time)} – {fmtTime(s.end_time)}</TableCell>
                         <TableCell>{s.location ?? '—'}</TableCell>
                         <TableCell>
-                          {si ? `${si.first_name} ${si.last_name}` : 'Course default'}
+                          <SessionInstructorSelect
+                            sessionId={s.id}
+                            courseId={id}
+                            instructorId={s.instructor_id}
+                            instructors={instructors ?? []}
+                          />
                         </TableCell>
                         <TableCell>
                           <Badge

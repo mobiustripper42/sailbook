@@ -17,6 +17,7 @@ type CourseAttendance = {
     status: AttendanceStatus
     makeupSessionId: string | null
     cancelled: boolean
+    sessionInstructorName: string | null
   }[]
   missedCount: number
 }
@@ -31,6 +32,7 @@ async function getAttendanceHistory(userId: string) {
       makeup_session_id,
       session:sessions!session_attendance_session_id_fkey (
         id, date, start_time, end_time, location, status,
+        session_instructor:profiles!sessions_instructor_id_fkey ( first_name, last_name ),
         course:courses!sessions_course_id_fkey (
           id, title,
           course_types ( name ),
@@ -49,6 +51,7 @@ async function getAttendanceHistory(userId: string) {
   type RawSession = {
     id: string; date: string; start_time: string; end_time: string
     location: string | null; status: string
+    session_instructor: { first_name: string; last_name: string } | null
     course: {
       id: string; title: string | null
       course_types: { name: string } | null
@@ -82,6 +85,7 @@ async function getAttendanceHistory(userId: string) {
     const isMissedNeedingMakeup = row.status === 'missed' && !row.makeup_session_id
     if (isMissedNeedingMakeup) group.missedCount++
 
+    const si = session.session_instructor
     group.records.push({
       sessionId: session.id,
       sessionDate: session.date,
@@ -91,6 +95,7 @@ async function getAttendanceHistory(userId: string) {
       status: row.status as AttendanceStatus,
       makeupSessionId: row.makeup_session_id as string | null,
       cancelled: session.status === 'cancelled',
+      sessionInstructorName: si ? `${si.first_name} ${si.last_name}` : null,
     })
   }
 

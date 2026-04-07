@@ -13,6 +13,7 @@ type AttendanceRecord = {
   status: AttendanceStatus
   makeupSessionId: string | null
   cancelled: boolean
+  sessionInstructorName: string | null
 }
 
 type CourseAttendance = {
@@ -50,8 +51,9 @@ export default function CourseAttendanceCard({ course }: { course: CourseAttenda
             return (
               <div
                 key={r.sessionId}
-                className="flex items-center justify-between py-2 text-sm first:pt-0 last:pb-0"
+                className="py-2 text-sm first:pt-0 last:pb-0"
               >
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className={r.cancelled ? 'line-through text-muted-foreground' : ''}>
                     {fmtDate(r.sessionDate)} · {fmtTime(r.startTime)}–{fmtTime(r.endTime)}
@@ -76,6 +78,12 @@ export default function CourseAttendanceCard({ course }: { course: CourseAttenda
                   )}
                   <Badge variant={config.variant}>{config.label}</Badge>
                 </div>
+              </div>
+              {r.sessionInstructorName && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Instructor: {r.sessionInstructorName}
+                </p>
+              )}
               </div>
             )
           })}
