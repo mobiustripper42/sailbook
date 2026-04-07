@@ -101,7 +101,7 @@ Make it production-ready.
 - [x] 5.3 — Error handling — form validation, API errors, empty states `[effort: 3]` <!-- completed 2026-04-06 -->
 - [ ] 5.4 — Loading states and optimistic UI `[effort: 2]`
 - [ ] 5.5 — Mobile responsiveness pass (admin will use desktop, students may use phone) `[effort: 5]`
-- [ ] 5.6 — Seed data — create LTSC course types, Andy as admin, test instructor/student `[effort: 1]`
+- [x] 5.6 — Seed data — create LTSC course types, Andy as admin, test instructor/student `[effort: 1]` <!-- completed 2026-04-07 -->
 - [ ] 5.7 — End-to-end walkthrough with Andy `[effort: 4]`
 - [ ] 5.8 — Bug fixes from walkthrough `[effort: 5]`
 - [ ] 5.9 — Production environment variables on Vercel `[effort: 1]`

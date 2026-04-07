@@ -3,6 +3,26 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 24 — 2026-04-07
+**Duration:** 0.25 hours
+**Task:** Phase 5.6 — Demo seed data + walkthrough page
+**Completed:**
+- Renamed `docs/dev-seed.sql` → `docs/dev-seed-qa.sql` (preserved for QA edge-case testing)
+- Created `docs/demo-seed.sql` — clean, walkthrough-friendly LTSC data:
+  - 7 users: Andy (admin), Mike + Lisa + Chris (instructors), Sam + Alex + Jordan (students)
+  - Chris Marino is instructor + student (dual-role demo per PO suggestion)
+  - 5 course types incl. Dinghy Sailing for Adults + Open Sailing (+ inactive Advanced Racing)
+  - 6 courses: ASA 101 Weekend May (2/4), ASA 101 Evening May (1/4), ASA 103 (no instructor, triggers warning), ASA 101 April (completed w/ attendance history), Dinghy draft, Open Sailing July (5 Wed sessions Jul 1–29 @ 17:30–21:00)
+  - Alex has pending enrollment (shows in admin alert), Jordan has none (use for live demo enrollment)
+- Rewrote `src/app/dev/page.tsx` — replaced QA edge-case reference with guided walkthrough:
+  - 4 sections: Admin Tour (8 parts), Student Experience (3 parts), Instructor View (2 parts), Dual Role (2 parts)
+  - Each part shows account email, numbered steps, and what to expect
+- Updated PROJECT_PLAN.md: 5.6 marked complete
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 5.7 — End-to-end walkthrough with Andy. Load demo-seed.sql first. Start at /dev.
+**Context:** Wednesdays in July 2026: Jul 1, 8, 15, 22, 29 — all confirmed. Chris's dual-role routing: lands on /instructor/dashboard (instructor takes priority), can manually nav to /student/dashboard since is_student=true.
+
 ## Session 23 — 2026-04-07 16:10–16:34 (0.25 hrs)
 **Duration:** 0.25 hours
 **Task:** Phase 5.21 — Student attendance page: enrollment status badge
