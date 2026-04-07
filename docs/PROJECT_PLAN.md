@@ -130,8 +130,8 @@ Make it production-ready.
 | 2 — Student Browse | — | 8–10 | ~14 | — | Pre-tracking |
 | 3 — Attendance | 21 | 12–16 | ~5.5 | ~0.26 | First tracked phase (3.5/3.6 deferred V2) |
 | 4 — Instructor | 10 | 4–6 | 1.75 | 0.175 | 4/4 complete |
-| 5 — Polish | 49 | 7–9 | 10.25 (in progress) | 0.64 (so far) | 16 pts done (5.1+5.17+5.2+5.3+5.18+5.19+5.20+5.21). Forecast: 0.64 hrs/pt x 33 remaining = ~21.1 hrs |
-| **Total** | **80** | **48–66** | **~43.50** | — | Phases 0–4 actual: ~33.25 hrs. Phase 5 in progress: 10.25 hrs. |
+| 5 — Polish | 49 | 7–9 | 10.75 (in progress) | 0.64 (so far) | 17 pts done (5.1+5.17+5.2+5.3+5.18+5.19+5.20+5.21+5.6). Forecast: 0.64 hrs/pt x 32 remaining = ~20.5 hrs |
+| **Total** | **80** | **48–66** | **~44.00** | — | Phases 0–4 actual: ~33.25 hrs. Phase 5 in progress: 10.75 hrs. |
 
 ### Cuttable tasks (if time is tight)
 - **5.12** — Student calendar view. Explicitly labeled "stretch goal" in the task. Cut first.

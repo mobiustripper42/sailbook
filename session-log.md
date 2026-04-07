@@ -4,7 +4,7 @@ Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
 ## Session 24 — 2026-04-07
-**Duration:** 0.25 hours
+**Duration:** 0.50 hours
 **Task:** Phase 5.6 — Demo seed data + walkthrough page
 **Completed:**
 - Renamed `docs/dev-seed.sql` → `docs/dev-seed-qa.sql` (preserved for QA edge-case testing)
