@@ -3,7 +3,22 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 26 — 2026-04-09 [start]–
+## Session 26 — 2026-04-09 09:00–10:30 (1.50 hrs)
+**Duration:** 1.50 hours
+**Task:** Phase 5.5 continued + housekeeping
+**Completed:**
+- Fixed cross-origin dev server block: `next.config.ts` `allowedDevOrigins: ['192.168.50.202']` — this was why phone showed stale JS (bundles were blocked, browser ran cache)
+- `next.config.ts` server actions `allowedOrigins` updated to include 192.168.50.202
+- Course browse (`/student/courses`): `Card size="sm"`, Date/Dates pluralized
+- Course detail (`/student/courses/[id]`): Session/Sessions pluralized
+- `card.tsx`: `rounded-2xl` → `rounded-lg` globally (all roles)
+- 5.5 marked complete in PROJECT_PLAN.md
+- Added tasks: 5.23 (Admin mobile, effort 3), 5.24 (Instructor mobile, effort 2), 5.25 (UX/UI design review, effort 3)
+- Committed: `bc21861`
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 5.7 — End-to-end walkthrough with Andy. Load demo-seed.sql first. Start at /dev.
+**Context:** Phone dev testing now works reliably. Restart dev server after config changes. `allowedDevOrigins` is the key — without it, JS bundles are blocked cross-origin and React doesn't hydrate. Card `size="sm"` is the standard for all student-facing cards. `rounded-lg` is now global.
 
 ## Session 25 — 2026-04-08 07:30–08:30 (1.00 hr)
 **Duration:** 1.00 hour
