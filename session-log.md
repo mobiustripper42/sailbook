@@ -3,6 +3,19 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 27 — 2026-04-09 (1.00 hr)
+**Duration:** 1.00 hour
+**Task:** 5.8, 5.9, 5.10 — Bug fixes, Vercel env vars, custom domain
+**Completed:**
+- 5.8 (scoped): Instructor session roster — swapped `email` → `phone` column. Query, type, header, and display all updated. Null-safe (`?? '—'`). `src/app/(instructor)/instructor/sessions/[id]/page.tsx`
+- 5.9: Walked through Vercel env var setup — `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` set in Vercel production. No service role key needed (all RLS, no server-side admin client).
+- 5.10: Custom domain `sailbook.live` — purchased at Namecheap, DNS managed via Cloudflare. Records (A + CNAME, gray cloud) added in Cloudflare, Namecheap NS pointed to Cloudflare. Propagating.
+- Moved `/kill-this` and `/its-dead` skills from project-local `.claude/skills/` to global `~/.claude/skills/` — available in all projects going forward.
+**In Progress:** `sailbook.live` DNS propagation (Vercel domain verification pending)
+**Blocked:** Nothing
+**Next Steps:** Confirm `sailbook.live` is green in Vercel. Then 5.7 (Andy walkthrough) and 5.11 (duplicate course).
+**Context:** Instructor roster now shows phone, not email — intentional per Andy's request. Skills must be in `~/.claude/skills/` to be globally available; project-level skills only load for that project. DNS changes: Cloudflare records first, then update Namecheap NS — never the other way.
+
 ## Session 26 — 2026-04-09 09:00–10:30 (1.50 hrs)
 **Duration:** 1.50 hours
 **Task:** Phase 5.5 continued + housekeeping

@@ -20,7 +20,7 @@ type StudentRow = {
   student_id: string
   first_name: string
   last_name: string
-  email: string
+  phone: string | null
   attendance_status: AttendanceStatus | null
   makeup_session_id: string | null
   makeup_from_date: string | null
@@ -67,7 +67,7 @@ export default async function InstructorSessionRosterPage({
     .from('enrollments')
     .select(`
       id, student_id, status,
-      profiles!enrollments_student_id_fkey ( first_name, last_name, email )
+      profiles!enrollments_student_id_fkey ( first_name, last_name, phone )
     `)
     .eq('course_id', course.id)
     .neq('status', 'cancelled')
@@ -100,7 +100,7 @@ export default async function InstructorSessionRosterPage({
     const profile = e.profiles as unknown as {
       first_name: string
       last_name: string
-      email: string
+      phone: string | null
     }
     const attendance = attendanceMap.get(e.id)
     return {
@@ -108,7 +108,7 @@ export default async function InstructorSessionRosterPage({
       student_id: e.student_id,
       first_name: profile.first_name,
       last_name: profile.last_name,
-      email: profile.email,
+      phone: profile.phone,
       attendance_status: (attendance?.status as AttendanceStatus) ?? null,
       makeup_session_id: attendance?.makeup_session_id ?? null,
       makeup_from_date: makeupMap.get(e.id) ?? null,
@@ -163,7 +163,7 @@ export default async function InstructorSessionRosterPage({
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
                   <TableHead>Attendance</TableHead>
                 </TableRow>
               </TableHeader>
@@ -181,7 +181,7 @@ export default async function InstructorSessionRosterPage({
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {s.email}
+                      {s.phone ?? '—'}
                     </TableCell>
                     <TableCell>
                       {s.attendance_status ? (

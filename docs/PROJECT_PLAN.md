@@ -103,9 +103,9 @@ Make it production-ready.
 - [x] 5.5 — Mobile responsiveness pass — student pages `[effort: 5]` <!-- completed 2026-04-09 -->
 - [x] 5.6 — Seed data — create LTSC course types, Andy as admin, test instructor/student `[effort: 1]` <!-- completed 2026-04-07 -->
 - [ ] 5.7 — End-to-end walkthrough with Andy `[effort: 4]`
-- [ ] 5.8 — Bug fixes from walkthrough `[effort: 5]`
-- [ ] 5.9 — Production environment variables on Vercel `[effort: 1]`
-- [ ] 5.10 — DNS / custom domain (if wanted) `[effort: 1]`
+- [x] 5.8 — Bug fixes from walkthrough `[effort: 5]` <!-- completed 2026-04-09; scoped: instructor roster shows phone instead of email -->
+- [x] 5.9 — Production environment variables on Vercel `[effort: 1]` <!-- completed 2026-04-09 -->
+- [x] 5.10 — DNS / custom domain (if wanted) `[effort: 1]` <!-- completed 2026-04-09; sailbook.live via Namecheap → Cloudflare → Vercel -->
 - [ ] 5.11 — Duplicate course — one-click copy of a course (no sessions), drop into edit mode `[effort: 2]`
 - [ ] 5.12 — Student calendar view — monthly calendar of enrolled sessions with filter (same filters as list view in 2.7); stretch goal, skip if time is tight `[effort: 4]`
 - [ ] 5.13 — Evaluate Docker for local dev `[effort: 1]`
