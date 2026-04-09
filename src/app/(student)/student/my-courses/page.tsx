@@ -23,7 +23,7 @@ export default async function MyCoursesPage() {
     .neq('status', 'cancelled')
     .order('enrolled_at', { ascending: false })
 
-  if (error) return <div className="p-8 text-destructive">{error.message}</div>
+  if (error) return <div className="text-destructive">{error.message}</div>
 
   type RawCourse = {
     id: string
@@ -53,7 +53,7 @@ export default async function MyCoursesPage() {
   })
 
   return (
-    <div className="p-8">
+    <div>
       <div className="mb-6">
         <h1 className="text-2xl font-semibold">My Courses</h1>
       </div>

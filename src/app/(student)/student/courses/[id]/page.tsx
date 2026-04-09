@@ -92,7 +92,7 @@ export default async function StudentCourseDetailPage({
   const cancelledCount = sessions?.filter((s) => s.status === 'cancelled').length ?? 0
 
   return (
-    <div className="p-8 space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-3xl">
       <div>
         <Link
           href="/student/courses"
@@ -133,7 +133,7 @@ export default async function StudentCourseDetailPage({
           <p className="font-medium">{course.price != null ? `$${course.price}` : '—'}</p>
         </div>
         <div>
-          <p className="text-muted-foreground">Sessions</p>
+          <p className="text-muted-foreground">{(sessions?.length ?? 0) === 1 ? 'Session' : 'Sessions'}</p>
           <p className="font-medium">
             {sessions?.length ?? 0}
             {cancelledCount > 0 && (

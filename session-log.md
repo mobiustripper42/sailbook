@@ -3,6 +3,29 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 26 — 2026-04-09 [start]–
+
+## Session 25 — 2026-04-08 07:30–08:30 (1.00 hr)
+**Duration:** 1.00 hour
+**Task:** Phase 5.5 — Mobile responsiveness pass (student dashboard + my-courses)
+**Completed:**
+- PM status check — confirmed must-ship scope (5.5, 5.7, 5.8, 5.9, 5.11), recommended cuts (5.12, 5.13 cut; 5.14–5.16, 5.10, 5.22 deferred)
+- 5.5 (partial) — Mobile nav + padding pass on all student pages:
+  - `src/components/student/mobile-nav-drawer.tsx` (new) — sticky top bar + hamburger + slide-in drawer for mobile; `pointer-events-none` when closed to prevent touch intercept on Android Chrome
+  - `src/app/(student)/layout.tsx` — sidebar `hidden md:flex`, new content column wraps `MobileNavDrawer` + main; `p-4 sm:p-8` on `<main>` (layout-level padding, DEC-017 pattern)
+  - All 5 student pages — stripped outer `p-8`; error fallbacks stripped too
+  - `src/app/(student)/student/dashboard/page.tsx` — `fmtDate` → short format (`weekday: short, month: short`); upcoming courses row stacks on mobile (`flex-col sm:flex-row`)
+  - `src/components/student/my-courses-list.tsx` — session rows: date+time on one line, location `pl-1 truncate` below; `Card size="sm"` for reduced padding; `space-y-2`
+  - `src/app/(auth)/layout.tsx` — `min-h-screen` → `min-h-dvh`, `items-start pt-16 sm:items-center sm:pt-0` fixes login form pushed off-screen by keyboard on Android
+- Architect consulted on padding pattern → layout-level padding approved (DEC-017)
+**In Progress:** Nothing
+**Blocked:** Phone click-through issue (hamburger + filter buttons not responding) — suspected Turbopack stale bundle cache; `pointer-events-none` applied to drawer as defensive fix; restart dev server to resolve
+**Next Steps:**
+- Confirm click-through works after dev server restart on phone
+- 5.5 still has remaining pages (browse, course detail, attendance) — or move on to 5.7 with Andy
+- Commit this work (not yet committed)
+**Context:** Layout padding is now DEC-017: one place in `(student)/layout.tsx <main>`. Any new student page must NOT add outer `p-*` — layout provides it. The `size="sm"` prop on Card reduces all padding to 16px (from 24px) — use it in student-facing views. Android Chrome may cache JS bundles aggressively on local dev; incognito/Brave private tab doesn't fully bypass — restart dev server is the reliable fix.
+
 ## Session 24 — 2026-04-07
 **Duration:** 0.50 hours
 **Task:** Phase 5.6 — Demo seed data + walkthrough page

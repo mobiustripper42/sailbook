@@ -1329,37 +1329,37 @@ WHERE e.student_id = 'a0000000-0000-0000-0000-000000000005'
 
 #### course-type-actions — Activate/Deactivate (optimistic)
 
-- [ ] Go to `/admin/course-types`
-- [ ] Advanced Racing (b0000000-...-005) is inactive — button reads **"Activate"**
-- [ ] With Slow 3G throttle: click **Activate**
-- [ ] **Immediately**: button label flips to **"Deactivate"**, button is disabled during pending
-- [ ] After server responds: label stays "Deactivate" (persisted)
-- [ ] Click **Deactivate** — label flips back to **"Activate"** immediately
-- [ ] Reload → Advanced Racing shows "Activate" (deactivated state persisted)
+- [ x] Go to `/admin/course-types`
+- [ x] Advanced Racing (b0000000-...-005) is inactive — button reads **"Activate"**
+- [ x] With Slow 3G throttle: click **Activate**
+- [ x] **Immediately**: button label flips to **"Deactivate"**, button is disabled during pending
+- [ x] After server responds: label stays "Deactivate" (persisted)
+- [ x] Click **Deactivate** — label flips back to **"Activate"** immediately
+- [ x] Reload → Advanced Racing shows "Activate" (deactivated state persisted)
 
 #### course-type-actions — revert on error
 
-- [ ] Set DevTools to Offline
-- [ ] Click **Activate** on any course type → label flips to "Deactivate" immediately
-- [ ] After error: label reverts to **"Activate"**, error message appears below in `text-destructive`
+- [x ] Set DevTools to Offline
+- [x ] Click **Activate** on any course type → label flips to "Deactivate" immediately
+- [x ] After error: label reverts to **"Activate"**, error message appears below in `text-destructive`
 
 ---
 
 #### instructor-actions — Activate/Deactivate (optimistic)
 
-- [ ] Go to `/admin/instructors`
-- [ ] Dave (dave@ltsc.test) is active — button reads **"Deactivate"**
-- [ ] With Slow 3G throttle: click **Deactivate**
-- [ ] **Immediately**: button label flips to **"Activate"**, button is disabled during pending
-- [ ] After server responds: label stays "Activate" (persisted)
-- [ ] Click **Activate** → label flips back to **"Deactivate"** immediately
-- [ ] Reload → Dave shows "Deactivate" (active state restored)
+- [x ] Go to `/admin/instructors`
+- [x ] Dave (dave@ltsc.test) is active — button reads **"Deactivate"**
+- [x ] With Slow 3G throttle: click **Deactivate**
+- [x ] **Immediately**: button label flips to **"Activate"**, button is disabled during pending
+- [x ] After server responds: label stays "Activate" (persisted)
+- [x ] Click **Activate** → label flips back to **"Deactivate"** immediately
+- [x ] Reload → Dave shows "Deactivate" (active state restored)
 
 #### instructor-actions — revert on error
 
-- [ ] Set DevTools to Offline
-- [ ] Click **Deactivate** on any instructor → label flips to "Activate" immediately
-- [ ] After error: label reverts to **"Deactivate"**, error message appears below in `text-destructive`
+- [x] Set DevTools to Offline
+- [x ] Click **Deactivate** on any instructor → label flips to "Activate" immediately
+- [x ] After error: label reverts to **"Deactivate"**, error message appears below in `text-destructive`
 
 ---
 

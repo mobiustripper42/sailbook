@@ -8,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 function fmtDate(d: string) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
+    weekday: 'short',
+    month: 'short',
     day: 'numeric',
   })
 }
@@ -74,7 +74,7 @@ export default async function StudentDashboard() {
     .slice(0, 4)
 
   return (
-    <div className="p-8 space-y-8 max-w-3xl">
+    <div className="space-y-8 max-w-3xl">
       <div>
         <h1 className="text-2xl font-semibold">
           {firstName ? `Welcome back, ${firstName}.` : 'Dashboard'}
@@ -151,7 +151,7 @@ export default async function StudentDashboard() {
               const next = upcomingSessions[0]
               const instructor = course?.instructor
               return (
-                <div key={enrollment.id} className="px-4 py-3 flex items-center justify-between gap-4">
+                <div key={enrollment.id} className="px-4 py-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <Link
@@ -169,7 +169,7 @@ export default async function StudentDashboard() {
                       {upcomingSessions.length} session{upcomingSessions.length !== 1 ? 's' : ''} remaining
                     </p>
                   </div>
-                  <div className="text-xs text-muted-foreground text-right shrink-0">
+                  <div className="text-xs text-muted-foreground sm:text-right shrink-0">
                     <p>{fmtDate(next.date)}</p>
                     <p>{fmtTime(next.start_time)}</p>
                   </div>

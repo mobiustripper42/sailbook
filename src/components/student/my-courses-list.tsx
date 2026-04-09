@@ -140,8 +140,8 @@ export default function MyCoursesList({ courses }: Props) {
       {view === 'card' && (
         <div className="grid gap-4 sm:grid-cols-2">
           {filtered.map((c) => (
-            <Card key={c.enrollmentId}>
-              <CardHeader className="pb-3">
+            <Card key={c.enrollmentId} size="sm">
+              <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-2">
                   <CardTitle className="text-base leading-snug">{c.title}</CardTitle>
                   <Badge variant={enrollmentStatusVariant(c.enrollmentStatus)} className="shrink-0">
@@ -150,7 +150,7 @@ export default function MyCoursesList({ courses }: Props) {
                 </div>
                 <p className="text-sm text-muted-foreground">{c.typeName}</p>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm">
+              <CardContent className="space-y-2 text-sm">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Instructor</span>
                   <span className="text-foreground">{c.instructorName ?? '—'}</span>
@@ -162,19 +162,16 @@ export default function MyCoursesList({ courses }: Props) {
                   </div>
                 )}
                 {c.sessions.length > 0 && (
-                  <div className="border-t pt-3 space-y-1.5">
+                  <div className="border-t pt-2 space-y-1">
                     {c.sessions.map((s) => {
                       const isPast = s.date < today
                       return (
-                        <div
-                          key={s.id}
-                          className={`flex justify-between text-xs ${isPast ? 'text-muted-foreground' : ''}`}
-                        >
-                          <span>{fmtDate(s.date)}</span>
-                          <span>
-                            {fmtTime(s.start_time)} – {fmtTime(s.end_time)}
-                            {s.location ? ` · ${s.location}` : ''}
-                          </span>
+                        <div key={s.id} className={`text-xs ${isPast ? 'text-muted-foreground' : ''}`}>
+                          <div className="flex justify-between gap-2">
+                            <span>{fmtDate(s.date)}</span>
+                            <span className="whitespace-nowrap">{fmtTime(s.start_time)} – {fmtTime(s.end_time)}</span>
+                          </div>
+                          {s.location && <p className="pl-1 truncate">{s.location}</p>}
                         </div>
                       )
                     })}

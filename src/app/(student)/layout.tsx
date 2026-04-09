@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/app/(auth)/actions'
 import StudentNav from '@/components/student/student-nav'
+import MobileNavDrawer from '@/components/student/mobile-nav-drawer'
 
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient()
@@ -17,11 +18,11 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const name = `${user.user_metadata?.first_name ?? ''} ${user.user_metadata?.last_name ?? ''}`.trim() || user.email
+  const name = (`${user.user_metadata?.first_name ?? ''} ${user.user_metadata?.last_name ?? ''}`.trim() || user.email) ?? ''
 
   return (
     <div className="flex min-h-screen">
-      <aside className="w-56 border-r bg-white flex flex-col shrink-0">
+      <aside className="hidden md:flex w-56 border-r bg-white flex-col shrink-0">
         <div className="px-4 py-5 border-b">
           <Link href="/student/dashboard" className="font-semibold text-sm tracking-tight">
             SailBook
@@ -41,9 +42,12 @@ export default async function StudentLayout({ children }: { children: React.Reac
           </form>
         </div>
       </aside>
-      <main className="flex-1 min-w-0 bg-background">
-        {children}
-      </main>
+      <div className="flex-1 min-w-0 flex flex-col">
+        <MobileNavDrawer name={name} />
+        <main className="flex-1 bg-background p-4 sm:p-8">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }

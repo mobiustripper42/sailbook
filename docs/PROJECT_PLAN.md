@@ -100,7 +100,7 @@ Make it production-ready.
 - [x] 5.2 — Instructor swap on individual sessions (AS-9) `[effort: 2]` <!-- completed 2026-04-06 -->
 - [x] 5.3 — Error handling — form validation, API errors, empty states `[effort: 3]` <!-- completed 2026-04-06 -->
 - [x] 5.4 — Loading states and optimistic UI `[effort: 2]` <!-- completed 2026-04-07 -->
-- [ ] 5.5 — Mobile responsiveness pass (admin will use desktop, students may use phone) `[effort: 5]`
+- [x] 5.5 — Mobile responsiveness pass — student pages `[effort: 5]` <!-- completed 2026-04-09 -->
 - [x] 5.6 — Seed data — create LTSC course types, Andy as admin, test instructor/student `[effort: 1]` <!-- completed 2026-04-07 -->
 - [ ] 5.7 — End-to-end walkthrough with Andy `[effort: 4]`
 - [ ] 5.8 — Bug fixes from walkthrough `[effort: 5]`
@@ -118,6 +118,9 @@ Make it production-ready.
 - [x] 5.20 — Student course browse: show enrollment status on course cards — enrolled students see "Enrolled" or "Pending" badge and a "View" button instead of "View & Enroll" `[effort: 2]` <!-- completed 2026-04-07 -->
 - [x] 5.21 — Student attendance page: show enrollment status badge (Enrolled / Pending) per course alongside session attendance badges `[effort: 1]` <!-- completed 2026-04-07 -->
 - [ ] 5.22 — Navigation loading indicator: router progress bar (`@bprogress/next`) — covers all link navigation globally, no per-route work `[effort: 1]`
+- [ ] 5.23 — Mobile responsiveness pass — admin pages `[effort: 3]`
+- [ ] 5.24 — Mobile responsiveness pass — instructor pages `[effort: 2]`
+- [ ] 5.25 — UX/UI design review session — typography, spacing, color, component consistency across all roles `[effort: 3]`
 
 **Demo:** Andy walks through full flow — creates a course, student registers, instructor views roster, session gets cancelled, makeup scheduled. Everything works.
 

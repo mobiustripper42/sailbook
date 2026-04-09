@@ -120,12 +120,12 @@ export default async function StudentAttendancePage() {
   if (!user) redirect('/login')
 
   const { error, data: courses } = await getAttendanceHistory(user.id)
-  if (error) return <div className="p-8 text-destructive">{error}</div>
+  if (error) return <div className="text-destructive">{error}</div>
 
   const totalMissed = courses.reduce((sum, c) => sum + c.missedCount, 0)
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Attendance</h1>
 
       {totalMissed > 0 && (
