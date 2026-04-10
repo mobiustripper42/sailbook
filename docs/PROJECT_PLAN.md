@@ -1,7 +1,7 @@
 # SailBook — Project Plan
 
 **Target:** May 15, 2026
-**Today:** April 6, 2026
+**Today:** April 9, 2026
 **Available:** 40 days (6 weeks)
 
 ---
@@ -102,25 +102,26 @@ Make it production-ready.
 - [x] 5.4 — Loading states and optimistic UI `[effort: 2]` <!-- completed 2026-04-07 -->
 - [x] 5.5 — Mobile responsiveness pass — student pages `[effort: 5]` <!-- completed 2026-04-09 -->
 - [x] 5.6 — Seed data — create LTSC course types, Andy as admin, test instructor/student `[effort: 1]` <!-- completed 2026-04-07 -->
-- [ ] 5.7 — End-to-end walkthrough with Andy `[effort: 4]`
+- [x] 5.7 — End-to-end walkthrough with Andy `[effort: 4]` <!-- completed 2026-04-09; 1 hr stakeholder review with Andy -->
 - [x] 5.8 — Bug fixes from walkthrough `[effort: 5]` <!-- completed 2026-04-09; scoped: instructor roster shows phone instead of email -->
 - [x] 5.9 — Production environment variables on Vercel `[effort: 1]` <!-- completed 2026-04-09 -->
 - [x] 5.10 — DNS / custom domain (if wanted) `[effort: 1]` <!-- completed 2026-04-09; sailbook.live via Namecheap → Cloudflare → Vercel -->
-- [ ] 5.11 — Duplicate course — one-click copy of a course (no sessions), drop into edit mode `[effort: 2]`
-- [ ] 5.12 — Student calendar view — monthly calendar of enrolled sessions with filter (same filters as list view in 2.7); stretch goal, skip if time is tight `[effort: 4]`
-- [ ] 5.13 — Evaluate Docker for local dev `[effort: 1]`
+- [~] 5.11 — Duplicate course — one-click copy of a course (no sessions), drop into edit mode `[effort: 2]` **(deferred to V2 — PO decision 2026-04-09)**
+- [~] 5.12 — Student calendar view — monthly calendar of enrolled sessions with filter (same filters as list view in 2.7); stretch goal, skip if time is tight `[effort: 4]` **(deferred to V2 — PO decision 2026-04-09)**
+- [~] 5.13 — Evaluate Docker for local dev `[effort: 1]` **(deferred to V2 — PO decision 2026-04-09; planning note: user intends Docker as the QA environment strategy — log as V2 planning discussion item)**
 - [ ] 5.14 — Admin UI for role management — add/remove admin, instructor, student flags from profile edit pages (may defer to V2) `[effort: 3]`
-- [ ] 5.15 — OAuth login — Google (and others if Supabase makes it easy); email/password remains the fallback `[effort: 2]`
-- [ ] 5.16 — Development database — separate Supabase project for dev, seed data pipeline, so prod isn't polluted with test data `[effort: 3]`
+- [~] 5.15 — OAuth login — Google (and others if Supabase makes it easy); email/password remains the fallback `[effort: 2]` **(deferred to V2 — PO decision 2026-04-09)**
+- [~] 5.16 — Development database — separate Supabase project for dev, seed data pipeline, so prod isn't polluted with test data `[effort: 3]` **(deferred to V2 — PO decision 2026-04-09; paired with 5.13 Docker strategy)**
 - [x] 5.17 — Bug: student enrollment RLS — missing INSERT/UPDATE policy on session_attendance means attendance records silently fail to create on enrollment `[effort: 2]` <!-- completed 2026-04-06 -->
 - [x] 5.18 — Dashboard: restore pending confirmation total count + "Showing N of M" notice when > 10 enrollments `[effort: 1]` <!-- completed 2026-04-07 -->
 - [x] 5.19 — Student enrollment status badge — show "Pending confirmation" on course detail, my-courses, and attendance pages when enrollment status is `registered` (vs `confirmed`) `[effort: 1]` <!-- completed 2026-04-07 -->
 - [x] 5.20 — Student course browse: show enrollment status on course cards — enrolled students see "Enrolled" or "Pending" badge and a "View" button instead of "View & Enroll" `[effort: 2]` <!-- completed 2026-04-07 -->
 - [x] 5.21 — Student attendance page: show enrollment status badge (Enrolled / Pending) per course alongside session attendance badges `[effort: 1]` <!-- completed 2026-04-07 -->
-- [ ] 5.22 — Navigation loading indicator: router progress bar (`@bprogress/next`) — covers all link navigation globally, no per-route work `[effort: 1]`
+- [x] 5.22 — Navigation loading indicator: router progress bar (`@bprogress/next`) — covers all link navigation globally, no per-route work `[effort: 1]` <!-- completed 2026-04-09; 0.25 hrs -->
 - [ ] 5.23 — Mobile responsiveness pass — admin pages `[effort: 3]`
 - [ ] 5.24 — Mobile responsiveness pass — instructor pages `[effort: 2]`
-- [ ] 5.25 — UX/UI design review session — typography, spacing, color, component consistency across all roles `[effort: 3]`
+- [~] 5.25 — UX/UI design review session — typography, spacing, color, component consistency across all roles `[effort: 3]` **(deferred to V2 — PO decision 2026-04-09)**
+- [~] 5.26 — Bug: setting an instructor to inactive does not remove them from assigned sessions; either reassign sessions to course default or filter inactive instructors out of session queries `[effort: 2]` **(deferred to V2 — logged 2026-04-09)**
 
 **Demo:** Andy walks through full flow — creates a course, student registers, instructor views roster, session gets cancelled, makeup scheduled. Everything works.
 
@@ -134,16 +135,19 @@ Make it production-ready.
 | 2 — Student Browse | — | 8–10 | ~14 | — | Pre-tracking |
 | 3 — Attendance | 21 | 12–16 | ~5.5 | ~0.26 | First tracked phase (3.5/3.6 deferred V2) |
 | 4 — Instructor | 10 | 4–6 | 1.75 | 0.175 | 4/4 complete |
-| 5 — Polish | 49 | 7–9 | 10.75 (in progress) | 0.64 (so far) | 17 pts done (5.1+5.17+5.2+5.3+5.18+5.19+5.20+5.21+5.6). Forecast: 0.64 hrs/pt x 32 remaining = ~20.5 hrs |
-| **Total** | **80** | **48–66** | **~44.00** | — | Phases 0–4 actual: ~33.25 hrs. Phase 5 in progress: 10.75 hrs. |
+| 5 — Polish | 49 | 7–9 | 17.75 (in progress) | 0.49 (so far) | 36 pts done (5.1–5.10+5.17–5.21). V1 remaining: 5.14+5.16+5.22+5.23+5.24 = 10 pts. 5.11/5.12/5.13/5.15/5.25 deferred V2 (12 pts cut). Forecast: 0.49 hrs/pt x 10 remaining = ~4.9 hrs |
+| **Total** | **68** | **48–66** | **~51.00** | — | Phases 0–4 actual: ~33.25 hrs. Phase 5 in progress: 17.75 hrs. 12 effort pts cut to V2 (5.11/5.12/5.13/5.15/5.25). |
 
 ### Cuttable tasks (if time is tight)
-- **5.12** — Student calendar view. Explicitly labeled "stretch goal" in the task. Cut first.
-- **5.13** — Docker evaluation. Nice-to-have process improvement, zero user value.
+- **5.16** — Dev database. Useful but not required for launch; Andy can test on prod with a test account.
 - **5.14** — Admin role management UI. Can manage roles via Supabase dashboard or SQL for V1.
-- **5.10** — Custom domain. Vercel subdomain works fine for launch.
+- **5.23/5.24** — Admin/instructor mobile pass. Andy operates on desktop; instructors primarily too.
 - ~~**3.5/3.6** — Cross-course makeup.~~ **Cut — deferred to V2 per PO (2026-04-04).**
-- **5.4** — Loading states / optimistic UI. Functional without it, just feels slower.
+- ~~**5.11** — Duplicate course.~~ **Cut — deferred to V2 per PO (2026-04-09).**
+- ~~**5.12** — Student calendar view.~~ **Cut — deferred to V2 per PO (2026-04-09).**
+- ~~**5.13** — Docker evaluation.~~ **Cut — deferred to V2 per PO (2026-04-09). V2 planning note: intended as QA environment strategy.**
+- ~~**5.15** — OAuth login.~~ **Cut — deferred to V2 per PO (2026-04-09).**
+- ~~**5.25** — UX/UI design review.~~ **Cut — deferred to V2 per PO (2026-04-09).**
 
 ---
 

@@ -10,6 +10,7 @@ const links = [
   { href: '/admin/course-types', label: 'Course Types' },
   { href: '/admin/instructors', label: 'Instructors' },
   { href: '/admin/students', label: 'Students' },
+  { href: '/admin/users', label: 'Users' },
   { href: '/admin/missed-sessions', label: 'Missed Sessions' },
 ]
 
