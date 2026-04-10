@@ -109,7 +109,7 @@ Make it production-ready.
 - [~] 5.11 — Duplicate course — one-click copy of a course (no sessions), drop into edit mode `[effort: 2]` **(deferred to V2 — PO decision 2026-04-09)**
 - [~] 5.12 — Student calendar view — monthly calendar of enrolled sessions with filter (same filters as list view in 2.7); stretch goal, skip if time is tight `[effort: 4]` **(deferred to V2 — PO decision 2026-04-09)**
 - [~] 5.13 — Evaluate Docker for local dev `[effort: 1]` **(deferred to V2 — PO decision 2026-04-09; planning note: user intends Docker as the QA environment strategy — log as V2 planning discussion item)**
-- [ ] 5.14 — Admin UI for role management — add/remove admin, instructor, student flags from profile edit pages (may defer to V2) `[effort: 3]`
+- [x] 5.14 — Admin UI for role management — /admin/users list + /admin/users/[id]/edit with role checkboxes and self-demotion guard `[effort: 3]` <!-- completed 2026-04-09 -->
 - [~] 5.15 — OAuth login — Google (and others if Supabase makes it easy); email/password remains the fallback `[effort: 2]` **(deferred to V2 — PO decision 2026-04-09)**
 - [~] 5.16 — Development database — separate Supabase project for dev, seed data pipeline, so prod isn't polluted with test data `[effort: 3]` **(deferred to V2 — PO decision 2026-04-09; paired with 5.13 Docker strategy)**
 - [x] 5.17 — Bug: student enrollment RLS — missing INSERT/UPDATE policy on session_attendance means attendance records silently fail to create on enrollment `[effort: 2]` <!-- completed 2026-04-06 -->
@@ -135,7 +135,7 @@ Make it production-ready.
 | 2 — Student Browse | — | 8–10 | ~14 | — | Pre-tracking |
 | 3 — Attendance | 21 | 12–16 | ~5.5 | ~0.26 | First tracked phase (3.5/3.6 deferred V2) |
 | 4 — Instructor | 10 | 4–6 | 1.75 | 0.175 | 4/4 complete |
-| 5 — Polish | 49 | 7–9 | 17.75 (in progress) | 0.49 (so far) | 36 pts done (5.1–5.10+5.17–5.21). V1 remaining: 5.14+5.16+5.22+5.23+5.24 = 10 pts. 5.11/5.12/5.13/5.15/5.25 deferred V2 (12 pts cut). Forecast: 0.49 hrs/pt x 10 remaining = ~4.9 hrs |
+| 5 — Polish | 49 | 7–9 | 18.50 (in progress) | 0.47 (so far) | 40 pts done (5.1–5.10+5.14+5.17–5.22). V1 remaining: 5.23+5.24 = 5 pts (both cuttable). 5.11/5.12/5.13/5.15/5.16/5.25 deferred V2. Forecast: ~2.4 hrs remaining |
 | **Total** | **68** | **48–66** | **~51.00** | — | Phases 0–4 actual: ~33.25 hrs. Phase 5 in progress: 17.75 hrs. 12 effort pts cut to V2 (5.11/5.12/5.13/5.15/5.25). |
 
 ### Cuttable tasks (if time is tight)

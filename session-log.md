@@ -3,6 +3,22 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 28 — 2026-04-09 19:28–20:13 (0.75 hrs)
+**Duration:** 0.75 hours
+**Task:** 5.22 (nav loading indicator) + 5.14 (admin role management UI)
+**Completed:**
+- 5.22: @bprogress/next nav progress bar — NavProgress wrapper in root layout, --progress-bar CSS var in globals.css
+- 5.14: /admin/users — all-users list with client-side search + role filter (All/Admin/Instructor/Student); `src/app/(admin)/admin/users/page.tsx` + `src/components/admin/users-list.tsx`
+- 5.14: /admin/users/[id]/edit — sectioned form (All, Instructor placeholder, Roles checkboxes); `src/app/(admin)/admin/users/[id]/edit/page.tsx` + `src/components/admin/user-edit-form.tsx`
+- 5.14: `updateUserProfile` server action with self-demotion guard on `is_admin`; `src/actions/profiles.ts`
+- Users nav link added to admin sidebar; `src/components/admin/admin-nav.tsx`
+- 5.16 deferred to V2 (paired with 5.13 Docker strategy)
+- 5.26 logged: inactive instructor not removed from assigned sessions (V2 bug)
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 5.23 (admin mobile pass, effort 3) or 5.24 (instructor mobile pass, effort 2) — both are cuttable per PM; confirm with user whether to tackle or cut
+**Context:** Role checkboxes use native HTML inputs (not shadcn) with `accent-foreground`. Self-demotion guard: disabled Admin checkbox sends no FormData value so `is_admin=false`; server action catches this and returns error. code-review flagged admin layout doesn't verify `is_admin` (pre-existing gap) — RLS is the only backstop, acceptable for single-admin V1.
+
 ## Session 27 — 2026-04-09 (1.00 hr)
 **Duration:** 1.00 hour
 **Task:** 5.8, 5.9, 5.10 — Bug fixes, Vercel env vars, custom domain
