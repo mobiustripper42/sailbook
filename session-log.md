@@ -3,6 +3,18 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 29 — 2026-04-09 20:36–20:45 (0.25 hrs)
+**Duration:** 0.25 hours
+**Task:** Debug /kill-this and /its-dead not appearing as slash commands
+**Completed:**
+- Confirmed files exist in correct locations: `~/.claude/commands/kill-this.md`, `~/.claude/commands/its-dead.md`, `~/.claude/skills/kill-this/SKILL.md`, `~/.claude/skills/its-dead/SKILL.md`
+- Files are correctly formatted; skills ARE loading into Claude's context (visible in system-reminder)
+- Diagnosis: Claude Code likely needs a restart to pick up new `commands/` files; alternatively, project-level `.claude/commands/` may be needed
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** After restart, test `/kill-this` — if still not working, try adding commands to project-level `.claude/commands/` directory
+**Context:** Two separate systems: `~/.claude/skills/` → Skill tool (Claude invokes); `~/.claude/commands/` → user slash commands (tab complete + invoke). Both exist and look correct. Restart should fix it.
+
 ## Session 28 — 2026-04-09 19:28–20:13 (0.75 hrs)
 **Duration:** 0.75 hours
 **Task:** 5.22 (nav loading indicator) + 5.14 (admin role management UI)

@@ -118,8 +118,8 @@ Make it production-ready.
 - [x] 5.20 — Student course browse: show enrollment status on course cards — enrolled students see "Enrolled" or "Pending" badge and a "View" button instead of "View & Enroll" `[effort: 2]` <!-- completed 2026-04-07 -->
 - [x] 5.21 — Student attendance page: show enrollment status badge (Enrolled / Pending) per course alongside session attendance badges `[effort: 1]` <!-- completed 2026-04-07 -->
 - [x] 5.22 — Navigation loading indicator: router progress bar (`@bprogress/next`) — covers all link navigation globally, no per-route work `[effort: 1]` <!-- completed 2026-04-09; 0.25 hrs -->
-- [ ] 5.23 — Mobile responsiveness pass — admin pages `[effort: 3]`
-- [ ] 5.24 — Mobile responsiveness pass — instructor pages `[effort: 2]`
+- [~] 5.23 — Mobile responsiveness pass — admin pages `[effort: 3]` **(deferred to V2 — PO decision 2026-04-09; hamburger menu sufficient for desktop-primary admin role)**
+- [~] 5.24 — Mobile responsiveness pass — instructor pages `[effort: 2]` **(deferred to V2 — PO decision 2026-04-09; hamburger menu sufficient for desktop-primary instructor role)**
 - [~] 5.25 — UX/UI design review session — typography, spacing, color, component consistency across all roles `[effort: 3]` **(deferred to V2 — PO decision 2026-04-09)**
 - [~] 5.26 — Bug: setting an instructor to inactive does not remove them from assigned sessions; either reassign sessions to course default or filter inactive instructors out of session queries `[effort: 2]` **(deferred to V2 — logged 2026-04-09)**
 
@@ -135,13 +135,14 @@ Make it production-ready.
 | 2 — Student Browse | — | 8–10 | ~14 | — | Pre-tracking |
 | 3 — Attendance | 21 | 12–16 | ~5.5 | ~0.26 | First tracked phase (3.5/3.6 deferred V2) |
 | 4 — Instructor | 10 | 4–6 | 1.75 | 0.175 | 4/4 complete |
-| 5 — Polish | 49 | 7–9 | 18.50 (in progress) | 0.47 (so far) | 40 pts done (5.1–5.10+5.14+5.17–5.22). V1 remaining: 5.23+5.24 = 5 pts (both cuttable). 5.11/5.12/5.13/5.15/5.16/5.25 deferred V2. Forecast: ~2.4 hrs remaining |
-| **Total** | **68** | **48–66** | **~51.00** | — | Phases 0–4 actual: ~33.25 hrs. Phase 5 in progress: 17.75 hrs. 12 effort pts cut to V2 (5.11/5.12/5.13/5.15/5.25). |
+| 5 — Polish | 49 | 7–9 | 18.50 | 0.47 | COMPLETE. 40 V1 pts done (5.1–5.10, 5.14, 5.17–5.22). 17 pts deferred V2 (5.11/5.12/5.13/5.15/5.16/5.23/5.24/5.25/5.26). |
+| **Total** | **68** | **48–66** | **~51.75** | — | Phase 5 complete 2026-04-09. All phases done. V1 ships May 15. |
 
 ### Cuttable tasks (if time is tight)
 - **5.16** — Dev database. Useful but not required for launch; Andy can test on prod with a test account.
 - **5.14** — Admin role management UI. Can manage roles via Supabase dashboard or SQL for V1.
-- **5.23/5.24** — Admin/instructor mobile pass. Andy operates on desktop; instructors primarily too.
+- ~~**5.23** — Admin mobile pass.~~ **Cut — deferred to V2 per PO (2026-04-09). Hamburger menu sufficient.**
+- ~~**5.24** — Instructor mobile pass.~~ **Cut — deferred to V2 per PO (2026-04-09). Hamburger menu sufficient.**
 - ~~**3.5/3.6** — Cross-course makeup.~~ **Cut — deferred to V2 per PO (2026-04-04).**
 - ~~**5.11** — Duplicate course.~~ **Cut — deferred to V2 per PO (2026-04-09).**
 - ~~**5.12** — Student calendar view.~~ **Cut — deferred to V2 per PO (2026-04-09).**
