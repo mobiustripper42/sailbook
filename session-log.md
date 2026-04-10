@@ -3,6 +3,19 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 30 — 2026-04-09 20:45–21:09 (0.25 hrs)
+**Duration:** 0.25 hours
+**Task:** V1 close-out — defer 5.23/5.24, tag v1.0.0, ship to main
+**Completed:**
+- Removed duplicate `kill-this` / `its-dead` command files from `~/.claude/commands/` — skills in `~/.claude/skills/` are canonical
+- Deferred 5.23 (admin mobile) and 5.24 (instructor mobile) to V2 — hamburger menu sufficient for desktop-primary users
+- Phase 5 marked complete in `docs/PROJECT_PLAN.md`; velocity report generated (0.47 hrs/pt phase, 0.38 lifetime)
+- Merged `dev` → `main`, pushed, tagged `v1.0.0` — "SailBook V1 — LTSC launch build, May 15 2026"
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** V1 is shipped. Before V2: (1) push `dev` branch (`git push origin dev`), (2) confirm sailbook.live DNS/HTTPS is clean, (3) brief Andy on `/dev` walkthrough page. V2 planning should start with an Andy feedback session, then a standalone planning doc (outside Claude Code), then return here with `/architect` for structural decisions.
+**Context:** v1.0.0 tag is on GitHub. All deferred V2 items logged in `PROJECT_PLAN.md` with `[~]`. 52.75 total project hours across all phases.
+
 ## Session 29 — 2026-04-09 20:36–20:45 (0.25 hrs)
 **Duration:** 0.25 hours
 **Task:** Debug /kill-this and /its-dead not appearing as slash commands
