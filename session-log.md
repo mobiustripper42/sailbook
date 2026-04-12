@@ -3,6 +3,19 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 33 — 2026-04-11 23:28–23:44 (0.25 hrs)
+**Duration:** 0.25 hours | **Points:** 5 pts
+**Task:** Phase 0.2–0.3 — Finish local Supabase init + baseline migration
+**Completed:**
+- 0.2 done (was already complete coming in — confirmed and marked off)
+- 0.3: Ran `supabase login`, linked to remote project `sbbcfnivtnakgvgtchre`
+- Dumped prod schema to `supabase/migrations/000_baseline.sql` (28 policies + helper functions)
+- Verified `supabase db reset` applies migration cleanly — local stack healthy
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.4 — Create `supabase/seed.sql`. Rebuild from demo-seed data (dev-seed-qa is stale). Add Playwright test users. Verify seed runs automatically on `supabase db reset`.
+**Context:** Docker image pull on first reset is normal (one-time cache). Subsequent resets are fast/local only. `supabase/seed.sql` warned as missing — expected, not yet created.
+
 ## Session 32 — 2026-04-11 23:09–23:23 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 2 pts
 **Task:** Phase 0.2 — Initialize local Supabase
