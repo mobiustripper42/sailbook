@@ -3,7 +3,17 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 32 — 2026-04-11 23:09 [open]
+## Session 32 — 2026-04-11 23:09–23:23 (0.25 hrs)
+**Duration:** 0.25 hours | **Points:** 2 pts
+**Task:** Phase 0.2 — Initialize local Supabase
+**Completed:**
+- `supabase init` run — `supabase/config.toml` created with `project_id = "sailbook"`
+- Discussed Supabase CLI install options (brew/npm/direct download)
+- Confirmed `supabase start` output format and how to verify stack is running (`supabase status`, `docker ps`)
+**In Progress:** 0.2 — CLI install method not yet chosen; `supabase start` not yet run
+**Blocked:** Nothing
+**Next Steps:** Install Supabase CLI (`brew install supabase/tap/supabase` or `npm install -g supabase`), then `supabase start` — first run pulls Docker images, watch for port conflict on 5432
+**Context:** `supabase init` already done — do NOT re-run. `project_id = "sailbook"`. Ports: API 54321, DB 54322, Studio 54323.
 
 ## Session 31 — 2026-04-11 21:06–21:15 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 2 pts
