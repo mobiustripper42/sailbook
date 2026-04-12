@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 38 — 2026-04-12 00:17 [open]
+
 ## Session 37 — 2026-04-12 00:08–00:15 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 3 pts
 **Task:** Phase 0.7 — pgTAP RLS tests for profiles

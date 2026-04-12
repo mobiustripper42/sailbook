@@ -1,0 +1,200 @@
+-- RLS tests for course_types, courses, sessions
+-- Policies under test:
+--   course_types: admin all | authenticated reads active only
+--   courses:      admin all | student reads active+enrolled | instructor reads assigned
+--   sessions:     admin all | student reads active-course+enrolled | instructor reads assigned
+--
+-- Run with: supabase test db
+
+BEGIN;
+SELECT plan(13);
+
+-- Reuse authenticate() helper from 01_rls_profiles.sql.
+-- If running this file standalone, recreate it here.
+CREATE SCHEMA IF NOT EXISTS tests;
+
+CREATE OR REPLACE FUNCTION tests.authenticate(
+  p_uid            uuid,
+  p_is_admin       boolean DEFAULT false,
+  p_is_instructor  boolean DEFAULT false,
+  p_is_student     boolean DEFAULT false
+) RETURNS void SECURITY DEFINER LANGUAGE plpgsql AS $$
+BEGIN
+  PERFORM set_config('request.jwt.claims', json_build_object(
+    'sub',           p_uid::text,
+    'role',          'authenticated',
+    'user_metadata', json_build_object(
+      'is_admin',      p_is_admin,
+      'is_instructor', p_is_instructor,
+      'is_student',    p_is_student
+    )
+  )::text, true);
+END;
+$$;
+
+-- ============================================================
+-- Seed reference
+--   Courses: c001 (ASA101 Weekend May, active, Mike)
+--            c002 (ASA101 Evening May, active, Chris)
+--            c003 (ASA103 June, active, no instructor)
+--            c004 (ASA101 April, completed, Mike)
+--            c005 (Dinghy, draft, Lisa)
+--            c006 (Open Sailing July, active, Mike)
+--   Sessions: d001-d002 (c001), d003-d006 (c002), d007-d008 (c004),
+--             d009 (c005 draft), d010-d014 (c006) = 14 total
+--   Sam enrolled: c001 (confirmed), c002 (confirmed), c004 (completed)
+--   Mike assigned: c001, c004, c006
+--   Lisa assigned: c005
+-- ============================================================
+
+-- ============================================================
+-- COURSE TYPES
+-- ============================================================
+
+-- Anon: no policy grants SELECT to anon → 0 rows
+SET LOCAL ROLE anon;
+
+SELECT is(
+  (SELECT count(*)::int FROM public.course_types),
+  0,
+  'anon: cannot read course_types'
+);
+
+RESET ROLE;
+
+-- Authenticated student: sees only active course_types (4 of 5)
+SELECT tests.authenticate('a1000000-0000-0000-0000-000000000005', p_is_student => true);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  (SELECT count(*)::int FROM public.course_types),
+  4,
+  'authenticated: sees 4 active course_types (Advanced Racing is inactive)'
+);
+
+RESET ROLE;
+
+-- Admin: sees all 5 course_types including inactive
+SELECT tests.authenticate('a1000000-0000-0000-0000-000000000001', p_is_admin => true);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  (SELECT count(*)::int FROM public.course_types),
+  5,
+  'admin: sees all 5 course_types including inactive'
+);
+
+RESET ROLE;
+
+-- ============================================================
+-- COURSES
+-- ============================================================
+
+-- Admin: sees all 6 courses (any status)
+SELECT tests.authenticate('a1000000-0000-0000-0000-000000000001', p_is_admin => true);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  (SELECT count(*)::int FROM public.courses),
+  6,
+  'admin: sees all 6 courses regardless of status'
+);
+
+UPDATE public.courses SET notes = 'admin edit test'
+WHERE id = 'c1000000-0000-0000-0000-000000000001';
+
+SELECT is(
+  (SELECT notes FROM public.courses WHERE id = 'c1000000-0000-0000-0000-000000000001'),
+  'admin edit test',
+  'admin: can update any course'
+);
+
+RESET ROLE;
+
+-- Student (sam): sees active courses (c001,c002,c003,c006) + enrolled completed (c004) = 5
+-- Does NOT see draft c005 (not active, not enrolled)
+SELECT tests.authenticate('a1000000-0000-0000-0000-000000000005', p_is_student => true);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  (SELECT count(*)::int FROM public.courses),
+  5,
+  'student: sees 5 courses (4 active + enrolled completed c004, not draft c005)'
+);
+
+SELECT is(
+  (SELECT count(*)::int FROM public.courses WHERE id = 'c1000000-0000-0000-0000-000000000005'),
+  0,
+  'student: cannot see draft course (c005 Dinghy)'
+);
+
+RESET ROLE;
+
+-- Instructor (mike): sees only assigned courses (c001, c004, c006 = 3)
+SELECT tests.authenticate('a1000000-0000-0000-0000-000000000002', p_is_instructor => true);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  (SELECT count(*)::int FROM public.courses),
+  3,
+  'instructor (mike): sees only assigned courses (c001, c004, c006)'
+);
+
+SELECT is(
+  (SELECT count(*)::int FROM public.courses WHERE id = 'c1000000-0000-0000-0000-000000000003'),
+  0,
+  'instructor (mike): cannot see c003 (active but assigned to no one)'
+);
+
+RESET ROLE;
+
+-- ============================================================
+-- SESSIONS
+-- ============================================================
+
+-- Admin: sees all 14 sessions
+SELECT tests.authenticate('a1000000-0000-0000-0000-000000000001', p_is_admin => true);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  (SELECT count(*)::int FROM public.sessions),
+  14,
+  'admin: sees all 14 sessions'
+);
+
+RESET ROLE;
+
+-- Student (sam): sees sessions for active courses (c001,c002,c003,c006 = 11 sessions)
+-- + enrolled courses (c001,c002,c004 adds d007,d008) = 13 total
+-- Does NOT see d009 (draft c005)
+SELECT tests.authenticate('a1000000-0000-0000-0000-000000000005', p_is_student => true);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  (SELECT count(*)::int FROM public.sessions),
+  13,
+  'student: sees 13 sessions (active-course + enrolled, not draft c005 session d009)'
+);
+
+SELECT is(
+  (SELECT count(*)::int FROM public.sessions WHERE id = 'd1000000-0000-0000-0000-000000000009'),
+  0,
+  'student: cannot see draft course session (d009)'
+);
+
+RESET ROLE;
+
+-- Instructor (mike): sees assigned sessions only (c001+c004+c006 = 2+2+5 = 9)
+Select tests.authenticate('a1000000-0000-0000-0000-000000000002', p_is_instructor => true);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  (SELECT count(*)::int FROM public.sessions),
+  9,
+  'instructor (mike): sees 9 assigned sessions (c001:2, c004:2, c006:5)'
+);
+
+RESET ROLE;
+
+SELECT * FROM finish();
+ROLLBACK;
