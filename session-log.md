@@ -3,6 +3,19 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 39 — 2026-04-12 00:27–00:34 (0.25 hrs)
+**Duration:** 0.25 hours | **Points:** 5 pts
+**Task:** Phase 0.9 — pgTAP RLS tests for enrollments and session_attendance
+**Completed:**
+- Created `supabase/tests/03_rls_enrollments.sql` — 16 tests
+- enrollments: anon blocked, admin sees all 6 + can update, sam sees own 3 (not alex's), sam can INSERT own / throws 42501 on another student's, mike sees 5 (c001+c004+c006), chris sees 1 (c002)
+- session_attendance: anon blocked, admin sees all 17, sam sees own 8 (not alex's), mike sees 13 (assigned sessions), chris sees 4
+- `supabase test db` passes 48/48 (smoke + profiles + courses + enrollments)
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.10 — RLS audit: review all policies for gaps found (or not found) by the pgTAP suite. Compare against spec. Flag anything suspicious before moving to Playwright in 0.11.
+**Context:** throws_ok 2-arg form matches error message, not test name — always use 4-arg form: throws_ok(sql, '42501', NULL, description). RLS violation SQLSTATE = 42501. 48/48 tests passing; full RLS coverage for profiles, course_types, courses, sessions, enrollments, session_attendance.
+
 ## Session 38 — 2026-04-12 00:17–00:22 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 5 pts
 **Task:** Phase 0.8 — pgTAP RLS tests for course_types, courses, sessions
