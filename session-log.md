@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 44 — 2026-04-12 18:08 [open]
+
 ## Session 43 — 2026-04-12 17:14–17:59 (0.75 hrs)
 **Duration:** 0.75 hours | **Points:** 8 pts
 **Task:** Phase 0.13 — Playwright test suite for admin course CRUD
