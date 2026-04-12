@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 37 — 2026-04-12 00:08 [open]
+
 ## Session 36 — 2026-04-12 00:03–00:06 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 3 pts
 **Task:** Phase 0.6 — pgTAP setup
