@@ -53,9 +53,9 @@ Everything needed to develop safely. No user-facing changes.
 | 0.15 | Playwright test suite — attendance + cancellation + makeup | 5 | The operational core. |
 | 0.16 | Playwright test suite — instructor views | 3 | Dashboard, roster, session detail. Read-only pages. |
 | 0.17 | Save @ui-reviewer agent spec to `.claude/agents/ui-reviewer.md` | 2 | Tuned to SailBook design language. |
-| 0.18 | Write session skills — `/its-alive`, `/pause-this`, `/restart-this`, update `/kill-this`, `/its-dead` | 2 | Five skill files in `~/.claude/skills/`. Specs already written. |
-| 0.19 | Update CLAUDE.md — micro workflow, migration protocol, test commands, new agents, conventions | 3 | V2 conventions. Migration protocol included (no dashboard edits, everything in migrations). |
-| 0.20 | Update all docs — SPEC.md, DECISIONS.md, AGENTS.md, BRAND.md for V2 scope | 3 | Andy's philosophy note in BRAND.md. New DECs. V2 scope in SPEC.md. |
+| 0.18 | ~~Write session skills — `/its-alive`, `/pause-this`, `/restart-this`, update `/kill-this`, `/its-dead`~~ | 2 | [x] <!-- completed pre-project --> Five skill files in `~/.claude/skills/`. Done before V2 work began. |
+| 0.19 | ~~Update CLAUDE.md — micro workflow, migration protocol, test commands, new agents, conventions~~ | 3 | [x] <!-- completed pre-project --> V2 conventions, migration protocol. Done before V2 work began. |
+| 0.20 | ~~Update all docs — SPEC.md, DECISIONS.md, AGENTS.md, BRAND.md for V2 scope~~ | 3 | [x] <!-- completed pre-project --> Andy's philosophy note in BRAND.md. New DECs. V2 scope in SPEC.md. Done before V2 work began. |
 
 **Phase 0 total: 70 pts**
 **Projected hours (at 0.38 hr/pt): ~27 hrs**

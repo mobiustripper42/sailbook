@@ -3,6 +3,10 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Retroactive credit — 2026-04-12
+**Duration:** 0.75 hrs | **Points:** 8 pts (0.18 + 0.19 + 0.20)
+Tasks 0.18, 0.19, 0.20 completed before V2 work formally began: session skills, CLAUDE.md update, docs update.
+
 ## Session 41 — 2026-04-12 08:39–08:46 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 3 pts
 **Task:** Phase 0.11 — Install Playwright + MCP servers, configure viewports
