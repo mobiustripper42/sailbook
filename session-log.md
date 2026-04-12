@@ -3,7 +3,19 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 38 — 2026-04-12 00:17 [open]
+## Session 38 — 2026-04-12 00:17–00:22 (0.25 hrs)
+**Duration:** 0.25 hours | **Points:** 5 pts
+**Task:** Phase 0.8 — pgTAP RLS tests for course_types, courses, sessions
+**Completed:**
+- Created `supabase/tests/02_rls_courses.sql` — 13 tests
+- course_types: anon blocked, authenticated sees active only (4/5), admin sees all (5/5)
+- courses: admin sees all 6, student sees active+enrolled (5, not draft c005), instructor (mike) sees only assigned (3)
+- sessions: admin sees all 14, student sees 13 (not d009 draft), instructor sees 9
+- `supabase test db` passes 32/32 (smoke + profiles + courses)
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.9 — pgTAP RLS tests for enrollments and session_attendance. Highest-risk tables. Same authenticate() pattern. Test student sees own, instructor sees assigned course enrollments, admin sees all.
+**Context:** RLS policies combine with OR — student sees active courses UNION enrolled courses (explains why sam sees completed c004). Session count math: active courses (11 sessions) + enrolled adds d007-d008 = 13 total.
 
 ## Session 37 — 2026-04-12 00:08–00:15 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 3 pts

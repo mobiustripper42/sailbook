@@ -43,7 +43,7 @@ Everything needed to develop safely. No user-facing changes.
 | 0.5 | ~~Verify: `supabase db reset` → app runs against local Supabase~~ | 2 | [x] <!-- completed 2026-04-12 --> Login confirmed, seed users visible, local DB active. |
 | 0.6 | ~~pgTAP setup — install extension, create `supabase/tests/` structure, verify pipeline~~ | 3 | [x] <!-- completed 2026-04-12 --> 00_smoke.sql passes 7/7. Pipeline confirmed. |
 | 0.7 | ~~pgTAP test suite — RLS tests for `profiles` table (all roles × CRUD)~~ | 3 | [x] <!-- completed 2026-04-12 --> 12 tests, 19/19 total passing. authenticate() helper established. |
-| 0.8 | pgTAP test suite — RLS tests for `course_types`, `courses`, `sessions` | 5 | Admin write, public read (active only), instructor scoped read. |
+| 0.8 | ~~pgTAP test suite — RLS tests for `course_types`, `courses`, `sessions`~~ | 5 | [x] <!-- completed 2026-04-12 --> 13 tests, 32/32 total passing. |
 | 0.9 | pgTAP test suite — RLS tests for `enrollments`, `session_attendance` | 5 | Highest risk tables. Student sees own, admin sees all, instructor sees assigned. |
 | 0.10 | RLS audit — fix gaps found by pgTAP tests | 3 | Buffer for 0.7–0.9. The V1 audit that never happened. |
 | 0.11 | Install Playwright + Playwright MCP + a11y-mcp-server, configure viewports (375/768/1440) | 3 | `npm init playwright@latest`. MCP config in `.claude/settings.json`. |
