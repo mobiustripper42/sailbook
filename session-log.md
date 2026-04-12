@@ -3,7 +3,17 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 31 — 2026-04-11 21:06 [open]
+## Session 31 — 2026-04-11 21:06–21:15 (0.25 hrs)
+**Duration:** 0.25 hours | **Points:** 2 pts
+**Task:** Phase 0.1 — Docker Desktop install
+**Completed:**
+- Docker Desktop 29.3.1 installed on Windows with WSL2 integration enabled
+- Verified `docker --version` and `docker ps` work in WSL2 without sudo — clean
+- Task 0.1 complete
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.2 — `supabase init` then `supabase start` (first run pulls Docker images, may take a few minutes)
+**Context:** Docker is fully operational in WSL2. `supabase start` will be the first real test — watch for port conflicts on 5432 (postgres).
 
 ## Session 30 — 2026-04-09 20:45–21:09 (0.25 hrs)
 **Duration:** 0.25 hours
