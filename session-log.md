@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 34 — 2026-04-11 23:47 [open]
+
 ## Session 33 — 2026-04-11 23:28–23:44 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 5 pts
 **Task:** Phase 0.2–0.3 — Finish local Supabase init + baseline migration
