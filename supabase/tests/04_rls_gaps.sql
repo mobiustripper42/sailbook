@@ -4,14 +4,15 @@
 --   - Instructors cannot INSERT enrollments
 --   - Students cannot escalate enrollment status (completed/confirmed)
 --   - Students CAN cancel their own enrollment
---   - Students cannot escalate session_attendance status to present/absent
+--   - Students cannot escalate session_attendance status to present or absent
 --   - get_enrolled_course_ids excludes cancelled enrollments (c004 sessions invisible
---     after cancelling a completed-course enrollment)
+--     after cancelling a non-completed enrollment that was the only route to c004)
+--   - Students cannot cancel a completed enrollment
 --
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(9);
+SELECT plan(11);
 
 CREATE SCHEMA IF NOT EXISTS tests;
 
@@ -156,16 +157,30 @@ SELECT throws_ok(
   'student: cannot set own attendance status to present'
 );
 
+SELECT throws_ok(
+  $$ UPDATE public.session_attendance
+     SET status = 'absent'
+     WHERE enrollment_id = 'e1000000-0000-0000-0000-000000000003'
+       AND session_id   = 'd1000000-0000-0000-0000-000000000003' $$,
+  '42501',
+  NULL,
+  'student: cannot set own attendance status to absent'
+);
+
 RESET ROLE;
 
 -- ============================================================
 -- get_enrolled_course_ids excludes cancelled enrollments
 --
 -- c004 is a completed course (not active). Sam's e004 is the only reason
--- she can see c004 sessions (d007, d008). After cancelling e004, those
--- sessions should disappear — the active-courses policy does not apply
--- to completed courses.
+-- she can see c004 sessions (d007, d008). We reset e004 to 'confirmed'
+-- (via postgres, bypassing RLS) so sam can cancel it, then verify those
+-- sessions disappear — the active-courses policy does not cover completed courses.
 -- ============================================================
+
+-- Set up: downgrade e004 from 'completed' to 'confirmed' as postgres so sam can cancel it
+UPDATE public.enrollments SET status = 'confirmed'
+WHERE id = 'e1000000-0000-0000-0000-000000000004';
 
 SELECT tests.authenticate('a1000000-0000-0000-0000-000000000005', p_is_student => true);
 SET LOCAL ROLE authenticated;
@@ -177,10 +192,30 @@ SELECT is(
   (SELECT count(*)::int FROM public.sessions
    WHERE course_id = 'c1000000-0000-0000-0000-000000000004'),
   0,
-  'student: cancelling completed-course enrollment removes session visibility (c004 sessions gone)'
+  'student: cancelling enrollment removes session visibility for non-active course (c004 sessions gone)'
 );
 
 RESET ROLE;
+
+-- ============================================================
+-- Students cannot cancel a completed enrollment (USING guard)
+-- ============================================================
+
+-- Set up: ensure e005 (jordan/c004) is completed so USING blocks the update
+SELECT tests.authenticate('a1000000-0000-0000-0000-000000000007', p_is_student => true);
+SET LOCAL ROLE authenticated;
+
+-- e005 has status='completed' — USING clause blocks this (silently, 0 rows updated)
+UPDATE public.enrollments SET status = 'cancelled'
+WHERE id = 'e1000000-0000-0000-0000-000000000005';
+
+RESET ROLE;
+
+SELECT is(
+  (SELECT status FROM public.enrollments WHERE id = 'e1000000-0000-0000-0000-000000000005'),
+  'completed',
+  'student: cannot cancel a completed enrollment (USING blocks update, row unchanged)'
+);
 
 SELECT * FROM finish();
 ROLLBACK;
