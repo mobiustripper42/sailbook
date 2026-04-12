@@ -3,7 +3,17 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 34 — 2026-04-11 23:47 [open]
+## Session 34 — 2026-04-11 23:47–23:55 (0.25 hrs)
+**Duration:** 0.25 hours | **Points:** 2 pts
+**Task:** Phase 0.4 — Seed data (supabase/seed.sql)
+**Completed:**
+- Created `supabase/seed.sql` from demo-seed.sql — 7 demo users + 3 Playwright test users (pw_admin, pw_instructor, pw_student; f1 UUID block)
+- Fixed two local Supabase quirks: `extensions.crypt()`/`extensions.gen_salt()` (pgcrypto in extensions schema, not public) and schema-qualified all table names (Supabase batches seed SQL, SET search_path doesn't carry across batches)
+- `supabase db reset` runs clean — migration + seed both apply without errors
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.5 — Smoke test. `supabase db reset` → `npm run dev` → log in as each role (andy, mike, sam) → verify correct dashboard loads against local DB.
+**Context:** Seed table names must be schema-qualified (public.profiles, etc.) — bare names fail because Supabase splits seed.sql into batches and search_path doesn't persist. crypt/gen_salt must use extensions.crypt()/extensions.gen_salt(). All passwords: qwert12345.
 
 ## Session 33 — 2026-04-11 23:28–23:44 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 5 pts
