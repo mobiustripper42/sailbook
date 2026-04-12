@@ -4,7 +4,8 @@
 **Decision:** No separate backend server. React/Next.js talks directly to Supabase.
 **Why:** Andy's spec had React → Express → Supabase. The Express layer is ~40% of the build and is entirely CRUD plumbing. Supabase Auth + Row Level Security replaces JWT middleware and role checks. Eliminates backend hosting (Railway). For a single-school MVP with straightforward business logic, the API layer adds cost with no benefit.
 **Tradeoff:** Business logic lives in Postgres RLS policies and database functions. Harder to unit test. Migration away from Supabase is more involved later.
-**Revisit if:** Business logic becomes complex enough to warrant a dedicated API layer.
+**V2 update:** Stripe webhook requires one API route (`app/api/webhooks/stripe/route.ts`). This is a mailbox, not an API layer. DEC-001 survives — a single webhook endpoint does not justify a backend server.
+**Revisit if:** Business logic becomes complex enough to warrant a dedicated API layer, or if the number of webhook endpoints exceeds 3–4.
 
 ## DEC-002: Next.js 14+ over bare React 18
 **Decision:** Use Next.js with App Router instead of Create React App.
@@ -14,6 +15,7 @@
 ## DEC-003: Single profiles table instead of separate users + students
 **Decision:** One `profiles` table for all roles, extending Supabase Auth.
 **Why:** Admin, instructor, and student share the same auth flow. Role is a column, not a table. Simplifies queries, RLS policies, and the auth model. Adding roles later is a one-line migration.
+**V2 update:** Boolean flags (is_admin, is_instructor, is_student) replaced single role column in V1 Phase 2 to support multi-role users (e.g., Chris = instructor + student).
 **Tradeoff:** Students have nullable fields they don't use (and vice versa for instructors).
 
 ## DEC-004: course_type → course → session(s) data model
@@ -24,6 +26,7 @@
 ## DEC-005: Enrollment at course level, attendance at session level
 **Decision:** Students enroll in courses, not individual sessions. Attendance tracked per session via `session_attendance`.
 **Why:** Maps to how sailing schools actually operate — you sign up for "ASA 101 May 17–18," not for Saturday separately from Sunday. Attendance tracking per session enables cancellation/makeup logic: who missed what, and where they made it up.
+**V2 note:** Drop-in courses (Open Sailing) may use per-session enrollment. See DEC-TBD (drop-in enrollment model).
 
 ## DEC-006: Cross-course makeup support
 **Decision:** `makeup_session_id` in session_attendance can reference any session, not just sessions within the same course.
@@ -32,6 +35,7 @@
 ## DEC-007: Instructor on both course and session
 **Decision:** Default `instructor_id` on courses, optional override `instructor_id` on sessions.
 **Why:** Typically one instructor teaches the whole course. But LTSC wants the ability to swap instructors mid-course for specific sessions. NULL on session means use course default.
+**V2 note:** UI should clearly show "Using course instructor" on sessions with NULL instructor_id, not just a blank field. Andy flagged this as confusing in V1 review.
 
 ## DEC-008: No schools table (single-tenant)
 **Decision:** Dropped Andy's `schools` table and all `school_id` foreign keys.
@@ -45,9 +49,10 @@
 **Decision:** Admin manually creates makeup sessions and assigns students. No automation.
 **Why:** Automated suggestions require understanding availability, cross-course compatibility, and student preferences — complex logic that can wait. Manual flow covers the need for season one. Automated is a fast-follow.
 
-## DEC-011: Price display only, no payment processing
+## DEC-011: Price display only, no payment processing (V1)
 **Decision:** `price` field on courses for display. No checkout, no Stripe, no payment status tracking.
-**Why:** Shipping by May 15. Payment processing adds Stripe integration, webhook handling, refund logic, and PCI compliance concerns. The school can collect payment outside the app (cash, Venmo, check) for season one. Schema can accommodate payment fields later without refactoring.
+**Why:** Shipping by May 15. Payment processing adds Stripe integration, webhook handling, refund logic, and PCI compliance concerns. The school can collect payment outside the app (cash, Venmo, check) for season one.
+**V2 update:** Superseded. Phase 2 adds Stripe Checkout Sessions. Enrollment `confirmed` status tied to payment. See DEC-TBD (pessimistic inventory).
 
 ## DEC-012: Vercel for hosting
 **Decision:** Vercel free tier for frontend hosting.
@@ -55,29 +60,38 @@
 
 ## DEC-013: experience_level is static in V1
 **Decision:** `profiles.experience_level` is set at registration and never updated automatically.
-**Why:** Automatically updating skill level based on completed courses is non-trivial — it requires defining progression rules per course type, handling partial completions, and surfacing it meaningfully in the UI. Out of scope for May 15.
-**Known limitation:** A student who completes ASA 101 still shows as 'beginner' until manually updated. Admin can edit profiles directly in Supabase for now.
-**V2 path:** This field is the seed of the student skill tracking feature already on the V2 list. When that ships, completed enrollments drive automatic level progression.
+**Why:** Automatically updating skill level based on completed courses is non-trivial — it requires defining progression rules per course type, handling partial completions, and surfacing it meaningfully in the UI.
+**V2 update:** Experience level moves to generic codes table (DEC-TBD). Still static — automatic progression deferred to Phase 7 (Skills & Tracking).
 
-## DEC-014: Enrollment status lifecycle — manual confirmation in V1
-**Decision:** Enrollment statuses are `registered → confirmed → cancelled / completed`. In V1, admin manually moves a student from `registered` to `confirmed` after receiving payment (cash, Venmo, check). `confirmed` is the payment signal for V1 — no separate `paid` boolean needed.
-**Why:** Payment processing is out of scope for May 15. The status column provides the right hook for a future payment integration without any schema change — a Stripe webhook would simply set `status = 'confirmed'` on successful charge.
-**V2 path:** Payment flow sets `confirmed` automatically. A 24-hour hold period (registered but not yet confirmed/charged) is a natural extension of this model.
+## DEC-014: Enrollment status lifecycle
+**Decision:** Enrollment statuses are `registered → confirmed → cancelled / completed`. In V1, admin manually moves a student from `registered` to `confirmed` after receiving payment (cash, Venmo, check). `confirmed` is the payment signal.
+**V2 update:** With Stripe, lifecycle becomes `registered → pending_payment → confirmed → cancelled / completed`. Stripe webhook sets `confirmed` automatically. `pending_payment` includes a hold timer — spot held for configurable duration, released on timeout. See DEC-TBD (pessimistic inventory).
 
 ## DEC-015: Server action error handling — two patterns, both return errors
 **Decision:** Two error patterns based on how the action is called. No `throw` in server actions.
-
 1. **Form actions** (used with `useActionState`, accept `prevState`): return `string | null`. `null` means success. A string is the error message displayed inline by the form.
 2. **Button-triggered actions** (called via `useTransition`): return `{ error: string | null }`. Callers check the result and show inline feedback.
-
-**Why:** The previous codebase had three patterns — the two above plus `throw new Error(...)`. Throwing sends the user to an error boundary with no recovery path except refreshing the page. For a button click that fails (RLS denial, network blip, race condition), that's a dead end. Returning errors lets components show inline feedback and keep the user in context.
-
-The `string | null` form pattern stays because it's React's own `useActionState` convention — changing it would mean fighting the framework.
-
-**Applies to:** All files in `src/actions/`. Seven existing actions using `throw` need migration: `publishCourse`, `completeCourse`, `cancelCourse`, `toggleCourseTypeActive`, `confirmEnrollment`, `cancelEnrollment`, `deleteSession`, `toggleInstructorActive`.
+**Why:** Throwing sends the user to an error boundary with no recovery path except refreshing the page. Returning errors lets components show inline feedback and keep the user in context.
 
 ## DEC-016: Empty state component — shared component, text + optional CTA
 **Decision:** Top-level list views with no data use a shared `EmptyState` component: centered text, optional action button. No icons, no illustrations.
-**Why:** ~5 top-level list pages need empty states. One component, consistent appearance, minimal implementation. Anything more decorative is out of scope for May 15.
-**Applies to:** Top-level admin and student list pages (courses, course types, students, instructors, student course browse).
-**Exceptions:** Inline table sections (sessions within course detail, enrollments within course detail) use short inline `<p>` text — `EmptyState`'s centered layout doesn't fit inside a table card. Contextual empty states with filter-aware messaging (missed sessions, attendance history, my courses filter) keep their existing inline implementations.
+**Why:** ~5 top-level list pages need empty states. One component, consistent appearance, minimal implementation.
+
+## DEC-017: Layout-level padding
+**Decision:** Page padding applied once in layout.tsx `<main>` element, not in individual page components.
+**Why:** Consistent padding across all pages in a route group. Any new page must NOT add outer `p-*` — layout provides it.
+
+---
+
+## V2 Decisions (to be resolved during build)
+
+| ID | Decision | When | Who | Status |
+|----|----------|------|-----|--------|
+| DEC-TBD | Generic codes/lookup table pattern | Phase 1, task 1.7 | @architect | Pending |
+| DEC-TBD | Inactive instructor cascade behavior | Phase 1, task 1.3 | DEC entry | Pending |
+| DEC-TBD | Pessimistic inventory / enrollment hold duration | Phase 2, task 2.3 | DEC + Andy | Pending |
+| DEC-TBD | Cancellation refund policy (full? time-based? admin override?) | Phase 2, task 2.7 | Andy | Pending |
+| DEC-TBD | Scheduled job infrastructure (Vercel Cron vs Supabase Edge Functions) | Phase 2, task 2.4 | @architect | Pending |
+| DEC-TBD | Notification settings storage (table vs JSON column) | Phase 3, task 3.8 | @architect | Pending |
+| DEC-TBD | Admin-created student architecture (profile without auth?) | Phase 4, task 4.4 | @architect | Pending |
+| DEC-TBD | Drop-in enrollment model (per-session vs per-course, flag on course) | Phase 5, task 5.2 | @architect + Andy | Pending |

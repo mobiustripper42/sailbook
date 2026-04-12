@@ -1,169 +1,350 @@
-# SailBook — Project Plan
+# SailBook V2 — Project Plan
 
-**Target:** May 15, 2026
-**Today:** April 9, 2026
-**Available:** 40 days (6 weeks)
-
----
-
-## Phase 0: Infrastructure (Days 1–2)
-Get the project running locally with auth working end-to-end.
-
-- [x] 0.1 — Create GitHub repo, initialize Next.js 14+ with App Router
-- [x] 0.2 — Install and configure Tailwind CSS + shadcn/ui
-- [x] 0.3 — Create Supabase project, run schema SQL
-- [x] 0.4 — Configure Supabase Auth (email/password)
-- [x] 0.5 — Set up environment variables (.env.local)
-- [x] 0.6 — Wire up Supabase client in Next.js
-- [x] 0.7 — Build middleware.ts (auth guard + role routing)
-- [x] 0.8 — Create root layout with auth provider
-- [x] 0.9 — Build login page + registration page
-- [x] 0.10 — Verify: can create account, log in, get redirected by role
-- [x] 0.11 — Connect Vercel to GitHub repo, verify deploy
-- [x] 0.12 — Write CLAUDE.md for Claude Code (project context, conventions, file structure)
-- [x] 0.13 — Set up RLS policies for profiles table
-
-**Demo:** Log in as admin, student, or instructor → land on correct (empty) dashboard.
+**V1 shipped:** April 9, 2026 (v1.0.0)
+**V2 planning:** April 11, 2026
+**Deadline:** TBD — no hard date, but Phases 0–2 (payments live) is the critical path
 
 ---
 
-## Phase 1: Admin — Course Catalog & Creation (Days 3–7)
-Admin can set up the school's offerings.
+## Estimation Method
 
-- [x] 1.1 — Admin dashboard page (placeholder stats)
-- [x] 1.2 — Course types CRUD — list, create, edit, deactivate
-- [x] 1.3 — RLS policies for course_types table
-- [x] 1.4 — Course creation form — select type, instructor, capacity, price
-- [x] 1.5 — Session creation within course — add multiple sessions with date/time/location
-- [x] 1.6 — Course list page — all offerings with status, enrollment count
-- [x] 1.7 — Course detail page — sessions, enrollments, edit capability
-- [x] 1.8 — RLS policies for courses and sessions tables
-- [x] 1.9 — Instructor management — list, add, deactivate
+Fibonacci scale (2, 3, 5, 8, 13). See `VELOCITY_AND_POKER_GUIDE.md` for definitions.
+All estimates from planning poker between Spink and Claude.
+Disagreements logged in the Standing Disagreements table at the bottom.
+Tests are baked into every task estimate — no separate testing tasks.
 
-**Demo:** Admin creates ASA 101 Weekend (2 sessions), ASA 101 Evenings (4 sessions), and Open Sailing (weekly sessions). Assigns instructors.
+**V1 velocity baseline:** 0.38 hrs/pt lifetime across 52.75 hours and ~111 pts.
 
 ---
 
-## Phase 2: Student — Browse & Register (Days 8–12)
-Students can find and sign up for courses.
+## Micro Workflow (every task, no exceptions)
 
-- [x] 2.0 — Migrate role model: replace single `role` column with `is_admin`, `is_instructor`, `is_student` boolean flags. Update proxy.ts, RLS policies, registration, and types. (Do this first — Phase 2 bakes role assumptions in deeper.)
-- [x] 2.1 — Student dashboard — stat cards (enrolled courses, upcoming sessions), next session highlight, upcoming courses list
-- [x] 2.2 — Course browse page — available courses with spots remaining
-- [x] 2.3 — Course detail view (student-facing) — type, schedule, instructor, price
-- [x] 2.4 — Registration flow — enroll in a course
-- [x] 2.5 — Capacity enforcement — can't register if full
-- [x] 2.6 — Duplicate enrollment prevention
-- [x] 2.7 — My courses page — enrolled courses with session schedule; list view with line/card toggle; filter by status (upcoming, past, all)
-- [x] 2.8 — RLS policies for enrollments table
-- [x] 2.9 — Student list + edit for admin — view all students, edit profile details
-- [x] 2.10 — Instructor edit for admin — edit profile details (name, phone, etc.)
+1. Spec it (poker estimate, acceptance criteria)
+2. Build it
+3. Write the test (Playwright + pgTAP if RLS-touching)
+4. Run the test suite — `supabase test db` + `npx playwright test`
+5. Confirm 375px mobile screenshot passes
+6. `/kill-this` → `/its-dead` → push
 
-**Demo:** Student browses courses, registers for ASA 101 Weekend, sees it in "My Courses" with session dates. Admin sees enrollment.
+No test, no push.
 
 ---
 
-## Phase 3: Attendance & Cancellations (Days 13–18)
-The real operational value — tracking who showed up.
+## Phase 0: Infrastructure (do first, no feature work until green)
 
-- [x] 3.1 — Attendance page for admin — select session, mark each student `[effort: 4]`
-- [x] 3.2 — Auto-create attendance records when student enrolls (status: expected) `[effort: 2]`
-- [x] 3.3 — Cancel session flow — mark reason, flip attendance to missed `[effort: 3]`
-- [x] 3.4 — Create makeup session flow — new session, assign affected students `[effort: 4]`
-- ~~3.5 — Cross-course makeup — assign students from different courses~~ **(deferred to V2 — PO decision 2026-04-04)**
-- ~~3.6 — Makeup tracking — link makeup_session_id on attendance records~~ **(deferred to V2 — PO decision 2026-04-04)**
-- [x] 3.7 — Admin view: students with outstanding missed sessions `[effort: 2]` <!-- completed 2026-04-05 -->
-- [x] 3.8 — Student view: my attendance history + missed sessions needing makeup `[effort: 3]` <!-- completed 2026-04-05 -->
-- [x] 3.9 — RLS policies for session_attendance table `[effort: 3]` <!-- completed 2026-04-05 -->
-- [x] 3.10 — Student course view: show session status (cancelled badge, missed indicator) and filter/dim cancelled sessions `[effort: 2]` <!-- completed 2026-04-05 -->
+Everything needed to develop safely. No user-facing changes.
 
-**Demo:** Admin cancels a Saturday session (weather). Creates makeup. Assigns affected students. Attendance tracked correctly. *(Cross-course makeup deferred to V2.)*
+| # | Task | Effort | Notes |
+|---|------|--------|-------|
+| 0.1 | Install Docker Desktop on WSL2, verify running | 2 | One-time pain. May need WSL2 kernel update. |
+| 0.2 | Initialize local Supabase (`supabase init`, `supabase start`) | 2 | Creates `supabase/` dir with config. |
+| 0.3 | Baseline migration — dump prod schema as `supabase/migrations/000_baseline.sql` | 3 | Includes RLS policies, functions, triggers. Everything from V1. |
+| 0.4 | Seed data — consolidate demo-seed into `supabase/seed.sql`, add Playwright test users | 2 | Runs automatically on `supabase db reset`. Dev-seed-qa is stale — rebuild from demo-seed. |
+| 0.5 | Verify: `supabase db reset` → app runs against local Supabase | 2 | End-to-end smoke test. Login, browse, enroll. |
+| 0.6 | pgTAP setup — install extension, create `supabase/tests/` structure, verify pipeline | 3 | `CREATE EXTENSION pgtap;` in test helper. Run trivial test to confirm `supabase test db` works. |
+| 0.7 | pgTAP test suite — RLS tests for `profiles` table (all roles × CRUD) | 3 | Template for all other tables. |
+| 0.8 | pgTAP test suite — RLS tests for `course_types`, `courses`, `sessions` | 5 | Admin write, public read (active only), instructor scoped read. |
+| 0.9 | pgTAP test suite — RLS tests for `enrollments`, `session_attendance` | 5 | Highest risk tables. Student sees own, admin sees all, instructor sees assigned. |
+| 0.10 | RLS audit — fix gaps found by pgTAP tests | 3 | Buffer for 0.7–0.9. The V1 audit that never happened. |
+| 0.11 | Install Playwright + Playwright MCP + a11y-mcp-server, configure viewports (375/768/1440) | 3 | `npm init playwright@latest`. MCP config in `.claude/settings.json`. |
+| 0.12 | Playwright test suite — auth flows (login, register, role routing) | 3 | Login as admin/instructor/student, verify correct dashboard. |
+| 0.13 | Playwright test suite — admin course CRUD (create type, create course, add sessions) | 8 | Full admin catalog flow. First big Playwright tests. |
+| 0.14 | Playwright test suite — student browse + register + capacity + duplicate prevention | 8 | Full student enrollment flow. |
+| 0.15 | Playwright test suite — attendance + cancellation + makeup | 5 | The operational core. |
+| 0.16 | Playwright test suite — instructor views | 3 | Dashboard, roster, session detail. Read-only pages. |
+| 0.17 | Save @ui-reviewer agent spec to `.claude/agents/ui-reviewer.md` | 2 | Tuned to SailBook design language. |
+| 0.18 | Write session skills — `/its-alive`, `/pause-this`, `/restart-this`, update `/kill-this`, `/its-dead` | 2 | Five skill files in `~/.claude/skills/`. Specs already written. |
+| 0.19 | Update CLAUDE.md — micro workflow, migration protocol, test commands, new agents, conventions | 3 | V2 conventions. Migration protocol included (no dashboard edits, everything in migrations). |
+| 0.20 | Update all docs — SPEC.md, DECISIONS.md, AGENTS.md, BRAND.md for V2 scope | 3 | Andy's philosophy note in BRAND.md. New DECs. V2 scope in SPEC.md. |
 
----
+**Phase 0 total: 70 pts**
+**Projected hours (at 0.38 hr/pt): ~27 hrs**
 
-## Phase 4: Instructor Views (Days 19–21)
-Instructors see their assignments.
+**Ejection point:** Dev environment is professional-grade. Every future session is faster and safer. No user-facing value yet.
 
-- [x] 4.1 — Instructor dashboard — stat cards (upcoming sessions, total students), upcoming sessions list with course name/date/time/roster count `[effort: 3]` <!-- completed 2026-04-05 -->
-- [x] 4.2 — Session roster view — enrolled students, attendance status `[effort: 2]` <!-- completed 2026-04-05 -->
-- [x] 4.3 — Identify makeup students in roster (from other courses) `[effort: 2]` <!-- completed 2026-04-06 -->
-- [x] 4.4 — RLS policies — instructors see only their own courses/sessions `[effort: 3]` <!-- completed 2026-04-06 -->
-
-**Demo:** Instructor logs in, sees this week's sessions, views roster with attendance.
-
----
-
-## Phase 5: Polish & Ship (Days 22–28)
-Make it production-ready.
-
-- [x] 5.1 — Admin dashboard — real stats (total courses, enrollments, upcoming sessions) + "courses without instructors" warning tile `[effort: 4]` <!-- completed 2026-04-06 -->
-- [x] 5.2 — Instructor swap on individual sessions (AS-9) `[effort: 2]` <!-- completed 2026-04-06 -->
-- [x] 5.3 — Error handling — form validation, API errors, empty states `[effort: 3]` <!-- completed 2026-04-06 -->
-- [x] 5.4 — Loading states and optimistic UI `[effort: 2]` <!-- completed 2026-04-07 -->
-- [x] 5.5 — Mobile responsiveness pass — student pages `[effort: 5]` <!-- completed 2026-04-09 -->
-- [x] 5.6 — Seed data — create LTSC course types, Andy as admin, test instructor/student `[effort: 1]` <!-- completed 2026-04-07 -->
-- [x] 5.7 — End-to-end walkthrough with Andy `[effort: 4]` <!-- completed 2026-04-09; 1 hr stakeholder review with Andy -->
-- [x] 5.8 — Bug fixes from walkthrough `[effort: 5]` <!-- completed 2026-04-09; scoped: instructor roster shows phone instead of email -->
-- [x] 5.9 — Production environment variables on Vercel `[effort: 1]` <!-- completed 2026-04-09 -->
-- [x] 5.10 — DNS / custom domain (if wanted) `[effort: 1]` <!-- completed 2026-04-09; sailbook.live via Namecheap → Cloudflare → Vercel -->
-- [~] 5.11 — Duplicate course — one-click copy of a course (no sessions), drop into edit mode `[effort: 2]` **(deferred to V2 — PO decision 2026-04-09)**
-- [~] 5.12 — Student calendar view — monthly calendar of enrolled sessions with filter (same filters as list view in 2.7); stretch goal, skip if time is tight `[effort: 4]` **(deferred to V2 — PO decision 2026-04-09)**
-- [~] 5.13 — Evaluate Docker for local dev `[effort: 1]` **(deferred to V2 — PO decision 2026-04-09; planning note: user intends Docker as the QA environment strategy — log as V2 planning discussion item)**
-- [x] 5.14 — Admin UI for role management — /admin/users list + /admin/users/[id]/edit with role checkboxes and self-demotion guard `[effort: 3]` <!-- completed 2026-04-09 -->
-- [~] 5.15 — OAuth login — Google (and others if Supabase makes it easy); email/password remains the fallback `[effort: 2]` **(deferred to V2 — PO decision 2026-04-09)**
-- [~] 5.16 — Development database — separate Supabase project for dev, seed data pipeline, so prod isn't polluted with test data `[effort: 3]` **(deferred to V2 — PO decision 2026-04-09; paired with 5.13 Docker strategy)**
-- [x] 5.17 — Bug: student enrollment RLS — missing INSERT/UPDATE policy on session_attendance means attendance records silently fail to create on enrollment `[effort: 2]` <!-- completed 2026-04-06 -->
-- [x] 5.18 — Dashboard: restore pending confirmation total count + "Showing N of M" notice when > 10 enrollments `[effort: 1]` <!-- completed 2026-04-07 -->
-- [x] 5.19 — Student enrollment status badge — show "Pending confirmation" on course detail, my-courses, and attendance pages when enrollment status is `registered` (vs `confirmed`) `[effort: 1]` <!-- completed 2026-04-07 -->
-- [x] 5.20 — Student course browse: show enrollment status on course cards — enrolled students see "Enrolled" or "Pending" badge and a "View" button instead of "View & Enroll" `[effort: 2]` <!-- completed 2026-04-07 -->
-- [x] 5.21 — Student attendance page: show enrollment status badge (Enrolled / Pending) per course alongside session attendance badges `[effort: 1]` <!-- completed 2026-04-07 -->
-- [x] 5.22 — Navigation loading indicator: router progress bar (`@bprogress/next`) — covers all link navigation globally, no per-route work `[effort: 1]` <!-- completed 2026-04-09; 0.25 hrs -->
-- [~] 5.23 — Mobile responsiveness pass — admin pages `[effort: 3]` **(deferred to V2 — PO decision 2026-04-09; hamburger menu sufficient for desktop-primary admin role)**
-- [~] 5.24 — Mobile responsiveness pass — instructor pages `[effort: 2]` **(deferred to V2 — PO decision 2026-04-09; hamburger menu sufficient for desktop-primary instructor role)**
-- [~] 5.25 — UX/UI design review session — typography, spacing, color, component consistency across all roles `[effort: 3]` **(deferred to V2 — PO decision 2026-04-09)**
-- [~] 5.26 — Bug: setting an instructor to inactive does not remove them from assigned sessions; either reassign sessions to course default or filter inactive instructors out of session queries `[effort: 2]` **(deferred to V2 — logged 2026-04-09)**
-
-**Demo:** Andy walks through full flow — creates a course, student registers, instructor views roster, session gets cancelled, makeup scheduled. Everything works.
+**Demo:** `supabase db reset` → `npm run dev` → `supabase test db` (all green) → `npx playwright test` (all green) → app works on localhost against local database.
 
 ---
 
-## Estimated Effort
+## Phase 1: V1 Fixes & Gaps
+
+Bugs, missing functionality, and quick profile improvements. Makes the existing app solid before adding new features.
+
+| # | Task | Effort | Notes |
+|---|------|--------|-------|
+| 1.1 | Session editing — edit date, time, location, instructor on existing sessions | 3 | Currently must cancel and recreate. Bug, not feature. |
+| 1.2 | Set course back to Draft status (from Active) | 2 | Missing state transition. One button + server action. |
+| 1.3 | Inactive instructor cascade — deactivating instructor clears course + session assignments | 2 | DB function for cascade. Warning tile already exists. DEC entry. |
+| 1.4 | Course status review — confirm statuses cover all needs via @architect | 2 | Audit existing status logic. Probably fine as-is. |
+| 1.5 | Student history view — past enrollments, attendance, completions visible to admin/instructor/student | 5 | New page/component across three roles. Terminology TBD with Andy ("Sailing Record"?). |
+| 1.6 | ASA number field — add to profiles, show in admin student list + student profile | 2 | Migration + UI. Not mandatory. |
+| 1.7 | Experience level — generic codes/lookup table + migrate experience levels onto it | 5 | DEC: generic codes table pattern. Reusable for qualifications, prereqs, skill names. |
+| 1.8 | Password reset — "Forgot password" on login page + reset flow | 3 | Supabase `resetPasswordForEmail()`. Uses default mailer until Phase 3. |
+| 1.9 | Unsaved changes guard — warn before leaving form with edits in progress | 3 | `beforeunload` + App Router interception. May need community package. |
+| 1.10 | Student "instructor notes" field + expand instructor roster (phone, email, age, notes indicator) | 3 | "Anything you want your instructor to know?" free text. Dot/asterisk on roster if populated. Andy request. |
+| 1.11 | Spots remaining fix — only count confirmed enrollments against capacity | 3 | Currently counts all non-cancelled. UI language cleanup ("X spots remaining"). Andy request. |
+| 1.12 | Past courses not enrollable — filter student browse to exclude courses with all sessions in the past | 2 | V1 bug. Auto-transition status or query filter. Andy request. |
+| 1.13 | Dual-role nav toggle — "Switch to Student/Instructor View" for multi-role users | 2 | Chris (instructor + student) needs visible toggle. Roles already exist, this is UI/routing. Andy request. |
+| 1.14 | Dashboard instructor assignment clarity — verify courses-without-instructors count + show "Using course instructor" on sessions | 3 | Andy reported confusing number. Also clarify DEC-007 default behavior in UI. Andy request. |
+
+**Phase 1 total: 40 pts**
+**Projected hours: ~15 hrs**
+
+**Ejection point:** V1 is solid. All known bugs fixed. Student records are richer. App is more trustworthy.
+
+---
+
+## Phase 2: Payments (Stripe)
+
+The app makes money. Student self-cancellation ships here (ST-10).
+
+| # | Task | Effort | Notes |
+|---|------|--------|-------|
+| 2.1 | Stripe account setup — test mode, API keys in `.env.local` | 2 | Get Andy's Stripe account started early. Dev uses test keys. |
+| 2.2 | Schema migration — `stripe_customer_id` on profiles, `stripe_checkout_session_id` on enrollments, `payments` table | 3 | New migration. pgTAP tests for payments RLS included. |
+| 2.3 | Stripe Checkout Session creation — server action, redirect to Stripe hosted page | 5 | Replaces "Register" button. Capacity check + enrollment hold creation. DEC: pessimistic inventory (hold spot on checkout start). |
+| 2.4 | Enrollment hold expiration — release `pending_payment` spots after timeout | 5 | First scheduled job (Vercel Cron or Supabase Edge Function). Handles race with webhook. |
+| 2.5 | Stripe webhook endpoint — `app/api/webhooks/stripe/route.ts` | 5 | First API route. Verify signature, confirm enrollment on payment success. DEC: DEC-001 survives. |
+| 2.6 | Post-payment redirect — success + cancel URLs, confirmation page | 2 | Success shows confirmation. Cancel shows "hold active, try again." |
+| 2.7 | Student self-cancellation — cancel enrollment, trigger Stripe refund | 5 | ST-10 ships. Cancellation policy DEC needed (full? time-based? admin override?). |
+| 2.8 | Admin enrollment view — payment status, Stripe link, manual refund trigger | 3 | UI additions to existing enrollment list. Admin can issue refunds from dashboard. |
+| 2.9 | Member pricing field — `member_price` on courses alongside `price` | 2 | Checkout logic picks correct price based on profile. |
+| 2.10 | Playwright end-to-end payment test — register → pay → confirm → cancel → refund | 5 | Full chain integration test using Stripe test cards + Stripe CLI for webhooks. |
+
+**Phase 2 total: 37 pts**
+**Projected hours: ~14 hrs**
+
+**Ejection point:** App takes money. Students can pay and self-cancel. This is the make-or-break phase.
+
+---
+
+## Phase 3: Notifications + Auth Hardening
+
+Users know what's happening. Auth is production-grade.
+
+| # | Task | Effort | Notes |
+|---|------|--------|-------|
+| 3.1 | Twilio setup — account, phone number, API keys | 2 | Test mode available. |
+| 3.2 | Resend setup — account, API key, domain verification for sailbook.live | 2 | Cloudflare DNS records. Set up info@sailbook.live email routing. |
+| 3.3 | Notification service — shared module for SMS (Twilio) + email (Resend) with mock mode for testing | 3 | Abstraction layer. `NOTIFICATIONS_ENABLED=false` routes to log in test. |
+| 3.4 | Enrollment notifications — SMS + email on confirmed, plus admin alert on new enrollment, plus low enrollment warning to admin | 5 | Multiple triggers through one service. Admin shouldn't have to log in to know someone signed up. Andy request. |
+| 3.5 | Session cancellation notice — SMS + email to enrolled students | 3 | Includes reason, makeup info if available. |
+| 3.6 | Makeup session assignment — SMS + email to affected students | 3 | New date/time/location in message. |
+| 3.7 | Session reminder — SMS 24 hours before session start | 5 | Scheduled job (cron). DEC: Vercel Cron vs Supabase Edge Function. |
+| 3.8 | Admin notification preferences — checkboxes per event type × channel | 3 | DEC: settings table vs JSON column. |
+| 3.9 | Student notification preferences — opt out of SMS, email-only option | 2 | Profile toggle. Notification service checks before sending. |
+| 3.10 | Password strength + email verification | 3 | Supabase Auth config + custom email template via Resend. |
+| 3.11 | OAuth login — Google | 2 | Supabase toggle + Google Cloud console. Email/password remains fallback. |
+| 3.12 | Security audit — run @security-agent, evaluate findings, fix serious issues | 3 | Post-auth-hardening + payments-live audit. Non-serious findings move to backlog. |
+
+**Phase 3 total: 36 pts**
+**Projected hours: ~14 hrs**
+
+**Ejection point:** Students get confirmations, cancellation notices, and reminders. Auth is solid with email verification and OAuth. Security audited. The school runs without phone calls.
+
+---
+
+## Phase 4: Identity & Profiles
+
+Clean onboarding. Richer student and instructor records.
+
+| # | Task | Effort | Notes |
+|---|------|--------|-------|
+| 4.1 | Instructor invite link — `invites` table, one-time token, auto-sets `is_instructor` | 3 | "Generate Invite Link" button on admin instructor page. |
+| 4.2 | Admin invite link — same pattern for admin role | 2 | Button on admin user management page. Reuses 4.1 infrastructure. |
+| 4.3 | Student profile expansion — classes taken, editable ASA number, experience level from codes table | 5 | Profile page redesign. Experience level pulls from codes table (1.7). |
+| 4.4 | Admin-created students (no login) — DEC resolution + implementation | 8 | "My wife has no fingers." @architect weighs in. May be simpler than it sounds. |
+| 4.5 | Link admin-created student to login — student creates account, admin links to existing profile | 3 | Depends on 4.4 architecture. Might be as simple as "student resets password." |
+| 4.6 | Instructor notes on sessions — text field per session, visible to all instructors + admin | 3 | IN-5 from V1 backlog. `notes` column already exists on sessions table. UI only. |
+| 4.7 | Instructor profile expansion — availability field + bio/website link | 3 | General availability for admin assignment. Name links to LTSC website bio. Andy request. |
+
+**Phase 4 total: 27 pts**
+**Projected hours: ~10 hrs**
+
+**Ejection point:** Instructors get proper onboarding. Student profiles are richer. Instructor notes captured. Admin can create students for non-technical users.
+
+---
+
+## Phase 5: Pricing & Enrollment
+
+Flexible pricing, enrollment safety rails, and waitlist.
+
+| # | Task | Effort | Notes |
+|---|------|--------|-------|
+| 5.1 | Member pricing model — `is_member` flag on profiles, checkout uses correct price | 3 | Admin-editable flag. Foundation for SailTime/boat owner discounts later. |
+| 5.2 | Drop-in pricing for Open Sailing — per-session enrollment + payment | 5 | Different enrollment model. DEC: flag on course (`is_drop_in`), not course_type. |
+| 5.3 | Discount codes — enable Stripe promotion codes on checkout | 2 | `allow_promotion_codes: true`. Admin creates codes in Stripe dashboard. UI note on checkout page. |
+| 5.4 | Prerequisite flagging — `course_type_prerequisites` table, admin warning + override | 3 | Flag, not block. "⚠️ No ASA 101 on record" with override checkbox. |
+| 5.5 | Admin qualification grant ("test out") — `qualifications` table, manual ASA cert grants | 3 | Same effect as completing a course. Satisfies prereq flags. |
+| 5.6 | Duplicate enrollment in same course type — warn student + flag for admin | 3 | ⚠️ Scope creep risk. Keep tight: warning on enrollment + admin dashboard flag. No auto-clear. |
+| 5.7 | Waitlist — full course → join waitlist → notify on opening | 8 | New table, student UI, admin visibility, notification on spot opening. Depends on Phase 3 notifications. Andy request. |
+| 5.8 | Low enrollment warning — dashboard tile for courses below minimum threshold approaching start date | 2 | Same pattern as "courses without instructors." Meaningful only with payments live. Andy request. |
+
+**Phase 5 total: 29 pts**
+**Projected hours: ~11 hrs**
+
+**Ejection point:** Pricing is flexible. Enrollment has safety rails. Prerequisite and waitlist systems exist. Low enrollment flagged early.
+
+---
+
+## Phase 6: Polish & UX
+
+Design quality, accessibility, navigation, convenience features.
+
+| # | Task | Effort | Notes |
+|---|------|--------|-------|
+| 6.1 | Mobile responsiveness pass — admin pages | 3 | Deferred from V1 (5.23). |
+| 6.2 | Mobile responsiveness pass — instructor pages | 2 | Deferred from V1 (5.24). |
+| 6.3 | Full @ui-reviewer design review — all roles, all pages, three viewports | 5 | Formal design audit with scored report. |
+| 6.4 | Implement @ui-reviewer findings | 5 | Re-estimate after 6.3. |
+| 6.5 | axe-core accessibility audit — fix critical/serious violations | 3 | WCAG 2.1 AA compliance. |
+| 6.6 | Duplicate course — one-click copy, drop into edit | 2 | Deferred from V1 (5.11). |
+| 6.7 | Relative session badges — "Tomorrow", "This week" instead of "Upcoming" | 3 | Date math. Always harder than it looks. |
+| 6.8 | WebsiteAuditAI + Attention Insight external audit | 2 | 10-minute external validation at phase boundary. |
+| 6.9 | Admin dashboard UX redesign | 5 | Dashboard has real data by now (payments, holds, notifications). Design it properly. |
+| 6.10 | Back button / breadcrumb audit — consistent navigation across all roles and views | 5 | Audit every page, establish breadcrumb pattern, fix dead ends. Andy request. |
+| 6.11 | Public landing page + contact form for sailbook.live | 3 | Currently drops straight to login. Basic public page + contact form. **Cuttable.** |
+| 6.12 | Security audit (V2 final) — run @security-agent, evaluate findings, fix serious issues, prime V3 backlog | 3 | Full V2 surface area: payments, notifications, waitlist, prereqs, qualifications. Non-serious findings seed V3 backlog. |
+
+**Phase 6 total: 41 pts**
+**Projected hours: ~16 hrs**
+
+**Ejection point:** The app looks and feels professional. Accessible. Navigable. Polished. Security verified.
+
+---
+
+## Phase 7: Skills & Tracking (future — scope TBD)
+
+Transforms the app from scheduling into a learning management tool.
+
+- Skill checklists per course type (ASA 101: tacking, parts of boat, etc.)
+- Instructor marks skills demonstrated/executed per student per session
+- Student "Sailing Record" accumulates completed skills
+- Two-level checkoff: instructor demonstrates → student executes
+- Makeup sessions show which skills still need covering
+- Cross-instructor continuity via skill records
+- Automated experience level progression based on completed skills
+- Advanced analytics/reporting
+
+**Phase 7: estimated 40–60 pts. Break down when Phase 6 is complete.**
+
+---
+
+## V3 Ideas (parked)
+
+- Proxy enrollment ("Who are you enrolling?" — Me / Me + someone / Someone else) — requires shopping cart model
+- Charter module — separate app, shared auth/profiles infrastructure
+- General program request form — private lessons, corporate events, group bookings
+- Youth enrollment — parent/guardian co-enrollment, birth month/year, ASA data standards
+- In-app messaging — admin/instructor/student messaging (SMS covers this for now)
+- ASA number auto-populate from ASA's API (unlikely to exist)
+- Tiered instructor roles — lead/super instructor with elevated permissions
+- "Put me in next available" — auto-enroll on next course opening
+- Duplicate enrollment auto-clear — confirming one section cancels pending others (refund implications)
+- Student calendar view — monthly calendar of enrolled sessions
+- Admin / instructor calendar views
+- Automated makeup suggestions
+- Multi-school / multi-tenant
+- AI season setup agent
+- Admin impersonation mode ("view as student")
+- Full coupon/discount engine (beyond Stripe promotion codes)
+
+---
+
+## Summary
+
+| Phase | Pts | Projected Hours (at 0.38 hr/pt) | Ejection Point Value |
+|-------|-----|--------------------------------|---------------------|
+| 0 — Infrastructure | 70 | ~27 hrs | Dev environment ready |
+| 1 — V1 Fixes | 40 | ~15 hrs | V1 is solid |
+| 2 — Payments | 37 | ~14 hrs | App makes money |
+| 3 — Notifications + Auth | 36 | ~14 hrs | Users stay informed, auth hardened, security audited |
+| 4 — Identity | 27 | ~10 hrs | Onboarding is clean |
+| 5 — Pricing | 29 | ~11 hrs | Flexible pricing, waitlist, prereqs |
+| 6 — Polish | 41 | ~16 hrs | Professional, accessible, navigable, security verified |
+| 7 — Skills | 40–60 | ~15–23 hrs | Learning management |
+| **Total (0–6)** | **280** | **~107 hrs** | |
+
+At V1 velocity (0.38 hrs/pt): ~107 hours for Phases 0–6.
+At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–2 (critical path to payments).
+
+---
+
+## Velocity Tracking
+
 | Phase | Effort Pts | Est. Hours | Actual Hours | Hrs/Point | Notes |
 |-------|-----------|------------|--------------|-----------|-------|
-| 0 — Infrastructure | — | 4–6 | ~4 | — | Pre-tracking |
-| 1 — Admin Catalog | — | 10–14 | ~8 | — | Pre-tracking |
-| 2 — Student Browse | — | 8–10 | ~14 | — | Pre-tracking |
-| 3 — Attendance | 21 | 12–16 | ~5.5 | ~0.26 | First tracked phase (3.5/3.6 deferred V2) |
-| 4 — Instructor | 10 | 4–6 | 1.75 | 0.175 | 4/4 complete |
-| 5 — Polish | 49 | 7–9 | 18.50 | 0.47 | COMPLETE. 40 V1 pts done (5.1–5.10, 5.14, 5.17–5.22). 17 pts deferred V2 (5.11/5.12/5.13/5.15/5.16/5.23/5.24/5.25/5.26). |
-| **Total** | **68** | **48–66** | **~51.75** | — | Phase 5 complete 2026-04-09. All phases done. V1 ships May 15. |
-
-### Cuttable tasks (if time is tight)
-- **5.16** — Dev database. Useful but not required for launch; Andy can test on prod with a test account.
-- **5.14** — Admin role management UI. Can manage roles via Supabase dashboard or SQL for V1.
-- ~~**5.23** — Admin mobile pass.~~ **Cut — deferred to V2 per PO (2026-04-09). Hamburger menu sufficient.**
-- ~~**5.24** — Instructor mobile pass.~~ **Cut — deferred to V2 per PO (2026-04-09). Hamburger menu sufficient.**
-- ~~**3.5/3.6** — Cross-course makeup.~~ **Cut — deferred to V2 per PO (2026-04-04).**
-- ~~**5.11** — Duplicate course.~~ **Cut — deferred to V2 per PO (2026-04-09).**
-- ~~**5.12** — Student calendar view.~~ **Cut — deferred to V2 per PO (2026-04-09).**
-- ~~**5.13** — Docker evaluation.~~ **Cut — deferred to V2 per PO (2026-04-09). V2 planning note: intended as QA environment strategy.**
-- ~~**5.15** — OAuth login.~~ **Cut — deferred to V2 per PO (2026-04-09).**
-- ~~**5.25** — UX/UI design review.~~ **Cut — deferred to V2 per PO (2026-04-09).**
+| 0 — Infrastructure | 70 | ~27 | — | — | |
+| 1 — V1 Fixes | 40 | ~15 | — | — | |
+| 2 — Payments | 37 | ~14 | — | — | |
+| 3 — Notifications | 36 | ~14 | — | — | |
+| 4 — Identity | 27 | ~10 | — | — | |
+| 5 — Pricing | 29 | ~11 | — | — | |
+| 6 — Polish | 41 | ~16 | — | — | |
+| **Total** | **280** | **~107** | — | — | |
 
 ---
 
-## Session Management (from Workflow 1)
-- One named CC session per task: `claude -n "phase-0-auth"`
-- `/compact` at 50% context
-- `/clear` when switching phases
-- Commit before ending any session
-- Opus for architecture decisions and hard bugs
-- Sonnet for routine implementation
+## Estimation Poker — Standing Disagreements
 
-## Key Files for Claude Code
-- `CLAUDE.md` — project conventions, file structure, commands
-- `docs/SPEC.md` — what we're building
-- `docs/DECISIONS.md` — why we made each choice
-- `docs/USER_STORIES.md` — what each role does
-- `docs/sailbook-schema.sql` — database schema
-- `session-log.md` — session continuity log
+| Task | Claude | Spink | Resolution | Notes |
+|------|--------|-------|------------|-------|
+| — | — | — | — | None. All estimates agreed. |
+
+---
+
+## Cuttable Tasks (if time is tight)
+
+Ordered by least impact to cut:
+
+- **6.7** — Relative session badges. Nice UX, zero operational impact.
+- **6.11** — Public landing page. Current login-only works.
+- **6.6** — Duplicate course. Admin can create from scratch — just slower.
+- **6.9** — Admin dashboard redesign. Functional beats pretty.
+- **5.6** — Duplicate enrollment warning. Edge case. Costs a few refunds at worst.
+- **5.3** — Discount codes. Manual pricing adjustments work short-term.
+- **6.1/6.2** — Mobile admin/instructor pass. Hamburger menu is the V1 stopgap.
+- **4.4/4.5** — Admin-created students. Workaround: admin creates account on student's behalf.
+
+---
+
+## Decisions Needed During Build
+
+| Decision | When | Who |
+|----------|------|-----|
+| Generic codes/lookup table pattern | Phase 1, task 1.7 | @architect |
+| Inactive instructor cascade behavior | Phase 1, task 1.3 | DEC entry |
+| "Student history" terminology | Phase 1, task 1.5 | Andy |
+| Stripe account ownership | Phase 2 start | Andy |
+| Pessimistic inventory / hold duration | Phase 2, task 2.3 | DEC + Andy |
+| Cancellation refund policy | Phase 2, task 2.7 | Andy |
+| DEC-001 survival (webhook = mailbox, not API layer) | Phase 2, task 2.5 | DEC entry |
+| Scheduled job infrastructure (Vercel Cron vs Edge Functions) | Phase 2, task 2.4 | @architect |
+| Notification settings storage (table vs JSON) | Phase 3, task 3.8 | @architect |
+| Admin-created student architecture | Phase 4, task 4.4 | @architect |
+| Drop-in enrollment model (flag on course) | Phase 5, task 5.2 | @architect + Andy |
+| Low enrollment threshold and cutoff timing | Phase 5, task 5.8 | Andy |
+| Duplicate same-course-type enrollment behavior | Phase 5, task 5.6 | Andy |
+
+---
+
+## Cloud Staging Environment
+
+Not Phase 0. Add when Andy needs to preview V2 features.
+
+- Second Supabase cloud project (free tier)
+- Vercel preview branch pointing to staging Supabase
+- Same migration workflow: `supabase db push --project-ref staging-ref`
+- Seed with demo data for Andy testing
+
+---
+
+## Phase Boundary Checklist
+
+At the end of every phase:
+1. All pgTAP tests green (`supabase test db`)
+2. All Playwright tests green (`npx playwright test`)
+3. Run WebsiteAuditAI on deployed preview (free, 10 min)
+4. Run Attention Insight Chrome extension on deployed preview (free, 5 min)
+5. @pm phase retrospective — velocity check, timeline update
+6. Return to primary planning chat — review docs against intent

@@ -1,28 +1,33 @@
 # SailBook — Claude Code Project Context
 
 ## What We're Building
-Scheduling and enrollment management system for Learn To Sail Cleveland (LTSC). Single school, single season. Target launch: **May 15, 2026**.
+Scheduling, enrollment, and payment management system for Learn To Sail Cleveland (LTSC). Single school, single season.
 
 Replaces manual scheduling with a web app where:
-- **Admin (Andy)** manages course types, courses, sessions, enrollments, attendance, and makeups
-- **Instructors** view their assigned sessions and rosters
-- **Students** self-register for courses and track their own attendance
+- **Admin (Andy)** manages course types, courses, sessions, enrollments, attendance, makeups, payments, refunds, and notifications
+- **Instructors** view assigned sessions, rosters with student details, and add session notes
+- **Students** self-register, pay via Stripe, view schedule and attendance, cancel enrollments, manage notification preferences
 
 ## Stack
-- **Frontend:** Next.js 14+ (App Router), Tailwind CSS, shadcn/ui, Geist font
+- **Frontend:** Next.js 14+ (App Router), Tailwind CSS, shadcn/ui, Geist Sans
 - **Backend:** Supabase (PostgreSQL + Auth + Row Level Security) — no separate API server
+- **Payments:** Stripe (Checkout Sessions, webhooks)
+- **Notifications:** Twilio (SMS), Resend (email)
 - **Hosting:** Vercel (frontend), Supabase Cloud (database)
+- **Testing:** pgTAP (RLS), Playwright (integration), axe-core (accessibility)
 
 ## Key Docs
 | File | Purpose |
 |------|---------|
-| `docs/SPEC.md` | What we're building — scope, V1 vs V2 |
+| `docs/SPEC.md` | What we're building — scope, V1 vs V2 vs V3 |
 | `docs/DECISIONS.md` | Why we made each architectural choice |
 | `docs/USER_STORIES.md` | What each role does (AS-*, ST-*, IN-* IDs) |
-| `docs/PROJECT_PLAN.md` | Phases, tasks, current status |
-| `docs/AGENTS.md` | Agent workflow and prompt patterns |
-| `docs/sailbook-schema.sql` | Canonical database schema |
+| `docs/PROJECT_PLAN.md` | Phases, tasks, estimates, velocity |
+| `docs/AGENTS.md` | Agent and skill specs |
+| `docs/BRAND.md` | Philosophy, visual direction, voice |
+| `docs/sailbook-schema.sql` | Reference schema (migrations are source of truth) |
 | `session-log.md` | Session-to-session continuity log |
+| `VELOCITY_AND_POKER_GUIDE.md` | Estimation method and tracking |
 
 ## Core Data Model
 ```
@@ -33,150 +38,160 @@ course_types → courses → sessions
           session_attendance (student × session)
                     ↓
           makeup_session_id (cross-course makeup reference)
+
+codes (generic lookup: experience levels, qualification types, etc.)
+qualifications (admin-granted certs, prereq satisfaction)
+course_type_prerequisites (prereq flagging)
+invites (one-time tokens for instructor/admin onboarding)
+payments (Stripe receipt history)
+waitlist_entries (notify on spot opening)
 ```
 
-## Project File Structure (target)
-```
-sailbook/
-├── src/
-│   ├── app/
-│   │   ├── (auth)/
-│   │   │   ├── login/page.tsx
-│   │   │   └── register/page.tsx
-│   │   ├── (admin)/
-│   │   │   ├── layout.tsx
-│   │   │   └── admin/
-│   │   │       ├── dashboard/page.tsx
-│   │   │       ├── courses/
-│   │   │       ├── course-types/
-│   │   │       ├── sessions/
-│   │   │       └── students/
-│   │   ├── (instructor)/
-│   │   │   ├── layout.tsx
-│   │   │   └── instructor/
-│   │   │       └── dashboard/page.tsx
-│   │   ├── (student)/
-│   │   │   ├── layout.tsx
-│   │   │   └── student/
-│   │   │       ├── dashboard/page.tsx
-│   │   │       └── courses/
-│   │   └── layout.tsx
-│   ├── components/
-│   │   ├── ui/           # shadcn/ui components (do not edit directly)
-│   │   └── [feature]/    # feature-specific components
-│   ├── lib/
-│   │   ├── supabase/
-│   │   │   ├── client.ts     # browser client
-│   │   │   ├── server.ts     # server client (Server Components / Server Actions)
-│   │   │   └── types.ts      # generated DB types
-│   │   └── utils.ts
-│   └── proxy.ts
-├── docs/             # project documentation
-├── session-log.md    # session continuity log
-└── CLAUDE.md         # this file
+## Micro Workflow (every task, no exceptions)
+
+1. **Spec it** — poker estimate, acceptance criteria
+2. **Build it** — implement the feature
+3. **Write the test** — Playwright integration test + pgTAP if RLS-touching
+4. **Run the suite** — `supabase test db` + `npx playwright test`
+5. **Mobile screenshot** — confirm 375px viewport passes
+6. **Close out** — `/kill-this` → `/its-dead` → push
+
+**No test, no push.**
+
+## Migration Protocol
+
+**All schema changes go through `supabase/migrations/`.** No exceptions.
+
+- Create migration: `supabase migration new descriptive_name`
+- Test locally: `supabase db reset` (replays all migrations + seed)
+- Apply to remote: `supabase db push`
+- Never edit schema through the Supabase dashboard on any environment
+- `supabase/seed.sql` runs automatically on `db reset` — use for test data
+- After schema changes: regenerate types with `npx supabase gen types typescript --local > src/lib/supabase/types.ts`
+
+## Commands
+```bash
+# Development
+npm run dev                    # local dev server (localhost:3000)
+npm run build                  # production build
+npm run lint                   # ESLint
+
+# Database (local Supabase)
+supabase start                 # start local Supabase (Docker)
+supabase stop                  # stop local Supabase
+supabase db reset              # wipe + replay all migrations + seed
+supabase migration new name    # create new migration file
+supabase db push               # apply migrations to remote project
+
+# Testing
+supabase test db               # run pgTAP RLS tests
+npx playwright test            # run integration tests
+npx playwright test --ui       # run with browser UI
+
+# Types
+npx supabase gen types typescript --local > src/lib/supabase/types.ts
 ```
 
 ## Conventions
 
 ### TypeScript
 - Strict mode on. No `any`.
-- Use generated Supabase types from `lib/supabase/types.ts`. Regenerate with `npx supabase gen types typescript --local > lib/supabase/types.ts` after schema changes.
+- Use generated Supabase types from `lib/supabase/types.ts`.
+- Regenerate after every schema change.
 
 ### Components
-- Server Components by default. Add `'use client'` only when needed (event handlers, hooks, browser APIs).
-- shadcn/ui components live in `components/ui/`. Don't edit them directly — extend or wrap instead.
-- Feature components live in `components/[feature]/` (e.g., `components/courses/`, `components/attendance/`).
+- Server Components by default. Add `'use client'` only when needed.
+- shadcn/ui components in `components/ui/` — don't edit directly.
+- Feature components in `components/[feature]/`.
 - Keep components under 200 lines. Split if larger.
 
 ### Data Fetching
 - Server Components fetch directly via Supabase server client.
 - Mutations go through Server Actions (not API routes).
+- Exception: Stripe webhook uses an API route (it's a mailbox, not an API layer).
 - Client-side data (real-time, after interaction) uses Supabase browser client.
 
 ### Auth & RLS
 - All auth through Supabase Auth. No custom JWT handling.
-- Role is in `profiles.role` — check it via `auth.uid()` in RLS policies.
+- Role flags: `is_admin`, `is_instructor`, `is_student` (not mutually exclusive).
 - Every table needs RLS policies before shipping. No table is accessible without explicit policy.
-- Middleware (`middleware.ts`) handles role-based redirects: `/admin/*`, `/instructor/*`, `/student/*`.
+- Every RLS change requires a pgTAP test.
+- Middleware (`proxy.ts`) handles role-based redirects.
+
+### Error Handling (DEC-015)
+- Form actions: return `string | null`. `null` = success, string = error message.
+- Button actions: return `{ error: string | null }`.
+- Never `throw` in server actions — return errors for inline feedback.
 
 ### Database
-- Schema source of truth: `docs/sailbook-schema.sql`.
-- Instructor on session: `NULL` means use course default (`DEC-007`).
-- Makeups: `session_attendance.makeup_session_id` can reference any session, cross-course (`DEC-006`).
-- No schools table — single-tenant by design (`DEC-008`).
+- Migrations are source of truth (not schema.sql, not the dashboard).
+- Instructor on session: `NULL` means use course default (DEC-007).
+- Makeups: `session_attendance.makeup_session_id` can reference any session, cross-course (DEC-006).
+- No schools table — single-tenant (DEC-008).
+- Configurable values go in the codes table, not hardcoded enums.
 
 ### Naming
 - Files: `kebab-case.tsx`
 - Components: `PascalCase`
-- Server Actions: `camelCase` in `actions/` files or co-located with feature
-- DB columns: `snake_case` (matches Supabase)
+- Server Actions: `camelCase` in `actions/` files
+- DB columns: `snake_case`
+- Migrations: `supabase/migrations/YYYYMMDDHHMMSS_descriptive_name.sql`
 
 ### UI / Brand
-- Colors: white/black base, navy and gray accents. No color for color's sake.
-- Font: Geist Sans (Vercel default in Next.js 14+)
-- No nautical kitsch — no anchors, rope borders, or "ahoy"
+- Colors: white/black base, navy and gray accents (zinc family). No color for color's sake.
+- Font: Geist Sans
+- No nautical kitsch
 - shadcn/ui defaults. Override only when necessary.
+- One border radius: `rounded-lg`
+- Layout padding in layout.tsx only (DEC-017)
+- Student-facing cards: `size="sm"` prop
+- Every page works at 375px (Playwright screenshot confirms)
 
-## Commands
-```bash
-npm run dev          # local dev server (localhost:3000)
-npm run build        # production build
-npm run lint         # ESLint
-npx supabase start   # start local Supabase (Docker)
-npx supabase stop    # stop local Supabase
-npx supabase gen types typescript --local > lib/supabase/types.ts  # regenerate types
-```
+### Testing
+- pgTAP tests live in `supabase/tests/`
+- Playwright tests live in `tests/`
+- Playwright viewports: 375px (mobile), 768px (tablet), 1440px (desktop)
+- Mock external services (Twilio, Resend, Stripe) in test mode
+- `NOTIFICATIONS_ENABLED=false` for test environment
 
-## Workflow Note
-- **Diagnostic commands** (build, lint, type check, test): run these with the Bash tool directly — see errors, fix them, don't bother the user.
-- **Environment-changing commands** (npm install, supabase migrations, git push, deploys): output these for the user to run in their own terminal.
+## Session Skills
 
-## Tone
-Occasional dry humor and sarcasm are welcome. Don't overdo it — one good line beats three forced ones.
+| Skill | When | What |
+|-------|------|------|
+| `/its-alive` | Session start | Stamp time, read context, recommend task |
+| `/pause-this` | Mid-session break | Build check, commit WIP, compact, note pause |
+| `/restart-this` | Resume from pause | Reload context, continue same session |
+| `/kill-this` | Session end (part 1) | Build check, commit, calc time + points, draft log |
+| `/its-dead` | Session end (part 2) | Write log, update plan, push, PM recommendation |
 
 ## Agent Workflow
 
-### Starting a session
-0. Log session start: append `## [Session Name] — [Date] [Time]–` to `session-log.md` immediately
-1. Check `session-log.md` for last entry — read "Next Steps" and "In Progress"
-2. Check `docs/PROJECT_PLAN.md` for current phase task list
-3. Open a named session for the task: `claude -n "phase-X-task-name"`
+| Agent | Model | When | Purpose |
+|-------|-------|------|---------|
+| @architect | Opus | Before design decisions, DEC-TBD items | Keep architecture coherent |
+| @code-review | Sonnet | After commits, optional | Catch issues early |
+| @pm | Sonnet | Start/end of sessions (via skills) | Track progress, flag risks |
+| @ui-reviewer | Sonnet | After UI work, phase boundaries | Design quality |
 
-### During a session
-- Use `@architect` (Opus) before committing to a new pattern or adding a dependency
-- Use `@code-review` (Sonnet) after completing a task or set of commits
-
-### Ending a session
-1. Commit all work
-2. Run `/compact` if above 50% context
-3. Complete the session log entry — fill in end time, compute duration (round to nearest 0.25 hr), and append the full summary:
-
-```markdown
-## [Session Name] — [Date] [Start Time]–[End Time] ([X.XX hrs])
-**Duration:** X.XX hours
-**Task:** What you were working on
-**Completed:** What got done
-**In Progress:** What's partially done (with file paths and line numbers)
-**Blocked:** Anything waiting on a decision or external input
-**Next Steps:** Exactly what to do when you sit back down
-**Context:** Gotchas, weird behavior, things you'll forget
-```
-
-The summary must be detailed enough for a cold-start session to get productive in under 2 minutes.
-
-## Scope Discipline
-V1 ships May 15. When in doubt, check `docs/SPEC.md` section "Not V1."
-
-Features explicitly out of scope:
-- Payment processing
-- Student self-cancellation
-- Email/SMS notifications
-- Automated makeup suggestions
-- Multi-school / multi-tenant
-- Waitlists
+## Workflow Notes
+- **Diagnostic commands** (build, lint, type check, test): run directly — see errors, fix them, don't bother the user.
+- **Environment-changing commands** (npm install, supabase migrations, git push, deploys): output these for the user to run.
+- **Bugs from Andy:** Create a GitHub issue (`gh issue create`), tag `bug`, add to current or next phase.
 
 ## Bug Reports & Questions
 When I report a bug or ask a question:
 1. Explain the cause and your proposed fix
 2. Wait for my approval before making any changes
 3. Do not edit files, run commands, or implement fixes until I say "go" or "do it"
+
+## Scope Discipline
+Check `docs/SPEC.md` section "Not V2" before adding anything.
+
+If a task starts feeling bigger than its estimate:
+1. Stop and re-estimate
+2. Update PROJECT_PLAN.md
+3. If it's now a 13, break it down
+4. If it's scope creep, flag it and move on
+
+## Tone
+Occasional dry humor and sarcasm are welcome. Don't overdo it — one good line beats three forced ones.
