@@ -3,7 +3,19 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 41 — 2026-04-12 08:39 [open]
+## Session 41 — 2026-04-12 08:39–08:46 (0.25 hrs)
+**Duration:** 0.25 hours | **Points:** 3 pts
+**Task:** Phase 0.11 — Install Playwright + MCP servers, configure viewports
+**Completed:**
+- Installed @playwright/test v1.59.1 + Chromium headless browser
+- Created playwright.config.ts with 3 viewport projects: mobile (375px), tablet (768px), desktop (1440px)
+- Created .mcp.json with @playwright/mcp and a11y-mcp-server configured
+- Created tests/ directory for Playwright test suite
+- Confirmed build clean post-install
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.12 — Playwright test suite for auth flows. Login as admin (andy@ltsc.example), instructor (mike@ltsc.example), student (sam@ltsc.example). Verify each lands on correct dashboard. Requires `supabase start` + `npm run dev` running before `npx playwright test`.
+**Context:** Playwright v1.59.1. MCP servers live in .mcp.json (project root), not .claude/settings.json — project settings schema rejects mcpServers. Viewports: 375/768/1440. baseURL is http://localhost:3000. Tests run against local Supabase stack.
 
 ## Session 40 — 2026-04-12 00:35–00:52 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 3 pts
