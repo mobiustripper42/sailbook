@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 41 — 2026-04-12 08:39 [open]
+
 ## Session 40 — 2026-04-12 00:35–00:52 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 3 pts
 **Task:** Phase 0.10 — RLS audit

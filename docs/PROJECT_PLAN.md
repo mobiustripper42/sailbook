@@ -46,7 +46,7 @@ Everything needed to develop safely. No user-facing changes.
 | 0.8 | ~~pgTAP test suite — RLS tests for `course_types`, `courses`, `sessions`~~ | 5 | [x] <!-- completed session 38, 2026-04-12 --> 13 tests, 32/32 total passing. |
 | 0.9 | ~~pgTAP test suite — RLS tests for `enrollments`, `session_attendance`~~ | 5 | [x] <!-- completed 2026-04-12 --> 16 tests, 48/48 total passing. throws_ok(sql,'42501',NULL,desc) pattern established. |
 | 0.10 | ~~RLS audit — fix gaps found by pgTAP tests~~ | 3 | [x] <!-- completed 2026-04-12 --> 2 policy fixes + 11 gap tests. 59/59 passing. Code-review agent caught 2 follow-up gaps, both fixed. |
-| 0.11 | Install Playwright + Playwright MCP + a11y-mcp-server, configure viewports (375/768/1440) | 3 | `npm init playwright@latest`. MCP config in `.claude/settings.json`. |
+| 0.11 | ~~Install Playwright + Playwright MCP + a11y-mcp-server, configure viewports (375/768/1440)~~ | 3 | [x] <!-- completed 2026-04-12 --> @playwright/test v1.59.1 + Chromium installed. playwright.config.ts with 3 viewport projects (375/768/1440). MCP servers in .mcp.json (@playwright/mcp, a11y-mcp-server). |
 | 0.12 | Playwright test suite — auth flows (login, register, role routing) | 3 | Login as admin/instructor/student, verify correct dashboard. |
 | 0.13 | Playwright test suite — admin course CRUD (create type, create course, add sessions) | 8 | Full admin catalog flow. First big Playwright tests. |
 | 0.14 | Playwright test suite — student browse + register + capacity + duplicate prevention | 8 | Full student enrollment flow. |
