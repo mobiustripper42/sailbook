@@ -37,7 +37,7 @@ Everything needed to develop safely. No user-facing changes.
 | # | Task | Effort | Notes |
 |---|------|--------|-------|
 | 0.1 | ~~Install Docker Desktop on WSL2, verify running~~ | 2 | [x] <!-- completed 2026-04-11 --> Docker 29.3.1 + WSL2 integration verified. |
-| 0.2 | Initialize local Supabase (`supabase init`, `supabase start`) | 2 | Creates `supabase/` dir with config. |
+| 0.2 | ~~Initialize local Supabase (`supabase init`, `supabase start`)~~ | 2 | [x] <!-- completed 2026-04-11 --> Local stack running. |
 | 0.3 | Baseline migration — dump prod schema as `supabase/migrations/000_baseline.sql` | 3 | Includes RLS policies, functions, triggers. Everything from V1. |
 | 0.4 | Seed data — consolidate demo-seed into `supabase/seed.sql`, add Playwright test users | 2 | Runs automatically on `supabase db reset`. Dev-seed-qa is stale — rebuild from demo-seed. |
 | 0.5 | Verify: `supabase db reset` → app runs against local Supabase | 2 | End-to-end smoke test. Login, browse, enroll. |
