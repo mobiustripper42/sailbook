@@ -1,18 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
-
-const PASSWORD = 'qwert12345';
+import { loginAs, runId } from './helpers';
 
 async function loginAsAdmin(page: Page) {
-  await page.goto('/login');
-  await page.getByLabel('Email').fill('pw_admin@ltsc.test');
-  await page.getByLabel('Password').fill(PASSWORD);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await page.waitForURL('/admin/dashboard', { timeout: 10000 });
-}
-
-/** Random 6-char alphanum suffix so each test run creates distinct DB records. */
-function runId() {
-  return Math.random().toString(36).slice(2, 8).toUpperCase();
+  await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard');
 }
 
 // ─── Course Type CRUD ───────────────────────────────────────────────────────

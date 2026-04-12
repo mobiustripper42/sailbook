@@ -1,23 +1,13 @@
 import { test, expect, type Page } from '@playwright/test';
-
-const PASSWORD = 'qwert12345';
-
-async function loginAs(page: Page, email: string, dashboardUrl: string | RegExp) {
-  await page.goto('/login');
-  await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill(PASSWORD);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await page.waitForURL(dashboardUrl, { timeout: 10000 });
-}
-
-/** Random 6-char alphanum suffix so each test run creates distinct DB records. */
-function runId() {
-  return Math.random().toString(36).slice(2, 8).toUpperCase();
-}
+import { loginAs, runId } from './helpers';
 
 /**
  * Creates a test course via admin UI. Returns the course UUID.
  * Requires a fresh browser context — must not already be authenticated.
+ *
+ * Always uses `{ force: true }` on Create Course — this helper is only called
+ * from desktop-only test blocks, so the mobile sidebar overlap that motivated
+ * the conditional force in admin-course-crud.spec.ts is not a concern here.
  */
 async function createTestCourse(
   page: Page,
@@ -34,13 +24,12 @@ async function createTestCourse(
   await page.getByLabel('Title Override').fill(title);
   await page.getByLabel('Capacity').fill(String(capacity));
 
-  // Fill one session — far-future date so it never counts as past
+  // Far-future date so the session never counts as past
   await page.locator('input[type="date"]').fill('2027-09-15');
   await page.locator('input[type="time"]').first().fill('09:00');
   await page.locator('input[type="time"]').nth(1).fill('17:00');
   await page.locator('section').filter({ hasText: 'Sessions' }).getByPlaceholder(/Dock A/).fill('Edgewater Park');
 
-  // Mobile: sidebar overlaps button coords — force bypasses the pointer-intercept check.
   await page.getByRole('button', { name: 'Create Course' }).click({ force: true });
   await page.waitForURL(/\/admin\/courses\/[0-9a-f-]+$/, { timeout: 10000 });
 
@@ -81,7 +70,8 @@ test.describe('Student — browse courses', () => {
 
   test('course cards display spots remaining badges', async ({ page }) => {
     await page.goto('/student/courses');
-    // ASA 101 Weekend May (c001): capacity 4, Sam + Alex enrolled = 2 active → 2 spots left
+    // c001 (ASA 101 Weekend May): capacity 4, Sam (confirmed) + Alex (registered) = 2 active
+    // → 4 - 2 = 2 spots left. pw_student has no seed enrollment on c001.
     await expect(page.getByText('2 spots left')).toBeVisible();
   });
 });
@@ -117,9 +107,12 @@ test.describe('Student — enroll in a course', () => {
     // After enrollment: Pending confirmation badge appears, enroll button is gone
     await expect(page.getByText('Pending confirmation')).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole('button', { name: 'Enroll in This Course' })).not.toBeVisible();
+
+    // Spot count decrements (1 of 4 now taken by pw_student)
+    await expect(page.getByText('3 of 4 remaining')).toBeVisible();
   });
 
-  test('enrolled course card shows Pending confirmation on browse page', async ({ page, browser }) => {
+  test('enrolled course card shows Pending confirmation badge on browse page', async ({ page, browser }) => {
     test.skip(test.info().project.name !== 'desktop');
 
     const title = `PW Browse ${runId()}`;
@@ -162,22 +155,26 @@ test.describe('Student — capacity enforcement', () => {
     await page.getByRole('button', { name: 'Enroll in This Course' }).click();
     await expect(page.getByText('Pending confirmation')).toBeVisible({ timeout: 10000 });
 
-    // jordan (not enrolled in this course) checks the course detail
+    // jordan (not enrolled in this course) checks the course detail.
+    // Course is now full — should see a disabled "Course Full" button.
     const jordanCtx = await browser.newContext();
-    const jordanPage = await jordanCtx.newPage();
-    await loginAs(jordanPage, 'jordan@ltsc.test', '/student/dashboard');
-    await jordanPage.goto(`/student/courses/${courseId}`);
-
-    const fullBtn = jordanPage.getByRole('button', { name: 'Course Full' });
-    await expect(fullBtn).toBeVisible();
-    await expect(fullBtn).toBeDisabled();
-    await jordanCtx.close();
+    try {
+      const jordanPage = await jordanCtx.newPage();
+      await loginAs(jordanPage, 'jordan@ltsc.test', '/student/dashboard');
+      await jordanPage.goto(`/student/courses/${courseId}`);
+      const fullBtn = jordanPage.getByRole('button', { name: 'Course Full' });
+      await expect(fullBtn).toBeVisible();
+      await expect(fullBtn).toBeDisabled();
+    } finally {
+      await jordanCtx.close();
+    }
   });
 
   test('full course card shows Full badge on browse page', async ({ page, browser }) => {
     test.skip(test.info().project.name !== 'desktop');
 
-    const title = `PW Full Browse ${runId()}`;
+    // Title contains "Full" — use exact matching below to avoid substring collisions
+    const title = `PW Cap ${runId()}`;
 
     const adminCtx = await browser.newContext();
     const adminPage = await adminCtx.newPage();
@@ -190,15 +187,18 @@ test.describe('Student — capacity enforcement', () => {
     await page.getByRole('button', { name: 'Enroll in This Course' }).click();
     await expect(page.getByText('Pending confirmation')).toBeVisible({ timeout: 10000 });
 
-    // jordan sees Full badge on the browse page card
+    // jordan sees the Full badge on the browse page card.
+    // Exact match required: card title also contains text, avoid strict-mode violation.
     const jordanCtx = await browser.newContext();
-    const jordanPage = await jordanCtx.newPage();
-    await loginAs(jordanPage, 'jordan@ltsc.test', '/student/dashboard');
-    await jordanPage.goto('/student/courses');
-    const card = jordanPage.locator('[data-slot="card"]').filter({ hasText: title });
-    // Use exact match — the title also contains "Full" as a substring
-    await expect(card.getByText('Full', { exact: true })).toBeVisible();
-    await jordanCtx.close();
+    try {
+      const jordanPage = await jordanCtx.newPage();
+      await loginAs(jordanPage, 'jordan@ltsc.test', '/student/dashboard');
+      await jordanPage.goto('/student/courses');
+      const card = jordanPage.locator('[data-slot="card"]').filter({ hasText: title });
+      await expect(card.getByText('Full', { exact: true })).toBeVisible();
+    } finally {
+      await jordanCtx.close();
+    }
   });
 });
 
@@ -221,7 +221,11 @@ test.describe('Student — duplicate enrollment prevention', () => {
     await page.getByRole('button', { name: 'Enroll in This Course' }).click();
     await expect(page.getByText('Pending confirmation')).toBeVisible({ timeout: 10000 });
 
-    // Re-navigate to the same course — server re-fetches enrollment state
+    // Re-navigate to the same course — server re-fetches enrollment state.
+    // The Enroll button must not appear; only the status badge should render.
+    // This tests the UI half of duplicate prevention (the button disappears post-enroll).
+    // The server-side guard ('You are already enrolled in this course.') is covered
+    // by the enrollInCourse action logic; no UI path can trigger it once enrolled.
     await page.goto(`/student/courses/${courseId}`);
     await expect(page.getByText('Pending confirmation')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Enroll in This Course' })).not.toBeVisible();
