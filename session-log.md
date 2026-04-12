@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 36 — 2026-04-12 00:03 [open]
+
 ## Session 35 — 2026-04-11 23:57–00:02 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 2 pts
 **Task:** Phase 0.5 — Smoke test local Supabase
