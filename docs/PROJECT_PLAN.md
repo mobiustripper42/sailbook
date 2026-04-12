@@ -40,7 +40,7 @@ Everything needed to develop safely. No user-facing changes.
 | 0.2 | ~~Initialize local Supabase (`supabase init`, `supabase start`)~~ | 2 | [x] <!-- completed 2026-04-11 --> Local stack running. |
 | 0.3 | ~~Baseline migration — dump prod schema as `supabase/migrations/000_baseline.sql`~~ | 3 | [x] <!-- completed 2026-04-11 --> 28 policies + helper functions. Reset verified clean. |
 | 0.4 | ~~Seed data — consolidate demo-seed into `supabase/seed.sql`, add Playwright test users~~ | 2 | [x] <!-- completed 2026-04-11 --> Schema-qualified inserts, extensions.crypt(). Reset clean. |
-| 0.5 | Verify: `supabase db reset` → app runs against local Supabase | 2 | End-to-end smoke test. Login, browse, enroll. |
+| 0.5 | ~~Verify: `supabase db reset` → app runs against local Supabase~~ | 2 | [x] <!-- completed 2026-04-12 --> Login confirmed, seed users visible, local DB active. |
 | 0.6 | pgTAP setup — install extension, create `supabase/tests/` structure, verify pipeline | 3 | `CREATE EXTENSION pgtap;` in test helper. Run trivial test to confirm `supabase test db` works. |
 | 0.7 | pgTAP test suite — RLS tests for `profiles` table (all roles × CRUD) | 3 | Template for all other tables. |
 | 0.8 | pgTAP test suite — RLS tests for `course_types`, `courses`, `sessions` | 5 | Admin write, public read (active only), instructor scoped read. |

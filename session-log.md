@@ -3,6 +3,18 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 35 — 2026-04-11 23:57–00:02 (0.25 hrs)
+**Duration:** 0.25 hours | **Points:** 2 pts
+**Task:** Phase 0.5 — Smoke test local Supabase
+**Completed:**
+- Updated `.env.local` to point at local Supabase (http://127.0.0.1:54321) with prod commented out for easy switching
+- Confirmed `npm run dev` + login shows seed data users (not prod users)
+- Smoke test passed — app running against local DB
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.6 — pgTAP setup. `CREATE EXTENSION pgtap` in test helper, create `supabase/tests/` structure, run a trivial test to confirm `supabase test db` works.
+**Context:** `.env.local` has local/prod toggle via comments. Local is currently active. `.env.local` is gitignored — switching envs is manual.
+
 ## Session 34 — 2026-04-11 23:47–23:55 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 2 pts
 **Task:** Phase 0.4 — Seed data (supabase/seed.sql)
