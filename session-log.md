@@ -3,7 +3,20 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 43 — 2026-04-12 17:14 [open]
+## Session 43 — 2026-04-12 17:14–17:59 (0.75 hrs)
+**Duration:** 0.75 hours | **Points:** 8 pts
+**Task:** Phase 0.13 — Playwright test suite for admin course CRUD
+
+**Completed:**
+- Created `tests/admin-course-crud.spec.ts` — 16 passing tests across 3 viewports (5 skipped with rationale), 55/55 full suite green
+- Suites: course type creation + list, course creation with session, add session to existing course, course detail cards, course type edit
+- Edit test includes write verification: navigates back to edit page after save and asserts `Description` field value matches — no-op submits now fail
+- Ran code-review agent; actioned `force:true` scoping and write verification findings
+- Established patterns for 0.14–0.16 (see Context)
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.14 — Playwright test suite for student browse + register + capacity + duplicate prevention. Use `pw_student@ltsc.test`. Key flows: browse /student/courses, enroll in a course (enroll button → confirmation), try to enroll in a full course (capacity check), try to enroll twice (duplicate prevention). Supabase + dev server must be running.
+**Context:** `test.skip(test.info().project.name !== 'desktop')` — use for admin tests involving the sessions table; overflow-x-auto + non-responsive sidebar make mobile/tablet button clicks unreliable as sessions accumulate. Most admin interaction tests can be desktop-only. `force: true` WITHOUT prior scrollIntoViewIfNeeded() for buttons near the sessions table — scroll repositions the element so the force-click lands on whatever was previously on top. field-sizing-content textareas: fill() appends instead of replacing when field has a value — fix with click() + Ctrl+A + keyboard.type(). page.locator('main form').evaluate(f => f.requestSubmit()) when multiple forms on page. runId() helper for unique test data per run (avoids unique constraint re-run failures). Write verification pattern: after save redirect, goto(editUrl) and assert field value. Code-review agent run post-commit; findings addressed in follow-up commit.
 
 ## Session 42 — 2026-04-12 08:53–09:41 (0.75 hrs)
 **Duration:** 0.75 hours | **Points:** 3 pts

@@ -48,7 +48,7 @@ Everything needed to develop safely. No user-facing changes.
 | 0.10 | ~~RLS audit — fix gaps found by pgTAP tests~~ | 3 | [x] <!-- completed 2026-04-12 --> 2 policy fixes + 11 gap tests. 59/59 passing. Code-review agent caught 2 follow-up gaps, both fixed. |
 | 0.11 | ~~Install Playwright + Playwright MCP + a11y-mcp-server, configure viewports (375/768/1440)~~ | 3 | [x] <!-- completed 2026-04-12 --> @playwright/test v1.59.1 + Chromium installed. playwright.config.ts with 3 viewport projects (375/768/1440). MCP servers in .mcp.json (@playwright/mcp, a11y-mcp-server). |
 | 0.12 | ~~Playwright test suite — auth flows (login, register, role routing)~~ | 3 | [x] <!-- completed 2026-04-12 --> 39/39 passing across 3 viewports. Fixed login action to redirect directly to role dashboard. Chromium for all viewports (WebKit not installed). |
-| 0.13 | Playwright test suite — admin course CRUD (create type, create course, add sessions) | 8 | Full admin catalog flow. First big Playwright tests. |
+| 0.13 | ~~Playwright test suite — admin course CRUD (create type, create course, add sessions)~~ | 8 | [x] <!-- completed 2026-04-12 --> 18/18 passing across 3 viewports. runId() for unique test data; force:true for mobile sidebar overlap; main form scope for requestSubmit(). |
 | 0.14 | Playwright test suite — student browse + register + capacity + duplicate prevention | 8 | Full student enrollment flow. |
 | 0.15 | Playwright test suite — attendance + cancellation + makeup | 5 | The operational core. |
 | 0.16 | Playwright test suite — instructor views | 3 | Dashboard, roster, session detail. Read-only pages. |
