@@ -1,80 +1,5 @@
-import { test, expect, type Browser } from '@playwright/test';
-import { loginAs, runId } from './helpers';
-
-// ─── Shared helper ────────────────────────────────────────────────────────────
-//
-// Creates a test course via admin UI, publishes it, then enrolls pw_student.
-// Called only from desktop-only tests — `force:true` on Create Course is safe.
-// Returns the courseId and the first sessionId (extracted from the Attendance link href).
-//
-// Session date: 2027-09-15 · Location: "Edgewater Park" (stable selectors below rely on this)
-
-async function createEnrolledCourse(
-  browser: Browser,
-  { title }: { title: string }
-): Promise<{ courseId: string; sessionId: string }> {
-  let courseId!: string;
-  let sessionId!: string;
-
-  // Step 1: admin creates + publishes course
-  const adminCtx = await browser.newContext();
-  const adminPage = await adminCtx.newPage();
-  try {
-    await loginAs(adminPage, 'pw_admin@ltsc.test', '/admin/dashboard');
-    await adminPage.goto('/admin/courses/new');
-    await expect(adminPage.getByRole('heading', { name: 'New Course' })).toBeVisible();
-
-    await adminPage.getByLabel('Course Type').click();
-    await adminPage.getByRole('option', { name: /ASA 101.*Basic Keelboat/ }).click();
-    await adminPage.getByLabel('Title Override').fill(title);
-    await adminPage.getByLabel('Capacity').fill('4');
-    await adminPage.locator('input[type="date"]').fill('2027-09-15');
-    await adminPage.locator('input[type="time"]').first().fill('09:00');
-    await adminPage.locator('input[type="time"]').nth(1).fill('17:00');
-    await adminPage
-      .locator('section')
-      .filter({ hasText: 'Sessions' })
-      .getByPlaceholder(/Dock A/)
-      .fill('Edgewater Park');
-
-    await adminPage.getByRole('button', { name: 'Create Course' }).click({ force: true });
-    await adminPage.waitForURL(/\/admin\/courses\/[0-9a-f-]+$/, { timeout: 10000 });
-
-    const urlMatch = adminPage.url().match(/\/admin\/courses\/([0-9a-f-]+)$/);
-    if (!urlMatch) throw new Error('Could not extract course ID from URL');
-    courseId = urlMatch[1];
-
-    await adminPage.getByRole('button', { name: 'Publish' }).click();
-    await expect(adminPage.getByRole('button', { name: 'Mark Completed' })).toBeVisible({
-      timeout: 10000,
-    });
-
-    // Extract sessionId from the Attendance link in the sessions table
-    const href = await adminPage
-      .getByRole('link', { name: 'Attendance' })
-      .first()
-      .getAttribute('href');
-    const sessionMatch = href?.match(/\/sessions\/([0-9a-f-]+)\/attendance/);
-    if (!sessionMatch) throw new Error('Could not extract session ID from attendance link href');
-    sessionId = sessionMatch[1];
-  } finally {
-    await adminCtx.close();
-  }
-
-  // Step 2: pw_student enrolls (creates session_attendance record automatically)
-  const studentCtx = await browser.newContext();
-  const studentPage = await studentCtx.newPage();
-  try {
-    await loginAs(studentPage, 'pw_student@ltsc.test', '/student/dashboard');
-    await studentPage.goto(`/student/courses/${courseId}`);
-    await studentPage.getByRole('button', { name: 'Enroll in This Course' }).click();
-    await expect(studentPage.getByText('Pending confirmation')).toBeVisible({ timeout: 10000 });
-  } finally {
-    await studentCtx.close();
-  }
-
-  return { courseId, sessionId };
-}
+import { test, expect } from '@playwright/test';
+import { loginAs, runId, createEnrolledCourse } from './helpers';
 
 // ─── Admin — Attendance Marking ──────────────────────────────────────────────
 
@@ -125,7 +50,8 @@ test.describe('Admin — attendance marking', () => {
     // Click "All Attended" quick action
     await page.getByRole('button', { name: 'All Attended' }).click();
 
-    // Save is now enabled — status changed from expected → attended for all students
+    // Save is now enabled — status changed from expected → attended for all students.
+    // Save path (click → toast) is covered by the "marks a student as attended" test above.
     await expect(page.getByRole('button', { name: 'Save Attendance' })).toBeEnabled();
   });
 });
@@ -275,9 +201,14 @@ test.describe('Admin — session cancellation + makeup', () => {
     const makeupButton = page.getByRole('button', { name: /Schedule Makeup.*1 student/ });
     await expect(makeupButton).toBeVisible({ timeout: 10000 });
 
-    // Open the makeup form and schedule a makeup date
+    // Open the makeup form and fill in a makeup date.
+    // Scoped to the form element to avoid any other date inputs on the page.
     await makeupButton.click();
-    await page.locator('input[type="date"]').fill('2027-09-22');
+    await page
+      .locator('form')
+      .filter({ hasText: 'Schedule Makeup' })
+      .locator('input[name="date"]')
+      .fill('2027-09-22');
     await page.getByRole('button', { name: 'Create Makeup' }).click();
 
     // After redirect: makeup row shows "Makeup scheduled (1 student)"

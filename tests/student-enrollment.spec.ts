@@ -1,50 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
-import { loginAs, runId } from './helpers';
-
-/**
- * Creates a test course via admin UI. Returns the course UUID.
- * Requires a fresh browser context — must not already be authenticated.
- *
- * Always uses `{ force: true }` on Create Course — this helper is only called
- * from desktop-only test blocks, so the mobile sidebar overlap that motivated
- * the conditional force in admin-course-crud.spec.ts is not a concern here.
- */
-async function createTestCourse(
-  page: Page,
-  { capacity, title }: { capacity: number; title: string }
-): Promise<string> {
-  await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard');
-  await page.goto('/admin/courses/new');
-  await expect(page.getByRole('heading', { name: 'New Course' })).toBeVisible();
-
-  await page.getByLabel('Course Type').click();
-  await page.getByRole('option', { name: /ASA 101.*Basic Keelboat/ }).click();
-
-  // Unique title so we can find the card on the student browse page
-  await page.getByLabel('Title Override').fill(title);
-  await page.getByLabel('Capacity').fill(String(capacity));
-
-  // Far-future date so the session never counts as past
-  await page.locator('input[type="date"]').fill('2027-09-15');
-  await page.locator('input[type="time"]').first().fill('09:00');
-  await page.locator('input[type="time"]').nth(1).fill('17:00');
-  await page.locator('section').filter({ hasText: 'Sessions' }).getByPlaceholder(/Dock A/).fill('Edgewater Park');
-
-  await page.getByRole('button', { name: 'Create Course' }).click({ force: true });
-  await page.waitForURL(/\/admin\/courses\/[0-9a-f-]+$/, { timeout: 10000 });
-
-  const match = page.url().match(/\/admin\/courses\/([0-9a-f-]+)$/);
-  if (!match) throw new Error('Could not extract course ID from URL');
-  const courseId = match[1];
-
-  // Courses start as draft — publish to make visible to students.
-  // After the server action completes, the page re-renders: Publish disappears,
-  // Mark Completed appears.
-  await page.getByRole('button', { name: 'Publish' }).click();
-  await expect(page.getByRole('button', { name: 'Mark Completed' })).toBeVisible({ timeout: 10000 });
-
-  return courseId;
-}
+import { test, expect } from '@playwright/test';
+import { loginAs, runId, createTestCourse } from './helpers';
 
 // ─── Browse Courses ──────────────────────────────────────────────────────────
 
