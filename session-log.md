@@ -3,6 +3,23 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 40 — 2026-04-12 00:35–00:52 (0.25 hrs)
+**Duration:** 0.25 hours | **Points:** 3 pts
+**Task:** Phase 0.10 — RLS audit
+**Completed:**
+- Full audit of all 28 RLS policies across 6 tables — no uncovered tables in V1
+- Found & fixed: "Students can update own enrollments" WITH CHECK had no status restriction; now restricted to status='cancelled' only (`supabase/migrations/20260412044427_rls_enrollment_update_restriction.sql`)
+- Found & fixed: get_enrolled_course_ids included cancelled enrollments — students could see sessions for courses they'd cancelled from
+- Found & fixed (code review follow-up): get_student_enrollment_ids also included cancelled enrollments — students could read/update attendance for cancelled enrollments
+- Found & fixed (code review follow-up): students could cancel completed enrollments; USING clause now blocks status='completed' rows (`supabase/migrations/20260412045055_rls_student_attendance_cancelled_fix.sql`)
+- Created `supabase/tests/04_rls_gaps.sql` — 11 tests: write-blocks for students/instructors, status escalation prevention, cancelled-enrollment visibility fix, completed-enrollment cancel guard
+- Ran code-review agent post-commit; two findings actioned
+- 59/59 pgTAP tests passing
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.11 — Install Playwright + Playwright MCP + a11y-mcp-server, configure viewports (375/768/1440). `npm init playwright@latest`. MCP config in `.claude/settings.json`.
+**Context:** Documented intentional non-fix: admin has no DELETE policy on profiles (correct by design — deleting profiles should go through Supabase Auth admin tools, not RLS). get_student_enrollment_ids and get_enrolled_course_ids now both exclude cancelled enrollments — keep these in sync when adding future enrollment statuses. Student enrollment UPDATE policy allows only status='cancelled' AND only when starting status != 'completed'. The code-review agent caught two real gaps in the first commit.
+
 ## Session 39 — 2026-04-12 00:27–00:34 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 5 pts
 **Task:** Phase 0.9 — pgTAP RLS tests for enrollments and session_attendance
