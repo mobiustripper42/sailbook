@@ -3,7 +3,24 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 44 — 2026-04-12 18:08 [open]
+## Session 44 — 2026-04-12 18:08–18:33 (0.42 hrs)
+**Duration:** 0.42 hours | **Points:** 8 pts
+**Task:** Phase 0.14 — Playwright test suite for student browse + register + capacity + duplicate prevention
+
+**Completed:**
+- Created `tests/student-enrollment.spec.ts` — 24 tests (14 pass, 10 skipped by design) across 3 viewports
+- Suites: browse courses, enroll flow, capacity enforcement, duplicate prevention
+- Browse tests run all viewports (read-only); enrollment/capacity/duplicate tests are desktop-only
+- `createTestCourse()` helper: creates + publishes a course via admin UI, returns UUID
+- User-switching via `browser.newContext()` — separate context per user (admin → pw_student → jordan)
+- Ran code-review agent; actioned all 7 findings in follow-up commit
+- Extracted shared `tests/helpers.ts` with `loginAs()` and `runId()`; updated `admin-course-crud.spec.ts` to import from it
+- Fixed `jordanCtx` context leaks (try/finally), added `'3 of 4 remaining'` spot-decrement assertion, added seed-row comments, documented duplicate-prevention server-side coverage gap
+- `supabase db reset` needed before pgTAP after accumulated Playwright runs; 59/59 pgTAP + 69/69 Playwright green
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.15 — Playwright test suite for attendance + cancellation + makeup. Key flows: pw_student enrolled in a course → admin marks attendance (present/absent) → student sees updated attendance badge on detail page → cancellation flow (admin cancels enrollment or session) → makeup session linkage. Check existing `/admin/courses/[id]/sessions/[sessionId]/attendance` page and attendance actions before writing tests.
+**Context:** `createTestCourse` is only called from desktop-only tests — `force: true` on Create Course is safe (no mobile layout conflict). `getByText('Full', { exact: true })` needed when course title contains 'Full' as substring. `supabase db reset` is routine maintenance before pgTAP — schedule it at start of any session that will run both suites. `tests/helpers.ts` is the single source for `loginAs`/`runId`/`PASSWORD` — add new shared helpers there, not inline.
 
 ## Session 43 — 2026-04-12 17:14–17:59 (0.75 hrs)
 **Duration:** 0.75 hours | **Points:** 8 pts
