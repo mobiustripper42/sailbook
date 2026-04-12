@@ -3,7 +3,16 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 36 — 2026-04-12 00:03 [open]
+## Session 36 — 2026-04-12 00:03–00:06 (0.25 hrs)
+**Duration:** 0.25 hours | **Points:** 3 pts
+**Task:** Phase 0.6 — pgTAP setup
+**Completed:**
+- Created `supabase/tests/00_smoke.sql` — 7 tests: pgTAP alive + all 6 core tables exist (profiles, course_types, courses, sessions, enrollments, session_attendance)
+- `supabase test db` passes 7/7 — pipeline confirmed working
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.7 — pgTAP RLS tests for `profiles` table (all roles × CRUD). This is the template test file — patterns established here carry into 0.8/0.9.
+**Context:** Test files live in `supabase/tests/`. Format: BEGIN; SELECT plan(N); ... tests ... SELECT * FROM finish(); ROLLBACK; Supabase handles pgTAP extension setup automatically — no manual CREATE EXTENSION needed in test files.
 
 ## Session 35 — 2026-04-11 23:57–00:02 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 2 pts
