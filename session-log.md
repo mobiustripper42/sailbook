@@ -20,7 +20,7 @@ Format: append newest entry at the top.
 **Context:** Next.js 16 uses proxy.ts (not middleware.ts) — function must be named `proxy`. Login action now redirects directly to role dashboard; proxy still guards cross-role access and unauthenticated requests but is NOT in the post-login path. Playwright mobile/tablet use Chromium (not WebKit) — webkit not installed, Chromium covers the viewport breakpoints we care about. login() helper in tests uses waitForURL(/dashboard/) to ensure session is fully settled before any subsequent page.goto() calls. The proxy's getUser() in Playwright contexts does not reliably see cookies set by Server Action redirects — hence the direct-redirect fix in the login action.
 
 ## Retroactive credit — 2026-04-12
-**Duration:** 0.75 hrs | **Points:** 8 pts (0.18 + 0.19 + 0.20)
+**Duration:** 0.25 hrs | **Points:** 8 pts (0.18 + 0.19 + 0.20)
 Tasks 0.18, 0.19, 0.20 completed before V2 work formally began: session skills, CLAUDE.md update, docs update.
 
 ## Session 41 — 2026-04-12 08:39–08:46 (0.08 hrs)
