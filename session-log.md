@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 31 — 2026-04-11 21:06 [open]
+
 ## Session 30 — 2026-04-09 20:45–21:09 (0.25 hrs)
 **Duration:** 0.25 hours
 **Task:** V1 close-out — defer 5.23/5.24, tag v1.0.0, ship to main
