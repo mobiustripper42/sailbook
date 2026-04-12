@@ -42,7 +42,7 @@ Everything needed to develop safely. No user-facing changes.
 | 0.4 | ~~Seed data — consolidate demo-seed into `supabase/seed.sql`, add Playwright test users~~ | 2 | [x] <!-- completed 2026-04-11 --> Schema-qualified inserts, extensions.crypt(). Reset clean. |
 | 0.5 | ~~Verify: `supabase db reset` → app runs against local Supabase~~ | 2 | [x] <!-- completed 2026-04-12 --> Login confirmed, seed users visible, local DB active. |
 | 0.6 | ~~pgTAP setup — install extension, create `supabase/tests/` structure, verify pipeline~~ | 3 | [x] <!-- completed 2026-04-12 --> 00_smoke.sql passes 7/7. Pipeline confirmed. |
-| 0.7 | pgTAP test suite — RLS tests for `profiles` table (all roles × CRUD) | 3 | Template for all other tables. |
+| 0.7 | ~~pgTAP test suite — RLS tests for `profiles` table (all roles × CRUD)~~ | 3 | [x] <!-- completed 2026-04-12 --> 12 tests, 19/19 total passing. authenticate() helper established. |
 | 0.8 | pgTAP test suite — RLS tests for `course_types`, `courses`, `sessions` | 5 | Admin write, public read (active only), instructor scoped read. |
 | 0.9 | pgTAP test suite — RLS tests for `enrollments`, `session_attendance` | 5 | Highest risk tables. Student sees own, admin sees all, instructor sees assigned. |
 | 0.10 | RLS audit — fix gaps found by pgTAP tests | 3 | Buffer for 0.7–0.9. The V1 audit that never happened. |

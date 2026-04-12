@@ -3,7 +3,19 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 37 — 2026-04-12 00:08 [open]
+## Session 37 — 2026-04-12 00:08–00:15 (0.25 hrs)
+**Duration:** 0.25 hours | **Points:** 3 pts
+**Task:** Phase 0.7 — pgTAP RLS tests for profiles
+**Completed:**
+- Created `supabase/tests/01_rls_profiles.sql` — 12 tests across 4 roles (anon, admin/andy, student/sam, instructor/mike)
+- Covers all 7 profiles policies: admin all, anyone reads instructors, users read/update own, instructors read their students
+- Established `tests.authenticate()` helper + role-switching pattern (SELECT tests.authenticate(...); SET LOCAL ROLE authenticated; ... RESET ROLE)
+- Fixed: PERFORM → SELECT for void function calls in plain SQL context
+- `supabase test db` passes 19/19 (smoke + profiles)
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.8 — pgTAP RLS tests for course_types, courses, sessions. Reuse authenticate() helper pattern from 01_rls_profiles.sql.
+**Context:** PERFORM is PL/pgSQL only — use SELECT for void function calls in plain SQL test files. authenticate() is SECURITY DEFINER so it works even when called as authenticated role. Verify-as-postgres pattern: reset role, then SELECT to confirm blocked writes didn't land.
 
 ## Session 36 — 2026-04-12 00:03–00:06 (0.25 hrs)
 **Duration:** 0.25 hours | **Points:** 3 pts
