@@ -6,14 +6,17 @@ import { redirect } from 'next/navigation'
 export async function login(_: unknown, formData: FormData) {
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: formData.get('email') as string,
     password: formData.get('password') as string,
   })
 
   if (error) return { error: error.message }
 
-  redirect('/')
+  const meta = (data.user?.user_metadata ?? {}) as Record<string, unknown>
+  if (meta.is_admin) redirect('/admin/dashboard')
+  if (meta.is_instructor) redirect('/instructor/dashboard')
+  redirect('/student/dashboard')
 }
 
 export async function register(_: unknown, formData: FormData) {

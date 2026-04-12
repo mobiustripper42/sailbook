@@ -18,15 +18,20 @@ export default defineConfig({
     {
       name: 'mobile',
       use: {
-        ...devices['iPhone SE'],
+        browserName: 'chromium',
         viewport: { width: 375, height: 667 },
+        userAgent: 'Mozilla/5.0 (Linux; Android 10; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+        isMobile: true,
+        hasTouch: true,
       },
     },
     {
       name: 'tablet',
       use: {
-        ...devices['iPad Mini'],
+        browserName: 'chromium',
         viewport: { width: 768, height: 1024 },
+        isMobile: true,
+        hasTouch: true,
       },
     },
     {
