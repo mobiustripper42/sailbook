@@ -3,6 +3,22 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 46 — 2026-04-12 20:20–20:36 (0.27 hrs)
+**Duration:** 0.27 hours | **Points:** 3 pts
+**Task:** Phase 0.16 — Playwright test suite for instructor views
+
+**Completed:**
+- Created `tests/instructor-views.spec.ts` — 18 tests (9 pass, 9 skip by design) across 3 viewports
+- Suites: dashboard empty state (heading + stat cards), dashboard with assigned sessions (course title, badge, Roster link), session roster (title, date/time/location, student in table, back link), access control (instructor can't view unowned session — gets 404)
+- `createInstructorCourse()` inline helper: admin creates course with pw_instructor assigned + student enrolls, returns courseId + sessionId
+- Key locator fixes: `{ exact: true }` for stat card labels; `.first()` on badge + Roster link (dirty DB resilience); `fmtDateLong` outputs "Wed, Sep 15" (short format — don't use long weekday/month names)
+- Empty-state message test skipped with note: requires `supabase db reset` — prior runs accumulate pw_instructor assignments
+- 9/9 pass; capacity enforcement flaky test (student-enrollment.spec.ts:96) confirmed pre-existing — passes in isolation
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.17 — Save @ui-reviewer agent spec to `.claude/agents/ui-reviewer.md`. Tuned to SailBook design language. Should cover: nav/layout consistency, color/brand adherence, mobile layout, typography, shadcn component usage. Read `docs/BRAND.md` + existing pages before writing the spec.
+**Context:** Phase 0 is now fully tested (auth, admin CRUD, student enrollment, attendance/cancellation/makeup, instructor views). `createInstructorCourse` lives inline in instructor-views.spec.ts (not helpers.ts) since it's specific to that suite. Dirty DB is a fact of life — design assertions with `.first()` or scoped locators when multiple matching elements can accumulate. `test.skip(true, 'reason')` is the pattern for tests that need clean-DB state.
+
 ## Session 45 — 2026-04-12 18:40–19:02 (0.33 hrs)
 **Duration:** 0.33 hours | **Points:** 5 pts
 **Task:** Phase 0.15 — Playwright test suite for attendance + cancellation + makeup
