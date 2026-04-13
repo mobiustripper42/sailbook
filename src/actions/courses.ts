@@ -81,6 +81,18 @@ export async function updateCourse(id: string, prevState: string | null, formDat
   redirect(`/admin/courses/${id}`)
 }
 
+export async function revertToDraft(id: string) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('courses')
+    .update({ status: 'draft', updated_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) return { error: error.message }
+  revalidatePath('/admin/courses')
+  revalidatePath(`/admin/courses/${id}`)
+  return { error: null }
+}
+
 export async function publishCourse(id: string) {
   const supabase = await createClient()
   const { error } = await supabase

@@ -233,3 +233,43 @@ test.describe('Admin — session editing', () => {
     await expect(page.locator('input[name="date"]')).toHaveCount(0);
   });
 });
+
+// ─── Course Status Transitions ───────────────────────────────────────────────
+
+test.describe('Admin — course status transitions', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsAdmin(page);
+  });
+
+  test('publishes a draft course then reverts it back to draft', async ({ page }) => {
+    // Create a fresh draft course so the test is self-contained (no seed state dependency).
+    await page.goto('/admin/courses/new');
+    await page.getByLabel('Course Type').click();
+    await page.getByRole('option', { name: /ASA 101.*Basic Keelboat/ }).click();
+    await page.locator('input[type="date"]').fill('2028-06-01');
+    await page.locator('input[type="time"]').first().fill('09:00');
+    await page.locator('input[type="time"]').nth(1).fill('17:00');
+    const createBtn = page.getByRole('button', { name: 'Create Course' });
+    await createBtn.scrollIntoViewIfNeeded();
+    await createBtn.click();
+
+    // Should redirect to course detail — new course is in draft status
+    await expect(page).toHaveURL(/\/admin\/courses\/[0-9a-f-]+$/, { timeout: 10000 });
+    await expect(page.getByText('draft')).toBeVisible();
+
+    // Publish the course
+    page.on('dialog', (d) => d.accept());
+    await page.getByRole('button', { name: 'Publish' }).click();
+
+    // Badge should update to "active" and Revert to Draft button should appear
+    await expect(page.getByText('active')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: 'Revert to Draft' })).toBeVisible();
+
+    // Revert back to draft
+    await page.getByRole('button', { name: 'Revert to Draft' }).click();
+
+    // Badge should return to "draft" and Publish button should reappear
+    await expect(page.getByText('draft')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: 'Publish' })).toBeVisible();
+  });
+});
