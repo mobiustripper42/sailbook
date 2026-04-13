@@ -3,7 +3,32 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 50 — 2026-04-13 10:28 [open]
+## Session 50 — 2026-04-13 10:28–10:47 (0.33 hrs)
+**Duration:** 0.33 hours | **Points:** 3 pts
+**Task:** Phase 1.1 — Inline session editing
+
+**Completed:**
+- `src/actions/sessions.ts` — added `updateSession` action (date, start_time, end_time, location)
+- `src/components/admin/session-row.tsx` — new client component; Fragment with main row + optional inline edit sub-row; Close button toggles form; form uses useTransition + onSubmit pattern
+- `src/app/(admin)/admin/courses/[id]/page.tsx` — refactored to use SessionRow; removed inline Fragment rendering; cleaned unused imports
+- `tests/admin-course-crud.spec.ts` — 2 new desktop tests: edit saves + Close dismisses
+- `docs/BRAND.md` — --radius: 0.125rem documented
+- `docs/PROJECT_PLAN.md` — 1.1 marked complete; 1.16 and 1.17 added; totals updated to 47 pts
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Task 1.16 — Restore admin mobile hamburger menu (theme changes broke it, regression)
+- Check what changed in the admin layout during theme work (likely `bg-white` → `bg-sidebar` or ThemeProvider wrapping changed something)
+- Goal: hamburger visible + working on 375px, unblock admin mobile test skips
+
+**Context:**
+- Edit button toggles to "Close" (not "Cancel") — avoids collision with SessionActions' "Cancel session" button in PW selectors
+- Edit form uses onSubmit + new FormData() pattern (not useActionState) so we can close the form on success without extra state tracking
+- SessionActions (cancel/delete with prompt/confirm) intentionally kept as separate component — will merge into shadcn DropdownMenu in task 1.17
+- Admin mobile layout has pre-existing fixed sidebar overlap (all admin tests use force:true or desktop-only skip) — not introduced here
 
 ## Session 49 — 2026-04-12 23:24–00:35 (1.17 hrs)
 **Duration:** 1.17 hours | **Points:** 0 pts (completing 1.0 remainder)
