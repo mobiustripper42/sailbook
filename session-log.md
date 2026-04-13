@@ -3,7 +3,37 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 48 — 2026-04-12 22:22 [open]
+## Session 48 — 2026-04-12 22:22–23:19 (0.92 hrs)
+**Duration:** 0.92 hours | **Points:** 5 pts
+**Task:** Phase 1.0 — Theme & dark mode
+
+**Completed:**
+- `src/app/globals.css` — Full rewrite with Mira preset hex CSS vars; `.dark` block replaces oklch defaults
+- `src/app/layout.tsx` — Swapped Geist → Nunito Sans; added ThemeProvider wrapper; suppressHydrationWarning on html
+- `src/components/theme-provider.tsx` — New; next-themes ThemeProvider (attribute="class", defaultTheme="dark")
+- `src/components/theme-toggle.tsx` — New; HugeIcons sun/moon; fetch-based DB save via /api/theme; mounted guard
+- `src/components/theme-sync.tsx` — New; writes directly to localStorage (not setTheme) on first session to avoid re-render cascade
+- `src/app/api/theme/route.ts` — New Route Handler; saves theme_preference to DB without triggering router refresh
+- `supabase/migrations/20260412222200_add_theme_preference_to_profiles.sql` — New; theme_preference column, default 'dark'
+- `src/lib/supabase/types.ts` — Added theme_preference to Profile type
+- `src/app/(admin|student|instructor)/layout.tsx` — Wired ThemeSync + ThemeToggle; profile fetch for DB preference
+- `src/components/student/mobile-nav-drawer.tsx` — bg-white → bg-sidebar; ThemeToggle in drawer footer
+- `tests/theme.spec.ts` — 15 tests × 3 viewports, all passing (defaults dark, toggle round-trip, visible student/instructor)
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Run `supabase db push` to apply theme_preference migration to remote
+- Update `docs/BRAND.md` and `.claude/agents/ui-reviewer.md` with Mira/Nunito Sans/dark-first (noted in 1.0 task)
+- Mark Task 1.0 complete in PROJECT_PLAN.md
+- Start Task 1.1 — Session editing (edit date, time, location, instructor on existing sessions)
+
+**Context:**
+- ThemeSync must write `localStorage.setItem('theme', preference)` directly — calling `setTheme()` in next-themes v0.4.6 creates an unstable reference loop that remounts ThemeToggle repeatedly. Using localStorage bypasses the context update entirely.
+- Server actions from ThemeToggle trigger router refresh in Next.js 16 App Router even without revalidatePath — always use a Route Handler for fire-and-forget DB saves that must not refresh the page.
+- pgTAP: 11 tests still failing (02_rls_courses, 03_rls_enrollments) — pre-existing, not caused by this session.
 
 ## Session 47 — 2026-04-12 20:41–21:28 (0.75 hrs)
 **Duration:** 0.75 hours | **Points:** 2 pts

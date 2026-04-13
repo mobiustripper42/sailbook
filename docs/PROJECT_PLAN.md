@@ -72,7 +72,7 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 
 | # | Task | Effort | Notes |
 |---|------|--------|-------|
-| 1.0 | Theme & dark mode — apply Mira preset b7CSfQ4Xo, swap to Nunito Sans, xs radius, wire next-themes toggle, add theme_preference column to profiles, sync on login | 5 | Dark default. Preference: 'light'/'dark'/'system'. Migration required. Update BRAND.md + ui-reviewer.md. |
+| 1.0 | ~~Theme & dark mode — apply Mira preset b7CSfQ4Xo, swap to Nunito Sans, xs radius, wire next-themes toggle, add theme_preference column to profiles, sync on login~~ | 5 | [x] <!-- completed 2026-04-12 --> Mira hex vars, Nunito Sans, next-themes toggle, /api/theme route, ThemeSync via localStorage, 15 Playwright tests. BRAND.md + ui-reviewer.md update still pending. |
 | 1.1 | Session editing — edit date, time, location, instructor on existing sessions | 3 | Currently must cancel and recreate. Bug, not feature. |
 | 1.2 | Set course back to Draft status (from Active) | 2 | Missing state transition. One button + server action. |
 | 1.3 | Inactive instructor cascade — deactivating instructor clears course + session assignments | 2 | DB function for cascade. Warning tile already exists. DEC entry. |
