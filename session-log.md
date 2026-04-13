@@ -3,6 +3,34 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 49 — 2026-04-12 23:24–00:35 (1.17 hrs)
+**Duration:** 1.17 hours | **Points:** 0 pts (completing 1.0 remainder)
+**Task:** Phase 1.05 — Get Mira Sky/Mist preset actually applied
+
+**Completed:**
+- Diagnosed why theme wasn't showing: `@theme inline` var() references DO work at runtime — the problem was wrong color values, not the mechanism
+- Reverted multiple failed experiments back to session 48 baseline
+- Sourced exact b7CSfQ4Xo preset CSS by running `npx shadcn@latest init --preset b7CSfQ4Xo` in a scratch project (/home/eric/next-app)
+- Ported correct oklch values to `src/app/globals.css` (:root and .dark)
+- Set --radius to 0.125rem (2px) — almost square, brand-appropriate
+- Sky-blue primary confirmed in both light and dark mode
+- Dark mode toggle confirmed working
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Update BRAND.md to record --radius: 0.125rem as the chosen value
+- Mark task 1.0 fully complete in PROJECT_PLAN.md
+- Move to task 1.1 — session editing (edit date/time/location/instructor)
+
+**Context:**
+- The `@theme inline` with var() references is the correct pattern — don't change it. Colors live in :root and .dark blocks only.
+- Preset source of truth: /home/eric/next-app/app/globals.css (scratch project)
+- Button/badge components use rounded-4xl which maps to --radius * 2.6, so even 2px base gives slightly rounded pill feel on small elements — acceptable
+- Session 48 commit (5f09783) is the safe rollback point for theme machinery
+
 ## Session 48 — 2026-04-12 22:22–23:19 (0.92 hrs)
 **Duration:** 0.92 hours | **Points:** 5 pts
 **Task:** Phase 1.0 — Theme & dark mode
