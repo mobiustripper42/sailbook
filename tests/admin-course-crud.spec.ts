@@ -192,8 +192,9 @@ test.describe('Admin — session editing', () => {
       page.locator('[data-slot="card-title"]').filter({ hasText: 'Sessions' })
     ).toBeVisible();
 
-    // Click the first "Edit" button in the sessions table
-    await page.getByRole('button', { name: 'Edit' }).first().click({ force: true });
+    // Open the first session's action dropdown, then click Edit
+    await page.getByRole('button', { name: 'Session actions' }).first().click({ force: true });
+    await page.getByRole('menuitem', { name: 'Edit' }).click();
 
     // Inline edit form should appear
     await expect(page.locator('input[name="date"]')).toBeVisible();
@@ -221,11 +222,14 @@ test.describe('Admin — session editing', () => {
     const courseId = 'c1000000-0000-0000-0000-000000000001';
 
     await page.goto(`/admin/courses/${courseId}`);
-    await page.getByRole('button', { name: 'Edit' }).first().click({ force: true });
+    // Open dropdown, click Edit to expand the inline form
+    await page.getByRole('button', { name: 'Session actions' }).first().click({ force: true });
+    await page.getByRole('menuitem', { name: 'Edit' }).click();
     await expect(page.locator('input[name="date"]')).toBeVisible();
 
-    // "Close" button is the Edit toggle — unambiguous (SessionActions uses "Cancel" for session cancel)
-    await page.getByRole('button', { name: 'Close' }).first().click({ force: true });
+    // Re-open dropdown and click Close to collapse the inline form
+    await page.getByRole('button', { name: 'Session actions' }).first().click({ force: true });
+    await page.getByRole('menuitem', { name: 'Close' }).click();
     await expect(page.locator('input[name="date"]')).toHaveCount(0);
   });
 });

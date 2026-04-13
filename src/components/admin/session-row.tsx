@@ -3,14 +3,20 @@
 import { Fragment, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { fmtTime } from '@/lib/utils'
-import { updateSession } from '@/actions/sessions'
+import { updateSession, cancelSession, deleteSession } from '@/actions/sessions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { TableRow, TableCell } from '@/components/ui/table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import SessionInstructorSelect from '@/components/admin/session-instructor-select'
-import SessionActions from '@/components/admin/session-actions'
 import MakeupSessionForm from '@/components/admin/makeup-session-form'
 
 type SessionData = {
@@ -41,27 +47,47 @@ export default function SessionRow({
   linkedCount: number
 }) {
   const [isEditing, setIsEditing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [editError, setEditError] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const isCancelled = session.status === 'cancelled'
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    setError(null)
+    setEditError(null)
     startTransition(async () => {
       const result = await updateSession(session.id, courseId, formData)
       if (result === null) {
         setIsEditing(false)
       } else {
-        setError(result)
+        setEditError(result)
       }
+    })
+  }
+
+  function handleCancel() {
+    const reason = prompt('Cancel reason (e.g., weather, instructor unavailable):')
+    if (reason === null) return
+    setActionError(null)
+    startTransition(async () => {
+      const result = await cancelSession(session.id, courseId, reason)
+      if (result.error) setActionError(result.error)
+    })
+  }
+
+  function handleDelete() {
+    if (!confirm('Delete this session? This cannot be undone.')) return
+    setActionError(null)
+    startTransition(async () => {
+      const result = await deleteSession(session.id, courseId)
+      if (result.error) setActionError(result.error)
     })
   }
 
   return (
     <Fragment>
-      <TableRow>
+      <TableRow data-session-id={session.id}>
         <TableCell>
           {new Date(session.date + 'T00:00:00').toLocaleDateString('en-US', {
             weekday: 'short',
@@ -96,25 +122,44 @@ export default function SessionRow({
           </Badge>
         </TableCell>
         <TableCell>
-          <div className="flex gap-1 flex-wrap">
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/admin/courses/${courseId}/sessions/${session.id}/attendance`}>
-                Attendance
-              </Link>
-            </Button>
-            {!isCancelled && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setIsEditing((v) => !v)
-                  setError(null)
-                }}
-              >
-                {isEditing ? 'Close' : 'Edit'}
-              </Button>
-            )}
-            <SessionActions sessionId={session.id} courseId={courseId} status={session.status} />
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" disabled={pending} aria-label="Session actions">
+                  •••
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {!isCancelled && (
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      setIsEditing((v) => !v)
+                      setEditError(null)
+                    }}
+                  >
+                    {isEditing ? 'Close' : 'Edit'}
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem asChild>
+                  <Link href={`/admin/courses/${courseId}/sessions/${session.id}/attendance`}>
+                    Attendance
+                  </Link>
+                </DropdownMenuItem>
+                {!isCancelled && (
+                  <DropdownMenuItem onSelect={handleCancel}>
+                    Cancel session
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={handleDelete}
+                  className="text-amber-500 focus:text-amber-500"
+                >
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {actionError && <p className="text-xs text-destructive">{actionError}</p>}
           </div>
         </TableCell>
       </TableRow>
@@ -123,7 +168,7 @@ export default function SessionRow({
         <TableRow>
           <TableCell colSpan={6} className="bg-muted/30">
             <form onSubmit={handleSubmit} className="space-y-3 py-2">
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {editError && <p className="text-sm text-destructive">{editError}</p>}
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1.5">
                   <Label>Date</Label>
@@ -171,7 +216,7 @@ export default function SessionRow({
                   size="sm"
                   onClick={() => {
                     setIsEditing(false)
-                    setError(null)
+                    setEditError(null)
                   }}
                 >
                   Cancel

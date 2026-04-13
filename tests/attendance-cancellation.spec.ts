@@ -192,7 +192,8 @@ test.describe('Admin — session cancellation + makeup', () => {
 
     // Cancel the session (row identified by "Edgewater Park", the location set in createEnrolledCourse)
     const sessionRow = page.getByRole('row').filter({ hasText: 'Edgewater Park' });
-    await sessionRow.getByRole('button', { name: 'Cancel' }).click();
+    await sessionRow.getByRole('button', { name: 'Session actions' }).click();
+    await page.getByRole('menuitem', { name: 'Cancel session' }).click();
 
     // Session status badge flips to "cancelled"
     await expect(sessionRow.getByText('cancelled')).toBeVisible({ timeout: 10000 });

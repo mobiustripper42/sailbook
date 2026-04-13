@@ -45,14 +45,13 @@ async function createInstructorCourse(
     if (!match) throw new Error('Could not extract course ID from URL');
     courseId = match[1];
 
-    // Extract sessionId from the Attendance link
-    const href = await adminPage
-      .getByRole('link', { name: 'Attendance' })
+    // Extract sessionId from the row data attribute
+    const sessionIdAttr = await adminPage
+      .locator('[data-session-id]')
       .first()
-      .getAttribute('href');
-    const sessionMatch = href?.match(/\/sessions\/([0-9a-f-]+)\/attendance/);
-    if (!sessionMatch) throw new Error('Could not extract session ID from attendance link');
-    sessionId = sessionMatch[1];
+      .getAttribute('data-session-id');
+    if (!sessionIdAttr) throw new Error('Could not extract session ID from data-session-id attribute');
+    sessionId = sessionIdAttr;
 
     // Publish the course
     await adminPage.getByRole('button', { name: 'Publish' }).click();
