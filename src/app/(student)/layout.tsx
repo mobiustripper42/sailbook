@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/app/(auth)/actions'
 import StudentNav from '@/components/student/student-nav'
 import MobileNavDrawer from '@/components/student/mobile-nav-drawer'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { ThemeSync } from '@/components/theme-sync'
 
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient()
@@ -20,9 +22,17 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   const name = (`${user.user_metadata?.first_name ?? ''} ${user.user_metadata?.last_name ?? ''}`.trim() || user.email) ?? ''
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('theme_preference')
+    .eq('id', user.id)
+    .single()
+  const themePreference = (profile as { theme_preference?: string } | null)?.theme_preference ?? 'dark'
+
   return (
     <div className="flex min-h-screen">
-      <aside className="hidden md:flex w-56 border-r bg-white flex-col shrink-0">
+      <ThemeSync preference={themePreference} />
+      <aside className="hidden md:flex w-56 border-r bg-sidebar flex-col shrink-0">
         <div className="px-4 py-5 border-b">
           <Link href="/student/dashboard" className="font-semibold text-sm tracking-tight">
             SailBook
@@ -32,18 +42,21 @@ export default async function StudentLayout({ children }: { children: React.Reac
         <StudentNav />
         <div className="px-4 py-4 border-t mt-auto">
           <p className="text-xs text-muted-foreground truncate">{name}</p>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="text-xs text-muted-foreground hover:text-foreground mt-1"
-            >
-              Sign out
-            </button>
-          </form>
+          <div className="flex items-center justify-between mt-1">
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Sign out
+              </button>
+            </form>
+            <ThemeToggle />
+          </div>
         </div>
       </aside>
       <div className="flex-1 min-w-0 flex flex-col">
-        <MobileNavDrawer name={name} />
+        <MobileNavDrawer name={name} themePreference={themePreference} />
         <main className="flex-1 bg-background p-4 sm:p-8">
           {children}
         </main>

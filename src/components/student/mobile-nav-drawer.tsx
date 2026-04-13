@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { signOut } from '@/app/(auth)/actions'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 const links = [
   { href: '/student/dashboard', label: 'Dashboard' },
@@ -13,14 +14,14 @@ const links = [
   { href: '/student/attendance', label: 'Attendance' },
 ]
 
-export default function MobileNavDrawer({ name }: { name: string }) {
+export default function MobileNavDrawer({ name }: { name: string; themePreference?: string }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
   return (
     <>
       {/* Mobile top bar */}
-      <div className="md:hidden sticky top-0 z-20 flex items-center justify-between px-4 h-14 border-b bg-white">
+      <div className="md:hidden sticky top-0 z-20 flex items-center justify-between px-4 h-14 border-b bg-sidebar">
         <Link href="/student/dashboard" className="font-semibold text-sm tracking-tight">
           SailBook
         </Link>
@@ -48,7 +49,7 @@ export default function MobileNavDrawer({ name }: { name: string }) {
       {/* Drawer */}
       <div
         className={cn(
-          'md:hidden fixed inset-y-0 left-0 z-40 w-64 bg-white flex flex-col border-r transition-transform duration-200',
+          'md:hidden fixed inset-y-0 left-0 z-40 w-64 bg-sidebar flex flex-col border-r transition-transform duration-200',
           open ? 'translate-x-0' : '-translate-x-full pointer-events-none'
         )}
       >
@@ -89,14 +90,17 @@ export default function MobileNavDrawer({ name }: { name: string }) {
 
         <div className="px-4 py-4 border-t">
           <p className="text-xs text-muted-foreground truncate">{name}</p>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="text-xs text-muted-foreground hover:text-foreground mt-1"
-            >
-              Sign out
-            </button>
-          </form>
+          <div className="flex items-center justify-between mt-1">
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Sign out
+              </button>
+            </form>
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </>

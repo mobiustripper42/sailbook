@@ -12,6 +12,7 @@ export type Profile = {
   is_student: boolean
   experience_level: string | null
   is_active: boolean
+  theme_preference: 'light' | 'dark' | 'system'
   created_at: string
   updated_at: string
 }

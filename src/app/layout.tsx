@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Nunito_Sans } from "next/font/google";
 import { NavProgress } from "@/components/nav-progress";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
-const geistSans = Geist({
+const nunitoSans = Nunito_Sans({
   variable: "--font-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-mono",
   subsets: ["latin"],
 });
 
@@ -27,9 +23,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={nunitoSans.variable} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <NavProgress>{children}</NavProgress>
+        <ThemeProvider>
+          <NavProgress>{children}</NavProgress>
+        </ThemeProvider>
       </body>
     </html>
   );
