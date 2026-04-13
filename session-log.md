@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 51 — 2026-04-13 11:07 [open]
+
 ## Session 50 — 2026-04-13 10:28–10:47 (0.33 hrs)
 **Duration:** 0.33 hours | **Points:** 3 pts
 **Task:** Phase 1.1 — Inline session editing

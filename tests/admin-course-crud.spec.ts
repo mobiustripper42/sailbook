@@ -69,13 +69,7 @@ test.describe('Admin — course creation', () => {
 
     const createBtn = page.getByRole('button', { name: 'Create Course' });
     await createBtn.scrollIntoViewIfNeeded();
-    // Mobile (375px): sidebar is w-56 and not responsive; force bypasses the
-    // pointer-intercept check that fires when the sidebar overlaps the button coords.
-    if (test.info().project.name === 'mobile') {
-      await createBtn.click({ force: true });
-    } else {
-      await createBtn.click();
-    }
+    await createBtn.click();
 
     // Should redirect to /admin/courses/[id]
     await expect(page).toHaveURL(/\/admin\/courses\/[0-9a-f-]+$/);
@@ -101,10 +95,8 @@ test.describe('Admin — add session to existing course', () => {
 
   test('adds a session via the course detail page', async ({ page }) => {
     // The sessions table on c1 accumulates rows across test runs. On narrow viewports
-    // (mobile/tablet) the overflow-x-auto container and non-responsive sidebar make
-    // force:true unreliable — the click can land on the table or sidebar instead.
-    // Tested on desktop (1440px) where the layout is stable. TODO: revisit when
-    // admin gets a responsive mobile layout.
+    // (mobile/tablet) the overflow-x-auto container makes force:true unreliable —
+    // the click can land on the table instead of the button. Desktop only.
     test.skip(test.info().project.name !== 'desktop');
 
     // Use the seed course: ASA 101 Weekend Intensive (May) — c1000000-...-001
@@ -188,7 +180,8 @@ test.describe('Admin — session editing', () => {
   });
 
   test('edits a session date and location inline', async ({ page }) => {
-    // Desktop only — same layout constraint as the add-session test (sidebar overlap on mobile)
+    // Edit button is in the rightmost column of an overflow-x-scroll table.
+    // force:true is unreliable on narrow viewports when the column is scrolled off-screen.
     test.skip(test.info().project.name !== 'desktop');
 
     const courseId = 'c1000000-0000-0000-0000-000000000001';
@@ -211,14 +204,18 @@ test.describe('Admin — session editing', () => {
 
     await page.getByRole('button', { name: 'Save' }).click();
 
-    // Form closes and updated values appear in the row
-    await expect(page.getByRole('cell', { name: newLocation })).toBeVisible({ timeout: 10000 });
-    await expect(page.getByRole('cell', { name: /Nov.*15|Mon.*Nov/ })).toBeVisible({ timeout: 10000 });
+    // Form closes and updated values appear in the row.
+    // Scope the date check to the row containing our unique location to avoid
+    // strict-mode violations when other sessions also show Nov 15.
+    const updatedRow = page.getByRole('row').filter({ hasText: newLocation });
+    await expect(updatedRow.getByRole('cell', { name: newLocation })).toBeVisible({ timeout: 10000 });
+    await expect(updatedRow.getByRole('cell', { name: /Nov.*15|Mon.*Nov/ })).toBeVisible({ timeout: 10000 });
     // Edit form inputs should be gone
     await expect(page.locator('input[name="date"]')).toHaveCount(0);
   });
 
   test('edit form closes on Close without saving', async ({ page }) => {
+    // Same constraint as above — Edit button in overflow-x-scroll table.
     test.skip(test.info().project.name !== 'desktop');
 
     const courseId = 'c1000000-0000-0000-0000-000000000001';
