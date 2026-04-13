@@ -3,7 +3,35 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 52 — 2026-04-13 14:22 [open]
+## Session 52 — 2026-04-13 14:22–14:49 (0.42 hrs)
+**Duration:** 0.42 hours | **Points:** 2 pts
+**Task:** Phase 1.17 — Session row Action dropdown
+
+**Completed:**
+- `src/components/admin/session-row.tsx` — replaced 4-button cluster with single `···` DropdownMenu; items: Edit/Close (toggle), Attendance (link), Cancel session, Delete; added `data-session-id` to `<TableRow>`
+- `src/components/admin/session-actions.tsx` — deleted; logic inlined into SessionRow
+- `src/components/ui/dropdown-menu.tsx` — shadcn component (user-installed)
+- `tests/admin-course-crud.spec.ts` — edit tests updated to open dropdown → click menuitem
+- `tests/attendance-cancellation.spec.ts` — cancel flow updated to open dropdown
+- `tests/helpers.ts` + `tests/instructor-views.spec.ts` — sessionId extraction switched from Attendance link href to `[data-session-id]` attribute
+- `.claude/agents/code-review.md` — clean review now outputs "Clean Bill of Health"
+- `.claude/skills/kill-this/SKILL.md` + `CLAUDE.md` — @code-review now runs automatically after every commit (was "optional")
+
+**In Progress:** Nothing
+**Blocked:** Nothing
+
+**Next Steps:**
+- Task 1.18 — Add logo to login page and favicon (ask Andy for SVG/PNG files)
+- Or pick up Phase 1: 1.2 (Draft status), 1.11 (spots remaining fix), 1.12 (past courses)
+
+**Context:**
+- Attendance is a DropdownMenuItem asChild wrapping a Link — not in DOM when menu is closed; `data-session-id` on TableRow is the stable test handle for extracting sessionIds
+- Delete uses `variant="destructive"` (red) — amber was considered, destructive is semantically correct
+- Two student-enrollment flaky tests (parallel load) are pre-existing, unrelated to this change
+
+**Code Review:**
+- `variant="destructive"` preferred over `text-amber-500` on Delete — fixed this session
+- `session-row.tsx` at 247 lines (47 over 200-line limit) — deferred; `SessionEditForm` extraction is the clean split
 
 ## Session 51 — 2026-04-13 11:07–11:18 (0.17 hrs)
 **Duration:** 0.17 hours | **Points:** 2 pts

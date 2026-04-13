@@ -89,7 +89,7 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.14 | Dashboard instructor assignment clarity — verify courses-without-instructors count + show "Using course instructor" on sessions | 3 | Andy reported confusing number. Also clarify DEC-007 default behavior in UI. Andy request. |
 | 1.15 | Theme preference persistence — save theme_preference to profiles on toggle, load on login, default to 'system' for unauthenticated/login page | 3 | Column default changed from 'dark' to 'system'. Migration update needed. |
 | 1.16 | ~~Restore admin mobile hamburger menu — theme changes broke mobile nav~~ | 2 | [x] <!-- completed 2026-04-13 --> AdminMobileNavDrawer component; hidden md:flex on aside; test skips updated. |
-| 1.17 | Session row Action dropdown — consolidate Attendance/Edit/Cancel/Delete into shadcn DropdownMenu | 2 | 4 stacked buttons is awkward. Merge SessionActions + SessionRow edit trigger into one menu. |
+| 1.17 | ~~Session row Action dropdown — consolidate Attendance/Edit/Cancel/Delete into shadcn DropdownMenu~~ | 2 | [x] <!-- completed 2026-04-13 --> Single ··· DropdownMenu; SessionActions deleted; data-session-id on TableRow; all tests updated. |
 | 1.18 | Add logo to login page and favicon to browser tab | 2 | Ask human for the files. SVG favicon in public/, PNG logo on login page above sign-in form. |
 
 **Phase 1 total: 49 pts** (40 original + 3 for 1.15 + 2 for 1.16 + 2 for 1.17 + 2 for 1.18)
