@@ -3,6 +3,33 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 53 — 2026-04-13 18:28–18:41 (0.22 hrs)
+**Duration:** 0.22 hours | **Points:** 2 pts
+**Task:** Phase 1.2 — Revert active course to draft status
+
+**Completed:**
+- `src/actions/courses.ts` — added `revertToDraft` action (sets status → 'draft', revalidates both paths); follows same shape as publishCourse/completeCourse/cancelCourse siblings
+- `src/components/admin/course-status-actions.tsx` — imported `revertToDraft`; added "Revert to Draft" button that renders when status === 'active', wrapped both active-state buttons in a Fragment
+- `tests/admin-course-crud.spec.ts` — new "course status transitions" describe block; test creates a fresh draft course (self-contained, no seed state dependency), publishes it, reverts to draft, confirms badge + button state at each step; 3/3 viewports passing
+
+**In Progress:** Nothing
+**Blocked:** Nothing
+
+**Next Steps:**
+- Task 1.11 — Spots remaining fix (only count confirmed enrollments against capacity; UI language cleanup)
+- Task 1.12 — Past courses not enrollable (filter student browse to exclude courses with all sessions in the past)
+- Task 1.3 — Inactive instructor cascade (DB function; warning tile already exists)
+
+**Context:**
+- Status transition actions (publish/revert/complete/cancel) all skip the auth guard that createCourse/updateCourse have — RLS enforces admin-only at DB level, but error message is "row-level security policy" not "Unauthorized" — deferred cleanup, pre-Phase 2
+- Pending spinner on "Revert to Draft" and "Mark Completed" drops the label text (inconsistency with "Publish" which shows "Publishing…") — deferred to Phase 5 polish
+
+**Code Review:**
+- All status-transition actions missing explicit admin auth guard — RLS blocks the write but surfaces ugly error message; deferred, pre-existing pattern
+- "Revert to Draft" and "Mark Completed" drop button label during pending state; "Publish" shows "Publishing…" — inconsistency; deferred to polish pass
+- Suggest adding `expect(Cancel Course button).toBeVisible()` assertion in active-state check — minor test coverage gap
+- Magic-string statuses ('draft', 'active', etc.) should eventually live in constants — pre-existing, low urgency
+
 ## Session 52 — 2026-04-13 14:22–14:49 (0.42 hrs)
 **Duration:** 0.42 hours | **Points:** 2 pts
 **Task:** Phase 1.17 — Session row Action dropdown

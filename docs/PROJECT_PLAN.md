@@ -74,7 +74,7 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 |---|------|--------|-------|
 | 1.0 | ~~Theme & dark mode — apply Mira preset b7CSfQ4Xo, swap to Nunito Sans, xs radius, wire next-themes toggle, add theme_preference column to profiles, sync on login~~ | 5 | [x] <!-- completed 2026-04-13 --> Mira Sky/Mist oklch vars, Nunito Sans, next-themes toggle, /api/theme route, ThemeSync via localStorage, 15 Playwright tests. --radius 0.125rem. BRAND.md update still pending. |
 | 1.1 | ~~Session editing — edit date, time, location, instructor on existing sessions~~ | 3 | [x] <!-- completed 2026-04-13 --> Inline edit form (sub-row pattern). SessionRow client component. updateSession action. 2 Playwright tests. |
-| 1.2 | Set course back to Draft status (from Active) | 2 | Missing state transition. One button + server action. |
+| 1.2 | ~~Set course back to Draft status (from Active)~~ | 2 | [x] <!-- completed 2026-04-13 --> revertToDraft action; Revert to Draft button in CourseStatusActions; self-contained Playwright test, 3/3 viewports. |
 | 1.3 | Inactive instructor cascade — deactivating instructor clears course + session assignments | 2 | DB function for cascade. Warning tile already exists. DEC entry. |
 | 1.4 | Course status review — confirm statuses cover all needs via @architect | 2 | Audit existing status logic. Probably fine as-is. |
 | 1.5 | Student history view — past enrollments, attendance, completions visible to admin/instructor/student | 5 | New page/component across three roles. Terminology TBD with Andy ("Sailing Record"?). |
@@ -91,9 +91,10 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.16 | ~~Restore admin mobile hamburger menu — theme changes broke mobile nav~~ | 2 | [x] <!-- completed 2026-04-13 --> AdminMobileNavDrawer component; hidden md:flex on aside; test skips updated. |
 | 1.17 | ~~Session row Action dropdown — consolidate Attendance/Edit/Cancel/Delete into shadcn DropdownMenu~~ | 2 | [x] <!-- completed 2026-04-13 --> Single ··· DropdownMenu; SessionActions deleted; data-session-id on TableRow; all tests updated. |
 | 1.18 | Add logo to login page and favicon to browser tab | 2 | Ask human for the files. SVG favicon in public/, PNG logo on login page above sign-in form. |
+| 1.19 | Dark / Light theme not applyed to /dev instruction page, can read any text | 2 | Fix /dev instruction page so fonts are readable. |
 
-**Phase 1 total: 49 pts** (40 original + 3 for 1.15 + 2 for 1.16 + 2 for 1.17 + 2 for 1.18)
-**Projected hours: ~16 hrs**
+**Phase 1 total: 51 pts** (40 original + 3 for 1.15 + 2 for 1.16 + 2 for 1.17 + 2 for 1.18 + 2 for 1.19)
+**Projected hours: ~19 hrs**
 
 **Session 49 polish credit: 8 pts** — one-off theme diagnosis/fix session (2026-04-13). Not tied to a task; effort logged separately. Counts toward lifetime velocity but not Phase 1 task completion.
 
@@ -212,9 +213,10 @@ Design quality, accessibility, navigation, convenience features.
 | 6.10 | Back button / breadcrumb audit — consistent navigation across all roles and views | 5 | Audit every page, establish breadcrumb pattern, fix dead ends. Andy request. |
 | 6.11 | Public landing page + contact form for sailbook.live | 3 | Currently drops straight to login. Basic public page + contact form. **Cuttable.** |
 | 6.12 | Security audit (V2 final) — run @security-agent, evaluate findings, fix serious issues, prime V3 backlog | 3 | Full V2 surface area: payments, notifications, waitlist, prereqs, qualifications. Non-serious findings seed V3 backlog. |
+| 6.13 | Using an agent redsign date and time picker (date picker isn't terrible, but time picker is almost unsable) | 3 | Human find time picker to be unusable. Needs redisign, then date picker to match (maybe even combine the two if that makes sense) |
 
-**Phase 6 total: 41 pts**
-**Projected hours: ~16 hrs**
+**Phase 6 total: 44 pts**
+**Projected hours: ~17 hrs**
 
 **Ejection point:** The app looks and feels professional. Accessible. Navigable. Polished. Security verified.
 
@@ -263,16 +265,16 @@ Transforms the app from scheduling into a learning management tool.
 | Phase | Pts | Projected Hours (at 0.38 hr/pt) | Ejection Point Value |
 |-------|-----|--------------------------------|---------------------|
 | 0 — Infrastructure | 70 | ~27 hrs | Dev environment ready |
-| 1 — V1 Fixes | 43 | ~16 hrs | V1 is solid |
+| 1 — V1 Fixes | 51 | ~19 hrs | V1 is solid |
 | 2 — Payments | 37 | ~14 hrs | App makes money |
 | 3 — Notifications + Auth | 36 | ~14 hrs | Users stay informed, auth hardened, security audited |
 | 4 — Identity | 27 | ~10 hrs | Onboarding is clean |
 | 5 — Pricing | 29 | ~11 hrs | Flexible pricing, waitlist, prereqs |
-| 6 — Polish | 41 | ~16 hrs | Professional, accessible, navigable, security verified |
+| 6 — Polish | 44 | ~17 hrs | Professional, accessible, navigable, security verified |
 | 7 — Skills | 40–60 | ~15–23 hrs | Learning management |
-| **Total (0–6)** | **283** | **~108 hrs** | |
+| **Total (0–6)** | **288** | **~109 hrs** | |
 
-At V1 velocity (0.38 hrs/pt): ~107 hours for Phases 0–6.
+At V1 velocity (0.38 hrs/pt): ~109 hours for Phases 0–6.
 At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–2 (critical path to payments).
 
 ---
@@ -282,13 +284,13 @@ At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–
 | Phase | Effort Pts | Est. Hours | Actual Hours | Hrs/Point | Notes |
 |-------|-----------|------------|--------------|-----------|-------|
 | 0 — Infrastructure | 70 | ~27 | — | — | |
-| 1 — V1 Fixes | 43 | ~16 | — | — | +8 polish credit (session 49) |
+| 1 — V1 Fixes | 51 | ~19 | — | — | +8 polish credit (session 49) |
 | 2 — Payments | 37 | ~14 | — | — | |
 | 3 — Notifications | 36 | ~14 | — | — | |
 | 4 — Identity | 27 | ~10 | — | — | |
 | 5 — Pricing | 29 | ~11 | — | — | |
-| 6 — Polish | 41 | ~16 | — | — | |
-| **Total** | **280** | **~107** | — | — | |
+| 6 — Polish | 44 | ~17 | — | — | |
+| **Total** | **288** | **~109** | — | — | |
 
 ---
 
