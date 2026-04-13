@@ -3,7 +3,24 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 51 — 2026-04-13 11:07 [open]
+## Session 51 — 2026-04-13 11:07–11:18 (0.17 hrs)
+**Duration:** 0.17 hours | **Points:** 2 pts
+**Task:** Phase 1.16 — Restore admin mobile hamburger menu
+
+**Completed:**
+- `src/components/admin/admin-mobile-nav-drawer.tsx` — new client component; sticky top bar with hamburger button, slide-in drawer with admin nav links, overlay, close button, sign-out + ThemeToggle in footer; exact mirror of student drawer
+- `src/app/(admin)/layout.tsx` — aside now `hidden md:flex` (hidden on mobile); wrapped content in flex-col div; wired AdminMobileNavDrawer; fixed `name` type to `?? ''`
+- `tests/admin-course-crud.spec.ts` — removed sidebar-specific `force:true` branch on create course (now plain `.click()`); removed desktop-only skips from edit-session tests; re-added those skips with corrected reason (overflow-x-scroll table, not sidebar); fixed strict-mode violation in edit-session assertion by scoping date cell check to the row containing `newLocation`
+
+**In Progress:** Nothing
+**Blocked:** Nothing
+
+**Next Steps:**
+- Task 1.17 — Session row Action dropdown (consolidate Attendance/Edit/Cancel/Delete into shadcn DropdownMenu, 2 pts)
+
+**Context:**
+- Admin session table is overflow-x-scroll; edit session tests remain desktop-only because the Edit button is in the rightmost column and scrolled off-screen on narrow viewports — same constraint as add-session
+- The create course `force:true` branch is gone; button is in a form (not a table) so it works normally at all viewports after the sidebar fix
 
 ## Session 50 — 2026-04-13 10:28–10:47 (0.33 hrs)
 **Duration:** 0.33 hours | **Points:** 3 pts
