@@ -3,7 +3,20 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 47 — 2026-04-12 20:41 [open]
+## Session 47 — 2026-04-12 20:41–21:28 (0.75 hrs)
+**Duration:** 0.75 hours | **Points:** 2 pts
+**Task:** Phase 0.17 — @ui-reviewer agent spec + theme planning
+
+**Completed:**
+- Created `~/.claude/agents/ui-reviewer.md` — ui-reviewer agent spec tuned to new SailBook design language: Mira preset (b7CSfQ4Xo), Nunito Sans, Sky accent on Mist base, xs border radius, dark mode default. Token-based color rules (no hardcoded zinc/gray classes), 12-point review checklist, scored output format (X/10 with High/Medium/Low findings table).
+- `docs/BRAND.md` — updated Visual Direction: Mira theme, Nunito Sans, xs radius, dark default. Retired Oleg's Law, Geist, and zinc-only palette.
+- `docs/DECISIONS.md` — added D-018: Theme & Visual Refresh rationale (preset over custom, theme preference in profiles table, no localStorage).
+- `docs/PROJECT_PLAN.md` — marked 0.17 complete; added task 1.0 (theme + dark mode implementation, 5 pts) as first task in Phase 1.
+- Phase 0 fully complete. All 20 tasks done.
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 1.0 — Apply Mira theme: swap globals.css to preset b7CSfQ4Xo values, install Nunito Sans, wire next-themes toggle, add theme_preference column to profiles (migration), sync preference on login. Dark default. Migration required before any Phase 1 UI work.
+**Context:** ui-reviewer.md lives at ~/.claude/agents/ (outside the repo — not in git). Theme preference decision: stored in profiles table as text ('light'/'dark'/'system'), default 'dark', syncs across devices. Task 1.0 is a prerequisite for Phase 1 UI work — build the theme once, then every new screen comes out right.
 
 ## Session 46 — 2026-04-12 20:20–20:36 (0.27 hrs)
 **Duration:** 0.27 hours | **Points:** 3 pts
