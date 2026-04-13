@@ -1,0 +1,134 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - link "SailBook" [ref=e5] [cursor=pointer]:
+          - /url: /admin/dashboard
+        - paragraph [ref=e6]: Admin
+      - navigation [ref=e7]:
+        - link "Dashboard" [ref=e8] [cursor=pointer]:
+          - /url: /admin/dashboard
+        - link "Courses" [ref=e9] [cursor=pointer]:
+          - /url: /admin/courses
+        - link "Course Types" [ref=e10] [cursor=pointer]:
+          - /url: /admin/course-types
+        - link "Instructors" [ref=e11] [cursor=pointer]:
+          - /url: /admin/instructors
+        - link "Students" [ref=e12] [cursor=pointer]:
+          - /url: /admin/students
+        - link "Users" [ref=e13] [cursor=pointer]:
+          - /url: /admin/users
+        - link "Missed Sessions" [ref=e14] [cursor=pointer]:
+          - /url: /admin/missed-sessions
+      - generic [ref=e15]:
+        - paragraph [ref=e16]: Andy Kaminski
+        - button "Sign out" [ref=e19]
+    - main [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - heading "Courses" [level=1] [ref=e24]
+          - link "New Course" [ref=e25] [cursor=pointer]:
+            - /url: /admin/courses/new
+        - table [ref=e28]:
+          - rowgroup [ref=e29]:
+            - row "Course Instructor Sessions Enrolled / Cap Price Status" [ref=e30]:
+              - columnheader "Course" [ref=e31]
+              - columnheader "Instructor" [ref=e32]
+              - columnheader "Sessions" [ref=e33]
+              - columnheader "Enrolled / Cap" [ref=e34]
+              - columnheader "Price" [ref=e35]
+              - columnheader "Status" [ref=e36]
+              - columnheader [ref=e37]
+          - rowgroup [ref=e38]:
+            - row "ASA 101 — Weekend Intensive (May) ASA 101 — Basic Keelboat Sailing Mike Theriault 2 2 / 4 $450 active View" [ref=e39]:
+              - cell "ASA 101 — Weekend Intensive (May) ASA 101 — Basic Keelboat Sailing" [ref=e40]:
+                - generic [ref=e41]:
+                  - link "ASA 101 — Weekend Intensive (May)" [ref=e42] [cursor=pointer]:
+                    - /url: /admin/courses/c1000000-0000-0000-0000-000000000001
+                  - paragraph [ref=e43]: ASA 101 — Basic Keelboat Sailing
+              - cell "Mike Theriault" [ref=e44]
+              - cell "2" [ref=e45]
+              - cell "2 / 4" [ref=e46]
+              - cell "$450" [ref=e47]
+              - cell "active" [ref=e48]:
+                - generic [ref=e49]: active
+              - cell "View" [ref=e50]:
+                - link "View" [ref=e51] [cursor=pointer]:
+                  - /url: /admin/courses/c1000000-0000-0000-0000-000000000001
+            - row "ASA 101 — Evening Series (May) ASA 101 — Basic Keelboat Sailing Chris Marino 4 1 / 4 $400 active View" [ref=e52]:
+              - cell "ASA 101 — Evening Series (May) ASA 101 — Basic Keelboat Sailing" [ref=e53]:
+                - generic [ref=e54]:
+                  - link "ASA 101 — Evening Series (May)" [ref=e55] [cursor=pointer]:
+                    - /url: /admin/courses/c1000000-0000-0000-0000-000000000002
+                  - paragraph [ref=e56]: ASA 101 — Basic Keelboat Sailing
+              - cell "Chris Marino" [ref=e57]
+              - cell "4" [ref=e58]
+              - cell "1 / 4" [ref=e59]
+              - cell "$400" [ref=e60]
+              - cell "active" [ref=e61]:
+                - generic [ref=e62]: active
+              - cell "View" [ref=e63]:
+                - link "View" [ref=e64] [cursor=pointer]:
+                  - /url: /admin/courses/c1000000-0000-0000-0000-000000000002
+            - row "ASA 103 — Coastal Cruising (June) ASA 103 — Basic Coastal Cruising — 0 0 / 4 $650 active View" [ref=e65]:
+              - cell "ASA 103 — Coastal Cruising (June) ASA 103 — Basic Coastal Cruising" [ref=e66]:
+                - generic [ref=e67]:
+                  - link "ASA 103 — Coastal Cruising (June)" [ref=e68] [cursor=pointer]:
+                    - /url: /admin/courses/c1000000-0000-0000-0000-000000000003
+                  - paragraph [ref=e69]: ASA 103 — Basic Coastal Cruising
+              - cell "—" [ref=e70]
+              - cell "0" [ref=e71]
+              - cell "0 / 4" [ref=e72]
+              - cell "$650" [ref=e73]
+              - cell "active" [ref=e74]:
+                - generic [ref=e75]: active
+              - cell "View" [ref=e76]:
+                - link "View" [ref=e77] [cursor=pointer]:
+                  - /url: /admin/courses/c1000000-0000-0000-0000-000000000003
+            - row "ASA 101 — Weekend (April) ASA 101 — Basic Keelboat Sailing Mike Theriault 2 2 / 4 $450 completed View" [ref=e78]:
+              - cell "ASA 101 — Weekend (April) ASA 101 — Basic Keelboat Sailing" [ref=e79]:
+                - generic [ref=e80]:
+                  - link "ASA 101 — Weekend (April)" [ref=e81] [cursor=pointer]:
+                    - /url: /admin/courses/c1000000-0000-0000-0000-000000000004
+                  - paragraph [ref=e82]: ASA 101 — Basic Keelboat Sailing
+              - cell "Mike Theriault" [ref=e83]
+              - cell "2" [ref=e84]
+              - cell "2 / 4" [ref=e85]
+              - cell "$450" [ref=e86]
+              - cell "completed" [ref=e87]:
+                - generic [ref=e88]: completed
+              - cell "View" [ref=e89]:
+                - link "View" [ref=e90] [cursor=pointer]:
+                  - /url: /admin/courses/c1000000-0000-0000-0000-000000000004
+            - row "Dinghy Sailing for Adults Dinghy Sailing for Adults Lisa Chen 1 0 / 6 $150 draft View" [ref=e91]:
+              - cell "Dinghy Sailing for Adults Dinghy Sailing for Adults" [ref=e92]:
+                - generic [ref=e93]:
+                  - link "Dinghy Sailing for Adults" [ref=e94] [cursor=pointer]:
+                    - /url: /admin/courses/c1000000-0000-0000-0000-000000000005
+                  - paragraph [ref=e95]: Dinghy Sailing for Adults
+              - cell "Lisa Chen" [ref=e96]
+              - cell "1" [ref=e97]
+              - cell "0 / 6" [ref=e98]
+              - cell "$150" [ref=e99]
+              - cell "draft" [ref=e100]:
+                - generic [ref=e101]: draft
+              - cell "View" [ref=e102]:
+                - link "View" [ref=e103] [cursor=pointer]:
+                  - /url: /admin/courses/c1000000-0000-0000-0000-000000000005
+            - row "Open Sailing — July Wednesdays Open Sailing Mike Theriault 5 1 / 8 — active View" [ref=e104]:
+              - cell "Open Sailing — July Wednesdays Open Sailing" [ref=e105]:
+                - generic [ref=e106]:
+                  - link "Open Sailing — July Wednesdays" [ref=e107] [cursor=pointer]:
+                    - /url: /admin/courses/c1000000-0000-0000-0000-000000000006
+                  - paragraph [ref=e108]: Open Sailing
+              - cell "Mike Theriault" [ref=e109]
+              - cell "5" [ref=e110]
+              - cell "1 / 8" [ref=e111]
+              - cell "—" [ref=e112]
+              - cell "active" [ref=e113]:
+                - generic [ref=e114]: active
+              - cell "View" [ref=e115]:
+                - link "View" [ref=e116] [cursor=pointer]:
+                  - /url: /admin/courses/c1000000-0000-0000-0000-000000000006
+  - button "Open Next.js Dev Tools" [ref=e122] [cursor=pointer]:
+    - img [ref=e123]

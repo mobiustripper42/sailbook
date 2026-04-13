@@ -1,0 +1,203 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - link "SailBook" [ref=e5] [cursor=pointer]:
+          - /url: /admin/dashboard
+        - paragraph [ref=e6]: Admin
+      - navigation [ref=e7]:
+        - link "Dashboard" [ref=e8] [cursor=pointer]:
+          - /url: /admin/dashboard
+        - link "Courses" [ref=e9] [cursor=pointer]:
+          - /url: /admin/courses
+        - link "Course Types" [ref=e10] [cursor=pointer]:
+          - /url: /admin/course-types
+        - link "Instructors" [ref=e11] [cursor=pointer]:
+          - /url: /admin/instructors
+        - link "Students" [ref=e12] [cursor=pointer]:
+          - /url: /admin/students
+        - link "Users" [ref=e13] [cursor=pointer]:
+          - /url: /admin/users
+        - link "Missed Sessions" [ref=e14] [cursor=pointer]:
+          - /url: /admin/missed-sessions
+      - generic [ref=e15]:
+        - paragraph [ref=e16]: Andy Kaminski
+        - button "Sign out" [ref=e19]
+    - main [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - paragraph [ref=e25]:
+              - link "Courses" [ref=e26] [cursor=pointer]:
+                - /url: /admin/courses
+              - text: / ASA 101 — Weekend Intensive (May)
+            - generic [ref=e27]:
+              - heading "ASA 101 — Weekend Intensive (May)" [level=1] [ref=e28]
+              - generic [ref=e29]: active
+            - paragraph [ref=e30]: ASA 101 — Basic Keelboat Sailing
+            - paragraph [ref=e31]: "Instructor: Mike Theriault · Capacity: 2 / 4 · $450"
+          - generic [ref=e32]:
+            - link "Edit" [ref=e33] [cursor=pointer]:
+              - /url: /admin/courses/c1000000-0000-0000-0000-000000000001/edit
+            - generic [ref=e35]:
+              - button "Mark Completed" [ref=e36]
+              - button "Cancel Course" [ref=e37]
+        - generic [ref=e38]:
+          - generic [ref=e40]: Sessions
+          - generic [ref=e41]:
+            - table [ref=e43]:
+              - rowgroup [ref=e44]:
+                - row "Date Time Location Instructor Status" [ref=e45]:
+                  - columnheader "Date" [ref=e46]
+                  - columnheader "Time" [ref=e47]
+                  - columnheader "Location" [ref=e48]
+                  - columnheader "Instructor" [ref=e49]
+                  - columnheader "Status" [ref=e50]
+                  - columnheader [ref=e51]
+              - rowgroup [ref=e52]:
+                - row "Wed, Oct 20 8:00am – 12:00pm Dock OAHN scheduled Attendance Edit Cancel Delete" [ref=e53]:
+                  - cell "Wed, Oct 20" [ref=e54]
+                  - cell "8:00am – 12:00pm" [ref=e55]
+                  - cell "Dock OAHN" [ref=e56]
+                  - cell [ref=e57]:
+                    - generic [ref=e58]:
+                      - combobox [ref=e59]:
+                        - img
+                      - combobox [ref=e60]
+                  - cell "scheduled" [ref=e61]:
+                    - generic [ref=e62]: scheduled
+                  - cell "Attendance Edit Cancel Delete" [ref=e63]:
+                    - generic [ref=e64]:
+                      - link "Attendance" [ref=e65] [cursor=pointer]:
+                        - /url: /admin/courses/c1000000-0000-0000-0000-000000000001/sessions/a8c6314b-7127-486a-87c3-776de6ebc64b/attendance
+                      - button "Edit" [ref=e66]
+                      - generic [ref=e67]:
+                        - button "Cancel" [ref=e68]
+                        - button "Delete" [ref=e69]
+                - row "Wed, Oct 20 8:00am – 12:00pm Dock JKV6 scheduled Attendance Edit Cancel Delete" [ref=e70]:
+                  - cell "Wed, Oct 20" [ref=e71]
+                  - cell "8:00am – 12:00pm" [ref=e72]
+                  - cell "Dock JKV6" [ref=e73]
+                  - cell [ref=e74]:
+                    - generic [ref=e75]:
+                      - combobox [ref=e76]:
+                        - img
+                      - combobox [ref=e77]
+                  - cell "scheduled" [ref=e78]:
+                    - generic [ref=e79]: scheduled
+                  - cell "Attendance Edit Cancel Delete" [ref=e80]:
+                    - generic [ref=e81]:
+                      - link "Attendance" [ref=e82] [cursor=pointer]:
+                        - /url: /admin/courses/c1000000-0000-0000-0000-000000000001/sessions/59b57c5f-196a-4e4e-93aa-20f0c3ec74a9/attendance
+                      - button "Edit" [ref=e83]
+                      - generic [ref=e84]:
+                        - button "Cancel" [ref=e85]
+                        - button "Delete" [ref=e86]
+                - row "Wed, Oct 20 8:00am – 12:00pm Dock 2AHX scheduled Attendance Edit Cancel Delete" [ref=e87]:
+                  - cell "Wed, Oct 20" [ref=e88]
+                  - cell "8:00am – 12:00pm" [ref=e89]
+                  - cell "Dock 2AHX" [ref=e90]
+                  - cell [ref=e91]:
+                    - generic [ref=e92]:
+                      - combobox [ref=e93]:
+                        - img
+                      - combobox [ref=e94]
+                  - cell "scheduled" [ref=e95]:
+                    - generic [ref=e96]: scheduled
+                  - cell "Attendance Edit Cancel Delete" [ref=e97]:
+                    - generic [ref=e98]:
+                      - link "Attendance" [ref=e99] [cursor=pointer]:
+                        - /url: /admin/courses/c1000000-0000-0000-0000-000000000001/sessions/8ffc2612-718e-4b4b-9264-454761de4c94/attendance
+                      - button "Edit" [ref=e100]
+                      - generic [ref=e101]:
+                        - button "Cancel" [ref=e102]
+                        - button "Delete" [ref=e103]
+                - row "Wed, Oct 20 8:00am – 12:00pm Dock R65G scheduled Attendance Edit Cancel Delete" [ref=e104]:
+                  - cell "Wed, Oct 20" [ref=e105]
+                  - cell "8:00am – 12:00pm" [ref=e106]
+                  - cell "Dock R65G" [ref=e107]
+                  - cell [ref=e108]:
+                    - generic [ref=e109]:
+                      - combobox [ref=e110]:
+                        - img
+                      - combobox [ref=e111]
+                  - cell "scheduled" [ref=e112]:
+                    - generic [ref=e113]: scheduled
+                  - cell "Attendance Edit Cancel Delete" [ref=e114]:
+                    - generic [ref=e115]:
+                      - link "Attendance" [ref=e116] [cursor=pointer]:
+                        - /url: /admin/courses/c1000000-0000-0000-0000-000000000001/sessions/db1d30ec-9644-4518-8de5-53c4e44cfe37/attendance
+                      - button "Edit" [ref=e117]
+                      - generic [ref=e118]:
+                        - button "Cancel" [ref=e119]
+                        - button "Delete" [ref=e120]
+                - row "Mon, Nov 15 8:00am – 4:00pm Pier KPU7 scheduled Attendance Edit Cancel Delete" [ref=e121]:
+                  - cell "Mon, Nov 15" [ref=e122]
+                  - cell "8:00am – 4:00pm" [ref=e123]
+                  - cell "Pier KPU7" [ref=e124]
+                  - cell [ref=e125]:
+                    - generic [ref=e126]:
+                      - combobox [ref=e127]:
+                        - img
+                      - combobox [ref=e128]
+                  - cell "scheduled" [ref=e129]:
+                    - generic [ref=e130]: scheduled
+                  - cell "Attendance Edit Cancel Delete" [ref=e131]:
+                    - generic [ref=e132]:
+                      - link "Attendance" [ref=e133] [cursor=pointer]:
+                        - /url: /admin/courses/c1000000-0000-0000-0000-000000000001/sessions/d1000000-0000-0000-0000-000000000002/attendance
+                      - button "Edit" [ref=e134]
+                      - generic [ref=e135]:
+                        - button "Cancel" [ref=e136]
+                        - button "Delete" [ref=e137]
+                - row "Mon, Nov 15 8:00am – 4:00pm Pier BNPL scheduled Attendance Edit Cancel Delete" [ref=e138]:
+                  - cell "Mon, Nov 15" [ref=e139]
+                  - cell "8:00am – 4:00pm" [ref=e140]
+                  - cell "Pier BNPL" [ref=e141]
+                  - cell [ref=e142]:
+                    - generic [ref=e143]:
+                      - combobox [ref=e144]:
+                        - img
+                      - combobox [ref=e145]
+                  - cell "scheduled" [ref=e146]:
+                    - generic [ref=e147]: scheduled
+                  - cell "Attendance Edit Cancel Delete" [ref=e148]:
+                    - generic [ref=e149]:
+                      - link "Attendance" [ref=e150] [cursor=pointer]:
+                        - /url: /admin/courses/c1000000-0000-0000-0000-000000000001/sessions/d1000000-0000-0000-0000-000000000001/attendance
+                      - button "Edit" [ref=e151]
+                      - generic [ref=e152]:
+                        - button "Cancel" [ref=e153]
+                        - button "Delete" [ref=e154]
+            - button "+ Add Session" [ref=e156]
+        - generic [ref=e157]:
+          - generic [ref=e159]: Enrollments (2)
+          - table [ref=e162]:
+            - rowgroup [ref=e163]:
+              - row "Student Email Status Enrolled" [ref=e164]:
+                - columnheader "Student" [ref=e165]
+                - columnheader "Email" [ref=e166]
+                - columnheader "Status" [ref=e167]
+                - columnheader "Enrolled" [ref=e168]
+                - columnheader [ref=e169]
+            - rowgroup [ref=e170]:
+              - row "Sam Davies sam@ltsc.test confirmed 4/12/2026 Cancel" [ref=e171]:
+                - cell "Sam Davies" [ref=e172]
+                - cell "sam@ltsc.test" [ref=e173]
+                - cell "confirmed" [ref=e174]:
+                  - generic [ref=e175]: confirmed
+                - cell "4/12/2026" [ref=e176]
+                - cell "Cancel" [ref=e177]:
+                  - button "Cancel" [ref=e180]
+              - row "Alex Rivera alex@ltsc.test registered 4/12/2026 Confirm Cancel" [ref=e181]:
+                - cell "Alex Rivera" [ref=e182]
+                - cell "alex@ltsc.test" [ref=e183]
+                - cell "registered" [ref=e184]:
+                  - generic [ref=e185]: registered
+                - cell "4/12/2026" [ref=e186]
+                - cell "Confirm Cancel" [ref=e187]:
+                  - generic [ref=e189]:
+                    - button "Confirm" [ref=e190]
+                    - button "Cancel" [ref=e191]
+  - button "Open Next.js Dev Tools" [ref=e197] [cursor=pointer]:
+    - img [ref=e198]

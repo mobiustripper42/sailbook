@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 50 — 2026-04-13 10:28 [open]
+
 ## Session 49 — 2026-04-12 23:24–00:35 (1.17 hrs)
 **Duration:** 1.17 hours | **Points:** 0 pts (completing 1.0 remainder)
 **Task:** Phase 1.05 — Get Mira Sky/Mist preset actually applied

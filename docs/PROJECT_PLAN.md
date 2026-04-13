@@ -73,7 +73,7 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | # | Task | Effort | Notes |
 |---|------|--------|-------|
 | 1.0 | ~~Theme & dark mode — apply Mira preset b7CSfQ4Xo, swap to Nunito Sans, xs radius, wire next-themes toggle, add theme_preference column to profiles, sync on login~~ | 5 | [x] <!-- completed 2026-04-13 --> Mira Sky/Mist oklch vars, Nunito Sans, next-themes toggle, /api/theme route, ThemeSync via localStorage, 15 Playwright tests. --radius 0.125rem. BRAND.md update still pending. |
-| 1.1 | Session editing — edit date, time, location, instructor on existing sessions | 3 | Currently must cancel and recreate. Bug, not feature. |
+| 1.1 | ~~Session editing — edit date, time, location, instructor on existing sessions~~ | 3 | [x] <!-- completed 2026-04-13 --> Inline edit form (sub-row pattern). SessionRow client component. updateSession action. 2 Playwright tests. |
 | 1.2 | Set course back to Draft status (from Active) | 2 | Missing state transition. One button + server action. |
 | 1.3 | Inactive instructor cascade — deactivating instructor clears course + session assignments | 2 | DB function for cascade. Warning tile already exists. DEC entry. |
 | 1.4 | Course status review — confirm statuses cover all needs via @architect | 2 | Audit existing status logic. Probably fine as-is. |
@@ -87,9 +87,14 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.12 | Past courses not enrollable — filter student browse to exclude courses with all sessions in the past | 2 | V1 bug. Auto-transition status or query filter. Andy request. |
 | 1.13 | Dual-role nav toggle — "Switch to Student/Instructor View" for multi-role users | 2 | Chris (instructor + student) needs visible toggle. Roles already exist, this is UI/routing. Andy request. |
 | 1.14 | Dashboard instructor assignment clarity — verify courses-without-instructors count + show "Using course instructor" on sessions | 3 | Andy reported confusing number. Also clarify DEC-007 default behavior in UI. Andy request. |
+| 1.15 | Theme preference persistence — save theme_preference to profiles on toggle, load on login, default to 'system' for unauthenticated/login page | 3 | Column default changed from 'dark' to 'system'. Migration update needed. |
+| 1.16 | Restore admin mobile hamburger menu — theme changes broke mobile nav | 2 | Was working pre-theme. Regression, not new feature. |
+| 1.17 | Session row Action dropdown — consolidate Attendance/Edit/Cancel/Delete into shadcn DropdownMenu | 2 | 4 stacked buttons is awkward. Merge SessionActions + SessionRow edit trigger into one menu. |
 
-**Phase 1 total: 40 pts**
-**Projected hours: ~15 hrs**
+**Phase 1 total: 47 pts** (40 original + 3 for 1.15 + 2 for 1.16 + 2 for 1.17)
+**Projected hours: ~16 hrs**
+
+**Session 49 polish credit: 8 pts** — one-off theme diagnosis/fix session (2026-04-13). Not tied to a task; effort logged separately. Counts toward lifetime velocity but not Phase 1 task completion.
 
 **Ejection point:** V1 is solid. All known bugs fixed. Student records are richer. App is more trustworthy.
 
@@ -257,14 +262,14 @@ Transforms the app from scheduling into a learning management tool.
 | Phase | Pts | Projected Hours (at 0.38 hr/pt) | Ejection Point Value |
 |-------|-----|--------------------------------|---------------------|
 | 0 — Infrastructure | 70 | ~27 hrs | Dev environment ready |
-| 1 — V1 Fixes | 40 | ~15 hrs | V1 is solid |
+| 1 — V1 Fixes | 43 | ~16 hrs | V1 is solid |
 | 2 — Payments | 37 | ~14 hrs | App makes money |
 | 3 — Notifications + Auth | 36 | ~14 hrs | Users stay informed, auth hardened, security audited |
 | 4 — Identity | 27 | ~10 hrs | Onboarding is clean |
 | 5 — Pricing | 29 | ~11 hrs | Flexible pricing, waitlist, prereqs |
 | 6 — Polish | 41 | ~16 hrs | Professional, accessible, navigable, security verified |
 | 7 — Skills | 40–60 | ~15–23 hrs | Learning management |
-| **Total (0–6)** | **280** | **~107 hrs** | |
+| **Total (0–6)** | **283** | **~108 hrs** | |
 
 At V1 velocity (0.38 hrs/pt): ~107 hours for Phases 0–6.
 At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–2 (critical path to payments).
@@ -276,7 +281,7 @@ At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–
 | Phase | Effort Pts | Est. Hours | Actual Hours | Hrs/Point | Notes |
 |-------|-----------|------------|--------------|-----------|-------|
 | 0 — Infrastructure | 70 | ~27 | — | — | |
-| 1 — V1 Fixes | 40 | ~15 | — | — | |
+| 1 — V1 Fixes | 43 | ~16 | — | — | +8 polish credit (session 49) |
 | 2 — Payments | 37 | ~14 | — | — | |
 | 3 — Notifications | 36 | ~14 | — | — | |
 | 4 — Identity | 27 | ~10 | — | — | |

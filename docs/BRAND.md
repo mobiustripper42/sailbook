@@ -23,7 +23,7 @@ Practical, clean, no-nonsense. This is a tool for running a sailing school, not 
 - Style: Mira (shadcn preset b7CSfQ4Xo). Sky theme, Mist base.
 - Dark mode default. Light mode available via toggle. Preference stored in user profile.
 - Font: Nunito Sans (heading + body). Warm, approachable, clean.
-- Border radius: xs throughout. Consistent — never mixed.
+- Border radius: xs throughout (`--radius: 0.125rem`). Consistent — never mixed.
 - Maximum 2 shadow levels (shadow-sm for cards, shadow-lg for modals).
 - No decoration for decoration's sake — every element earns its place.
 - Nautical without being kitschy — no anchors, no rope borders, no "ahoy."

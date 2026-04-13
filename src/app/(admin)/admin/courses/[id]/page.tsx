@@ -1,23 +1,19 @@
-import { Fragment } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { fmtTime } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  TableCell,
 } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import AddSessionForm from '@/components/admin/add-session-form'
-import SessionActions from '@/components/admin/session-actions'
-import SessionInstructorSelect from '@/components/admin/session-instructor-select'
-import MakeupSessionForm from '@/components/admin/makeup-session-form'
+import SessionRow from '@/components/admin/session-row'
 import CourseStatusActions from '@/components/admin/course-status-actions'
 import EnrollmentActions from '@/components/admin/enrollment-actions'
 
@@ -133,60 +129,26 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sessions?.map((s) => {
-                  const si = s.instructor as { first_name: string; last_name: string } | null
-                  const isCancelled = s.status === 'cancelled'
-                  return (
-                    <Fragment key={s.id}>
-                      <TableRow>
-                        <TableCell>{new Date(s.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</TableCell>
-                        <TableCell className="whitespace-nowrap">{fmtTime(s.start_time)} – {fmtTime(s.end_time)}</TableCell>
-                        <TableCell>{s.location ?? '—'}</TableCell>
-                        <TableCell>
-                          <SessionInstructorSelect
-                            sessionId={s.id}
-                            courseId={id}
-                            instructorId={s.instructor_id}
-                            instructors={instructors ?? []}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={s.status === 'scheduled' ? 'default' : isCancelled ? 'destructive' : 'secondary'}
-                            title={isCancelled && s.cancel_reason ? s.cancel_reason : undefined}
-                          >
-                            {s.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            <Button variant="outline" size="sm" asChild>
-                              <Link href={`/admin/courses/${id}/sessions/${s.id}/attendance`}>
-                                Attendance
-                              </Link>
-                            </Button>
-                            <SessionActions sessionId={s.id} courseId={id} status={s.status} />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                      {isCancelled && (
-                        <TableRow>
-                          <TableCell colSpan={6} className="bg-muted/30">
-                            <MakeupSessionForm
-                              originalSessionId={s.id}
-                              courseId={id}
-                              defaultStartTime={s.start_time}
-                              defaultEndTime={s.end_time}
-                              defaultLocation={s.location}
-                              missedCount={makeupCounts.get(s.id)?.missed ?? 0}
-                              linkedCount={makeupCounts.get(s.id)?.linked ?? 0}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </Fragment>
-                  )
-                })}
+                {sessions?.map((s) => (
+                  <SessionRow
+                    key={s.id}
+                    session={{
+                      id: s.id,
+                      date: s.date,
+                      start_time: s.start_time,
+                      end_time: s.end_time,
+                      location: s.location,
+                      instructor_id: s.instructor_id,
+                      status: s.status as 'scheduled' | 'completed' | 'cancelled',
+                      cancel_reason: s.cancel_reason,
+                      instructor: s.instructor as { first_name: string; last_name: string } | null,
+                    }}
+                    courseId={id}
+                    instructors={instructors ?? []}
+                    missedCount={makeupCounts.get(s.id)?.missed ?? 0}
+                    linkedCount={makeupCounts.get(s.id)?.linked ?? 0}
+                  />
+                ))}
               </TableBody>
             </Table>
           )}

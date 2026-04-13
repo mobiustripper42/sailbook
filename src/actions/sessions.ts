@@ -142,6 +142,29 @@ export async function createMakeupSession(
   redirect(`/admin/courses/${courseId}`)
 }
 
+export async function updateSession(
+  sessionId: string,
+  courseId: string,
+  formData: FormData
+): Promise<string | null> {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('sessions')
+    .update({
+      date: formData.get('date') as string,
+      start_time: formData.get('start_time') as string,
+      end_time: formData.get('end_time') as string,
+      location: (formData.get('location') as string) || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', sessionId)
+
+  if (error) return error.message
+  revalidatePath(`/admin/courses/${courseId}`)
+  return null
+}
+
 export async function updateSessionInstructor(
   sessionId: string,
   courseId: string,

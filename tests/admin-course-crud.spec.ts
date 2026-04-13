@@ -179,3 +179,56 @@ test.describe('Admin — course type edit', () => {
     await expect(page.getByLabel('Description')).toHaveValue(newDesc);
   });
 });
+
+// ─── Edit Session ────────────────────────────────────────────────────────────
+
+test.describe('Admin — session editing', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsAdmin(page);
+  });
+
+  test('edits a session date and location inline', async ({ page }) => {
+    // Desktop only — same layout constraint as the add-session test (sidebar overlap on mobile)
+    test.skip(test.info().project.name !== 'desktop');
+
+    const courseId = 'c1000000-0000-0000-0000-000000000001';
+    const newLocation = `Pier ${runId().slice(0, 4)}`;
+
+    await page.goto(`/admin/courses/${courseId}`);
+    await expect(
+      page.locator('[data-slot="card-title"]').filter({ hasText: 'Sessions' })
+    ).toBeVisible();
+
+    // Click the first "Edit" button in the sessions table
+    await page.getByRole('button', { name: 'Edit' }).first().click({ force: true });
+
+    // Inline edit form should appear
+    await expect(page.locator('input[name="date"]')).toBeVisible();
+
+    // Update date and location
+    await page.locator('input[name="date"]').fill('2027-11-15');
+    await page.locator('input[name="location"]').fill(newLocation);
+
+    await page.getByRole('button', { name: 'Save' }).click();
+
+    // Form closes and updated values appear in the row
+    await expect(page.getByRole('cell', { name: newLocation })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('cell', { name: /Nov.*15|Mon.*Nov/ })).toBeVisible({ timeout: 10000 });
+    // Edit form inputs should be gone
+    await expect(page.locator('input[name="date"]')).toHaveCount(0);
+  });
+
+  test('edit form closes on Close without saving', async ({ page }) => {
+    test.skip(test.info().project.name !== 'desktop');
+
+    const courseId = 'c1000000-0000-0000-0000-000000000001';
+
+    await page.goto(`/admin/courses/${courseId}`);
+    await page.getByRole('button', { name: 'Edit' }).first().click({ force: true });
+    await expect(page.locator('input[name="date"]')).toBeVisible();
+
+    // "Close" button is the Edit toggle — unambiguous (SessionActions uses "Cancel" for session cancel)
+    await page.getByRole('button', { name: 'Close' }).first().click({ force: true });
+    await expect(page.locator('input[name="date"]')).toHaveCount(0);
+  });
+});
