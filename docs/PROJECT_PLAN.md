@@ -52,7 +52,7 @@ Everything needed to develop safely. No user-facing changes.
 | 0.14 | ~~Playwright test suite — student browse + register + capacity + duplicate prevention~~ | 8 | [x] <!-- completed 2026-04-12 --> 24 tests (14 pass, 10 desktop-only skips). createTestCourse helper; browser.newContext() for user switching; tests/helpers.ts extracted. |
 | 0.15 | ~~Playwright test suite — attendance + cancellation + makeup~~ | 5 | [x] <!-- completed 2026-04-12 --> 7 tests (11/21 pass, 10 skip by design). Flows: mark attended, All Attended, student sees badge, enrollment cancel, session cancel + makeup + student view. `test.setTimeout(90000/120000)` on setup-heavy tests. |
 | 0.16 | ~~Playwright test suite — instructor views~~ | 3 | [x] <!-- completed 2026-04-12 --> 18 tests (9 pass, 9 skip by design). Suites: dashboard empty state, dashboard with sessions, session roster, access control. `createInstructorCourse()` inline helper. |
-| 0.17 | Save @ui-reviewer agent spec to `.claude/agents/ui-reviewer.md` | 2 | Tuned to SailBook design language. |
+| 0.17 | ~~Save @ui-reviewer agent spec to `.claude/agents/ui-reviewer.md`~~ | 2 | [x] <!-- completed 2026-04-12 --> Mira/Sky/Mist theme, Nunito Sans, xs radius, dark-mode-first. Token-based color rules, 12-point checklist, scored output format. |
 | 0.18 | ~~Write session skills — `/its-alive`, `/pause-this`, `/restart-this`, update `/kill-this`, `/its-dead`~~ | 2 | [x] <!-- completed pre-project --> Five skill files in `~/.claude/skills/`. Done before V2 work began. |
 | 0.19 | ~~Update CLAUDE.md — micro workflow, migration protocol, test commands, new agents, conventions~~ | 3 | [x] <!-- completed pre-project --> V2 conventions, migration protocol. Done before V2 work began. |
 | 0.20 | ~~Update all docs — SPEC.md, DECISIONS.md, AGENTS.md, BRAND.md for V2 scope~~ | 3 | [x] <!-- completed pre-project --> Andy's philosophy note in BRAND.md. New DECs. V2 scope in SPEC.md. Done before V2 work began. |
@@ -72,6 +72,7 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 
 | # | Task | Effort | Notes |
 |---|------|--------|-------|
+| 1.0 | Theme & dark mode — apply Mira preset b7CSfQ4Xo, swap to Nunito Sans, xs radius, wire next-themes toggle, add theme_preference column to profiles, sync on login | 5 | Dark default. Preference: 'light'/'dark'/'system'. Migration required. Update BRAND.md + ui-reviewer.md. |
 | 1.1 | Session editing — edit date, time, location, instructor on existing sessions | 3 | Currently must cancel and recreate. Bug, not feature. |
 | 1.2 | Set course back to Draft status (from Active) | 2 | Missing state transition. One button + server action. |
 | 1.3 | Inactive instructor cascade — deactivating instructor clears course + session assignments | 2 | DB function for cascade. Warning tile already exists. DEC entry. |

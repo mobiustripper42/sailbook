@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 47 — 2026-04-12 20:41 [open]
+
 ## Session 46 — 2026-04-12 20:20–20:36 (0.27 hrs)
 **Duration:** 0.27 hours | **Points:** 3 pts
 **Task:** Phase 0.16 — Playwright test suite for instructor views

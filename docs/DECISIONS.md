@@ -81,6 +81,16 @@
 **Decision:** Page padding applied once in layout.tsx `<main>` element, not in individual page components.
 **Why:** Consistent padding across all pages in a route group. Any new page must NOT add outer `p-*` — layout provides it.
 
+### D-018: Theme & Visual Refresh (2026-04-12)
+**Context:** V1 shipped with Geist font, zinc-only palette, no dark mode. App felt clinical — wrong tone for a school built on "meeting people where they are."
+**Decision:** Adopt shadcn Mira style (preset b7CSfQ4Xo). Sky theme on Mist base, Nunito Sans font, xs border radius, dark mode default with toggle.
+**Options considered:**
+- Keep V1 aesthetic, add color accent only — too minimal, still cold
+- Full custom theme — overkill for MVP, maintenance burden
+- shadcn preset with targeted overrides — right balance of polish and speed
+**Chose:** Preset with overrides. Theme preference stored in profiles table (text: 'light'/'dark'/'system', default 'dark') — not localStorage, syncs across devices.
+**Consequence:** Oleg's Law retired. ui-reviewer.md updated to enforce new design language. Every screen from Phase 1 built against final theme — no retrofit.
+
 ---
 
 ## V2 Decisions (to be resolved during build)
