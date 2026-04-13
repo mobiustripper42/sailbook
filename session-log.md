@@ -3,6 +3,30 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 45 — 2026-04-12 18:40–19:02 (0.33 hrs)
+**Duration:** 0.33 hours | **Points:** 5 pts
+**Task:** Phase 0.15 — Playwright test suite for attendance + cancellation + makeup
+
+**Completed:**
+- Created `tests/attendance-cancellation.spec.ts` — 7 tests (11/21 pass, 10 desktop-only skips)
+- Suites: admin marks attendance + All Attended, student attendance history page (seed data), admin marks attended → student sees badge on course detail, admin enrollment cancellation, full session cancel → makeup schedule → student sees Makeup scheduled
+- `createEnrolledCourse()` helper: creates course + enrolls pw_student, returns courseId + sessionId
+- `test.setTimeout(90000/120000)` on setup-heavy tests (createEnrolledCourse takes ~25s)
+- `page.on('dialog')` with type-checks for `prompt` (session cancel) vs `confirm` (enrollment cancel)
+- Session row scoped by "Edgewater Park" location; enrollment row by email — no fragile index selectors
+- `{ exact: true }` on "Needs makeup" to avoid strict-mode collision with "1 needs makeup" badge
+- Ran @code-review agent; actioned all 5 findings in follow-up commit:
+  - Moved `createTestCourse` + `createEnrolledCourse` into `tests/helpers.ts`
+  - `student-enrollment.spec.ts` now imports `createTestCourse` from helpers (was duplicated)
+  - Scoped makeup form date input to `form.filter({hasText:'Schedule Makeup'})` to prevent strict-mode violation if AddSessionForm is ever open simultaneously
+  - Removed unnecessary `type Browser` import at spec file level
+  - Added comment on "All Attended" intentional short stop
+- 59/59 pgTAP + 80/80 Playwright green (after `supabase db reset`)
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** 0.16 — Playwright test suite for instructor views. Dashboard, roster, session detail. Read-only pages — no writes, so no createEnrolledCourse setup needed. Login as pw_instructor@ltsc.test. Key pages: /instructor/dashboard, /instructor/sessions/[id]. Check existing instructor pages before writing tests.
+**Context:** `supabase db reset` is routine maintenance before pgTAP after Playwright runs accumulate test data in the DB. `createEnrolledCourse` in `tests/helpers.ts` is the canonical helper for any test that needs an enrolled student — it manages its own browser contexts. `test.setTimeout` values: 90000 for single-context setup tests, 120000 for tests that also open a student context after admin work. Jordan's missed-session count (1) is seed-data dependent — requires clean DB reset before those assertions are reliable.
+
 ## Session 44 — 2026-04-12 18:08–18:33 (0.42 hrs)
 **Duration:** 0.42 hours | **Points:** 8 pts
 **Task:** Phase 0.14 — Playwright test suite for student browse + register + capacity + duplicate prevention
