@@ -32,6 +32,10 @@ test.describe('dual-role nav toggle', () => {
   test('Switch to Student View navigates to student dashboard', async ({ page }) => {
     await loginAs(page, DUAL_ROLE_EMAIL, /\/student\/dashboard|\/instructor\/dashboard/)
     await page.goto('/instructor/dashboard')
+    const viewport = page.viewportSize()
+    if (viewport && viewport.width < 768) {
+      await page.getByRole('button', { name: 'Open navigation' }).click()
+    }
     await page.getByRole('link', { name: 'Switch to Student View' }).click()
     await page.waitForURL(/\/student\/dashboard/, { timeout: 10000 })
     await expect(page).toHaveURL(/\/student\/dashboard/)
@@ -40,7 +44,10 @@ test.describe('dual-role nav toggle', () => {
   test('single-role instructor does not see student toggle', async ({ page }) => {
     await loginAs(page, 'pw_instructor@ltsc.test', /\/instructor\/dashboard/)
     await page.goto('/instructor/dashboard')
-    // Instructor layout has no mobile drawer — sidebar is always visible
+    const viewport = page.viewportSize()
+    if (viewport && viewport.width < 768) {
+      await page.getByRole('button', { name: 'Open navigation' }).click()
+    }
     await expect(page.getByRole('link', { name: 'Switch to Student View' })).not.toBeVisible()
   })
 

@@ -6,6 +6,7 @@ import { signOut } from '@/app/(auth)/actions'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { ThemeSync } from '@/components/theme-sync'
 import RoleToggle from '@/components/role-toggle'
+import InstructorMobileNavDrawer from '@/components/instructor/instructor-mobile-nav-drawer'
 
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient()
@@ -19,7 +20,7 @@ export default async function InstructorLayout({ children }: { children: React.R
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const name = `${user.user_metadata?.first_name ?? ''} ${user.user_metadata?.last_name ?? ''}`.trim() || user.email
+  const name = (`${user.user_metadata?.first_name ?? ''} ${user.user_metadata?.last_name ?? ''}`.trim() || user.email) ?? ''
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -32,7 +33,7 @@ export default async function InstructorLayout({ children }: { children: React.R
   return (
     <div className="flex min-h-screen">
       <ThemeSync preference={themePreference} />
-      <aside className="w-56 border-r bg-sidebar flex flex-col shrink-0">
+      <aside className="hidden md:flex w-56 border-r bg-sidebar flex-col shrink-0">
         <div className="px-4 py-5 border-b">
           <Link href="/instructor/dashboard" className="font-semibold text-sm tracking-tight">
             SailBook
@@ -62,9 +63,12 @@ export default async function InstructorLayout({ children }: { children: React.R
           </div>
         </div>
       </aside>
-      <main className="flex-1 min-w-0 bg-background">
-        {children}
-      </main>
+      <div className="flex-1 min-w-0 flex flex-col">
+        <InstructorMobileNavDrawer name={name} isStudent={isStudent} />
+        <main className="flex-1 min-w-0 bg-background">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }

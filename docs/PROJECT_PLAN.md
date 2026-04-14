@@ -92,9 +92,10 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.17 | ~~Session row Action dropdown — consolidate Attendance/Edit/Cancel/Delete into shadcn DropdownMenu~~ | 2 | [x] <!-- completed 2026-04-13 --> Single ··· DropdownMenu; SessionActions deleted; data-session-id on TableRow; all tests updated. |
 | 1.18 | Add logo to login page and favicon to browser tab | 2 | Ask human for the files. SVG favicon in public/, PNG logo on login page above sign-in form. |
 | 1.19 | Dark / Light theme not applyed to /dev instruction page, can read any text | 2 | Fix /dev instruction page so fonts are readable. |
-| 1.20 | Instructor mobile hamburger menu — aside is always visible at all viewports, no mobile drawer exists | 2 | Mirror admin/student pattern: hidden md:flex on aside, InstructorMobileNavDrawer component. |
+| 1.20 | ~~Instructor mobile hamburger menu — aside is always visible at all viewports, no mobile drawer exists~~ | 2 | [x] <!-- completed 2026-04-14 --> InstructorMobileNavDrawer component; hidden md:flex on aside; 9 Playwright tests. |
+| 1.21 | Dev login helper — dropdown of seed users that auto-fills + submits the login form | 2 | Dev-only component below login form. Gate: `NEXT_PUBLIC_DEV_MODE=true`. Users: andy, mike, lisa, chris, sam, alex. `if (process.env.NEXT_PUBLIC_DEV_MODE !== 'true') return null`. |
 
-**Phase 1 total: 53 pts** (40 original + 3 for 1.15 + 2 for 1.16 + 2 for 1.17 + 2 for 1.18 + 2 for 1.19 + 2 for 1.20)
+**Phase 1 total: 55 pts** (40 original + 3 for 1.15 + 2 for 1.16 + 2 for 1.17 + 2 for 1.18 + 2 for 1.19 + 2 for 1.20 + 2 for 1.21)
 **Projected hours: ~19 hrs**
 
 **Session 49 polish credit: 8 pts** — one-off theme diagnosis/fix session (2026-04-13). Not tied to a task; effort logged separately. Counts toward lifetime velocity but not Phase 1 task completion.

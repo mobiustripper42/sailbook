@@ -50,13 +50,16 @@ waitlist_entries (notify on spot opening)
 ## Micro Workflow (every task, no exceptions)
 
 1. **Spec it** — poker estimate, acceptance criteria
-2. **Build it** — implement the feature
-3. **Write the test** — Playwright integration test + pgTAP if RLS-touching
-4. **Run the suite** — `supabase test db` + `npx playwright test`
-5. **Mobile screenshot** — confirm 375px viewport passes
-6. **Close out** — `/kill-this` → `/its-dead` → push
+2. **Plan it** — summarize what you're going to do (files to create/edit, approach). Wait for explicit approval before writing any code or running any commands.
+3. **Build it** — implement the feature
+4. **Write the test** — Playwright integration test + pgTAP if RLS-touching
+5. **Run targeted tests** — `npx playwright test tests/foo.spec.ts --project=desktop` (and mobile if relevant). `supabase test db` if RLS-touching. Do NOT run the full suite — that's the user's call.
+6. **Mobile screenshot** — confirm 375px viewport passes
+7. **Close out** — `/kill-this` → `/its-dead` → push
 
 **No test, no push.**
+
+**Full suite (`npx playwright test`) is never run automatically.** At the end of the session summary, ask: "Did you run the full Playwright suite yet?" and let the user decide.
 
 ## Migration Protocol
 
@@ -180,6 +183,14 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 - **Diagnostic commands** (build, lint, type check, test): run directly — see errors, fix them, don't bother the user.
 - **Environment-changing commands** (npm install, supabase migrations, git push, deploys): output these for the user to run.
 - **Bugs from Andy:** Create a GitHub issue (`gh issue create`), tag `bug`, add to current or next phase.
+
+## Approval Before Action (all tasks)
+For every task — not just bugs — explain the plan and wait for approval before doing anything:
+1. State what files you'll create or modify and why
+2. Wait for "go", "do it", or equivalent
+3. Do not write code, create files, run tests, or execute any commands until approved
+
+**This includes the full test suite.** The database may be in use. Never run the full `npx playwright test` without telling the user first. Targeted test runs (`npx playwright test tests/foo.spec.ts --project=desktop`) are fine during active development without prior approval.
 
 ## Bug Reports & Questions
 When I report a bug or ask a question:
