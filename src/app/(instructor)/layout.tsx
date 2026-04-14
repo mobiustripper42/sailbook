@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/app/(auth)/actions'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { ThemeSync } from '@/components/theme-sync'
+import RoleToggle from '@/components/role-toggle'
 
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient()
@@ -22,10 +23,11 @@ export default async function InstructorLayout({ children }: { children: React.R
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('theme_preference')
+    .select('theme_preference, is_student')
     .eq('id', user.id)
     .single()
   const themePreference = (profile as { theme_preference?: string } | null)?.theme_preference ?? 'dark'
+  const isStudent = (profile as { is_student?: boolean } | null)?.is_student ?? false
 
   return (
     <div className="flex min-h-screen">
@@ -47,6 +49,9 @@ export default async function InstructorLayout({ children }: { children: React.R
         </nav>
         <div className="px-4 py-4 border-t mt-auto">
           <p className="text-xs text-muted-foreground truncate">{name}</p>
+          {isStudent && (
+            <RoleToggle href="/student/dashboard" label="Switch to Student View" />
+          )}
           <div className="flex items-center justify-between mt-1">
             <form action={signOut}>
               <button type="submit" className="text-xs text-muted-foreground hover:text-foreground">

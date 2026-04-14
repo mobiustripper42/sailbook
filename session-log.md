@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 61 — 2026-04-14 10:32 [open]
+
 ## Session 60 — 2026-04-14 10:07–10:29 (0.37 hrs)
 **Duration:** 0.37 hours | **Points:** 0 pts
 **Task:** Session 59 code review deferrals — cascade trigger hardening + test quality

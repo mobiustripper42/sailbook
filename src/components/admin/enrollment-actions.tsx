@@ -55,7 +55,7 @@ export default function EnrollmentActions({ enrollmentId, courseId, status }: Pr
           variant="ghost"
           disabled={pending}
           onClick={() => {
-            if (!confirm('Cancel this enrollment?')) return
+            if (!window.confirm('Cancel this enrollment?')) return
             handle('cancelled', () => cancelEnrollment(enrollmentId, courseId))
           }}
         >

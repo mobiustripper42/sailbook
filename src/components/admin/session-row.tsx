@@ -77,7 +77,7 @@ export default function SessionRow({
   }
 
   function handleDelete() {
-    if (!confirm('Delete this session? This cannot be undone.')) return
+    if (!window.confirm('Delete this session? This cannot be undone.')) return
     setActionError(null)
     startTransition(async () => {
       const result = await deleteSession(session.id, courseId)

@@ -7,6 +7,7 @@ import StudentNav from '@/components/student/student-nav'
 import MobileNavDrawer from '@/components/student/mobile-nav-drawer'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { ThemeSync } from '@/components/theme-sync'
+import RoleToggle from '@/components/role-toggle'
 
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient()
@@ -24,10 +25,11 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('theme_preference')
+    .select('theme_preference, is_instructor')
     .eq('id', user.id)
     .single()
   const themePreference = (profile as { theme_preference?: string } | null)?.theme_preference ?? 'dark'
+  const isInstructor = (profile as { is_instructor?: boolean } | null)?.is_instructor ?? false
 
   return (
     <div className="flex min-h-screen">
@@ -42,6 +44,9 @@ export default async function StudentLayout({ children }: { children: React.Reac
         <StudentNav />
         <div className="px-4 py-4 border-t mt-auto">
           <p className="text-xs text-muted-foreground truncate">{name}</p>
+          {isInstructor && (
+            <RoleToggle href="/instructor/dashboard" label="Switch to Instructor View" />
+          )}
           <div className="flex items-center justify-between mt-1">
             <form action={signOut}>
               <button
@@ -56,7 +61,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         </div>
       </aside>
       <div className="flex-1 min-w-0 flex flex-col">
-        <MobileNavDrawer name={name} themePreference={themePreference} />
+        <MobileNavDrawer name={name} themePreference={themePreference} isInstructor={isInstructor} />
         <main className="flex-1 bg-background p-4 sm:p-8">
           {children}
         </main>

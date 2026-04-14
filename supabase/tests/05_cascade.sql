@@ -5,7 +5,7 @@
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(6);
+SELECT plan(8);
 
 -- ============================================================
 -- Seed reference
@@ -86,6 +86,19 @@ WHERE id = 'c1000000-0000-0000-0000-000000000001';
 UPDATE public.sessions
 SET instructor_id = 'a1000000-0000-0000-0000-000000000002'
 WHERE id = 'd1000000-0000-0000-0000-000000000001';
+
+-- Pre-condition: confirm Mike has 1 course and 1 session assignment before role removal
+SELECT is(
+  (SELECT count(*)::int FROM public.courses WHERE instructor_id = 'a1000000-0000-0000-0000-000000000002'),
+  1,
+  'role removal pre-condition: Mike has 1 course assignment before is_instructor = FALSE'
+);
+
+SELECT is(
+  (SELECT count(*)::int FROM public.sessions WHERE instructor_id = 'a1000000-0000-0000-0000-000000000002'),
+  1,
+  'role removal pre-condition: Mike has 1 session assignment before is_instructor = FALSE'
+);
 
 -- Remove instructor role (is_instructor = false triggers same cascade)
 UPDATE public.profiles

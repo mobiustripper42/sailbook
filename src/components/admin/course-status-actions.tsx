@@ -31,7 +31,7 @@ export default function CourseStatusActions({ id, status }: { id: string; status
         {status === 'active' && (
           <>
             <Button variant="outline" onClick={() => {
-              if (!confirm('Revert this course to Draft? It will no longer be visible to students.')) return
+              if (!window.confirm('Revert this course to Draft? It will no longer be visible to students.')) return
               handle(() => revertToDraft(id))
             }} disabled={pending}>
               {pending
@@ -39,7 +39,7 @@ export default function CourseStatusActions({ id, status }: { id: string; status
                 : 'Revert to Draft'}
             </Button>
             <Button variant="outline" onClick={() => {
-              if (!confirm('Mark this course as completed?')) return
+              if (!window.confirm('Mark this course as completed?')) return
               handle(() => completeCourse(id))
             }} disabled={pending}>
               {pending
@@ -50,7 +50,7 @@ export default function CourseStatusActions({ id, status }: { id: string; status
         )}
         {status !== 'cancelled' && (
           <Button variant="outline" onClick={() => {
-            if (!confirm('Cancel this course? This cannot be undone easily.')) return
+            if (!window.confirm('Cancel this course? This cannot be undone easily.')) return
             handle(() => cancelCourse(id))
           }} disabled={pending}>
             {pending
