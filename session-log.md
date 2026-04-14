@@ -3,7 +3,35 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 61 — 2026-04-14 10:32 [open]
+## Session 61 — 2026-04-14 10:32–11:27 (0.92 hrs)
+**Duration:** 0.92 hours | **Points:** 2 pts
+**Task:** Code review deferrals (Session 60) + 1.13 dual-role nav toggle
+
+**Completed:**
+- `window.confirm` standardized across all admin components (`course-status-actions.tsx`, `session-row.tsx`, `enrollment-actions.tsx`, `instructor-actions.tsx`, `profile-edit-form.tsx`)
+- Confirm dialog wording unified: both deactivation paths say "remove them from all assigned courses and sessions"
+- `supabase/tests/05_cascade.sql` — pre-condition count=1 assertions before `is_instructor=FALSE` block; plan(6) → plan(8)
+- `src/components/role-toggle.tsx` — new server component, renders a Link
+- `src/app/(student)/layout.tsx` — fetches `is_instructor`, shows RoleToggle, passes `isInstructor` to MobileNavDrawer
+- `src/app/(instructor)/layout.tsx` — fetches `is_student`, shows RoleToggle
+- `src/components/student/mobile-nav-drawer.tsx` — accepts `isInstructor` prop, shows toggle in drawer; removed dead `themePreference` prop
+- `tests/dual-role-nav.spec.ts` — 18 tests across 3 viewports; mobile drawer opened before click/assert
+- `docs/PROJECT_PLAN.md` — added 1.20 (instructor mobile hamburger menu, 2 pts)
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Task 4.1 — instructors are students by default (migration + seed, discussed this session, deferred to 4.1)
+- Then: 1.4 (course status audit via @architect), 1.6 (ASA number), 1.8 (password reset), 1.20 (instructor mobile hamburger)
+
+**Context:**
+- On mobile, student drawer must be opened before interacting with the toggle link
+- Instructor layout has no mobile drawer — sidebar always visible, no hamburger (tracked as 1.20)
+- Chris Marino (`chris@ltsc.test`) is the only seed user with both roles until 4.1
+
+**Code Review:** Clean Bill of Health
 
 ## Session 60 — 2026-04-14 10:07–10:29 (0.37 hrs)
 **Duration:** 0.37 hours | **Points:** 0 pts

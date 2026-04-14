@@ -85,15 +85,16 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.10 | Student "instructor notes" field + expand instructor roster (phone, email, age, notes indicator) | 3 | "Anything you want your instructor to know?" free text. Dot/asterisk on roster if populated. Andy request. |
 | 1.11 | ~~Spots remaining fix — only count confirmed enrollments against capacity~~ | 3 | [x] <!-- completed 2026-04-13 --> Both RPCs + admin detail page JS filter updated. Tests updated throughout; confirmTestEnrollment helper added. |
 | 1.12 | ~~Past courses not enrollable — filter student browse to exclude courses with all sessions in the past~~ | 2 | [x] <!-- completed 2026-04-14 --> Post-fetch JS filter on student browse page; courses with zero sessions remain visible. One accepted edge case: active course with future cancelled + past scheduled session still shows (pathological, ignored). |
-| 1.13 | Dual-role nav toggle — "Switch to Student/Instructor View" for multi-role users | 2 | Chris (instructor + student) needs visible toggle. Roles already exist, this is UI/routing. Andy request. |
+| 1.13 | ~~Dual-role nav toggle — "Switch to Student/Instructor View" for multi-role users~~ | 2 | [x] <!-- completed 2026-04-14 --> RoleToggle component; student + instructor layouts; mobile drawer support; 18 Playwright tests. |
 | 1.14 | Dashboard instructor assignment clarity — verify courses-without-instructors count + show "Using course instructor" on sessions | 3 | Andy reported confusing number. Also clarify DEC-007 default behavior in UI. Andy request. |
 | 1.15 | Theme preference persistence — save theme_preference to profiles on toggle, load on login, default to 'system' for unauthenticated/login page | 3 | Column default changed from 'dark' to 'system'. Migration update needed. |
 | 1.16 | ~~Restore admin mobile hamburger menu — theme changes broke mobile nav~~ | 2 | [x] <!-- completed 2026-04-13 --> AdminMobileNavDrawer component; hidden md:flex on aside; test skips updated. |
 | 1.17 | ~~Session row Action dropdown — consolidate Attendance/Edit/Cancel/Delete into shadcn DropdownMenu~~ | 2 | [x] <!-- completed 2026-04-13 --> Single ··· DropdownMenu; SessionActions deleted; data-session-id on TableRow; all tests updated. |
 | 1.18 | Add logo to login page and favicon to browser tab | 2 | Ask human for the files. SVG favicon in public/, PNG logo on login page above sign-in form. |
 | 1.19 | Dark / Light theme not applyed to /dev instruction page, can read any text | 2 | Fix /dev instruction page so fonts are readable. |
+| 1.20 | Instructor mobile hamburger menu — aside is always visible at all viewports, no mobile drawer exists | 2 | Mirror admin/student pattern: hidden md:flex on aside, InstructorMobileNavDrawer component. |
 
-**Phase 1 total: 51 pts** (40 original + 3 for 1.15 + 2 for 1.16 + 2 for 1.17 + 2 for 1.18 + 2 for 1.19)
+**Phase 1 total: 53 pts** (40 original + 3 for 1.15 + 2 for 1.16 + 2 for 1.17 + 2 for 1.18 + 2 for 1.19 + 2 for 1.20)
 **Projected hours: ~19 hrs**
 
 **Session 49 polish credit: 8 pts** — one-off theme diagnosis/fix session (2026-04-13). Not tied to a task; effort logged separately. Counts toward lifetime velocity but not Phase 1 task completion.
