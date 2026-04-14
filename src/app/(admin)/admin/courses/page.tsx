@@ -65,7 +65,7 @@ export default async function CoursesPage() {
                 const instructor = c.instructor as unknown as { first_name: string; last_name: string } | null
                 const sessionCount = Array.isArray(c.sessions) ? c.sessions.length : 0
                 const enrollmentCount = Array.isArray(c.enrollments)
-                  ? c.enrollments.filter((e: { id: string; status: string }) => e.status !== 'cancelled').length
+                  ? c.enrollments.filter((e: { id: string; status: string }) => e.status === 'confirmed').length
                   : 0
 
                 return (

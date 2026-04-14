@@ -96,7 +96,7 @@ export default async function InstructorDashboard() {
           <div className="divide-y rounded-lg border">
             {rows.map((s) => {
               const course = s.courses
-              const activeEnrollments = course.enrollments.filter((e) => e.status !== 'cancelled').length
+              const activeEnrollments = course.enrollments.filter((e) => e.status === 'confirmed').length
               return (
                 <div key={s.id} className="px-4 py-3 flex items-start justify-between gap-4">
                   <div className="space-y-0.5 min-w-0">

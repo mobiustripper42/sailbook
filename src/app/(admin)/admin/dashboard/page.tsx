@@ -173,7 +173,7 @@ function UpcomingSessions({ sessions }: { sessions: UpcomingSession[] }) {
                 const sessionInstructor = s.instructor as unknown as { first_name: string; last_name: string } | null
                 const instructor = sessionInstructor ?? course?.course_instructor ?? null
                 const courseName = course?.title ?? course?.course_type?.name ?? '—'
-                const activeCount = (course?.enrollments ?? []).filter((e) => e.status !== 'cancelled').length
+                const activeCount = (course?.enrollments ?? []).filter((e) => e.status === 'confirmed').length
                 const capacity = course?.capacity ?? 0
                 const attendanceHref = course?.id
                   ? `/admin/courses/${course.id}/sessions/${s.id}/attendance`
