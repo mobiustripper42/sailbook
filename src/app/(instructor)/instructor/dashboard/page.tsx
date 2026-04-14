@@ -65,7 +65,7 @@ export default async function InstructorDashboard() {
   const studentIds = new Set<string>()
   for (const s of rows) {
     for (const e of s.courses.enrollments) {
-      if (e.status !== 'cancelled') studentIds.add(e.student_id)
+      if (e.status === 'confirmed') studentIds.add(e.student_id)
     }
   }
 

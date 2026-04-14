@@ -32,6 +32,36 @@ test.describe('Student — browse courses', () => {
     const c001Card = page.locator('[data-slot="card"]').filter({ hasText: 'ASA 101 — Weekend Intensive (May)' });
     await expect(c001Card.getByText('3 spots left')).toBeVisible();
   });
+
+  test('active course with all sessions in the past is hidden', async ({ page, browser }) => {
+    test.skip(test.info().project.name !== 'desktop');
+
+    const title = `PW Past ${runId()}`;
+
+    // Admin creates an active course with a past session date
+    const adminCtx = await browser.newContext();
+    const adminPage = await adminCtx.newPage();
+    await loginAs(adminPage, 'pw_admin@ltsc.test', '/admin/dashboard');
+    await adminPage.goto('/admin/courses/new');
+    await expect(adminPage.getByRole('heading', { name: 'New Course' })).toBeVisible();
+    await adminPage.getByLabel('Course Type').click();
+    await adminPage.getByRole('option', { name: /ASA 101.*Basic Keelboat/ }).click();
+    await adminPage.getByLabel('Title Override').fill(title);
+    await adminPage.getByLabel('Capacity').fill('4');
+    await adminPage.locator('input[type="date"]').fill('2020-06-01');
+    await adminPage.locator('input[type="time"]').first().fill('09:00');
+    await adminPage.locator('input[type="time"]').nth(1).fill('17:00');
+    await adminPage.locator('section').filter({ hasText: 'Sessions' }).getByPlaceholder(/Dock A/).fill('Edgewater Park');
+    await adminPage.getByRole('button', { name: 'Create Course' }).click({ force: true });
+    await adminPage.waitForURL(/\/admin\/courses\/[0-9a-f-]+$/, { timeout: 10000 });
+    await adminPage.getByRole('button', { name: 'Publish' }).click();
+    await expect(adminPage.getByRole('button', { name: 'Mark Completed' })).toBeVisible({ timeout: 10000 });
+    await adminCtx.close();
+
+    // Student browse page must not show the past course
+    await page.goto('/student/courses');
+    await expect(page.getByText(title)).not.toBeVisible();
+  });
 });
 
 // ─── Enroll in a Course ──────────────────────────────────────────────────────

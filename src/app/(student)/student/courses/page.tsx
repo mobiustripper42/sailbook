@@ -66,6 +66,14 @@ export default async function CourseBrowsePage() {
   if (error) return <div className="text-destructive">{error.message}</div>
   if (enrollmentError) return <div className="text-destructive">{enrollmentError.message}</div>
 
+  const today = new Date().toISOString().slice(0, 10)
+
+  // Hide courses where every session is in the past. Courses with no sessions yet remain visible.
+  const visibleCourses = (courses ?? []).filter((c) => {
+    const sessions = (c.sessions as unknown as { date: string }[]) ?? []
+    return sessions.length === 0 || sessions.some((s) => s.date >= today)
+  })
+
   const countMap = new Map<string, number>(
     enrollmentCounts?.map(({ course_id, active_count }: { course_id: string; active_count: number }) => [course_id, active_count]) ?? []
   )
@@ -80,11 +88,11 @@ export default async function CourseBrowsePage() {
         <h1 className="text-2xl font-semibold">Available Courses</h1>
       </div>
 
-      {courses?.length === 0 ? (
+      {visibleCourses.length === 0 ? (
         <EmptyState message="No courses are available right now. Check back soon." />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {courses?.map((c) => {
+          {visibleCourses.map((c) => {
             const type = c.course_types as unknown as { name: string; short_code: string; description: string | null } | null
             const instructor = c.instructor as unknown as { first_name: string; last_name: string } | null
             const sessions = (c.sessions as unknown as { date: string }[]) ?? []
