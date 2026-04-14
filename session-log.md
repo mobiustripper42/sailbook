@@ -3,6 +3,21 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 57 — 2026-04-14 00:00–00:08 (0.13 hrs)
+**Duration:** 0.13 hours | **Points:** 0 pts
+**Task:** Tooling — Playwright workers=1 default + targeted test protocol
+
+**Completed:**
+- `playwright.config.ts` — `workers: undefined` → `workers: 1` for local dev (eliminates parallel-load flakiness; benchmark `--workers=4` vs default to verify speed claim)
+- `CLAUDE.md` — added targeted Playwright conventions: run specific file + `--project=desktop` during development, full suite before every commit
+- `src/components/admin/session-row.tsx` — Delete button variant cleanup (`text-amber-500` → `variant="destructive"`) that was left unstaged from session 56
+
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** Task 1.12 — Past courses not enrollable (plus the two code review stragglers from session 56: `instructor/dashboard.tsx:68` Total Students stat and `admin/students/page.tsx:54` enrollment count)
+
+---
+
 ## Session 56 — 2026-04-13 23:17–23:57 (0.67 hrs)
 **Duration:** 0.67 hours | **Points:** 0 pts
 **Task:** Phase 1.11 follow-up — fix remaining `!= 'cancelled'` enrollment count locations; diagnose 3 failing attendance tests
