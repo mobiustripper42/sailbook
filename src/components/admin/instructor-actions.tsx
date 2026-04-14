@@ -11,6 +11,7 @@ export default function InstructorActions({ id, isActive }: { id: string; isActi
 
   function handleToggle() {
     const prev = optimisticActive
+    if (prev && !window.confirm('Deactivating this instructor will remove them from all course and session assignments. Continue?')) return
     setError(null)
     setOptimisticActive(!optimisticActive)
     startTransition(async () => {

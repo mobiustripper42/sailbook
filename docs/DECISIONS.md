@@ -91,6 +91,13 @@
 **Chose:** Preset with overrides. Theme preference stored in profiles table (text: 'light'/'dark'/'system', default 'dark') — not localStorage, syncs across devices.
 **Consequence:** Oleg's Law retired. ui-reviewer.md updated to enforce new design language. Every screen from Phase 1 built against final theme — no retrofit.
 
+## DEC-019: Instructor deactivation cascade
+**Decision:** When an instructor is deactivated (`is_active = FALSE`) or has their instructor role removed (`is_instructor = FALSE`), a `SECURITY DEFINER` trigger function (`cascade_instructor_deactivation`) NULLs out `instructor_id` on all affected courses and sessions. The cascade is one-way — reactivation does not restore assignments.
+**Why:** Two code paths can deactivate an instructor (the toggle button and the profile edit form). A trigger covers both automatically and atomically, with no risk of one path forgetting to cascade. The existing admin dashboard already flags courses without instructors, so clearing assignments is immediately visible.
+**SECURITY DEFINER choice:** The trigger needs to UPDATE courses and sessions as a side effect of a profiles UPDATE. The admin RLS policies on courses/sessions would technically allow this for an admin session, but triggers run in a context where JWT claims may not be set (e.g., service role calls, future background jobs). SECURITY DEFINER makes the cascade unconditional regardless of who executes the profiles UPDATE. The guard is at the profiles UPDATE policy (admin-only), not inside the trigger itself.
+**Tradeoff:** Cascade is silent — no event or notification is emitted. Andy sees the cleared assignments on the courses page; no separate audit trail for "why is this course unassigned."
+**Revisit if:** We add an audit log table and need to record the reason for assignment removal.
+
 ---
 
 ## V2 Decisions (to be resolved during build)
@@ -98,7 +105,7 @@
 | ID | Decision | When | Who | Status |
 |----|----------|------|-----|--------|
 | DEC-TBD | Generic codes/lookup table pattern | Phase 1, task 1.7 | @architect | Pending |
-| DEC-TBD | Inactive instructor cascade behavior | Phase 1, task 1.3 | DEC entry | Pending |
+| DEC-019 | Inactive instructor cascade behavior | Phase 1, task 1.3 | DEC entry | Done |
 | DEC-TBD | Pessimistic inventory / enrollment hold duration | Phase 2, task 2.3 | DEC + Andy | Pending |
 | DEC-TBD | Cancellation refund policy (full? time-based? admin override?) | Phase 2, task 2.7 | Andy | Pending |
 | DEC-TBD | Scheduled job infrastructure (Vercel Cron vs Supabase Edge Functions) | Phase 2, task 2.4 | @architect | Pending |
