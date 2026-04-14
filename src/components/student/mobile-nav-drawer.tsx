@@ -15,7 +15,7 @@ const links = [
   { href: '/student/attendance', label: 'Attendance' },
 ]
 
-export default function MobileNavDrawer({ name, isInstructor }: { name: string; themePreference?: string; isInstructor?: boolean }) {
+export default function MobileNavDrawer({ name, isInstructor }: { name: string; isInstructor?: boolean }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 

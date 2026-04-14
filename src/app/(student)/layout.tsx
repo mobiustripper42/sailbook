@@ -61,7 +61,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         </div>
       </aside>
       <div className="flex-1 min-w-0 flex flex-col">
-        <MobileNavDrawer name={name} themePreference={themePreference} isInstructor={isInstructor} />
+        <MobileNavDrawer name={name} isInstructor={isInstructor} />
         <main className="flex-1 bg-background p-4 sm:p-8">
           {children}
         </main>

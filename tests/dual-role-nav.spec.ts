@@ -40,12 +40,17 @@ test.describe('dual-role nav toggle', () => {
   test('single-role instructor does not see student toggle', async ({ page }) => {
     await loginAs(page, 'pw_instructor@ltsc.test', /\/instructor\/dashboard/)
     await page.goto('/instructor/dashboard')
+    // Instructor layout has no mobile drawer — sidebar is always visible
     await expect(page.getByRole('link', { name: 'Switch to Student View' })).not.toBeVisible()
   })
 
   test('single-role student does not see instructor toggle', async ({ page }) => {
     await loginAs(page, 'pw_student@ltsc.test', /\/student\/dashboard/)
     await page.goto('/student/dashboard')
+    const viewport = page.viewportSize()
+    if (viewport && viewport.width < 768) {
+      await page.getByRole('button', { name: 'Open navigation' }).click()
+    }
     await expect(page.getByRole('link', { name: 'Switch to Instructor View' })).not.toBeVisible()
   })
 })
