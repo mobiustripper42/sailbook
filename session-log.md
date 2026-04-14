@@ -3,6 +3,55 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 56 — 2026-04-13 23:17–23:57 (0.67 hrs)
+**Duration:** 0.67 hours | **Points:** 0 pts
+**Task:** Phase 1.11 follow-up — fix remaining `!= 'cancelled'` enrollment count locations; diagnose 3 failing attendance tests
+
+**Completed:**
+- `src/app/(admin)/admin/courses/page.tsx:68` — "Enrolled / Cap" column → `=== 'confirmed'`
+- `src/app/(admin)/admin/dashboard/page.tsx:176` — today's sessions capacity column → `=== 'confirmed'`
+- `src/app/(instructor)/instructor/dashboard/page.tsx:99` — per-session enrollment count → `=== 'confirmed'`
+- Diagnosed 3 failing attendance tests — root cause was Supabase not fully started after upgrade. Tests pass green once Supabase is up (11/11 attendance spec, 109/150 full suite)
+- Confirmed the 1 remaining failure is the pre-existing flaky "enrolled course card shows Pending confirmation badge" test (known from session 54, flakes under parallel load)
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Address code review findings (deliberate exceptions need either a fix or a comment):
+  - `instructor/dashboard/page.tsx:68` — "Total Students" stat card still uses `!= 'cancelled'`; creates internal inconsistency in same file (stat card counts `registered` but session seat count doesn't). Likely should also use `=== 'confirmed'`
+  - `admin/students/page.tsx:54` — student enrollment activity count still uses `!= 'cancelled'`; now the last straggler. Add comment or fix
+- Task 1.12 — Past courses not enrollable
+
+**Context:**
+- After `supabase upgrade` + `db reset`, let Supabase fully start before running tests — cold start causes 404 on attendance page (server component queries return null)
+- pgTAP count tests will show inflated numbers if test data hasn't been cleared; run `supabase db reset` before running pgTAP to get accurate counts
+- Two intentional `!= 'cancelled'` exceptions were left in (roster student-ID set and student activity count) but code review flagged instructor dashboard line 68 as creating a confusing inconsistency within a single render pass
+
+**Code Review:**
+- Instructor dashboard line 68 (`Total Students` stat) diverges from line 99 (seat count) — `registered` users appear in the stat but not the count; confusing if any `registered` enrollments exist. Recommend updating to `=== 'confirmed'` for consistency.
+- `admin/students/page.tsx:54` is now the only remaining `!= 'cancelled'` in UI code. Either update or add explanatory comment.
+
+---
+
+## Session 55 — 2026-04-13 (tooling)
+**Duration:** ~15 min | **Points:** 0 pts
+**Task:** Skill refactor — move time calc and point tally from `/kill-this` to `/its-dead`
+
+**Completed:**
+- `/home/eric/.claude/skills/kill-this/SKILL.md` — removed Steps 3 & 4 (time calc, point tally); draft now shows `[TBD]` placeholders; closing prompt directs user to pass time adjustments to `/its-dead`
+- `/home/eric/.claude/skills/its-dead/SKILL.md` — new Step 0 does full time calc (with adjustment args), point tally, and fills `[TBD]` before writing the log
+- `CLAUDE.md` — skills table updated to reflect new split
+
+**Why:** After `/kill-this` the session isn't actually over — code review runs, bugs get found during testing, last-minute fixes happen. Session end time should be captured when `/its-dead` runs, not when `/kill-this` runs. Time adjustment arg (`subtract N minutes`) moves to `/its-dead` as well.
+
+**In Progress:** Nothing
+**Blocked:** Nothing
+**Next Steps:** Resume Phase 1 work — fix the 4 remaining `!= 'cancelled'` enrollment count locations, then Task 1.12
+
+---
+
 ## Session 54 — 2026-04-13 22:22–22:55 (0.58 hrs)
 **Duration:** 0.58 hours | **Points:** 3 pts
 **Task:** Phase 1.11 — Spots remaining fix
