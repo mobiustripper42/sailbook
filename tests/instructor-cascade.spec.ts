@@ -53,14 +53,17 @@ test.describe('Instructor deactivation cascade', () => {
     await page.goto('/admin/courses');
     const courseRow = page.getByRole('row', { name: new RegExp(title) });
     await expect(courseRow).toBeVisible();
-    // Instructor cell should show "—" (NULL instructor after cascade)
-    await expect(courseRow.getByRole('cell', { name: '—' }).first()).toBeVisible();
+    // Instructor is the 2nd cell (index 1); use nth() to avoid ambiguity with
+    // other columns that also render "—" (e.g. price when unset).
+    await expect(courseRow.locator('td').nth(1)).toHaveText('—');
 
     // Step 4: Reactivate pw_instructor to restore state for subsequent test runs
     await page.goto('/admin/instructors');
     const pwRowAfter = page.getByRole('row', { name: /PW.*Instructor/ });
     await pwRowAfter.getByRole('button', { name: 'Activate' }).click();
-    await expect(pwRowAfter.getByText('Active')).toBeVisible({ timeout: 10000 });
+    // Wait for the server action to complete, not just the optimistic UI update.
+    // Button re-enables (pending=false) only after the round-trip finishes.
+    await expect(pwRowAfter.getByRole('button', { name: 'Deactivate' })).toBeEnabled({ timeout: 10000 });
   });
 
   test('deactivate button shows confirmation dialog before acting', async ({ page }) => {

@@ -5,7 +5,7 @@
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(5);
+SELECT plan(6);
 
 -- ============================================================
 -- Seed reference
@@ -51,11 +51,13 @@ SELECT is(
 -- ============================================================
 -- Test 3: Cascade does not clear OTHER instructors' assignments
 -- ============================================================
+-- Lisa Chen (a1000000-...-003) owns c005 (Dinghy Sailing). That assignment
+-- must survive Mike's deactivation.
 
-SELECT isnt(
-  (SELECT count(*)::int FROM public.courses WHERE instructor_id IS NOT NULL),
-  0,
-  'deactivate: other instructors course assignments are untouched'
+SELECT is(
+  (SELECT count(*)::int FROM public.courses WHERE instructor_id = 'a1000000-0000-0000-0000-000000000003'),
+  1,
+  'deactivate: Lisa Chen course assignment is untouched'
 );
 
 -- ============================================================
@@ -73,13 +75,17 @@ SELECT is(
 );
 
 -- ============================================================
--- Test 5: Removing instructor role also clears assignments
+-- Test 5: Removing instructor role also clears course assignments
 -- ============================================================
 
--- Re-assign Mike to c001 to have something to clear
+-- Re-assign Mike to c001 and d001 to have something to clear on both levels
 UPDATE public.courses
 SET instructor_id = 'a1000000-0000-0000-0000-000000000002'
 WHERE id = 'c1000000-0000-0000-0000-000000000001';
+
+UPDATE public.sessions
+SET instructor_id = 'a1000000-0000-0000-0000-000000000002'
+WHERE id = 'd1000000-0000-0000-0000-000000000001';
 
 -- Remove instructor role (is_instructor = false triggers same cascade)
 UPDATE public.profiles
@@ -90,6 +96,16 @@ SELECT is(
   (SELECT count(*)::int FROM public.courses WHERE instructor_id = 'a1000000-0000-0000-0000-000000000002'),
   0,
   'role removal: removing instructor role clears course assignments'
+);
+
+-- ============================================================
+-- Test 6: Removing instructor role also clears session assignments
+-- ============================================================
+
+SELECT is(
+  (SELECT count(*)::int FROM public.sessions WHERE instructor_id = 'a1000000-0000-0000-0000-000000000002'),
+  0,
+  'role removal: removing instructor role clears session assignments'
 );
 
 SELECT * FROM finish();

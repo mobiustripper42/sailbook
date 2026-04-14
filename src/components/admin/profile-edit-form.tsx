@@ -32,6 +32,13 @@ export default function ProfileEditForm({
 
   function handleSubmit(formData: FormData) {
     setError(null)
+
+    if (profile.is_instructor && profile.is_active && formData.get('is_active') === 'false') {
+      if (!window.confirm('Deactivating this instructor will remove them from all assigned courses and sessions. Continue?')) {
+        return
+      }
+    }
+
     startTransition(async () => {
       const result = await updateProfile(formData)
       if (result?.error) {
