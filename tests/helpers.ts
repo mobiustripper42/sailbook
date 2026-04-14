@@ -128,3 +128,19 @@ export async function createEnrolledCourse(
 
   return { courseId, sessionId };
 }
+
+/**
+ * Confirms the first pending (registered) enrollment on a course via the admin UI.
+ * Requires `adminPage` to be authenticated as an admin (or will log in as pw_admin).
+ * After returning, `adminPage` is on the admin course detail page.
+ */
+export async function confirmTestEnrollment(adminPage: Page, courseId: string): Promise<void> {
+  await loginAs(adminPage, 'pw_admin@ltsc.test', '/admin/dashboard');
+  await adminPage.goto(`/admin/courses/${courseId}`);
+  // Wait for the Confirm button to be visible (client component hydrates after SSR)
+  await adminPage.getByRole('button', { name: 'Confirm' }).first().waitFor({ state: 'visible', timeout: 10000 });
+  await adminPage.getByRole('button', { name: 'Confirm' }).first().click();
+  // Wait for network to settle so the server action completes before closing the context.
+  // Closing the context mid-flight cancels the in-flight request and skips the DB write.
+  await adminPage.waitForLoadState('networkidle', { timeout: 10000 });
+}

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAs, runId, createTestCourse } from './helpers';
+import { loginAs, runId, createTestCourse, confirmTestEnrollment } from './helpers';
 
 // ─── Browse Courses ──────────────────────────────────────────────────────────
 
@@ -25,9 +25,12 @@ test.describe('Student — browse courses', () => {
 
   test('course cards display spots remaining badges', async ({ page }) => {
     await page.goto('/student/courses');
-    // c001 (ASA 101 Weekend May): capacity 4, Sam (confirmed) + Alex (registered) = 2 active
-    // → 4 - 2 = 2 spots left. pw_student has no seed enrollment on c001.
-    await expect(page.getByText('2 spots left')).toBeVisible();
+    // c001 (ASA 101 Weekend May): capacity 4, Sam (confirmed) + Alex (registered).
+    // Only confirmed enrollments count → 1 confirmed → 3 spots left.
+    // pw_student has no seed enrollment on c001.
+    // Scope to this card — c002 also has 1 confirmed enrollment (same badge text).
+    const c001Card = page.locator('[data-slot="card"]').filter({ hasText: 'ASA 101 — Weekend Intensive (May)' });
+    await expect(c001Card.getByText('3 spots left')).toBeVisible();
   });
 });
 
@@ -63,8 +66,8 @@ test.describe('Student — enroll in a course', () => {
     await expect(page.getByText('Pending confirmation')).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole('button', { name: 'Enroll in This Course' })).not.toBeVisible();
 
-    // Spot count decrements (1 of 4 now taken by pw_student)
-    await expect(page.getByText('3 of 4 remaining')).toBeVisible();
+    // Spot count unchanged — registered enrollments don't consume spots until confirmed
+    await expect(page.getByText('4 of 4 remaining')).toBeVisible();
   });
 
   test('enrolled course card shows Pending confirmation badge on browse page', async ({ page, browser }) => {
@@ -90,11 +93,51 @@ test.describe('Student — enroll in a course', () => {
   });
 });
 
+// ─── Spots Remaining Fix (Task 1.11) ────────────────────────────────────────
+
+test.describe('Student — spots remaining counts only confirmed enrollments', () => {
+  test('spot count decreases on admin confirm, not on student registration', async ({ page, browser }) => {
+    test.skip(test.info().project.name !== 'desktop');
+    test.setTimeout(90000);
+
+    const title = `PW Spots ${runId()}`;
+
+    // Admin creates capacity-2 course
+    const adminCtx1 = await browser.newContext();
+    const adminPage1 = await adminCtx1.newPage();
+    const courseId = await createTestCourse(adminPage1, { capacity: 2, title });
+    await adminCtx1.close();
+
+    // Student sees 2 of 2 remaining before enrolling
+    await loginAs(page, 'pw_student@ltsc.test', '/student/dashboard');
+    await page.goto(`/student/courses/${courseId}`);
+    await expect(page.getByText('2 of 2 remaining')).toBeVisible();
+
+    // Enroll → status = registered
+    await page.getByRole('button', { name: 'Enroll in This Course' }).click();
+    await expect(page.getByText('Pending confirmation')).toBeVisible({ timeout: 10000 });
+
+    // Spots unchanged — registered enrollment does not consume a spot
+    await expect(page.getByText('2 of 2 remaining')).toBeVisible();
+
+    // Admin confirms the enrollment
+    const adminCtx2 = await browser.newContext();
+    const adminPage2 = await adminCtx2.newPage();
+    await confirmTestEnrollment(adminPage2, courseId);
+    await adminCtx2.close();
+
+    // Now spot count decreases (1 confirmed → 1 spot remaining)
+    await page.reload();
+    await expect(page.getByText('1 of 2 remaining')).toBeVisible();
+  });
+});
+
 // ─── Capacity Enforcement ────────────────────────────────────────────────────
 
 test.describe('Student — capacity enforcement', () => {
   test('full course shows disabled Course Full button on course detail', async ({ page, browser }) => {
     test.skip(test.info().project.name !== 'desktop');
+    test.setTimeout(90000);
 
     const title = `PW Full ${runId()}`;
 
@@ -104,11 +147,17 @@ test.describe('Student — capacity enforcement', () => {
     const courseId = await createTestCourse(adminPage, { capacity: 1, title });
     await adminCtx.close();
 
-    // pw_student enrolls, filling the course (1 of 1)
+    // pw_student enrolls (status = registered — does not yet consume the spot)
     await loginAs(page, 'pw_student@ltsc.test', '/student/dashboard');
     await page.goto(`/student/courses/${courseId}`);
     await page.getByRole('button', { name: 'Enroll in This Course' }).click();
     await expect(page.getByText('Pending confirmation')).toBeVisible({ timeout: 10000 });
+
+    // Admin confirms — enrollment is now counted against capacity
+    const adminCtx2 = await browser.newContext();
+    const adminPage2 = await adminCtx2.newPage();
+    await confirmTestEnrollment(adminPage2, courseId);
+    await adminCtx2.close();
 
     // jordan (not enrolled in this course) checks the course detail.
     // Course is now full — should see a disabled "Course Full" button.
@@ -127,6 +176,7 @@ test.describe('Student — capacity enforcement', () => {
 
   test('full course card shows Full badge on browse page', async ({ page, browser }) => {
     test.skip(test.info().project.name !== 'desktop');
+    test.setTimeout(90000);
 
     // Title contains "Full" — use exact matching below to avoid substring collisions
     const title = `PW Cap ${runId()}`;
@@ -136,11 +186,17 @@ test.describe('Student — capacity enforcement', () => {
     const courseId = await createTestCourse(adminPage, { capacity: 1, title });
     await adminCtx.close();
 
-    // pw_student fills the course
+    // pw_student enrolls (status = registered — does not yet consume the spot)
     await loginAs(page, 'pw_student@ltsc.test', '/student/dashboard');
     await page.goto(`/student/courses/${courseId}`);
     await page.getByRole('button', { name: 'Enroll in This Course' }).click();
     await expect(page.getByText('Pending confirmation')).toBeVisible({ timeout: 10000 });
+
+    // Admin confirms — enrollment is now counted against capacity
+    const adminCtx2 = await browser.newContext();
+    const adminPage2 = await adminCtx2.newPage();
+    await confirmTestEnrollment(adminPage2, courseId);
+    await adminCtx2.close();
 
     // jordan sees the Full badge on the browse page card.
     // Exact match required: card title also contains text, avoid strict-mode violation.
