@@ -153,6 +153,9 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 - Playwright viewports: 375px (mobile), 768px (tablet), 1440px (desktop)
 - Mock external services (Twilio, Resend, Stripe) in test mode
 - `NOTIFICATIONS_ENABLED=false` for test environment
+- **During development:** run only the relevant file + desktop project — `npx playwright test tests/foo.spec.ts --project=desktop`
+- **Single test:** `npx playwright test -g "test name" --project=desktop`
+- **Before every commit:** full suite, all viewports — `npx playwright test` (workers=1 is the config default; do not override)
 
 ## Session Skills
 
@@ -161,15 +164,15 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 | `/its-alive` | Session start | Stamp time, read context, recommend task |
 | `/pause-this` | Mid-session break | Build check, commit WIP, compact, note pause |
 | `/restart-this` | Resume from pause | Reload context, continue same session |
-| `/kill-this` | Session end (part 1) | Build check, commit, calc time + points, draft log |
-| `/its-dead` | Session end (part 2) | Write log, update plan, push, PM recommendation |
+| `/kill-this` | Session end (part 1) | Build check, commit, code review, draft log (time/points TBD) |
+| `/its-dead` | Session end (part 2) | Calc time + points, write log, update plan, push, PM recommendation |
 
 ## Agent Workflow
 
 | Agent | Model | When | Purpose |
 |-------|-------|------|---------|
 | @architect | Opus | Before design decisions, DEC-TBD items | Keep architecture coherent |
-| @code-review | Sonnet | After commits, optional | Catch issues early |
+| @code-review | Sonnet | After every commit (wired into `/kill-this`) | Catch issues early |
 | @pm | Sonnet | Start/end of sessions (via skills) | Track progress, flag risks |
 | @ui-reviewer | Sonnet | After UI work, phase boundaries | Design quality |
 

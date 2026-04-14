@@ -153,7 +153,7 @@ export default function SessionRow({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onSelect={handleDelete}
-                  className="text-amber-500 focus:text-amber-500"
+                  variant="destructive"
                 >
                   Delete
                 </DropdownMenuItem>
