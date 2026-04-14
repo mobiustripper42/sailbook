@@ -3,6 +3,50 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 54 — 2026-04-13 22:22–22:55 (0.58 hrs)
+**Duration:** 0.58 hours | **Points:** 3 pts
+**Task:** Phase 1.11 — Spots remaining fix
+
+**Completed:**
+- `supabase/migrations/20260414022518_fix_enrollment_count_confirmed_only.sql` — updated both RPCs
+  (`get_all_course_enrollment_counts`, `get_course_active_enrollment_count`) from
+  `status != 'cancelled'` to `status = 'confirmed'`
+- `src/app/(admin)/admin/courses/[id]/page.tsx` — capacity JS filter changed to match RPCs
+- `tests/helpers.ts` — `confirmTestEnrollment()` helper added; uses `waitForLoadState('networkidle')`
+  before closing context to prevent in-flight server action cancellation
+- `tests/student-enrollment.spec.ts` — spots badge assertion updated (2→3, scoped to c001 card);
+  enroll flow assertion corrected (registered doesn't decrement spots); new "spot count decreases
+  on admin confirm, not on student registration" test; both capacity tests now confirm via admin
+  before Jordan checks for Full
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Fix the 4 remaining `!= 'cancelled'` enrollment count locations flagged by code review:
+  - `admin/courses/page.tsx:68` — "Enrolled / Cap" column (capacity display → use `confirmed`)
+  - `admin/dashboard/page.tsx:176` — today's sessions capacity column (→ use `confirmed`)
+  - `instructor/dashboard/page.tsx:99` — upcoming sessions enrollment count (→ use `confirmed`)
+  - `instructor/dashboard/page.tsx:68` — roster student ID set (deliberate: registered students in pipeline, probably leave as `!= 'cancelled'`)
+  - `admin/students/page.tsx:54` — student activity count (deliberate decision: current enrollments vs confirmed-only)
+- Then pick up Task 1.12 — Past courses not enrollable
+
+**Context:**
+- `confirmTestEnrollment` must call `waitForLoadState('networkidle')` before closing the context —
+  closing mid-transition cancels the in-flight fetch and the DB write never happens
+- The 2 pre-existing flaky tests ("enrolled course card shows Pending confirmation badge" and
+  "re-visiting an enrolled course") continue to flake under parallel load — pre-existing, unrelated
+- As Andy noted: this fix may become moot when Phase 2 Stripe payments ship — the checkout flow
+  will likely bypass `registered` status entirely and go straight to `confirmed`
+
+**Code Review:**
+- 4 remaining locations still use `status !== 'cancelled'` for enrollment counting:
+  admin courses list, admin dashboard, instructor dashboard (×2), and admin students page.
+  The capacity displays (courses list, dashboard) are unambiguously wrong relative to this fix.
+  The roster inclusion and student activity count may be intentional different semantics — need
+  a deliberate call before updating them.
+
 ## Session 53 — 2026-04-13 18:28–18:41 (0.22 hrs)
 **Duration:** 0.22 hours | **Points:** 2 pts
 **Task:** Phase 1.2 — Revert active course to draft status

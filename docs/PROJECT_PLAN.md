@@ -83,7 +83,7 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.8 | Password reset — "Forgot password" on login page + reset flow | 3 | Supabase `resetPasswordForEmail()`. Uses default mailer until Phase 3. |
 | 1.9 | Unsaved changes guard — warn before leaving form with edits in progress | 3 | `beforeunload` + App Router interception. May need community package. |
 | 1.10 | Student "instructor notes" field + expand instructor roster (phone, email, age, notes indicator) | 3 | "Anything you want your instructor to know?" free text. Dot/asterisk on roster if populated. Andy request. |
-| 1.11 | Spots remaining fix — only count confirmed enrollments against capacity | 3 | Currently counts all non-cancelled. UI language cleanup ("X spots remaining"). Andy request. |
+| 1.11 | ~~Spots remaining fix — only count confirmed enrollments against capacity~~ | 3 | [x] <!-- completed 2026-04-13 --> Both RPCs + admin detail page JS filter updated. Tests updated throughout; confirmTestEnrollment helper added. |
 | 1.12 | Past courses not enrollable — filter student browse to exclude courses with all sessions in the past | 2 | V1 bug. Auto-transition status or query filter. Andy request. |
 | 1.13 | Dual-role nav toggle — "Switch to Student/Instructor View" for multi-role users | 2 | Chris (instructor + student) needs visible toggle. Roles already exist, this is UI/routing. Andy request. |
 | 1.14 | Dashboard instructor assignment clarity — verify courses-without-instructors count + show "Using course instructor" on sessions | 3 | Andy reported confusing number. Also clarify DEC-007 default behavior in UI. Andy request. |
@@ -138,7 +138,7 @@ Users know what's happening. Auth is production-grade.
 | 3.4 | Enrollment notifications — SMS + email on confirmed, plus admin alert on new enrollment, plus low enrollment warning to admin | 5 | Multiple triggers through one service. Admin shouldn't have to log in to know someone signed up. Andy request. |
 | 3.5 | Session cancellation notice — SMS + email to enrolled students | 3 | Includes reason, makeup info if available. |
 | 3.6 | Makeup session assignment — SMS + email to affected students | 3 | New date/time/location in message. |
-| 3.7 | Session reminder — SMS 24 hours before session start | 5 | Scheduled job (cron). DEC: Vercel Cron vs Supabase Edge Function. |
+| 3.7 | Session reminder — SMS 24 hours and 1 week before session start | 5 | Scheduled job (cron). DEC: Vercel Cron vs Supabase Edge Function. |
 | 3.8 | Admin notification preferences — checkboxes per event type × channel | 3 | DEC: settings table vs JSON column. |
 | 3.9 | Student notification preferences — opt out of SMS, email-only option | 2 | Profile toggle. Notification service checks before sending. |
 | 3.10 | Password strength + email verification | 3 | Supabase Auth config + custom email template via Resend. |
@@ -161,8 +161,8 @@ Clean onboarding. Richer student and instructor records.
 | 4.1 | Instructor invite link — `invites` table, one-time token, auto-sets `is_instructor` | 3 | "Generate Invite Link" button on admin instructor page. |
 | 4.2 | Admin invite link — same pattern for admin role | 2 | Button on admin user management page. Reuses 4.1 infrastructure. |
 | 4.3 | Student profile expansion — classes taken, editable ASA number, experience level from codes table | 5 | Profile page redesign. Experience level pulls from codes table (1.7). |
-| 4.4 | Admin-created students (no login) — DEC resolution + implementation | 8 | "My wife has no fingers." @architect weighs in. May be simpler than it sounds. |
-| 4.5 | Link admin-created student to login — student creates account, admin links to existing profile | 3 | Depends on 4.4 architecture. Might be as simple as "student resets password." |
+| 4.4 | Admin-created students (no login) — DEC resolution + implementation (this needs to be easy, it has to be a 2) | 8 | "My wife has no fingers." @architect weighs in. May be simpler than it sounds. |
+| 4.5 | (NOT REQUIRED) Link admin-created student to login — student creates account, admin links to existing profile | 3 | Depends on 4.4 architecture. Might be as simple as "student resets password." |
 | 4.6 | Instructor notes on sessions — text field per session, visible to all instructors + admin | 3 | IN-5 from V1 backlog. `notes` column already exists on sessions table. UI only. |
 | 4.7 | Instructor profile expansion — availability field + bio/website link | 3 | General availability for admin assignment. Name links to LTSC website bio. Andy request. |
 
@@ -179,12 +179,12 @@ Flexible pricing, enrollment safety rails, and waitlist.
 
 | # | Task | Effort | Notes |
 |---|------|--------|-------|
-| 5.1 | Member pricing model — `is_member` flag on profiles, checkout uses correct price | 3 | Admin-editable flag. Foundation for SailTime/boat owner discounts later. |
-| 5.2 | Drop-in pricing for Open Sailing — per-session enrollment + payment | 5 | Different enrollment model. DEC: flag on course (`is_drop_in`), not course_type. |
+| 5.1 | (this is solved with discount codes, please put in the trash) Member pricing model — `is_member` flag on profiles, checkout uses correct price | 3 | Admin-editable flag. Foundation for SailTime/boat owner discounts later. |
+| 5.2 | Open Sailing (holding a spot for $11) (then $60+tip to the captain day of) — per-session enrollment + payment | 5 | Different enrollment model. DEC: flag on course (`is_drop_in`), not course_type. |
 | 5.3 | Discount codes — enable Stripe promotion codes on checkout | 2 | `allow_promotion_codes: true`. Admin creates codes in Stripe dashboard. UI note on checkout page. |
-| 5.4 | Prerequisite flagging — `course_type_prerequisites` table, admin warning + override | 3 | Flag, not block. "⚠️ No ASA 101 on record" with override checkbox. |
+| 5.4 | If a course is flagged, then admin needs to appove. student had a textbox they can justify their bullshit. notificatoins all on this crap ---- Prerequisite flagging — `course_type_prerequisites` table, admin warning + override | 3 | Flag, not block. "⚠️ No ASA 101 on record" with override checkbox. |
 | 5.5 | Admin qualification grant ("test out") — `qualifications` table, manual ASA cert grants | 3 | Same effect as completing a course. Satisfies prereq flags. |
-| 5.6 | Duplicate enrollment in same course type — warn student + flag for admin | 3 | ⚠️ Scope creep risk. Keep tight: warning on enrollment + admin dashboard flag. No auto-clear. |
+| 5.6 | (probalby will not happen) Duplicate enrollment in same course type — warn student + flag for admin | 3 | ⚠️ Scope creep risk. Keep tight: warning on enrollment + admin dashboard flag. No auto-clear. |
 | 5.7 | Waitlist — full course → join waitlist → notify on opening | 8 | New table, student UI, admin visibility, notification on spot opening. Depends on Phase 3 notifications. Andy request. |
 | 5.8 | Low enrollment warning — dashboard tile for courses below minimum threshold approaching start date | 2 | Same pattern as "courses without instructors." Meaningful only with payments live. Andy request. |
 
@@ -242,7 +242,7 @@ Transforms the app from scheduling into a learning management tool.
 ## V3 Ideas (parked)
 
 - Proxy enrollment ("Who are you enrolling?" — Me / Me + someone / Someone else) — requires shopping cart model
-- Charter module — separate app, shared auth/profiles infrastructure
+- Charter module — separate app, shared auth/profiles infrastructure (Admin Pay Button)
 - General program request form — private lessons, corporate events, group bookings
 - Youth enrollment — parent/guardian co-enrollment, birth month/year, ASA data standards
 - In-app messaging — admin/instructor/student messaging (SMS covers this for now)
