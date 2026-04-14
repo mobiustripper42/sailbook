@@ -6,6 +6,7 @@ import { signOut } from '@/app/(auth)/actions'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { ThemeSync } from '@/components/theme-sync'
 import RoleToggle from '@/components/role-toggle'
+import InstructorDesktopNav from '@/components/instructor/instructor-desktop-nav'
 import InstructorMobileNavDrawer from '@/components/instructor/instructor-mobile-nav-drawer'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -40,14 +41,7 @@ export default async function InstructorLayout({ children }: { children: React.R
           </Link>
           <p className="text-xs text-muted-foreground mt-0.5">Instructor</p>
         </div>
-        <nav className="flex-1 px-2 py-3">
-          <Link
-            href="/instructor/dashboard"
-            className="block px-3 py-2 rounded-lg text-sm bg-foreground text-background font-medium"
-          >
-            Dashboard
-          </Link>
-        </nav>
+        <InstructorDesktopNav />
         <div className="px-4 py-4 border-t mt-auto">
           <p className="text-xs text-muted-foreground truncate">{name}</p>
           {isStudent && (

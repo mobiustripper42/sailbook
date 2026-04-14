@@ -70,7 +70,7 @@ export default function InstructorMobileNavDrawer({ name, isStudent }: { name: s
             onClick={() => setOpen(false)}
             className={cn(
               'block px-3 py-2 rounded-lg text-sm transition-colors',
-              pathname === '/instructor/dashboard'
+              pathname.startsWith('/instructor/dashboard')
                 ? 'bg-foreground text-background font-medium'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             )}

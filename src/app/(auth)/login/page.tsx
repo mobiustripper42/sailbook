@@ -14,11 +14,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { login } from "../actions";
+import DevLoginHelper from "@/components/dev-login-helper";
 
 export default function LoginPage() {
   const [state, action, pending] = useActionState(login, null);
 
   return (
+    <div className="flex flex-col items-center w-full max-w-sm">
     <Card className="w-full max-w-sm">
       <CardHeader>
         <CardTitle>SailBook</CardTitle>
@@ -66,5 +68,7 @@ export default function LoginPage() {
         </CardFooter>
       </form>
     </Card>
+    <DevLoginHelper />
+    </div>
   );
 }
