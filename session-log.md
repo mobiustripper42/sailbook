@@ -3,6 +3,42 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 63 — 2026-04-14 16:53–17:15 (0.37 hrs)
+**Duration:** 0.37 hours | **Points:** 2 pts
+**Task:** Phase 1.21 — dev login helper + Session 62 code review deferrals
+
+**Completed:**
+- `src/components/instructor/instructor-desktop-nav.tsx` — new client component, pathname-based active link; mirrors AdminNav pattern; replaces hardcoded active class in instructor desktop sidebar
+- `src/app/(instructor)/layout.tsx` — wired InstructorDesktopNav; removed hardcoded Link
+- `src/components/instructor/instructor-mobile-nav-drawer.tsx` — active-link: strict equality → startsWith (consistent with admin/student)
+- `tests/instructor-mobile-nav.spec.ts` — "aside sidebar hidden on mobile" now asserts `aside` not in viewport (real assertion); all if/skip/return guards → test.skip(condition, reason)
+- `src/components/dev-login-helper.tsx` — NEXT_PUBLIC_DEV_MODE-gated Select dropdown; fills uncontrolled form inputs + calls requestSubmit(); 7 seed users
+- `src/app/(auth)/login/page.tsx` — wired DevLoginHelper below Card in flex-col wrapper
+- `NEXT_PUBLIC_DEV_MODE=true` added to `.env.local`
+- `tests/dev-login-helper.spec.ts` — 4 tests: dropdown visible, admin/student/instructor quick login; all green
+
+**In Progress:** Nothing
+
+**Blocked:** WSL2 networking stall at session end (wsl --shutdown to recover; unrelated to code)
+
+**Next Steps:**
+- Fix 3 code review deferrals from this session (quick, do top of next):
+  1. `instructor-desktop-nav.tsx:23` — mirror AdminNav exact-match guard for dashboard link
+  2. `dev-login-helper.spec.ts` — add `test.skip(!process.env.NEXT_PUBLIC_DEV_MODE, …)` guard
+  3. `login/page.tsx` — fix indentation on wrapper div
+- Then: 1.4 (course status audit via @architect), 1.6 (ASA number), 1.8 (password reset)
+- Note: playwright.config.ts has workers:4 for non-CI (pre-existing, flagged by code review)
+
+**Context:**
+- DevLoginHelper fills uncontrolled inputs directly (no React setState needed) then calls requestSubmit() — works because the login form inputs have no value/onChange props
+- NEXT_PUBLIC_DEV_MODE guard works at runtime but entire component (including seed emails + password) is still in the client bundle on any build where the var is true — fine for local dev, don't set this var on any externally accessible deployment
+- test.skip(condition, reason) works correctly even after async loginAs/goto calls
+
+**Code Review — Deferrals (fix next session):**
+1. `instructor-desktop-nav.tsx:23` — startsWith without exact-match dashboard guard; diverges from AdminNav pattern; harmless now (1 link) but will silently differ when nav grows
+2. `dev-login-helper.spec.ts` — no NEXT_PUBLIC_DEV_MODE skip guard; will fail in CI with misleading "element not found" instead of a skip
+3. `login/page.tsx` — wrapper div indentation inconsistent with surrounding JSX
+
 ## Session 62 — 2026-04-14 11:55–12:20 (0.42 hrs)
 **Duration:** 0.42 hours | **Points:** 2 pts
 **Task:** Phase 1.20 — instructor mobile hamburger menu + CLAUDE.md workflow guardrails
