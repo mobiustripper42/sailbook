@@ -3,7 +3,36 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 62 — 2026-04-14 11:55 [open]
+## Session 62 — 2026-04-14 11:55–12:20 (0.42 hrs)
+**Duration:** 0.42 hours | **Points:** 2 pts
+**Task:** Phase 1.20 — instructor mobile hamburger menu + CLAUDE.md workflow guardrails
+
+**Completed:**
+- `src/components/instructor/instructor-mobile-nav-drawer.tsx` — new drawer component: hamburger top bar, slide-out drawer, close button, overlay dismiss, RoleToggle for dual-role users
+- `src/app/(instructor)/layout.tsx` — `hidden md:flex` on desktop aside, drawer wired in, `name ?? ''` type fix
+- `tests/instructor-mobile-nav.spec.ts` — 9 tests across mobile/desktop (hamburger visible, open/close, label, overlay dismiss, dual-role toggle, single-role negative)
+- `tests/dual-role-nav.spec.ts` — open drawer before clicking Switch to Student View on mobile; removed stale "no mobile drawer" comment
+- `CLAUDE.md` — Plan-before-code step added to Micro Workflow; new "Approval Before Action" section; full-suite guardrail (ask user, don't auto-run)
+- `docs/PROJECT_PLAN.md` — 1.20 marked complete; 1.21 (dev login helper, 2 pts) added
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Task 1.21 — dev login helper (dropdown of seed users, auto-fill + submit, gated by `NEXT_PUBLIC_DEV_MODE=true`)
+- Then: 1.4 (course status audit via @architect), 1.6 (ASA number), 1.8 (password reset)
+
+**Context:**
+- CSS `transform` doesn't affect Playwright's `isVisible()` — use `not.toBeInViewport()` to assert a translated-off-screen drawer is closed
+- `getByText('Instructor')` strict mode violation: matches both "Instructor" and "PW Instructor" — use `{ exact: true }`
+- For mobile tests in drawer specs, open the drawer before asserting any link inside it (pattern established in 1.13 and confirmed here)
+
+**Code Review — Deferrals (fix later):**
+1. `instructor-mobile-nav-drawer.tsx:73` — active-link uses strict equality only; admin/student use `startsWith` guard. Fix when a second instructor page lands.
+2. `instructor-layout.tsx` desktop sidebar — hardcoded active class instead of `pathname`-based conditional. Same fix, same trigger.
+3. `instructor-mobile-nav.spec.ts` — `aside sidebar hidden on mobile` test is redundant; remove or give it a real `aside` visibility assertion.
+4. `instructor-mobile-nav.spec.ts` — inline `if/skip/return` guards could use `test.skip(condition, reason)` one-liner. Low urgency.
 
 ## Session 61 — 2026-04-14 10:32–11:27 (0.92 hrs)
 **Duration:** 0.92 hours | **Points:** 2 pts
