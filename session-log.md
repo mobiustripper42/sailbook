@@ -3,6 +3,31 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 58 — 2026-04-14 08:28–08:51 (0.42 hrs)
+**Duration:** 0.42 hours | **Points:** 2 pts
+**Task:** Code review stragglers + Task 1.12 — Past courses not enrollable
+
+**Completed:**
+- `src/app/(instructor)/instructor/dashboard/page.tsx:68` — Total Students stat: `!= 'cancelled'` → `=== 'confirmed'` (consistent with seat count on line 99, same render pass)
+- `src/app/(admin)/admin/students/page.tsx:54` — added comment clarifying intentional `!= 'cancelled'`: includes `registered`, `confirmed`, and `completed`; only excludes `cancelled`
+- `src/app/(student)/student/courses/page.tsx` — post-fetch JS filter hides active courses where every session date < today; courses with zero sessions remain visible
+- `tests/student-enrollment.spec.ts` — new test: admin creates active course with 2020 session date, confirms it's absent from student browse; 10/10 pass, mobile green
+- `docs/PROJECT_PLAN.md` — added then removed Task 6.14 (uncancel session — decided it's a testing convenience, not a product feature)
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Task 1.3 — Inactive instructor cascade (or next Phase 1 task of your choosing)
+- Known edge case accepted: active course with one future *cancelled* session + one past *scheduled* session still shows — pathological enough to ignore
+
+**Context:**
+- UTC-only date comparison for "past course" filter — consistent with instructor dashboard. A student in UTC-4 at 10pm could lose visibility of a course whose last session was that day. Accepted.
+- Code review noted `as unknown as` double-cast on sessions is unnecessary; left as-is to match existing file pattern — type debt fix tracked separately.
+
+**Code Review:** Comment missing `completed` status — fixed in follow-up commit. Magic date `2020-06-01` in test has no comment — left, not blocking. No RLS gaps. No pattern violations.
+
 ## Session 57 — 2026-04-14 00:00–00:08 (0.13 hrs)
 **Duration:** 0.13 hours | **Points:** 0 pts
 **Task:** Tooling — Playwright workers=1 default + targeted test protocol
