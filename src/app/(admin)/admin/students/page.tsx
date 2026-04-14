@@ -51,8 +51,8 @@ export default async function StudentsPage() {
             <TableBody>
               {students?.map((s) => {
                 const enrollments = (s.enrollments ?? []) as { id: string; status: string }[]
-                // Intentional: include 'registered' + 'confirmed' — this is a student activity
-                // summary, not a seat count. Cancelled enrollments are excluded.
+                // Intentional: include 'registered', 'confirmed', and 'completed' — this is a
+                // student activity summary, not a seat count. Only 'cancelled' is excluded.
                 const activeCount = enrollments.filter((e) => e.status !== 'cancelled').length
                 return (
                   <TableRow key={s.id}>
