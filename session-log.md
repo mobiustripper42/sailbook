@@ -3,7 +3,37 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 59 — 2026-04-14 08:55 [open]
+## Session 59 — 2026-04-14 08:55–09:25 (0.50 hrs)
+**Duration:** 0.50 hours | **Points:** 2 pts
+**Task:** Phase 1.3 — Inactive instructor cascade
+
+**Completed:**
+- `supabase/migrations/20260414125953_instructor_deactivation_cascade.sql` — SECURITY DEFINER trigger function + trigger; NULLs instructor_id on courses and sessions when is_active → false (while instructor) or is_instructor → false. One-way cascade.
+- `src/components/admin/instructor-actions.tsx` — window.confirm() guard before Deactivate fires
+- `supabase/tests/05_cascade.sql` — 5 pgTAP tests; 64/64 total passing
+- `tests/instructor-cascade.spec.ts` — 2 Playwright tests (cascade flow + dialog dismiss); 113/113 full suite passing
+- `docs/DECISIONS.md` — DEC-019; documents SECURITY DEFINER choice and one-way behavior
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Address code review deferrals (see below) — quick fixes worth doing at top of next session
+- Then: 1.4 (course status audit via @architect), 1.6 (ASA number field), 1.8 (password reset), or 1.13 (dual-role nav toggle)
+
+**Context:**
+- Two deactivation paths exist: toggle button (InstructorActions) and edit form (ProfileEditForm). Only the toggle has the confirm dialog — edit form path is silent (deferred fix).
+- Sessions in seed have NULL instructor_id; pgTAP tests set explicit values within the transaction.
+- SECURITY DEFINER chosen because trigger may run outside an admin JWT context (service role, future background jobs).
+
+**Code Review — Deferred (fix next session):**
+1. `profile-edit-form.tsx` — No confirm dialog on edit form deactivation path (second path DEC-019 names). Silent cascade.
+2. `migration line 17` — `OLD.is_active = TRUE` → `OLD.is_active IS TRUE` (NULL coercion edge case, cheap fix).
+3. `05_cascade.sql test 3` — "other instructors untouched" uses `isnt(count, 0)` instead of asserting a specific known instructor's count. Weaker assertion.
+4. `05_cascade.sql test 5` — is_instructor=FALSE branch has no session-level assertion. Session cascade on that path is untested.
+5. `instructor-cascade.spec.ts line 52–55` — `getByRole('cell', { name: '—' }).first()` may grab wrong cell if other columns also render '—'. Fragile selector.
+6. `migration` — Missing `DROP TRIGGER IF EXISTS` before `CREATE TRIGGER`. Not idempotent on re-run.
 
 ## Session 58 — 2026-04-14 08:28–08:51 (0.42 hrs)
 **Duration:** 0.42 hours | **Points:** 2 pts
