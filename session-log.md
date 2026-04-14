@@ -3,6 +3,51 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
+## Session 60 — 2026-04-14 10:07–10:29 (0.37 hrs)
+**Duration:** 0.37 hours | **Points:** 0 pts
+**Task:** Session 59 code review deferrals — cascade trigger hardening + test quality
+
+**Completed:**
+- `supabase/migrations/20260414141053_fix_cascade_null_coercion.sql` — new migration:
+  `IS TRUE`/`IS FALSE` NULL-safe comparisons in cascade trigger; `DROP TRIGGER IF EXISTS`
+  makes the trigger creation idempotent on re-run
+- `src/components/admin/profile-edit-form.tsx` — `window.confirm()` guard on deactivation
+  path (edit form was the silent second path DEC-019 names; toggle button already had it)
+- `supabase/tests/05_cascade.sql` — test 3: assert Lisa Chen's specific count (1) instead
+  of `isnt(count, 0)`; test 5+6: re-assign session before is_instructor=FALSE path and add
+  session-level assertion (session cascade on that path was untested); plan(5) → plan(6)
+- `tests/instructor-cascade.spec.ts` — scope instructor cell check to `td.nth(1)` instead
+  of `getByRole('cell', { name: '—' }).first()` (price column also renders '—'); wait for
+  `toBeEnabled()` on Activate teardown so server round-trip confirms before test ends
+- 65 pgTAP / 113 Playwright — all green
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Code review found 3 deferred items (see below) — quick fixes, worth doing top of next session
+- Then: 1.13 (dual-role nav toggle), 1.6 (ASA number), 1.8 (password reset),
+  or 1.4 (course status audit via @architect)
+
+**Context:**
+- `toBeEnabled()` was key: optimistic UI update makes `toBeVisible()` pass immediately,
+  masking a not-yet-committed server action. `toBeEnabled()` waits for `pending=false` which
+  means the transition completed and the DB update committed.
+- The Next.js dev-mode `performance.measure` error on InstructorSessionRosterPage is a
+  Next.js internal bug (negative timestamp on interrupted async Server Component). Does not
+  affect production. Not fixable in app code.
+
+**Code Review — Deferred (fix next session):**
+1. `profile-edit-form.tsx:37` vs `instructor-actions.tsx:14` — confirm dialog wording
+   diverged: "remove them from all assigned courses and sessions" vs "...course and session
+   assignments." Same cascade, should be identical wording.
+2. `window.confirm` vs bare `confirm` — split across codebase; `profile-edit-form` and
+   `instructor-actions` use `window.confirm`, other files use bare `confirm`. Pick one.
+3. `05_cascade.sql` tests 5+6 — "went to zero" assertions without pre-condition "was non-zero
+   first." Add count=1 assertions before the `UPDATE profiles SET is_instructor = FALSE`
+   block to prevent vacuous passes.
+
 ## Session 59 — 2026-04-14 08:55–09:25 (0.50 hrs)
 **Duration:** 0.50 hours | **Points:** 2 pts
 **Task:** Phase 1.3 — Inactive instructor cascade
