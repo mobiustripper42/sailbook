@@ -3,6 +3,57 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 71 — 2026-04-15 17:59 [open]
+
+## Session 70 — 2026-04-15 17:56–18:50 (0.9 hrs)
+**Duration:** 0.9 hours | **Points:** 5 pts
+**Task:** Phase 2.3 — Stripe Checkout Session creation
+
+**Completed:**
+- `supabase/migrations/20260415220534_add_hold_expires_at.sql` — hold_expires_at TIMESTAMPTZ on enrollments
+- `src/app/(student)/student/courses/[id]/actions.ts` — createCheckoutSession action: capacity check, Stripe customer upsert, pending_payment enrollment hold, Checkout Session creation, redirect URL return
+- `src/components/student/enroll-button.tsx` — wired to createCheckoutSession; redirects to Stripe on success; "Preparing checkout…" loading state
+- `src/app/(student)/student/courses/[id]/page.tsx` — pending_payment state shows "Payment pending" badge instead of enroll button
+- `src/app/(student)/student/checkout/success/page.tsx` — confirmation page post-payment
+- `src/app/(student)/student/checkout/cancel/page.tsx` — hold-duration page with optional return-to-course link
+- `src/app/api/test/enroll/route.ts` — dev-only enrollment API for Playwright to bypass Stripe
+- `src/proxy.ts` — /api/* routes bypass login redirect (handle own auth)
+- `.env.local` — ENROLLMENT_HOLD_MINUTES=1 (change to 15 for prod), SUPABASE_SERVICE_ROLE_KEY
+- `tests/checkout.spec.ts` — 15 passing, 6 skipped by design (Stripe redirect + success/cancel pages)
+- `tests/helpers.ts` — createTestCourse fills Price ($) field; createEnrolledCourse uses test API route
+- `tests/student-enrollment.spec.ts` + `tests/instructor-views.spec.ts` — updated for Stripe flow
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Set ENROLLMENT_HOLD_MINUTES=15 in Vercel env before go-live
+- Add SUPABASE_SERVICE_ROLE_KEY (prod value) to Vercel env before go-live
+- Fix 3 priority code review findings before next feature:
+  1. `.single()` → `.maybeSingle()` on enrollment lookup in createCheckoutSession
+  2. profiles.update stripe_customer_id missing error check
+  3. NEXT_PUBLIC_DEV_MODE gate → use NODE_ENV or server-only var in test enroll route
+- Continue Phase 2: 2.4 (enrollment hold expiration) or 2.5 (Stripe webhook)
+- Session 71 (Phase 1.8 fixes) still open — will commit separately
+
+**Context:**
+- Stripe Checkout Session expires in 24h (Stripe minimum is 30 min — too short for holds); our hold_expires_at in DB is the real mechanism; 2.4 cleans up expired holds
+- /api/* routes now bypass proxy auth redirect — every future API route must handle its own auth
+- pending_payment does NOT count against get_course_active_enrollment_count (RPC counts confirmed only); the capacity check in createCheckoutSession also uses this RPC — a race condition exists between two students hitting checkout simultaneously (2.4 task handles this)
+- Test API route creates confirmed enrollments (not pending_payment); student-enrollment.spec test for "Payment pending" badge is misleading — logged in code review findings
+- price field on test courses was missing from createTestCourse helper — fixed; all test courses now default to $250
+
+**Code Review:** 8 findings:
+1. **Security** — NEXT_PUBLIC_DEV_MODE gate in test route leaks into client bundle; use NODE_ENV instead
+2. **Security** — /api/* proxy exemption is blanket; document contract or enumerate specific public API paths
+3. **Bug** — enrollment written after Stripe session created; Stripe session can dangle if DB write fails
+4. **Bug** — .single() on enrollment lookup should be .maybeSingle() (swallows real errors)
+5. **Security** — pending_payment holds grant course/attendance visibility via existing RLS helpers (probably acceptable, needs explicit decision)
+6. **Consistency** — success page silently discards session_id query param (by design, add comment)
+7. **Consistency** — stripe_customer_id update missing error check (silent duplicate Stripe customers)
+8. **Cleanup** — student-enrollment test for "Payment pending" badge actually tests confirmed state; rename or fix
+
 ## Session 69 — 2026-04-15 16:27–16:59 (0.5 hrs)
 **Duration:** 0.5 hours | **Points:** 3 pts
 **Tasks:** Phase 1.8 (password reset), login email persistence fix

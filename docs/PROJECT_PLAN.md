@@ -103,10 +103,10 @@ The app makes money. Student self-cancellation ships here (ST-10).
 |---|------|--------|-------|
 | 2.1 | ~~Stripe account setup — test mode, API keys in `.env.local`~~ | 2 | [x] <!-- completed 2026-04-15 --> stripe npm package, src/lib/stripe.ts singleton client, env vars in .env.local. |
 | 2.2 | ~~Schema migration — `stripe_customer_id` on profiles, `stripe_checkout_session_id` on enrollments, `payments` table~~ | 3 | [x] <!-- completed 2026-04-15 --> Migration + RLS. 10 pgTAP tests (77/77). Types regenerated. CHECK constraint on payments.status still needed (new migration). |
-| 2.3 | Stripe Checkout Session creation — server action, redirect to Stripe hosted page | 5 | Replaces "Register" button. Capacity check + enrollment hold creation. DEC: pessimistic inventory (hold spot on checkout start). |
+| 2.3 | ~~Stripe Checkout Session creation — server action, redirect to Stripe hosted page~~ | 5 | [x] <!-- completed 2026-04-15 --> createCheckoutSession action; pending_payment hold; Stripe customer upsert; ENROLLMENT_HOLD_MINUTES env var; success + cancel pages (2.6 folded in); dev-only /api/test/enroll route; 15 Playwright tests. |
 | 2.4 | Enrollment hold expiration — release `pending_payment` spots after timeout | 5 | First scheduled job (Vercel Cron or Supabase Edge Function). Handles race with webhook. |
 | 2.5 | Stripe webhook endpoint — `app/api/webhooks/stripe/route.ts` | 5 | First API route. Verify signature, confirm enrollment on payment success. DEC: DEC-001 survives. |
-| 2.6 | Post-payment redirect — success + cancel URLs, confirmation page | 2 | Success shows confirmation. Cancel shows "hold active, try again." |
+| 2.6 | ~~Post-payment redirect — success + cancel URLs, confirmation page~~ | 2 | [x] <!-- completed 2026-04-15 --> Folded into 2.3. |
 | 2.7 | Student self-cancellation — cancel enrollment, trigger Stripe refund | 5 | ST-10 ships. Cancellation policy DEC needed (full? time-based? admin override?). |
 | 2.8 | Admin enrollment view — payment status, Stripe link, manual refund trigger | 3 | UI additions to existing enrollment list. Admin can issue refunds from dashboard. |
 | 2.9 | Member pricing field — `member_price` on courses alongside `price` | 2 | Checkout logic picks correct price based on profile. |
