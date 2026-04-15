@@ -3,7 +3,34 @@
 Session summaries for continuity across work sessions.
 Format: append newest entry at the top.
 
-## Session 64 — 2026-04-14 19:52 [open]
+## Session 64 — 2026-04-14 19:52–20:50 (1.0 hrs)
+**Duration:** 1.0 hours | **Points:** 2 pts
+**Task:** Phase 1.21 deferrals — code review fixes from Session 63
+
+**Completed:**
+- `src/components/instructor/instructor-desktop-nav.tsx` — exact-match guard for dashboard link; `pathname === href || (href !== '/instructor/dashboard' && pathname.startsWith(href))`; mirrors AdminNav pattern
+- `tests/dev-login-helper.spec.ts` — `test.beforeEach` with `test.skip(!process.env.NEXT_PUBLIC_DEV_MODE, …)` guard; prevents misleading "element not found" CI failures
+- `playwright.config.ts` — dotenv load of `.env.local` at top; makes `NEXT_PUBLIC_DEV_MODE` (and other vars) available to the test process, not just the app server
+- `src/app/(auth)/login/page.tsx` — wrapper div indentation fixed
+- `CLAUDE.md` — updated workers convention: workers=4 locally, workers=1 in CI
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Fix 1 code review deferral from this session (quick, top of next):
+  1. `instructor-mobile-nav-drawer.tsx:73` — mirror the exact-match guard applied to desktop nav; mobile drawer still uses bare `startsWith`
+- Then: 1.4 (course status review via @architect), 1.6 (ASA number), 1.8 (password reset)
+
+**Context:**
+- dotenv load in `playwright.config.ts` is the right pattern for making `.env.local` vars available to test skip guards; without it, `process.env.NEXT_PUBLIC_DEV_MODE` is undefined in the test runner even if the app server sees it
+- The exact-match guard in the desktop nav is technically dead code right now (only one link, no child routes), but it prevents a silent bug when nav grows
+- workers=4 locally is the tested correct value; CLAUDE.md was stale
+
+**Code Review — Findings:**
+1. `instructor-mobile-nav-drawer.tsx:73` — mobile drawer still uses bare `startsWith`; desktop and mobile are now inconsistent. Deferred to next session.
+2. `playwright.config.ts` — `workers: 4` locally — CLAUDE.md updated this session to match.
 
 ## Session 63 — 2026-04-14 16:53–17:15 (0.37 hrs)
 **Duration:** 0.37 hours | **Points:** 2 pts
