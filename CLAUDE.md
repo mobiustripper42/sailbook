@@ -56,8 +56,6 @@ waitlist_entries (notify on spot opening)
 5. **Run targeted tests** — `npx playwright test tests/foo.spec.ts`. `supabase test db` if RLS-touching. Do NOT run the full suite — that's the user's call.
 6. **Close out** — `/kill-this` → `/its-dead` → push
 
-**No test, no push.**
-
 **Full suite (`npx playwright test`) is never run automatically.** `/kill-this` will ask before closing out.
 
 ## Migration Protocol
