@@ -88,7 +88,7 @@ export default async function AdminDashboard() {
   const data = await getDashboardData()
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
 
       <div className="grid grid-cols-2 gap-4">
@@ -120,9 +120,9 @@ function StatCard({ label, value }: { label: string; value: number }) {
 function InstructorCard({ value }: { value: number }) {
   const isWarning = value > 0
   return (
-    <Card size="sm" className={isWarning ? 'border-amber-400 bg-amber-50' : undefined}>
+    <Card size="sm" className={isWarning ? 'border-warning/40 bg-warning/10' : undefined}>
       <CardHeader className="h-14 items-start justify-end pb-0">
-        <CardTitle className={`text-sm font-medium flex items-center gap-1.5 ${isWarning ? 'text-amber-700' : 'text-muted-foreground'}`}>
+        <CardTitle className={`text-sm font-medium flex items-center gap-1.5 ${isWarning ? 'text-warning' : 'text-muted-foreground'}`}>
           {isWarning && <span aria-hidden="true">⚠</span>}
           {isWarning ? 'No Instructor Assigned' : 'All Instructors Assigned'}
         </CardTitle>
@@ -130,8 +130,8 @@ function InstructorCard({ value }: { value: number }) {
       <CardContent>
         {isWarning ? (
           <>
-            <p className="text-3xl font-semibold text-right text-amber-700">{value}</p>
-            <p className="text-xs text-amber-700 mt-1 text-right">Assign before publishing</p>
+            <p className="text-3xl font-semibold text-right text-warning">{value}</p>
+            <p className="text-xs text-warning mt-1 text-right">Assign before publishing</p>
           </>
         ) : (
           <p className="text-3xl font-semibold text-right">✓</p>
@@ -193,7 +193,7 @@ function UpcomingSessions({ sessions }: { sessions: UpcomingSession[] }) {
                       {instructor ? (
                         `${instructor.first_name} ${instructor.last_name}`
                       ) : (
-                        <span className="text-amber-600">⚠ Unassigned</span>
+                        <span className="text-warning">⚠ Unassigned</span>
                       )}
                     </td>
                     <td className="py-2 text-right">{activeCount}/{capacity}</td>

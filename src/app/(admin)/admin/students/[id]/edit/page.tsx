@@ -17,7 +17,7 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
   if (!profile) notFound()
 
   return (
-    <div className="p-8">
+    <div className="">
       <p className="text-sm text-muted-foreground mb-1">
         <Link href="/admin/students" className="hover:underline">Students</Link>
         {' / '}

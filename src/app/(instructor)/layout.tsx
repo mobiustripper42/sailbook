@@ -59,7 +59,7 @@ export default async function InstructorLayout({ children }: { children: React.R
       </aside>
       <div className="flex-1 min-w-0 flex flex-col">
         <InstructorMobileNavDrawer name={name} isStudent={isStudent} />
-        <main className="flex-1 min-w-0 bg-background">
+        <main className="flex-1 min-w-0 bg-background p-4 md:p-8">
           {children}
         </main>
       </div>

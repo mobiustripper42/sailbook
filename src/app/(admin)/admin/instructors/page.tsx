@@ -20,10 +20,10 @@ export default async function InstructorsPage() {
     .eq('is_instructor', true)
     .order('last_name')
 
-  if (error) return <div className="p-8 text-destructive">{error.message}</div>
+  if (error) return <div className="text-destructive text-sm">{error.message}</div>
 
   return (
-    <div className="p-8">
+    <div className="">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">Instructors</h1>
       </div>
@@ -31,7 +31,7 @@ export default async function InstructorsPage() {
       {instructors?.length === 0 ? (
         <EmptyState message="No instructors yet." />
       ) : (
-        <div className="rounded-xl border bg-card">
+        <div className="rounded-lg border bg-card">
           <Table>
             <TableHeader>
               <TableRow>

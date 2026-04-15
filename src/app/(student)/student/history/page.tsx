@@ -9,7 +9,7 @@ export default async function StudentHistoryPage() {
   if (!user) redirect('/login')
 
   const { data: courses, error } = await fetchStudentHistory(supabase, user.id)
-  if (error) return <div className="text-destructive">{error}</div>
+  if (error) return <p className="text-sm text-destructive">{error}</p>
 
   return (
     <div className="space-y-6">

@@ -9,10 +9,10 @@ export default async function UsersPage() {
     .select('id, first_name, last_name, email, is_admin, is_instructor, is_student, is_active')
     .order('last_name')
 
-  if (error) return <div className="p-8 text-destructive">{error.message}</div>
+  if (error) return <div className="text-destructive text-sm">{error.message}</div>
 
   return (
-    <div className="p-8">
+    <div className="">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">Users</h1>
         <p className="text-sm text-muted-foreground">{users?.length ?? 0} total</p>

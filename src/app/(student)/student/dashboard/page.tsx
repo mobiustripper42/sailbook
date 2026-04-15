@@ -84,7 +84,7 @@ export default async function StudentDashboard() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4">
-        <Card>
+        <Card size="sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Enrolled Courses</CardTitle>
           </CardHeader>
@@ -92,7 +92,7 @@ export default async function StudentDashboard() {
             <p className="text-3xl font-semibold">{enrolledCount}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card size="sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Upcoming Sessions</CardTitle>
           </CardHeader>
@@ -105,7 +105,7 @@ export default async function StudentDashboard() {
       {/* Next session highlight */}
       {nextSession ? (
         <div>
-          <h2 className="text-sm font-medium text-muted-foreground mb-3">Next Session</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground mb-3">Next Session</h2>
           <Card className="border-foreground/20 bg-muted/30">
             <CardContent className="pt-5">
               <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -141,7 +141,7 @@ export default async function StudentDashboard() {
       {upcomingCourses.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-medium text-muted-foreground">Upcoming Courses</h2>
+            <h2 className="text-sm font-semibold text-muted-foreground">Upcoming Courses</h2>
             <Link href="/student/my-courses" className="text-xs text-muted-foreground hover:text-foreground">
               View all →
             </Link>

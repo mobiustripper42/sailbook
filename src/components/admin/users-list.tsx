@@ -90,7 +90,7 @@ export default function UsersList({ users }: { users: User[] }) {
           }
         />
       ) : (
-        <div className="rounded-xl border bg-card">
+        <div className="rounded-lg border bg-card">
           <Table>
             <TableHeader>
               <TableRow>

@@ -23,10 +23,10 @@ export default async function StudentsPage() {
     .eq('is_student', true)
     .order('last_name')
 
-  if (error) return <div className="p-8 text-destructive">{error.message}</div>
+  if (error) return <div className="text-destructive text-sm">{error.message}</div>
 
   return (
-    <div className="p-8">
+    <div className="">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">Students</h1>
         <p className="text-sm text-muted-foreground">{students?.length ?? 0} total</p>
@@ -35,7 +35,7 @@ export default async function StudentsPage() {
       {students?.length === 0 ? (
         <EmptyState message="No students have registered yet." />
       ) : (
-        <div className="rounded-xl border bg-card">
+        <div className="rounded-lg border bg-card">
           <Table>
             <TableHeader>
               <TableRow>

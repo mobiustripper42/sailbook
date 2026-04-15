@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { fetchStudentHistory } from '@/lib/student-history'
 import StudentHistoryList from '@/components/student/student-history-list'
@@ -11,8 +11,6 @@ export default async function InstructorStudentViewPage({
 }) {
   const { id } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -26,7 +24,7 @@ export default async function InstructorStudentViewPage({
   const { data: courses, error } = await fetchStudentHistory(supabase, id)
 
   return (
-    <div className="p-8 space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-3xl">
       <div>
         <Link
           href="/instructor/dashboard"
@@ -48,13 +46,13 @@ export default async function InstructorStudentViewPage({
       </div>
 
       <div className="space-y-3">
-        <h2 className="text-base font-medium">Course History</h2>
+        <h2 className="text-base font-semibold">Course History</h2>
         {error ? (
           <p className="text-sm text-destructive">{error}</p>
         ) : (
           <StudentHistoryList
             courses={courses}
-            emptyMessage="No history found for courses you teach."
+            emptyMessage="No course history for this student."
           />
         )}
       </div>

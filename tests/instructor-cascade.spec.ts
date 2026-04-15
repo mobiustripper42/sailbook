@@ -13,7 +13,7 @@ import { loginAs, runId } from './helpers';
  */
 
 test.describe('Instructor deactivation cascade', () => {
-  test('deactivating an instructor clears their course assignments', async ({ page, browser }) => {
+  test('deactivating an instructor clears their course assignments', async ({ page }) => {
     test.skip(test.info().project.name !== 'desktop');
     test.setTimeout(90000);
 

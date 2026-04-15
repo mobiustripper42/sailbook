@@ -11,7 +11,7 @@ export default async function EditCourseTypePage({ params }: { params: Promise<{
   if (!courseType) notFound()
 
   return (
-    <div className="p-8 max-w-lg">
+    <div className="max-w-lg">
       <p className="text-sm text-muted-foreground mb-1">
         <Link href="/admin/course-types" className="hover:underline">Course Types</Link>
         {' / '}

@@ -119,7 +119,7 @@ export default async function InstructorSessionRosterPage({
   const isCancelled = session.status === 'cancelled'
 
   return (
-    <div className="p-8 space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-3xl">
       <div>
         <Link
           href="/instructor/dashboard"

@@ -3,6 +3,42 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 66 — 2026-04-15 15:12–15:43 (0.5 hrs)
+**Duration:** 0.5 hours | **Points:** 12 pts
+**Tasks:** Phase 1 housekeeping + 6.3/6.4 ui-reviewer
+
+**Completed:**
+- `docs/PROJECT_PLAN.md` — 1.4 marked complete (architect confirmed existing statuses sufficient, no schema changes)
+- `~/.claude/skills/restart-this/SKILL.md` — added Step 1 to stamp `[RESUMED HH:MM]` in session log on wake
+- `~/.claude/skills/kill-this/SKILL.md` — split Playwright question into two separate questions
+- `npm run lint` — 3 issues fixed: eslint-disable on `theme-toggle.tsx` hydration pattern, unused `browser` fixture in `instructor-cascade.spec.ts`, unused `PASSWORD` import in `instructor-views.spec.ts`
+- Code review deferrals (4): removed redundant `getUser()` + redirect from `instructor/students/[id]/page.tsx`, error element fixed in `student/history/page.tsx`, stale empty message fixed, migration comment added
+- **6.3 — @ui-reviewer full audit:** 8 pages × 3 viewports, scored 7.75/10. Key findings: S1 nav token wrong, S3 amber hardcoded light color, layout padding DEC-017 violations, rounded-xl on table wrappers, stat card sizing, heading weights
+- **6.4 — Implement findings (all High + Medium):**
+  - `admin-nav.tsx`, `admin-mobile-nav-drawer.tsx`, `instructor-desktop-nav.tsx`, `instructor-mobile-nav-drawer.tsx`, `student-nav.tsx`, `mobile-nav-drawer.tsx` — S1: `bg-foreground text-background` → `bg-accent text-accent-foreground`
+  - `globals.css` — added `--warning` token (oklch amber, light + dark values)
+  - `admin/dashboard/page.tsx` — S3: `bg-amber-50`/`text-amber-700` → `bg-warning/10`/`text-warning` throughout
+  - `(admin)/layout.tsx`, `(instructor)/layout.tsx` — `p-4 md:p-8` on `<main>`, removed `p-8` from all 19 admin/instructor pages
+  - 5 admin list pages — `rounded-xl` → `rounded-lg` on table wrappers
+  - Student + instructor dashboards — stat cards `size="sm"`
+  - Admin + instructor student detail pages — "Course History" `font-medium` → `font-semibold`
+  - `src/components/ui/badge.tsx` — `rounded-4xl` → `rounded-lg` (badge/card rounding consistency)
+- `docs/PROJECT_PLAN.md` — added end-of-phase @ui-reviewer tasks to Phases 2–5 (2.12, 3.14, 4.8, 5.9)
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Continue Phase 1: 1.6 (ASA number), 1.8 (password reset), 1.7 (experience level codes), 1.9 (unsaved changes guard)
+- Phase 2 (Payments) is the critical path — can start 2.1 (Stripe account setup) once Phase 1 is clean
+
+**Context:**
+- `--warning` token: `oklch(0.68 0.16 67)` light / `oklch(0.80 0.15 67)` dark. Use `bg-warning/10` for card bg, `text-warning` for text, `border-warning/40` for border
+- Badge rounding fixed in `components/ui/badge.tsx` (shadcn component edited deliberately — no reasonable workaround)
+- Layout padding now lives in `(admin)/layout.tsx` and `(instructor)/layout.tsx` `<main>` — pages should not add their own `p-*` outer wrapper
+- 6.3/6.4 marked complete ahead of Phase 6 — end-of-phase ui-reviewer tasks added at each phase boundary for ongoing quality checks
+
 ## Session 65 — 2026-04-15 11:06–14:56 (0.6 hrs)
 **Duration:** 0.6 hours | **Points:** 5 pts
 **Task:** Phase 1.5 — Student history/Experience view

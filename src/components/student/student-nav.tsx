@@ -24,7 +24,7 @@ export default function StudentNav() {
           className={cn(
             'block px-3 py-2 rounded-lg text-sm transition-colors',
             pathname === href || (href !== '/student/dashboard' && pathname.startsWith(href))
-              ? 'bg-foreground text-background font-medium'
+              ? 'bg-accent text-accent-foreground font-medium'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted'
           )}
         >

@@ -78,7 +78,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const instructor = course.instructor as { id: string; first_name: string; last_name: string } | null
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-muted-foreground mb-1">

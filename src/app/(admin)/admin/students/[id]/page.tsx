@@ -24,7 +24,7 @@ export default async function AdminStudentViewPage({
   const { data: courses, error } = await fetchStudentHistory(supabase, id)
 
   return (
-    <div className="p-8 space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-3xl">
       <div>
         <p className="text-sm text-muted-foreground mb-1">
           <Link href="/admin/students" className="hover:underline">Students</Link>
@@ -52,7 +52,7 @@ export default async function AdminStudentViewPage({
       </div>
 
       <div className="space-y-3">
-        <h2 className="text-base font-medium">Course History</h2>
+        <h2 className="text-base font-semibold">Course History</h2>
         {error ? (
           <p className="text-sm text-destructive">{error}</p>
         ) : (

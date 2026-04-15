@@ -19,7 +19,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   if (!profile) notFound()
 
   return (
-    <div className="p-8">
+    <div className="">
       <p className="text-sm text-muted-foreground mb-1">
         <Link href="/admin/users" className="hover:underline">Users</Link>
         {' / '}

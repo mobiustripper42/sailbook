@@ -72,7 +72,7 @@ export default async function InstructorDashboard() {
   const courseIds = new Set(rows.map((s) => s.courses.id))
 
   return (
-    <div className="p-8 space-y-8 max-w-3xl">
+    <div className="space-y-8 max-w-3xl">
       <div>
         <h1 className="text-2xl font-semibold">
           {firstName ? `Welcome back, ${firstName}.` : 'Dashboard'}
@@ -92,7 +92,7 @@ export default async function InstructorDashboard() {
         <p className="text-sm text-muted-foreground">No upcoming sessions assigned to you.</p>
       ) : (
         <div>
-          <h2 className="text-sm font-medium text-muted-foreground mb-3">Upcoming Sessions</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground mb-3">Upcoming Sessions</h2>
           <div className="divide-y rounded-lg border">
             {rows.map((s) => {
               const course = s.courses
@@ -131,7 +131,7 @@ export default async function InstructorDashboard() {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <Card>
+    <Card size="sm">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
       </CardHeader>

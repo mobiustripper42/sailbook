@@ -57,7 +57,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </aside>
       <div className="flex-1 min-w-0 flex flex-col">
         <AdminMobileNavDrawer name={name} />
-        <main className="flex-1 min-w-0 bg-background">
+        <main className="flex-1 min-w-0 bg-background p-4 md:p-8">
           {children}
         </main>
       </div>

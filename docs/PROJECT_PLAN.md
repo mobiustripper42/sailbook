@@ -65,7 +65,7 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.1 | ~~Session editing — edit date, time, location, instructor on existing sessions~~ | 3 | [x] <!-- completed 2026-04-13 --> Inline edit form (sub-row pattern). SessionRow client component. updateSession action. 2 Playwright tests. |
 | 1.2 | ~~Set course back to Draft status (from Active)~~ | 2 | [x] <!-- completed 2026-04-13 --> revertToDraft action; Revert to Draft button in CourseStatusActions; self-contained Playwright test, 3/3 viewports. |
 | 1.3 | ~~Inactive instructor cascade — deactivating instructor clears course + session assignments~~ | 2 | [x] <!-- completed 2026-04-14 --> SECURITY DEFINER trigger; confirm dialog on Deactivate button; 5 pgTAP + 2 Playwright tests; DEC-019. 6 code review fixes deferred to next session. |
-| 1.4 | Course status review — confirm statuses cover all needs via @architect | 2 | Audit existing status logic. Probably fine as-is. |
+| 1.4 | ~~Course status review — confirm statuses cover all needs via @architect~~ | 2 | [x] <!-- completed 2026-04-15 --> @architect confirmed existing statuses (draft/active/cancelled) are sufficient for V1. No schema changes needed. |
 | 1.5 | ~~Student history view — past enrollments, attendance, completions visible to admin/instructor/student~~ | 5 | [x] <!-- completed 2026-04-15 --> `/student/history` ("Experience"), `/admin/students/[id]`, `/instructor/students/[id]`. Shared `fetchStudentHistory()` helper. RLS migration broadens instructor read to all student data. 36 Playwright + 67 pgTAP tests green. |
 | 1.6 | ASA number field — add to profiles, show in admin student list + student profile | 2 | Migration + UI. Not mandatory. |
 | 1.7 | Experience level — generic codes/lookup table + migrate experience levels onto it | 5 | DEC: generic codes table pattern. Reusable for qualifications, prereqs, skill names. |
@@ -83,6 +83,7 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.19 | Dark / Light theme not applyed to /dev instruction page, can read any text | 2 | Fix /dev instruction page so fonts are readable. |
 | 1.20 | ~~Instructor mobile hamburger menu — aside is always visible at all viewports, no mobile drawer exists~~ | 2 | [x] <!-- completed 2026-04-14 --> InstructorMobileNavDrawer component; hidden md:flex on aside; 9 Playwright tests. |
 | 1.21 | ~~Dev login helper — dropdown of seed users that auto-fills + submits the login form~~ | 2 | [x] <!-- completed 2026-04-14 --> DevLoginHelper component; NEXT_PUBLIC_DEV_MODE gate; 7 seed users; requestSubmit(); 4 Playwright tests. |
+| 1.22 | ~~End-of-phase @ui-reviewer pass~~ | — | [x] <!-- completed 2026-04-15 --> Run as part of Session 66 housekeeping. Findings folded into 6.3/6.4 which are now done. |
 
 **Phase 1 total: 55 pts** (40 original + 3 for 1.15 + 2 for 1.16 + 2 for 1.17 + 2 for 1.18 + 2 for 1.19 + 2 for 1.20 + 2 for 1.21)
 **Projected hours: ~19 hrs**
@@ -110,8 +111,9 @@ The app makes money. Student self-cancellation ships here (ST-10).
 | 2.9 | Member pricing field — `member_price` on courses alongside `price` | 2 | Checkout logic picks correct price based on profile. |
 | 2.10 | Playwright end-to-end payment test — register → pay → confirm → cancel → refund | 5 | Full chain integration test using Stripe test cards + Stripe CLI for webhooks. |
 | 2.11 | README: Stripe setup instructions — keys, webhook config, test mode | 1 | Document `.env.local` keys, webhook CLI setup, and test card reference for new devs. |
+| 2.12 | End-of-phase @ui-reviewer pass | 2 | Run after payment UI is wired. Focus on checkout flow, confirmation page, payment status in enrollment list. |
 
-**Phase 2 total: 38 pts**
+**Phase 2 total: 40 pts**
 **Projected hours: ~14 hrs**
 
 **Ejection point:** App takes money. Students can pay and self-cancel. This is the make-or-break phase.
@@ -137,8 +139,9 @@ Users know what's happening. Auth is production-grade.
 | 3.11 | OAuth login — Google | 2 | Supabase toggle + Google Cloud console. Email/password remains fallback. |
 | 3.12 | Security audit — run @security-agent, evaluate findings, fix serious issues | 3 | Post-auth-hardening + payments-live audit. Non-serious findings move to backlog. |
 | 3.13 | README: Twilio/Resend setup instructions — keys, sender config | 1 | Document Twilio phone number, Resend API key, domain verification, and sender config for new devs. |
+| 3.14 | End-of-phase @ui-reviewer pass | 2 | Focus on notification preference UI, new auth flows (email verify, OAuth). |
 
-**Phase 3 total: 37 pts**
+**Phase 3 total: 39 pts**
 **Projected hours: ~14 hrs**
 
 **Ejection point:** Students get confirmations, cancellation notices, and reminders. Auth is solid with email verification and OAuth. Security audited. The school runs without phone calls.
@@ -158,8 +161,9 @@ Clean onboarding. Richer student and instructor records.
 | 4.5 | (NOT REQUIRED) Link admin-created student to login — student creates account, admin links to existing profile | 3 | Depends on 4.4 architecture. Might be as simple as "student resets password." |
 | 4.6 | Instructor notes on sessions — text field per session, visible to all instructors + admin | 3 | IN-5 from V1 backlog. `notes` column already exists on sessions table. UI only. |
 | 4.7 | Instructor profile expansion — availability field + bio/website link | 3 | General availability for admin assignment. Name links to LTSC website bio. Andy request. |
+| 4.8 | End-of-phase @ui-reviewer pass | 2 | Focus on profile expansion pages, invite flow, instructor onboarding. |
 
-**Phase 4 total: 27 pts**
+**Phase 4 total: 29 pts**
 **Projected hours: ~10 hrs**
 
 **Ejection point:** Instructors get proper onboarding. Student profiles are richer. Instructor notes captured. Admin can create students for non-technical users.
@@ -180,8 +184,9 @@ Flexible pricing, enrollment safety rails, and waitlist.
 | 5.6 | (probalby will not happen) Duplicate enrollment in same course type — warn student + flag for admin | 3 | ⚠️ Scope creep risk. Keep tight: warning on enrollment + admin dashboard flag. No auto-clear. |
 | 5.7 | Waitlist — full course → join waitlist → notify on opening | 8 | New table, student UI, admin visibility, notification on spot opening. Depends on Phase 3 notifications. Andy request. |
 | 5.8 | Low enrollment warning — dashboard tile for courses below minimum threshold approaching start date | 2 | Same pattern as "courses without instructors." Meaningful only with payments live. Andy request. |
+| 5.9 | End-of-phase @ui-reviewer pass | 2 | Focus on waitlist UI, prerequisite warning flow, discount code display on checkout. |
 
-**Phase 5 total: 29 pts**
+**Phase 5 total: 31 pts**
 **Projected hours: ~11 hrs**
 
 **Ejection point:** Pricing is flexible. Enrollment has safety rails. Prerequisite and waitlist systems exist. Low enrollment flagged early.
@@ -196,8 +201,8 @@ Design quality, accessibility, navigation, convenience features.
 |---|------|--------|-------|
 | 6.1 | Mobile responsiveness pass — admin pages | 3 | Deferred from V1 (5.23). |
 | 6.2 | Mobile responsiveness pass — instructor pages | 2 | Deferred from V1 (5.24). |
-| 6.3 | Full @ui-reviewer design review — all roles, all pages, three viewports | 5 | Formal design audit with scored report. |
-| 6.4 | Implement @ui-reviewer findings | 5 | Re-estimate after 6.3. |
+| 6.3 | ~~Full @ui-reviewer design review — all roles, all pages, three viewports~~ | 5 | [x] <!-- completed 2026-04-15 --> 8 pages audited across 3 viewports. Scored 7.75/10. S1 nav token, S3 warning color, layout padding, rounded-xl, stat card sizing, heading weights all fixed. |
+| 6.4 | ~~Implement @ui-reviewer findings~~ | 5 | [x] <!-- completed 2026-04-15 --> All High + Medium findings fixed. Low-priority items deferred to Phase 5 polish. |
 | 6.5 | axe-core accessibility audit — fix critical/serious violations | 3 | WCAG 2.1 AA compliance. |
 | 6.6 | Duplicate course — one-click copy, drop into edit | 2 | Deferred from V1 (5.11). |
 | 6.7 | Relative session badges — "Tomorrow", "This week" instead of "Upcoming" | 3 | Date math. Always harder than it looks. |

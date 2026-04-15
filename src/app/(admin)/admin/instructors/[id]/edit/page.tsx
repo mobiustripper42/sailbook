@@ -17,7 +17,7 @@ export default async function EditInstructorPage({ params }: { params: Promise<{
   if (!profile) notFound()
 
   return (
-    <div className="p-8">
+    <div className="">
       <p className="text-sm text-muted-foreground mb-1">
         <Link href="/admin/instructors" className="hover:underline">Instructors</Link>
         {' / '}

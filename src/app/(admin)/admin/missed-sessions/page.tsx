@@ -90,11 +90,11 @@ function groupByStudent(records: MissedRecord[]): GroupedByStudent[] {
 
 export default async function MissedSessionsPage() {
   const { error, data: records } = await getMissedSessions()
-  if (error) return <div className="p-8 text-destructive">{error}</div>
+  if (error) return <div className="text-destructive text-sm">{error}</div>
   const groups = groupByStudent(records)
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Missed Sessions</h1>
 
       {groups.length === 0 ? (

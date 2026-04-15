@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import type { Browser } from '@playwright/test';
-import { loginAs, runId, PASSWORD } from './helpers';
+import { loginAs, runId } from './helpers';
 
 /**
  * Creates a test course via admin UI with pw_instructor assigned, then enrolls
