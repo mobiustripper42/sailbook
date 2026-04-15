@@ -3,9 +3,39 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 68 — 2026-04-15 16:27 [open]
+## Session 68 — 2026-04-15 16:26–16:38 (0.2 hrs)
+**Duration:** 0.2 hours | **Points:** 6 pts
+**Tasks:** Phase 2.2 (Stripe/payments schema), Phase 1.8 (password reset)
 
-## Session 68 — 2026-04-15 16:26 [open]
+**Completed:**
+- `supabase/migrations/20260415203119_add_stripe_payments.sql` — stripe_customer_id on profiles, stripe_checkout_session_id on enrollments, payments table (amount_cents, status, refund_amount_cents, stripe_payment_intent_id, stripe_checkout_session_id); indexes on enrollment_id, student_id, checkout id
+- `supabase/tests/06_rls_payments.sql` — 10 pgTAP tests; admin all, student read-own, instructor/anon blocked (77/77 total passing)
+- `src/lib/supabase/types.ts` — regenerated; Course + CourseType convenience aliases re-appended
+- `src/app/(auth)/actions.ts` — requestPasswordReset + updatePassword server actions
+- `src/app/(auth)/forgot-password/page.tsx` — forgot password form page
+- `src/app/(auth)/reset-password/page.tsx` — set new password page; onAuthStateChange PASSWORD_RECOVERY gate
+- `src/app/(auth)/login/page.tsx` — "Forgot password?" link
+- `src/proxy.ts` — /reset-password excluded from logged-in redirect
+- `tests/password-reset.spec.ts` — Playwright tests for password reset flow
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Fix security bug: reset-password getSession fallback lets any logged-in user bypass recovery token → drop getSession fallback, rely solely on PASSWORD_RECOVERY event; wire SIGNED_OUT event to setTokenError to make "Link expired" branch live
+- Add payments.status CHECK constraint (`IN ('pending','succeeded','refunded','failed')`) via new migration
+- Confirm with Andy: should logged-in users be able to reach /forgot-password? Currently bounced to dashboard.
+- `supabase db push` to apply asa_number + payments migrations to remote
+- Continue Phase 2: next is 2.3 (Stripe Checkout Session creation)
+
+**Context:**
+- payments table uses amount_cents (INT) — no decimal money, amounts in USD cents throughout
+- types.ts regen still wipes Course + CourseType aliases — re-append manually after every regen
+- reset-password page uses onAuthStateChange to gate the form; PASSWORD_RECOVERY event fires reliably on hash fragment load so the getSession fallback is both redundant and a security gap
+- auth actions (login, register, requestPasswordReset, updatePassword) all return `{ error: string | null }` rather than `string | null` — pre-existing pattern in auth group, flag for future harmonization
+
+**Code Review:** 2 bugs to fix (reset-password security gap + dead tokenError code), 1 schema hardening (CHECK on payments.status), 1 consistency note (auth action return type vs. convention), 1 low-severity proxy question (logged-in /forgot-password redirect)
 
 ## Session 67 — 2026-04-15 15:48–16:22 (0.6 hrs)
 **Duration:** 0.6 hours | **Points:** 4 pts

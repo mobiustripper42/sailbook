@@ -69,7 +69,7 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.5 | ~~Student history view — past enrollments, attendance, completions visible to admin/instructor/student~~ | 5 | [x] <!-- completed 2026-04-15 --> `/student/history` ("Experience"), `/admin/students/[id]`, `/instructor/students/[id]`. Shared `fetchStudentHistory()` helper. RLS migration broadens instructor read to all student data. 36 Playwright + 67 pgTAP tests green. |
 | 1.6 | ~~ASA number field — add to profiles, show in admin student list + student profile~~ | 2 | [x] <!-- completed 2026-04-15 --> Migration + UI. Admin list/detail/edit. Student Experience page. 5 Playwright tests. |
 | 1.7 | Experience level — generic codes/lookup table + migrate experience levels onto it | 5 | DEC: generic codes table pattern. Reusable for qualifications, prereqs, skill names. |
-| 1.8 | Password reset — "Forgot password" on login page + reset flow | 3 | Supabase `resetPasswordForEmail()`. Uses default mailer until Phase 3. |
+| 1.8 | ~~Password reset — "Forgot password" on login page + reset flow~~ | 3 | [x] <!-- completed 2026-04-15 --> requestPasswordReset + updatePassword actions; forgot-password + reset-password pages; proxy guard; Playwright tests. Security fix needed: drop getSession fallback on reset-password page. |
 | 1.9 | Unsaved changes guard — warn before leaving form with edits in progress | 3 | `beforeunload` + App Router interception. May need community package. |
 | 1.10 | Student "instructor notes" field + expand instructor roster (phone, email, age, notes indicator) | 3 | "Anything you want your instructor to know?" free text. Dot/asterisk on roster if populated. Andy request. |
 | 1.11 | ~~Spots remaining fix — only count confirmed enrollments against capacity~~ | 3 | [x] <!-- completed 2026-04-13 --> Both RPCs + admin detail page JS filter updated. Tests updated throughout; confirmTestEnrollment helper added. |
@@ -102,7 +102,7 @@ The app makes money. Student self-cancellation ships here (ST-10).
 | # | Task | Effort | Notes |
 |---|------|--------|-------|
 | 2.1 | ~~Stripe account setup — test mode, API keys in `.env.local`~~ | 2 | [x] <!-- completed 2026-04-15 --> stripe npm package, src/lib/stripe.ts singleton client, env vars in .env.local. |
-| 2.2 | Schema migration — `stripe_customer_id` on profiles, `stripe_checkout_session_id` on enrollments, `payments` table | 3 | New migration. pgTAP tests for payments RLS included. |
+| 2.2 | ~~Schema migration — `stripe_customer_id` on profiles, `stripe_checkout_session_id` on enrollments, `payments` table~~ | 3 | [x] <!-- completed 2026-04-15 --> Migration + RLS. 10 pgTAP tests (77/77). Types regenerated. CHECK constraint on payments.status still needed (new migration). |
 | 2.3 | Stripe Checkout Session creation — server action, redirect to Stripe hosted page | 5 | Replaces "Register" button. Capacity check + enrollment hold creation. DEC: pessimistic inventory (hold spot on checkout start). |
 | 2.4 | Enrollment hold expiration — release `pending_payment` spots after timeout | 5 | First scheduled job (Vercel Cron or Supabase Edge Function). Handles race with webhook. |
 | 2.5 | Stripe webhook endpoint — `app/api/webhooks/stripe/route.ts` | 5 | First API route. Verify signature, confirm enrollment on payment success. DEC: DEC-001 survives. |
