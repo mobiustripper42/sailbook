@@ -155,7 +155,6 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 - `NOTIFICATIONS_ENABLED=false` for test environment
 - **During development:** run only the relevant file — `npx playwright test tests/foo.spec.ts`
 - **Single test:** `npx playwright test -g "test name"`
-- **Before every commit:** full suite, all viewports — `npx playwright test` (workers=4 locally, workers=1 in CI — do not override)
 
 ## Session Skills
 
