@@ -186,8 +186,6 @@ For every task — not just bugs — explain the plan and wait for approval befo
 2. Wait for "go", "do it", or equivalent
 3. Do not write code, create files, run tests, or execute any commands until approved
 
-**This includes the full test suite.** The database may be in use. Never run the full `npx playwright test` without telling the user first. Targeted test runs (`npx playwright test tests/foo.spec.ts --project=desktop`) are fine during active development without prior approval.
-
 ## Bug Reports & Questions
 When I report a bug or ask a question:
 1. Explain the cause and your proposed fix
