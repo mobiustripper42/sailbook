@@ -83,11 +83,10 @@ export async function updatePassword(_: unknown, formData: FormData) {
   const supabase = await createClient()
   const password = formData.get('password') as string
 
-  const { error } = await supabase.auth.updateUser({ password })
+  const { data: { user }, error } = await supabase.auth.updateUser({ password })
 
   if (error) return { error: error.message }
 
-  const { data: { user } } = await supabase.auth.getUser()
   const meta = (user?.user_metadata ?? {}) as Record<string, unknown>
   if (meta.is_admin) redirect('/admin/dashboard')
   if (meta.is_instructor) redirect('/instructor/dashboard')
