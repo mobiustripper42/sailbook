@@ -70,6 +70,7 @@ export async function updateProfile(formData: FormData) {
   const last_name = (formData.get('last_name') as string).trim()
   const phone = (formData.get('phone') as string)?.trim() || null
   const experience_level = (formData.get('experience_level') as string) || null
+  const asa_number = (formData.get('asa_number') as string)?.trim() || null
   const is_active = formData.get('is_active') === 'true'
   const returnPath = formData.get('return_path') as string
 
@@ -84,6 +85,7 @@ export async function updateProfile(formData: FormData) {
       last_name,
       phone,
       experience_level: experience_level === '—' ? null : experience_level,
+      asa_number,
       is_active,
       updated_at: new Date().toISOString(),
     })

@@ -14,6 +14,7 @@ type Profile = {
   email: string
   phone: string | null
   experience_level: string | null
+  asa_number?: string | null
   is_active: boolean
   is_student: boolean
   is_instructor: boolean
@@ -81,6 +82,13 @@ export default function ProfileEditForm({
         <Label htmlFor="phone">Phone</Label>
         <Input id="phone" name="phone" defaultValue={profile.phone ?? ''} />
       </div>
+
+      {profile.is_student && (
+        <div className="space-y-2">
+          <Label htmlFor="asa_number">ASA Number</Label>
+          <Input id="asa_number" name="asa_number" defaultValue={profile.asa_number ?? ''} placeholder="e.g. 123456" maxLength={20} />
+        </div>
+      )}
 
       {profile.is_student && (
         <div className="space-y-2">

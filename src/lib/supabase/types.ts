@@ -1,81 +1,522 @@
-// Hand-written types matching docs/sailbook-schema.sql
-// Regenerate with: npx supabase gen types typescript --local > src/lib/supabase/types.ts
+Need to install the following packages:
+supabase@2.91.2
+Ok to proceed? (y) 
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
-export type Profile = {
-  id: string
-  email: string
-  first_name: string
-  last_name: string
-  phone: string | null
-  is_admin: boolean
-  is_instructor: boolean
-  is_student: boolean
-  experience_level: string | null
-  is_active: boolean
-  theme_preference: 'light' | 'dark' | 'system'
-  created_at: string
-  updated_at: string
+export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  public: {
+    Tables: {
+      course_types: {
+        Row: {
+          certification_body: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          max_students: number | null
+          min_hours: number | null
+          name: string
+          short_code: string
+          updated_at: string | null
+        }
+        Insert: {
+          certification_body?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_students?: number | null
+          min_hours?: number | null
+          name: string
+          short_code: string
+          updated_at?: string | null
+        }
+        Update: {
+          certification_body?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_students?: number | null
+          min_hours?: number | null
+          name?: string
+          short_code?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      courses: {
+        Row: {
+          capacity: number
+          course_type_id: string
+          created_at: string | null
+          created_by: string
+          description: string | null
+          id: string
+          instructor_id: string | null
+          notes: string | null
+          price: number | null
+          status: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          capacity?: number
+          course_type_id: string
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          id?: string
+          instructor_id?: string | null
+          notes?: string | null
+          price?: number | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          capacity?: number
+          course_type_id?: string
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          id?: string
+          instructor_id?: string | null
+          notes?: string | null
+          price?: number | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_course_type_id_fkey"
+            columns: ["course_type_id"]
+            isOneToOne: false
+            referencedRelation: "course_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enrollments: {
+        Row: {
+          course_id: string
+          enrolled_at: string | null
+          id: string
+          status: string | null
+          student_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          course_id: string
+          enrolled_at?: string | null
+          id?: string
+          status?: string | null
+          student_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          course_id?: string
+          enrolled_at?: string | null
+          id?: string
+          status?: string | null
+          student_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          asa_number: string | null
+          created_at: string | null
+          email: string
+          experience_level: string | null
+          first_name: string
+          id: string
+          is_active: boolean | null
+          is_admin: boolean
+          is_instructor: boolean
+          is_student: boolean
+          last_name: string
+          phone: string | null
+          theme_preference: string
+          updated_at: string | null
+        }
+        Insert: {
+          asa_number?: string | null
+          created_at?: string | null
+          email: string
+          experience_level?: string | null
+          first_name: string
+          id: string
+          is_active?: boolean | null
+          is_admin?: boolean
+          is_instructor?: boolean
+          is_student?: boolean
+          last_name: string
+          phone?: string | null
+          theme_preference?: string
+          updated_at?: string | null
+        }
+        Update: {
+          asa_number?: string | null
+          created_at?: string | null
+          email?: string
+          experience_level?: string | null
+          first_name?: string
+          id?: string
+          is_active?: boolean | null
+          is_admin?: boolean
+          is_instructor?: boolean
+          is_student?: boolean
+          last_name?: string
+          phone?: string | null
+          theme_preference?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      session_attendance: {
+        Row: {
+          created_at: string | null
+          enrollment_id: string
+          id: string
+          makeup_session_id: string | null
+          notes: string | null
+          session_id: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          enrollment_id: string
+          id?: string
+          makeup_session_id?: string | null
+          notes?: string | null
+          session_id: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          enrollment_id?: string
+          id?: string
+          makeup_session_id?: string | null
+          notes?: string | null
+          session_id?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_attendance_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_attendance_makeup_session_id_fkey"
+            columns: ["makeup_session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_attendance_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessions: {
+        Row: {
+          cancel_reason: string | null
+          course_id: string
+          created_at: string | null
+          date: string
+          end_time: string
+          id: string
+          instructor_id: string | null
+          location: string | null
+          notes: string | null
+          start_time: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cancel_reason?: string | null
+          course_id: string
+          created_at?: string | null
+          date: string
+          end_time: string
+          id?: string
+          instructor_id?: string | null
+          location?: string | null
+          notes?: string | null
+          start_time: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cancel_reason?: string | null
+          course_id?: string
+          created_at?: string | null
+          date?: string
+          end_time?: string
+          id?: string
+          instructor_id?: string | null
+          location?: string | null
+          notes?: string | null
+          start_time?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      get_all_course_enrollment_counts: {
+        Args: never
+        Returns: {
+          active_count: number
+          course_id: string
+        }[]
+      }
+      get_course_active_enrollment_count: {
+        Args: { p_course_id: string }
+        Returns: number
+      }
+      get_enrolled_course_ids: { Args: { user_id: string }; Returns: string[] }
+      get_instructor_course_ids: {
+        Args: { user_id: string }
+        Returns: string[]
+      }
+      get_instructor_session_ids: {
+        Args: { user_id: string }
+        Returns: string[]
+      }
+      get_instructor_student_ids: {
+        Args: { user_id: string }
+        Returns: string[]
+      }
+      get_student_enrollment_ids: {
+        Args: { user_id: string }
+        Returns: string[]
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
 }
 
-export type CourseType = {
-  id: string
-  name: string
-  short_code: string
-  certification_body: string | null
-  description: string | null
-  min_hours: number | null
-  max_students: number
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-export type Course = {
-  id: string
-  course_type_id: string
-  instructor_id: string | null
-  title: string | null
-  description: string | null
-  capacity: number
-  price: number | null
-  status: 'draft' | 'active' | 'completed' | 'cancelled'
-  notes: string | null
-  created_at: string
-  updated_at: string
-  created_by: string
-}
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
-export type Session = {
-  id: string
-  course_id: string
-  instructor_id: string | null
-  date: string
-  start_time: string
-  end_time: string
-  location: string | null
-  status: string
-  cancel_reason: string | null
-  notes: string | null
-  created_at: string
-  updated_at: string
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
 }
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
-export type Enrollment = {
-  id: string
-  course_id: string
-  student_id: string
-  status: string
-  enrolled_at: string
-  updated_at: string
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
 }
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
-export type SessionAttendance = {
-  id: string
-  session_id: string
-  enrollment_id: string
-  status: string
-  makeup_session_id: string | null
-  notes: string | null
-  created_at: string
-  updated_at: string
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
 }
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {},
+  },
+} as const
+

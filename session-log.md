@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 67 — 2026-04-15 15:48 [open]
+
 ## Session 66 — 2026-04-15 15:12–15:43 (0.5 hrs)
 **Duration:** 0.5 hours | **Points:** 12 pts
 **Tasks:** Phase 1 housekeeping + 6.3/6.4 ui-reviewer

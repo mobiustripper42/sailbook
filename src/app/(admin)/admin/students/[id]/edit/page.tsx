@@ -9,7 +9,7 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name, email, phone, experience_level, is_active, is_student, is_instructor')
+    .select('id, first_name, last_name, email, phone, experience_level, asa_number, is_active, is_student, is_instructor')
     .eq('id', id)
     .eq('is_student', true)
     .single()

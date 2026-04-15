@@ -17,7 +17,7 @@ export default async function StudentsPage() {
   const { data: students, error } = await supabase
     .from('profiles')
     .select(`
-      id, first_name, last_name, email, phone, experience_level, is_active, created_at,
+      id, first_name, last_name, email, phone, experience_level, asa_number, is_active, created_at,
       enrollments:enrollments(id, status)
     `)
     .eq('is_student', true)
@@ -42,6 +42,7 @@ export default async function StudentsPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
+                <TableHead>ASA #</TableHead>
                 <TableHead>Experience</TableHead>
                 <TableHead>Enrollments</TableHead>
                 <TableHead>Status</TableHead>
@@ -59,6 +60,7 @@ export default async function StudentsPage() {
                     <TableCell className="font-medium">{s.first_name} {s.last_name}</TableCell>
                     <TableCell>{s.email}</TableCell>
                     <TableCell>{s.phone ?? '—'}</TableCell>
+                    <TableCell>{s.asa_number ?? '—'}</TableCell>
                     <TableCell className="capitalize">{s.experience_level ?? '—'}</TableCell>
                     <TableCell>{activeCount}</TableCell>
                     <TableCell>

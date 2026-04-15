@@ -8,12 +8,23 @@ export default async function StudentHistoryPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('asa_number')
+    .eq('id', user.id)
+    .single()
+
   const { data: courses, error } = await fetchStudentHistory(supabase, user.id)
   if (error) return <p className="text-sm text-destructive">{error}</p>
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Experience</h1>
+      <div>
+        <h1 className="text-2xl font-semibold">Experience</h1>
+        {profile?.asa_number && (
+          <p className="text-sm text-muted-foreground mt-1">ASA #: {profile.asa_number}</p>
+        )}
+      </div>
       <StudentHistoryList
         courses={courses}
         emptyMessage="No course history yet. Enroll in a course to get started."

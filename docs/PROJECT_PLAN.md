@@ -84,8 +84,9 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.20 | ~~Instructor mobile hamburger menu — aside is always visible at all viewports, no mobile drawer exists~~ | 2 | [x] <!-- completed 2026-04-14 --> InstructorMobileNavDrawer component; hidden md:flex on aside; 9 Playwright tests. |
 | 1.21 | ~~Dev login helper — dropdown of seed users that auto-fills + submits the login form~~ | 2 | [x] <!-- completed 2026-04-14 --> DevLoginHelper component; NEXT_PUBLIC_DEV_MODE gate; 7 seed users; requestSubmit(); 4 Playwright tests. |
 | 1.22 | ~~End-of-phase @ui-reviewer pass~~ | — | [x] <!-- completed 2026-04-15 --> Run as part of Session 66 housekeeping. Findings folded into 6.3/6.4 which are now done. |
+| 1.23 | Student account page — let students edit their own name, phone, ASA number, and experience level | 3 | `/student/account`. ST-13 instructor notes field can land here too (alongside 1.10). |
 
-**Phase 1 total: 55 pts** (40 original + 3 for 1.15 + 2 for 1.16 + 2 for 1.17 + 2 for 1.18 + 2 for 1.19 + 2 for 1.20 + 2 for 1.21)
+**Phase 1 total: 58 pts** (40 original + 3 for 1.15 + 2 for 1.16 + 2 for 1.17 + 2 for 1.18 + 2 for 1.19 + 2 for 1.20 + 2 for 1.21 + 3 for 1.23)
 **Projected hours: ~19 hrs**
 
 **Session 49 polish credit: 8 pts** — one-off theme diagnosis/fix session (2026-04-13). Not tied to a task; effort logged separately. Counts toward lifetime velocity but not Phase 1 task completion.
