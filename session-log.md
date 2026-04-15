@@ -4,6 +4,7 @@ Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
 ## Session 65 — 2026-04-15 11:06 [open]
+**[PAUSED 11:25]** Working on: 1.5 student history/experience view. Left off at: plan approved, no code written yet. Naming agreed: call the page/label "Experience" (student-facing). Next: build per the approved plan — `StudentHistoryList` component, `/student/history` page, `/admin/students/[id]` view page, `/instructor/students/[id]` page, nav link, admin list link, instructor roster link, Playwright tests.
 
 ## Session 64 — 2026-04-14 19:52–20:50 (1.0 hrs)
 **Duration:** 1.0 hours | **Points:** 2 pts
