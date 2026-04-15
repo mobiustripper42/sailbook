@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ import DevLoginHelper from "@/components/dev-login-helper";
 
 export default function LoginPage() {
   const [state, action, pending] = useActionState(login, null);
+  const [email, setEmail] = useState("");
 
   return (
     <div className="flex flex-col items-center w-full max-w-sm">
@@ -39,6 +40,8 @@ export default function LoginPage() {
               type="email"
               required
               autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="space-y-2">
