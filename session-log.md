@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 65 — 2026-04-15 11:06 [open]
+
 ## Session 64 — 2026-04-14 19:52–20:50 (1.0 hrs)
 **Duration:** 1.0 hours | **Points:** 2 pts
 **Task:** Phase 1.21 deferrals — code review fixes from Session 63
