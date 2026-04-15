@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 72 — 2026-04-15 19:08 [open]
+
 ## Session 71 — 2026-04-15 17:59–19:01 (1.0 hrs)
 **Duration:** 1.0 hours | **Points:** 3 pts
 **Tasks:** Phase 1.8 code review fixes, Phase 1.9 unsaved changes guard

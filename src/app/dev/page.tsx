@@ -9,7 +9,7 @@ export default function DevPage() {
   if (!allowed) notFound()
 
   return (
-    <div className="min-h-screen bg-white text-sm font-sans">
+    <div className="min-h-screen bg-background text-foreground text-sm font-sans">
       <div className="max-w-4xl mx-auto px-8 py-10 space-y-12">
 
         {/* Header */}
@@ -21,8 +21,8 @@ export default function DevPage() {
             </span>
           </div>
           <p className="text-muted-foreground mt-1 text-xs">
-            Demo seed: <code className="bg-gray-100 px-1.5 py-0.5 rounded font-mono">docs/demo-seed.sql</code>
-            &nbsp;· Password for all accounts: <code className="bg-gray-100 px-1.5 py-0.5 rounded font-mono">qwert12345</code><CopyButton text="qwert12345" />
+            Demo seed: <code className="bg-muted px-1.5 py-0.5 rounded font-mono">docs/demo-seed.sql</code>
+            &nbsp;· Password for all accounts: <code className="bg-muted px-1.5 py-0.5 rounded font-mono">qwert12345</code><CopyButton text="qwert12345" />
           </p>
         </div>
 
@@ -31,7 +31,7 @@ export default function DevPage() {
           <h2 className="font-semibold text-base mb-3">Test Accounts</h2>
           <table className="w-full border-collapse text-xs">
             <thead>
-              <tr className="border-b bg-gray-50 text-left">
+              <tr className="border-b bg-muted text-left">
                 <th className="px-3 py-2 font-medium">Name</th>
                 <th className="px-3 py-2 font-medium">Email</th>
                 <th className="px-3 py-2 font-medium">Role</th>
@@ -232,13 +232,13 @@ export default function DevPage() {
           <h2 className="font-semibold text-base mb-2">Resetting Demo Data</h2>
           <ol className="space-y-1 text-xs text-muted-foreground list-decimal list-inside">
             <li>Open Supabase → SQL Editor</li>
-            <li>Run the <strong>WIPE DEV DATA — FULL RESET</strong> block from <code className="bg-gray-100 px-1 rounded">docs/sql-helpers.sql</code></li>
-            <li>Run all of <code className="bg-gray-100 px-1 rounded">docs/demo-seed.sql</code></li>
+            <li>Run the <strong>WIPE DEV DATA — FULL RESET</strong> block from <code className="bg-muted px-1 rounded">docs/sql-helpers.sql</code></li>
+            <li>Run all of <code className="bg-muted px-1 rounded">docs/demo-seed.sql</code></li>
             <li>Refresh this page — you&apos;re back to baseline</li>
           </ol>
           <p className="text-xs text-muted-foreground mt-3">
             For QA edge-case testing (full/cancelled/draft scenarios), use{' '}
-            <code className="bg-gray-100 px-1 rounded">docs/dev-seed-qa.sql</code> instead.
+            <code className="bg-muted px-1 rounded">docs/dev-seed-qa.sql</code> instead.
           </p>
         </section>
 

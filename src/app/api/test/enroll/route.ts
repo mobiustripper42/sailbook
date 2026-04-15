@@ -10,7 +10,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/types'
 
 export async function POST(req: NextRequest) {
-  if (process.env.NEXT_PUBLIC_DEV_MODE !== 'true') {
+  if (process.env.NODE_ENV !== 'development') {
     return NextResponse.json({ error: 'Not available' }, { status: 403 })
   }
 

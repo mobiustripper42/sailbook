@@ -112,7 +112,7 @@ The app makes money. Student self-cancellation ships here (ST-10).
 | 2.9 | Member pricing field — `member_price` on courses alongside `price` | 2 | Checkout logic picks correct price based on profile. |
 | 2.10 | Playwright end-to-end payment test — register → pay → confirm → cancel → refund | 5 | Full chain integration test using Stripe test cards + Stripe CLI for webhooks. |
 | 2.11 | README: Stripe setup instructions — keys, webhook config, test mode | 1 | Document `.env.local` keys, webhook CLI setup, and test card reference for new devs. |
-| 2.12 | End-of-phase @ui-reviewer and lint pass | 2 | Run after payment UI is wired. Focus on checkout flow, confirmation page, payment status in enrollment list. |
+| 2.12 | End-of-phase @ui-reviewer and lint pass | 2 | Run after payment UI is wired. Focus on checkout flow, confirmation page, payment status in enrollment list. Also: replace all native `<select>` elements with shadcn `<Select>` (experience level, status dropdowns) — bg-transparent breaks dark mode, should have been caught by ui-reviewer. |
 
 **Phase 2 total: 40 pts**
 **Projected hours: ~14 hrs**

@@ -120,7 +120,7 @@ export async function createCheckoutSession(
     .select('id, status, hold_expires_at, stripe_checkout_session_id')
     .eq('course_id', courseId)
     .eq('student_id', user.id)
-    .single()
+    .maybeSingle()
 
   const holdMinutes = parseInt(process.env.ENROLLMENT_HOLD_MINUTES ?? '15', 10)
   const now = new Date()
@@ -173,10 +173,15 @@ export async function createCheckoutSession(
     })
     stripeCustomerId = customer.id
 
-    await supabase
+    const { error: customerUpdateError } = await supabase
       .from('profiles')
       .update({ stripe_customer_id: stripeCustomerId })
       .eq('id', user.id)
+    if (customerUpdateError) {
+      // Non-fatal: Stripe customer exists, enrollment can proceed.
+      // Duplicate customer risk is low; admin can merge via Stripe dashboard.
+      console.error('Failed to save stripe_customer_id:', customerUpdateError.message)
+    }
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'

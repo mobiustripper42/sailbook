@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,9 +24,19 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col items-center w-full max-w-sm">
       <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle>SailBook</CardTitle>
-        <CardDescription>Sign in to your account</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>SailBook</CardTitle>
+          <CardDescription>Sign in to your account</CardDescription>
+        </div>
+        <Image
+          src="/logo.png"
+          alt="Learn To Sail Cleveland"
+          width={80}
+          height={80}
+          className="h-20 w-auto"
+          priority
+        />
       </CardHeader>
       <form action={action}>
         <CardContent className="space-y-4">

@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     template: '%s',
   },
   description: "Course scheduling for Learn To Sail Cleveland",
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
