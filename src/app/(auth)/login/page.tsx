@@ -21,7 +21,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center w-full max-w-sm">
-    <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm">
       <CardHeader>
         <CardTitle>SailBook</CardTitle>
         <CardDescription>Sign in to your account</CardDescription>
@@ -67,8 +67,8 @@ export default function LoginPage() {
           </p>
         </CardFooter>
       </form>
-    </Card>
-    <DevLoginHelper />
+      </Card>
+      <DevLoginHelper />
     </div>
   );
 }
