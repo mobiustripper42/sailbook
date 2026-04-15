@@ -3,7 +3,34 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 71 — 2026-04-15 17:59 [open]
+## Session 71 — 2026-04-15 17:59–19:01 (1.0 hrs)
+**Duration:** 1.0 hours | **Points:** 3 pts
+**Tasks:** Phase 1.8 code review fixes, Phase 1.9 unsaved changes guard
+
+**Completed:**
+- `src/app/(auth)/actions.ts` — `requestPasswordReset` guards undefined `NEXT_PUBLIC_SITE_URL`; `updatePassword` uses user returned directly from `updateUser` (fixes null-user bug under recovery session); role-aware redirect (admin → `/admin/dashboard`, instructor → `/instructor/dashboard`)
+- `src/app/(auth)/forgot-password/page.tsx` — email input made controlled (same fix as login page)
+- `src/app/(auth)/reset-password/page.tsx` — removed `getSession` fallback security gap (logged-in users could bypass recovery token); wired `SIGNED_OUT` → `setTokenError` so "Link expired" card is now reachable; dropped `router` from `useEffect` deps
+- `src/lib/supabase/types.ts` — stripped leaked `Connecting to db 5432` line that was breaking ESLint (pre-existing)
+- `src/hooks/use-unsaved-changes.ts` — new hook: `beforeunload` (hard nav) + capture-phase click listener (Next.js `<Link>` / sidebar nav) + `pushState` guard + `popstate` listener (browser back button); returns `confirmDiscard()` helper
+- Wired to all admin edit/create forms: `course-edit-form`, `course-form`, `course-type-form`, `user-edit-form`, `profile-edit-form`, `session-row` (inline edit), `add-session-form`, `makeup-session-form`
+- `tests/unsaved-changes.spec.ts` — 32 passing, 4 skipped (desktop-only sidebar tests skip at mobile/tablet)
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- `supabase db push` to apply hold_expires_at migration from session 70 to remote (if not already done)
+- Phase 2 priority: fix 3 code review items from session 70 before next feature (`.single()` → `.maybeSingle()`, stripe_customer_id update error check, NEXT_PUBLIC_DEV_MODE → NODE_ENV in test route)
+- Then continue Phase 2: 2.4 (enrollment hold expiration) or 2.5 (Stripe webhook)
+- Remaining Phase 1: 1.7 (experience levels), 1.10 (instructor notes), 1.14 (dashboard clarity), 1.23 (student account page)
+
+**Context:**
+- Known tradeoff in `useUnsavedChanges`: on successful save + redirect, the `pushState` guard entry stays in history — one extra Back click needed after leaving an edit form. Acceptable complexity tradeoff
+- `SIGNED_OUT` on reset-password page fires if user signs out in another tab while this tab is open — would incorrectly show "Link expired." Extremely edge-case, noted in code review
+
+**Code Review:** 1 bug fixed immediately (updatePassword redundant getUser call). 4 low-severity notes: external link bypass in click guard (no external links in admin nav, latent), guard entry not cleaned up when isDirty→false without navigation (documented tradeoff), dropdown toggle reset pattern vs explicit close (readability), desktop-only skip using `width < 1024` (correct, 768px skips).
 
 ## Session 70 — 2026-04-15 17:56–18:50 (0.9 hrs)
 **Duration:** 0.9 hours | **Points:** 5 pts
