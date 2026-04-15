@@ -65,30 +65,38 @@ export async function updateThemePreference(theme: string): Promise<{ error: str
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
   const id = formData.get('id') as string
   const first_name = (formData.get('first_name') as string).trim()
   const last_name = (formData.get('last_name') as string).trim()
   const phone = (formData.get('phone') as string)?.trim() || null
   const experience_level = (formData.get('experience_level') as string) || null
   const asa_number = (formData.get('asa_number') as string)?.trim() || null
-  const is_active = formData.get('is_active') === 'true'
   const returnPath = formData.get('return_path') as string
 
   if (!first_name || !last_name) {
     return { error: 'First name and last name are required.' }
   }
 
+  // Only admins may flip is_active; students editing their own profile cannot deactivate themselves.
+  const isAdmin = formData.get('is_admin_caller') === 'true'
+  const updates: Record<string, unknown> = {
+    first_name,
+    last_name,
+    phone,
+    experience_level: experience_level === '—' ? null : experience_level,
+    asa_number,
+    updated_at: new Date().toISOString(),
+  }
+  if (isAdmin) {
+    updates.is_active = formData.get('is_active') === 'true'
+  }
+
   const { error } = await supabase
     .from('profiles')
-    .update({
-      first_name,
-      last_name,
-      phone,
-      experience_level: experience_level === '—' ? null : experience_level,
-      asa_number,
-      is_active,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updates)
     .eq('id', id)
 
   if (error) return { error: error.message }

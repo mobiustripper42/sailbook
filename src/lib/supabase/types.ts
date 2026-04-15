@@ -1,6 +1,3 @@
-Need to install the following packages:
-supabase@2.91.2
-Ok to proceed? (y) 
 export type Json =
   | string
   | number
@@ -519,4 +516,8 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
+// Convenience row type aliases
+export type Course = Database['public']['Tables']['courses']['Row']
+export type CourseType = Database['public']['Tables']['course_types']['Row']
 

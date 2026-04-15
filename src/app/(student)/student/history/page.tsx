@@ -12,7 +12,7 @@ export default async function StudentHistoryPage() {
     .from('profiles')
     .select('asa_number')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
   const { data: courses, error } = await fetchStudentHistory(supabase, user.id)
   if (error) return <p className="text-sm text-destructive">{error}</p>
