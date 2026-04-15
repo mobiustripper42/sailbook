@@ -144,6 +144,7 @@ export type Database = {
         Row: {
           course_id: string
           enrolled_at: string | null
+          hold_expires_at: string | null
           id: string
           status: string | null
           stripe_checkout_session_id: string | null
@@ -153,6 +154,7 @@ export type Database = {
         Insert: {
           course_id: string
           enrolled_at?: string | null
+          hold_expires_at?: string | null
           id?: string
           status?: string | null
           stripe_checkout_session_id?: string | null
@@ -162,6 +164,7 @@ export type Database = {
         Update: {
           course_id?: string
           enrolled_at?: string | null
+          hold_expires_at?: string | null
           id?: string
           status?: string | null
           stripe_checkout_session_id?: string | null
@@ -582,5 +585,5 @@ export const Constants = {
 
 
 // Convenience row type aliases
-export type Course = Database['public']['Tables']['courses']['Row']
-export type CourseType = Database['public']['Tables']['course_types']['Row']
+export type Course = import("./types").Database["public"]["Tables"]["courses"]["Row"]
+export type CourseType = import("./types").Database["public"]["Tables"]["course_types"]["Row"]

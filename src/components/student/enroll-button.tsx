@@ -2,7 +2,7 @@
 
 import { useTransition, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { enrollInCourse } from '@/app/(student)/student/courses/[id]/actions'
+import { createCheckoutSession } from '@/app/(student)/student/courses/[id]/actions'
 
 interface EnrollButtonProps {
   courseId: string
@@ -17,8 +17,12 @@ export default function EnrollButton({ courseId, disabled, disabledReason }: Enr
   function handleEnroll() {
     setError(null)
     startTransition(async () => {
-      const result = await enrollInCourse(courseId)
-      if (result?.error) setError(result.error)
+      const result = await createCheckoutSession(courseId)
+      if ('error' in result) {
+        setError(result.error)
+      } else {
+        window.location.href = result.url
+      }
     })
   }
 
@@ -33,7 +37,7 @@ export default function EnrollButton({ courseId, disabled, disabledReason }: Enr
   return (
     <div className="space-y-2">
       <Button onClick={handleEnroll} disabled={pending} className="w-full sm:w-auto">
-        {pending ? 'Enrolling…' : 'Enroll in This Course'}
+        {pending ? 'Preparing checkout…' : 'Register & Pay'}
       </Button>
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>

@@ -38,9 +38,11 @@ export async function proxy(request: NextRequest) {
 
   const isPublicRoute = PUBLIC_ROUTES.includes(pathname)
   const isRoot = pathname === '/'
+  // API routes handle their own auth — don't redirect to login
+  const isApiRoute = pathname.startsWith('/api/')
 
-  // Not logged in — send to login (except public routes)
-  if (!user && !isPublicRoute) {
+  // Not logged in — send to login (except public routes and API routes)
+  if (!user && !isPublicRoute && !isApiRoute) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 

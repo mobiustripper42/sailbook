@@ -64,7 +64,10 @@ export default async function StudentCourseDetailPage({
         .single()
     : { data: null }
 
-  const isEnrolled = myEnrollment && myEnrollment.status !== 'cancelled'
+  const isEnrolled = myEnrollment &&
+    myEnrollment.status !== 'cancelled' &&
+    myEnrollment.status !== 'pending_payment'
+  const hasPendingPayment = myEnrollment?.status === 'pending_payment'
 
   // Fetch attendance records if enrolled
   const { data: myAttendance } = isEnrolled
@@ -240,6 +243,11 @@ export default async function StudentCourseDetailPage({
             ) : (
               <Badge className="text-sm px-3 py-1">Enrolled</Badge>
             )}
+          </div>
+        ) : hasPendingPayment ? (
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary" className="text-sm px-3 py-1">Payment pending</Badge>
+            <span className="text-sm text-muted-foreground">Complete your payment to confirm your spot.</span>
           </div>
         ) : (
           <EnrollButton

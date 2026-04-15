@@ -60,16 +60,19 @@ async function createInstructorCourse(
     await adminCtx.close();
   }
 
-  // pw_student enrolls
-  const studentCtx = await browser.newContext();
-  const studentPage = await studentCtx.newPage();
+  // pw_student enrolls via dev-only API (bypasses Stripe)
+  const apiCtx = await browser.newContext();
+  const apiPage = await apiCtx.newPage();
   try {
-    await loginAs(studentPage, 'pw_student@ltsc.test', '/student/dashboard');
-    await studentPage.goto(`/student/courses/${courseId}`);
-    await studentPage.getByRole('button', { name: 'Enroll in This Course' }).click();
-    await expect(studentPage.getByText('Pending confirmation')).toBeVisible({ timeout: 10000 });
+    const response = await apiPage.request.post('http://localhost:3000/api/test/enroll', {
+      data: { courseId, studentEmail: 'pw_student@ltsc.test' },
+    });
+    if (!response.ok()) {
+      const body = await response.text();
+      throw new Error(`Test enrollment failed: ${response.status()} ${body}`);
+    }
   } finally {
-    await studentCtx.close();
+    await apiCtx.close();
   }
 
   return { courseId, sessionId };
