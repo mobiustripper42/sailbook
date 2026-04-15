@@ -172,7 +172,12 @@ export default async function InstructorSessionRosterPage({
                   <TableRow key={s.enrollment_id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
-                        {s.last_name}, {s.first_name}
+                        <Link
+                          href={`/instructor/students/${s.student_id}`}
+                          className="hover:underline underline-offset-2"
+                        >
+                          {s.last_name}, {s.first_name}
+                        </Link>
                         {s.makeup_from_date && (
                           <Badge variant="secondary" className="text-xs font-normal">
                             Makeup from {fmtDateLong(s.makeup_from_date)}

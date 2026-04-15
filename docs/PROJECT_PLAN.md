@@ -109,8 +109,9 @@ The app makes money. Student self-cancellation ships here (ST-10).
 | 2.8 | Admin enrollment view — payment status, Stripe link, manual refund trigger | 3 | UI additions to existing enrollment list. Admin can issue refunds from dashboard. |
 | 2.9 | Member pricing field — `member_price` on courses alongside `price` | 2 | Checkout logic picks correct price based on profile. |
 | 2.10 | Playwright end-to-end payment test — register → pay → confirm → cancel → refund | 5 | Full chain integration test using Stripe test cards + Stripe CLI for webhooks. |
+| 2.11 | README: Stripe setup instructions — keys, webhook config, test mode | 1 | Document `.env.local` keys, webhook CLI setup, and test card reference for new devs. |
 
-**Phase 2 total: 37 pts**
+**Phase 2 total: 38 pts**
 **Projected hours: ~14 hrs**
 
 **Ejection point:** App takes money. Students can pay and self-cancel. This is the make-or-break phase.
@@ -135,8 +136,9 @@ Users know what's happening. Auth is production-grade.
 | 3.10 | Password strength + email verification | 3 | Supabase Auth config + custom email template via Resend. |
 | 3.11 | OAuth login — Google | 2 | Supabase toggle + Google Cloud console. Email/password remains fallback. |
 | 3.12 | Security audit — run @security-agent, evaluate findings, fix serious issues | 3 | Post-auth-hardening + payments-live audit. Non-serious findings move to backlog. |
+| 3.13 | README: Twilio/Resend setup instructions — keys, sender config | 1 | Document Twilio phone number, Resend API key, domain verification, and sender config for new devs. |
 
-**Phase 3 total: 36 pts**
+**Phase 3 total: 37 pts**
 **Projected hours: ~14 hrs**
 
 **Ejection point:** Students get confirmations, cancellation notices, and reminders. Auth is solid with email verification and OAuth. Security audited. The school runs without phone calls.
@@ -257,15 +259,15 @@ Transforms the app from scheduling into a learning management tool.
 |-------|-----|--------------------------------|---------------------|
 | 0 — Infrastructure | 70 | ~27 hrs | Dev environment ready |
 | 1 — V1 Fixes | 51 | ~19 hrs | V1 is solid |
-| 2 — Payments | 37 | ~14 hrs | App makes money |
-| 3 — Notifications + Auth | 36 | ~14 hrs | Users stay informed, auth hardened, security audited |
+| 2 — Payments | 38 | ~14 hrs | App makes money |
+| 3 — Notifications + Auth | 37 | ~14 hrs | Users stay informed, auth hardened, security audited |
 | 4 — Identity | 27 | ~10 hrs | Onboarding is clean |
 | 5 — Pricing | 29 | ~11 hrs | Flexible pricing, waitlist, prereqs |
 | 6 — Polish | 44 | ~17 hrs | Professional, accessible, navigable, security verified |
 | 7 — Skills | 40–60 | ~15–23 hrs | Learning management |
-| **Total (0–6)** | **288** | **~109 hrs** | |
+| **Total (0–6)** | **290** | **~110 hrs** | |
 
-At V1 velocity (0.38 hrs/pt): ~109 hours for Phases 0–6.
+At V1 velocity (0.38 hrs/pt): ~110 hours for Phases 0–6.
 At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–2 (critical path to payments).
 
 ---
@@ -276,12 +278,12 @@ At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–
 |-------|-----------|------------|--------------|-----------|-------|
 | 0 — Infrastructure | 70 | ~27 | — | — | |
 | 1 — V1 Fixes | 51 | ~19 | — | — | +8 polish credit (session 49) |
-| 2 — Payments | 37 | ~14 | — | — | |
-| 3 — Notifications | 36 | ~14 | — | — | |
+| 2 — Payments | 38 | ~14 | — | — | |
+| 3 — Notifications | 37 | ~14 | — | — | |
 | 4 — Identity | 27 | ~10 | — | — | |
 | 5 — Pricing | 29 | ~11 | — | — | |
 | 6 — Polish | 44 | ~17 | — | — | |
-| **Total** | **288** | **~109** | — | — | |
+| **Total** | **290** | **~110** | — | — | |
 
 ---
 

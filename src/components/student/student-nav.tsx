@@ -9,6 +9,7 @@ const links = [
   { href: '/student/courses', label: 'Browse Courses' },
   { href: '/student/my-courses', label: 'My Courses' },
   { href: '/student/attendance', label: 'Attendance' },
+  { href: '/student/history', label: 'Experience' },
 ]
 
 export default function StudentNav() {

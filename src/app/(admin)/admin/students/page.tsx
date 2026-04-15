@@ -67,12 +67,20 @@ export default async function StudentsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Link
-                        href={`/admin/students/${s.id}/edit`}
-                        className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2"
-                      >
-                        Edit
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/admin/students/${s.id}`}
+                          className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2"
+                        >
+                          View
+                        </Link>
+                        <Link
+                          href={`/admin/students/${s.id}/edit`}
+                          className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2"
+                        >
+                          Edit
+                        </Link>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )

@@ -9,7 +9,7 @@ Replaces manual scheduling with a web app where:
 - **Students** self-register, pay via Stripe, view schedule and attendance, cancel enrollments, manage notification preferences
 
 ## Stack
-- **Frontend:** Next.js 14+ (App Router), Tailwind CSS, shadcn/ui, Geist Sans
+- **Frontend:** Next.js 16+ (App Router), Tailwind CSS, shadcn/ui, Nunito Sans
 - **Backend:** Supabase (PostgreSQL + Auth + Row Level Security) — no separate API server
 - **Payments:** Stripe (Checkout Sessions, webhooks)
 - **Notifications:** Twilio (SMS), Resend (email)
@@ -138,11 +138,12 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 - Migrations: `supabase/migrations/YYYYMMDDHHMMSS_descriptive_name.sql`
 
 ### UI / Brand
-- Colors: white/black base, navy and gray accents (zinc family). No color for color's sake.
-- Font: Geist Sans
+- Theme: Mira preset (b7CSfQ4Xo), Sky/Mist, oklch color vars. No color for color's sake.
+- Font: Nunito Sans (heading + body)
+- Dark mode default. Light mode available via toggle. Preference stored in user profile.
 - No nautical kitsch
-- shadcn/ui defaults. Override only when necessary.
-- One border radius: `rounded-lg`
+- Use Mira theme vars as-is. Don't layer additional shadcn overrides on top.
+- One border radius: xs throughout (`--radius: 0.125rem`) — never mixed
 - Layout padding in layout.tsx only (DEC-017)
 - Student-facing cards: `size="sm"` prop
 - Every page works at 375px (enforced by the Playwright mobile project)
@@ -155,13 +156,14 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 - `NOTIFICATIONS_ENABLED=false` for test environment
 - **During development:** run only the relevant file — `npx playwright test tests/foo.spec.ts`
 - **Single test:** `npx playwright test -g "test name"`
+- **Before pushing:** user runs the full suite — `npx playwright test` (workers=4 locally, workers=1 in CI — do not override)
 
 ## Session Skills
 
 | Skill | When | What |
 |-------|------|------|
 | `/its-alive` | Session start | Stamp time, read context, recommend task |
-| `/pause-this` | Mid-session break | Build check, commit WIP, compact, note pause |
+| `/pause-this` | Mid-session break | Build check, commit WIP, note pause |
 | `/restart-this` | Resume from pause | Reload context, continue same session |
 | `/kill-this` | Session end (part 1) | Build check, commit, code review, draft log (time/points TBD) |
 | `/its-dead` | Session end (part 2) | Calc time + points, write log, update plan, push, PM recommendation |
@@ -170,7 +172,7 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 
 | Agent | Model | When | Purpose |
 |-------|-------|------|---------|
-| @architect | Opus | Before design decisions, DEC-TBD items | Keep architecture coherent |
+| @architect | claude-opus-4-6 | Before design decisions, DEC-TBD items | Keep architecture coherent |
 | @code-review | Sonnet | After every commit (wired into `/kill-this`) | Catch issues early |
 | @pm | Sonnet | Start/end of sessions (via skills) | Track progress, flag risks |
 | @ui-reviewer | Sonnet | After UI work, phase boundaries | Design quality |

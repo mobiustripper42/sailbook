@@ -1,7 +1,7 @@
 -- RLS tests for enrollments and session_attendance
 -- Policies under test:
---   enrollments:        admin all | student reads/inserts/updates own | instructor reads assigned courses
---   session_attendance: admin all | student reads/inserts/updates own (expected status only) | instructor reads assigned sessions
+--   enrollments:        admin all | student reads/inserts/updates own | instructor reads all
+--   session_attendance: admin all | student reads/inserts/updates own (expected status only) | instructor reads all
 --
 -- Run with: supabase test db
 
@@ -45,8 +45,8 @@ $$;
 --     e004 (sam/c004):    d007,d008         → 2 rows
 --     e005 (jordan/c004): d007,d008         → 2 rows
 --     e006 (chris/c006):  d010-d014         → 5 rows
---   Mike assigned: c001+c004+c006 → sees e001,e002,e004,e005,e006 (5 enroll, 13 attendance)
---   Chris assigned: c002 → sees e003 (1 enroll, 4 attendance)
+--   Mike: all 6 enrollments, all 17 attendance records
+--   Chris: all 6 enrollments, all 17 attendance records
 -- ============================================================
 
 -- ============================================================
@@ -128,32 +128,32 @@ SELECT throws_ok(
 
 RESET ROLE;
 
--- Instructor (mike): sees enrollments for assigned courses c001+c004+c006 = e001+e002+e004+e005+e006 = 5
+-- Instructor (mike): sees all enrollments (6 seed + 1 inserted by student test above = 7)
 SELECT tests.authenticate('a1000000-0000-0000-0000-000000000002', p_is_instructor => true);
 SET LOCAL ROLE authenticated;
 
 SELECT is(
   (SELECT count(*)::int FROM public.enrollments),
-  5,
-  'instructor (mike): sees 5 enrollments across assigned courses (c001, c004, c006)'
+  7,
+  'instructor (mike): sees all 7 enrollments (6 seed + 1 inserted by student test)'
 );
 
 SELECT is(
   (SELECT count(*)::int FROM public.enrollments WHERE course_id = 'c1000000-0000-0000-0000-000000000002'),
-  0,
-  'instructor (mike): cannot see c002 enrollments (assigned to chris)'
+  1,
+  'instructor (mike): can see c002 enrollment (all enrollments visible to instructors)'
 );
 
 RESET ROLE;
 
--- Instructor (chris): sees enrollments for assigned course c002 = e003 = 1
+-- Instructor (chris): sees all enrollments (7 total at this point)
 SELECT tests.authenticate('a1000000-0000-0000-0000-000000000004', p_is_instructor => true);
 SET LOCAL ROLE authenticated;
 
 SELECT is(
   (SELECT count(*)::int FROM public.enrollments),
-  1,
-  'instructor (chris): sees 1 enrollment for assigned course (c002)'
+  7,
+  'instructor (chris): sees all 7 enrollments'
 );
 
 RESET ROLE;
@@ -205,26 +205,26 @@ SELECT is(
 
 RESET ROLE;
 
--- Instructor (mike): sees attendance for assigned sessions (c001+c004+c006 = 4+4+5 = 13)
+-- Instructor (mike): sees all 17 attendance records
 SELECT tests.authenticate('a1000000-0000-0000-0000-000000000002', p_is_instructor => true);
 SET LOCAL ROLE authenticated;
 
 SELECT is(
   (SELECT count(*)::int FROM public.session_attendance),
-  13,
-  'instructor (mike): sees 13 attendance records for assigned sessions (c001:4, c004:4, c006:5)'
+  17,
+  'instructor (mike): sees all 17 attendance records'
 );
 
 RESET ROLE;
 
--- Instructor (chris): sees attendance for assigned sessions (c002 = 4)
+-- Instructor (chris): sees all 17 attendance records
 SELECT tests.authenticate('a1000000-0000-0000-0000-000000000004', p_is_instructor => true);
 SET LOCAL ROLE authenticated;
 
 SELECT is(
   (SELECT count(*)::int FROM public.session_attendance),
-  4,
-  'instructor (chris): sees 4 attendance records for assigned sessions (c002:4)'
+  17,
+  'instructor (chris): sees all 17 attendance records'
 );
 
 RESET ROLE;

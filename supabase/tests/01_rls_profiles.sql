@@ -162,7 +162,7 @@ SELECT is(
 );
 
 -- ============================================================
--- INSTRUCTOR (mike): reads own + enrolled students, blocks others
+-- INSTRUCTOR (mike): reads own profile + all student profiles
 -- ============================================================
 
 SELECT tests.authenticate(
@@ -188,8 +188,8 @@ SELECT is(
 SELECT is(
   (SELECT count(*)::int FROM public.profiles
    WHERE id = 'f1000000-0000-0000-0000-000000000003'),
-  0,
-  'instructor: cannot read profile of student not in their courses (pw_student)'
+  1,
+  'instructor: can read any student profile (pw_student visible to all instructors)'
 );
 
 SELECT * FROM finish();

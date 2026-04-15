@@ -1,8 +1,8 @@
 -- RLS tests for course_types, courses, sessions
 -- Policies under test:
 --   course_types: admin all | authenticated reads active only
---   courses:      admin all | student reads active+enrolled | instructor reads assigned
---   sessions:     admin all | student reads active-course+enrolled | instructor reads assigned
+--   courses:      admin all | student reads active+enrolled | instructor reads all
+--   sessions:     admin all | student reads active-course+enrolled | instructor reads all
 --
 -- Run with: supabase test db
 
@@ -130,20 +130,20 @@ SELECT is(
 
 RESET ROLE;
 
--- Instructor (mike): sees only assigned courses (c001, c004, c006 = 3)
+-- Instructor (mike): sees all 6 courses
 SELECT tests.authenticate('a1000000-0000-0000-0000-000000000002', p_is_instructor => true);
 SET LOCAL ROLE authenticated;
 
 SELECT is(
   (SELECT count(*)::int FROM public.courses),
-  3,
-  'instructor (mike): sees only assigned courses (c001, c004, c006)'
+  6,
+  'instructor (mike): sees all 6 courses'
 );
 
 SELECT is(
   (SELECT count(*)::int FROM public.courses WHERE id = 'c1000000-0000-0000-0000-000000000003'),
-  0,
-  'instructor (mike): cannot see c003 (active but assigned to no one)'
+  1,
+  'instructor (mike): can see c003 (all courses visible to instructors)'
 );
 
 RESET ROLE;
@@ -184,14 +184,14 @@ SELECT is(
 
 RESET ROLE;
 
--- Instructor (mike): sees assigned sessions only (c001+c004+c006 = 2+2+5 = 9)
+-- Instructor (mike): sees all 14 sessions
 Select tests.authenticate('a1000000-0000-0000-0000-000000000002', p_is_instructor => true);
 SET LOCAL ROLE authenticated;
 
 SELECT is(
   (SELECT count(*)::int FROM public.sessions),
-  9,
-  'instructor (mike): sees 9 assigned sessions (c001:2, c004:2, c006:5)'
+  14,
+  'instructor (mike): sees all 14 sessions'
 );
 
 RESET ROLE;
