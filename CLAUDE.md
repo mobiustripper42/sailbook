@@ -53,13 +53,12 @@ waitlist_entries (notify on spot opening)
 2. **Plan it** — summarize what you're going to do (files to create/edit, approach). Wait for explicit approval before writing any code or running any commands.
 3. **Build it** — implement the feature
 4. **Write the test** — Playwright integration test + pgTAP if RLS-touching
-5. **Run targeted tests** — `npx playwright test tests/foo.spec.ts --project=desktop` (and mobile if relevant). `supabase test db` if RLS-touching. Do NOT run the full suite — that's the user's call.
-6. **Mobile screenshot** — confirm 375px viewport passes
-7. **Close out** — `/kill-this` → `/its-dead` → push
+5. **Run targeted tests** — `npx playwright test tests/foo.spec.ts`. `supabase test db` if RLS-touching. Do NOT run the full suite — that's the user's call.
+6. **Close out** — `/kill-this` → `/its-dead` → push
 
 **No test, no push.**
 
-**Full suite (`npx playwright test`) is never run automatically.** At the end of the session summary, ask: "Did you run the full Playwright suite yet?" and let the user decide.
+**Full suite (`npx playwright test`) is never run automatically.** `/kill-this` will ask before closing out.
 
 ## Migration Protocol
 
@@ -148,7 +147,7 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 - One border radius: `rounded-lg`
 - Layout padding in layout.tsx only (DEC-017)
 - Student-facing cards: `size="sm"` prop
-- Every page works at 375px (Playwright screenshot confirms)
+- Every page works at 375px (enforced by the Playwright mobile project)
 
 ### Testing
 - pgTAP tests live in `supabase/tests/`
@@ -156,8 +155,8 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 - Playwright viewports: 375px (mobile), 768px (tablet), 1440px (desktop)
 - Mock external services (Twilio, Resend, Stripe) in test mode
 - `NOTIFICATIONS_ENABLED=false` for test environment
-- **During development:** run only the relevant file + desktop project — `npx playwright test tests/foo.spec.ts --project=desktop`
-- **Single test:** `npx playwright test -g "test name" --project=desktop`
+- **During development:** run only the relevant file — `npx playwright test tests/foo.spec.ts`
+- **Single test:** `npx playwright test -g "test name"`
 - **Before every commit:** full suite, all viewports — `npx playwright test` (workers=4 locally, workers=1 in CI — do not override)
 
 ## Session Skills

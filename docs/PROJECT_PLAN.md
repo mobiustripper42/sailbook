@@ -17,17 +17,6 @@ Tests are baked into every task estimate — no separate testing tasks.
 
 ---
 
-## Micro Workflow (every task, no exceptions)
-
-1. Spec it (poker estimate, acceptance criteria)
-2. Build it
-3. Write the test (Playwright + pgTAP if RLS-touching)
-4. Run the test suite — `supabase test db` + `npx playwright test`
-5. Confirm 375px mobile screenshot passes
-6. `/kill-this` → `/its-dead` → push
-
-No test, no push.
-
 ---
 
 ## Phase 0: Infrastructure (do first, no feature work until green)
