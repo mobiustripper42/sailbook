@@ -13,18 +13,40 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { login } from "../actions";
-import DevLoginHelper from "@/components/dev-login-helper";
+import { requestPasswordReset } from "../actions";
 
-export default function LoginPage() {
-  const [state, action, pending] = useActionState(login, null);
+export default function ForgotPasswordPage() {
+  const [state, action, pending] = useActionState(requestPasswordReset, null);
+
+  if (state && !state.error) {
+    return (
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>Check your email</CardTitle>
+          <CardDescription>
+            If an account exists for that address, we sent a password reset
+            link. Check your inbox.
+          </CardDescription>
+        </CardHeader>
+        <CardFooter>
+          <Link
+            href="/login"
+            className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          >
+            Back to sign in
+          </Link>
+        </CardFooter>
+      </Card>
+    );
+  }
 
   return (
-    <div className="flex flex-col items-center w-full max-w-sm">
-      <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>SailBook</CardTitle>
-        <CardDescription>Sign in to your account</CardDescription>
+        <CardTitle>Forgot password</CardTitle>
+        <CardDescription>
+          Enter your email and we&apos;ll send a reset link.
+        </CardDescription>
       </CardHeader>
       <form action={action}>
         <CardContent className="space-y-4">
@@ -41,42 +63,21 @@ export default function LoginPage() {
               autoComplete="email"
             />
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <Link
-                href="/forgot-password"
-                className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
-              >
-                Forgot password?
-              </Link>
-            </div>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-            />
-          </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-3 pt-4">
           <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? "Signing in…" : "Sign in"}
+            {pending ? "Sending…" : "Send reset link"}
           </Button>
           <p className="text-sm text-muted-foreground text-center">
-            No account?{" "}
             <Link
-              href="/register"
+              href="/login"
               className="underline underline-offset-4 hover:text-foreground"
             >
-              Register
+              Back to sign in
             </Link>
           </p>
         </CardFooter>
       </form>
-      </Card>
-      <DevLoginHelper />
-    </div>
+    </Card>
   );
 }

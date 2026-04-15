@@ -146,6 +146,7 @@ export type Database = {
           enrolled_at: string | null
           id: string
           status: string | null
+          stripe_checkout_session_id: string | null
           student_id: string
           updated_at: string | null
         }
@@ -154,6 +155,7 @@ export type Database = {
           enrolled_at?: string | null
           id?: string
           status?: string | null
+          stripe_checkout_session_id?: string | null
           student_id: string
           updated_at?: string | null
         }
@@ -162,6 +164,7 @@ export type Database = {
           enrolled_at?: string | null
           id?: string
           status?: string | null
+          stripe_checkout_session_id?: string | null
           student_id?: string
           updated_at?: string | null
         }
@@ -175,6 +178,63 @@ export type Database = {
           },
           {
             foreignKeyName: "enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount_cents: number
+          created_at: string | null
+          currency: string
+          enrollment_id: string
+          id: string
+          refund_amount_cents: number | null
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          student_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string | null
+          currency?: string
+          enrollment_id: string
+          id?: string
+          refund_amount_cents?: number | null
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          student_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string | null
+          currency?: string
+          enrollment_id?: string
+          id?: string
+          refund_amount_cents?: number | null
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          student_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -196,6 +256,7 @@ export type Database = {
           is_student: boolean
           last_name: string
           phone: string | null
+          stripe_customer_id: string | null
           theme_preference: string
           updated_at: string | null
         }
@@ -212,6 +273,7 @@ export type Database = {
           is_student?: boolean
           last_name: string
           phone?: string | null
+          stripe_customer_id?: string | null
           theme_preference?: string
           updated_at?: string | null
         }
@@ -228,6 +290,7 @@ export type Database = {
           is_student?: boolean
           last_name?: string
           phone?: string | null
+          stripe_customer_id?: string | null
           theme_preference?: string
           updated_at?: string | null
         }
@@ -517,7 +580,7 @@ export const Constants = {
   },
 } as const
 
+
 // Convenience row type aliases
 export type Course = Database['public']['Tables']['courses']['Row']
 export type CourseType = Database['public']['Tables']['course_types']['Row']
-
