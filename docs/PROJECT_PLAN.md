@@ -67,7 +67,7 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.3 | ~~Inactive instructor cascade — deactivating instructor clears course + session assignments~~ | 2 | [x] <!-- completed 2026-04-14 --> SECURITY DEFINER trigger; confirm dialog on Deactivate button; 5 pgTAP + 2 Playwright tests; DEC-019. 6 code review fixes deferred to next session. |
 | 1.4 | ~~Course status review — confirm statuses cover all needs via @architect~~ | 2 | [x] <!-- completed 2026-04-15 --> @architect confirmed existing statuses (draft/active/cancelled) are sufficient for V1. No schema changes needed. |
 | 1.5 | ~~Student history view — past enrollments, attendance, completions visible to admin/instructor/student~~ | 5 | [x] <!-- completed 2026-04-15 --> `/student/history` ("Experience"), `/admin/students/[id]`, `/instructor/students/[id]`. Shared `fetchStudentHistory()` helper. RLS migration broadens instructor read to all student data. 36 Playwright + 67 pgTAP tests green. |
-| 1.6 | ASA number field — add to profiles, show in admin student list + student profile | 2 | Migration + UI. Not mandatory. |
+| 1.6 | ~~ASA number field — add to profiles, show in admin student list + student profile~~ | 2 | [x] <!-- completed 2026-04-15 --> Migration + UI. Admin list/detail/edit. Student Experience page. 5 Playwright tests. |
 | 1.7 | Experience level — generic codes/lookup table + migrate experience levels onto it | 5 | DEC: generic codes table pattern. Reusable for qualifications, prereqs, skill names. |
 | 1.8 | Password reset — "Forgot password" on login page + reset flow | 3 | Supabase `resetPasswordForEmail()`. Uses default mailer until Phase 3. |
 | 1.9 | Unsaved changes guard — warn before leaving form with edits in progress | 3 | `beforeunload` + App Router interception. May need community package. |
@@ -101,7 +101,7 @@ The app makes money. Student self-cancellation ships here (ST-10).
 
 | # | Task | Effort | Notes |
 |---|------|--------|-------|
-| 2.1 | Stripe account setup — test mode, API keys in `.env.local` | 2 | Get Andy's Stripe account started early. Dev uses test keys. |
+| 2.1 | ~~Stripe account setup — test mode, API keys in `.env.local`~~ | 2 | [x] <!-- completed 2026-04-15 --> stripe npm package, src/lib/stripe.ts singleton client, env vars in .env.local. |
 | 2.2 | Schema migration — `stripe_customer_id` on profiles, `stripe_checkout_session_id` on enrollments, `payments` table | 3 | New migration. pgTAP tests for payments RLS included. |
 | 2.3 | Stripe Checkout Session creation — server action, redirect to Stripe hosted page | 5 | Replaces "Register" button. Capacity check + enrollment hold creation. DEC: pessimistic inventory (hold spot on checkout start). |
 | 2.4 | Enrollment hold expiration — release `pending_payment` spots after timeout | 5 | First scheduled job (Vercel Cron or Supabase Edge Function). Handles race with webhook. |
@@ -112,7 +112,7 @@ The app makes money. Student self-cancellation ships here (ST-10).
 | 2.9 | Member pricing field — `member_price` on courses alongside `price` | 2 | Checkout logic picks correct price based on profile. |
 | 2.10 | Playwright end-to-end payment test — register → pay → confirm → cancel → refund | 5 | Full chain integration test using Stripe test cards + Stripe CLI for webhooks. |
 | 2.11 | README: Stripe setup instructions — keys, webhook config, test mode | 1 | Document `.env.local` keys, webhook CLI setup, and test card reference for new devs. |
-| 2.12 | End-of-phase @ui-reviewer pass | 2 | Run after payment UI is wired. Focus on checkout flow, confirmation page, payment status in enrollment list. |
+| 2.12 | End-of-phase @ui-reviewer and lint pass | 2 | Run after payment UI is wired. Focus on checkout flow, confirmation page, payment status in enrollment list. |
 
 **Phase 2 total: 40 pts**
 **Projected hours: ~14 hrs**
@@ -140,7 +140,7 @@ Users know what's happening. Auth is production-grade.
 | 3.11 | OAuth login — Google | 2 | Supabase toggle + Google Cloud console. Email/password remains fallback. |
 | 3.12 | Security audit — run @security-agent, evaluate findings, fix serious issues | 3 | Post-auth-hardening + payments-live audit. Non-serious findings move to backlog. |
 | 3.13 | README: Twilio/Resend setup instructions — keys, sender config | 1 | Document Twilio phone number, Resend API key, domain verification, and sender config for new devs. |
-| 3.14 | End-of-phase @ui-reviewer pass | 2 | Focus on notification preference UI, new auth flows (email verify, OAuth). |
+| 3.14 | End-of-phase @ui-reviewer and lint pass | 2 | Focus on notification preference UI, new auth flows (email verify, OAuth). |
 
 **Phase 3 total: 39 pts**
 **Projected hours: ~14 hrs**
@@ -162,7 +162,7 @@ Clean onboarding. Richer student and instructor records.
 | 4.5 | (NOT REQUIRED) Link admin-created student to login — student creates account, admin links to existing profile | 3 | Depends on 4.4 architecture. Might be as simple as "student resets password." |
 | 4.6 | Instructor notes on sessions — text field per session, visible to all instructors + admin | 3 | IN-5 from V1 backlog. `notes` column already exists on sessions table. UI only. |
 | 4.7 | Instructor profile expansion — availability field + bio/website link | 3 | General availability for admin assignment. Name links to LTSC website bio. Andy request. |
-| 4.8 | End-of-phase @ui-reviewer pass | 2 | Focus on profile expansion pages, invite flow, instructor onboarding. |
+| 4.8 | End-of-phase @ui-reviewer and lint pass | 2 | Focus on profile expansion pages, invite flow, instructor onboarding. |
 
 **Phase 4 total: 29 pts**
 **Projected hours: ~10 hrs**
@@ -185,7 +185,7 @@ Flexible pricing, enrollment safety rails, and waitlist.
 | 5.6 | (probalby will not happen) Duplicate enrollment in same course type — warn student + flag for admin | 3 | ⚠️ Scope creep risk. Keep tight: warning on enrollment + admin dashboard flag. No auto-clear. |
 | 5.7 | Waitlist — full course → join waitlist → notify on opening | 8 | New table, student UI, admin visibility, notification on spot opening. Depends on Phase 3 notifications. Andy request. |
 | 5.8 | Low enrollment warning — dashboard tile for courses below minimum threshold approaching start date | 2 | Same pattern as "courses without instructors." Meaningful only with payments live. Andy request. |
-| 5.9 | End-of-phase @ui-reviewer pass | 2 | Focus on waitlist UI, prerequisite warning flow, discount code display on checkout. |
+| 5.9 | End-of-phase @ui-reviewer and lint pass | 2 | Focus on waitlist UI, prerequisite warning flow, discount code display on checkout. |
 
 **Phase 5 total: 31 pts**
 **Projected hours: ~11 hrs**

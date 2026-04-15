@@ -3,7 +3,44 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 67 — 2026-04-15 15:48 [open]
+## Session 67 — 2026-04-15 15:48–16:22 (0.6 hrs)
+**Duration:** 0.6 hours | **Points:** 4 pts
+**Tasks:** Phase 2.1 (Stripe setup), Phase 1.6 (ASA number), 1.23 added to backlog
+
+**Completed:**
+- `src/lib/stripe.ts` — Stripe singleton server client, env guard, apiVersion 2026-03-25.dahlia
+- `package.json` / `package-lock.json` — stripe npm package installed
+- `.env.local` — STRIPE_SECRET_KEY + NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY + STRIPE_WEBHOOK_SECRET placeholder
+- `supabase/migrations/20260415200027_add_asa_number_to_profiles.sql` — asa_number VARCHAR(20) on profiles
+- `supabase/seed.sql` — Sam Davies seeded with ASA 101234
+- `src/lib/supabase/types.ts` — regenerated; corrupt npm prompt header stripped; Course + CourseType convenience exports added
+- `src/actions/profiles.ts` — updateProfile: auth guard added; is_active gated behind is_admin_caller flag
+- `src/components/admin/profile-edit-form.tsx` — is_admin_caller hidden input; asa_number optional → nullable
+- `src/app/(admin)/admin/students/page.tsx` — ASA # column in student list
+- `src/app/(admin)/admin/students/[id]/page.tsx` — ASA # on student detail
+- `src/app/(admin)/admin/students/[id]/edit/page.tsx` — asa_number in select query
+- `src/app/(admin)/admin/instructors/[id]/edit/page.tsx` — asa_number added to select (ProfileEditForm requires it)
+- `src/app/(student)/student/history/page.tsx` — ASA # shown on Experience page; .maybeSingle() fix
+- `tests/asa-number.spec.ts` — 5 Playwright tests (admin list, detail, edit, student experience view)
+- `docs/PROJECT_PLAN.md` — 1.23 added: student account page (3 pts)
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- `supabase db push` to apply asa_number migration to remote
+- Run `npx playwright test tests/asa-number.spec.ts` to confirm 1.6 tests pass
+- Continue Phase 1 backlog: 1.8 (password reset), 1.7 (experience level codes), 1.23 (student account page)
+- Or jump to Phase 2: next is 2.2 (schema migration — stripe_customer_id, payments table)
+
+**Context:**
+- types.ts regen wiped hand-written Course + CourseType exports — added them back as derived row type aliases at bottom of file. Any future regen will wipe them again — re-add manually or fix the regen command to append them
+- updateProfile is_active is only applied when is_admin_caller=true hidden field present — student-facing form (1.23) should NOT include that hidden field
+- STRIPE_WEBHOOK_SECRET left commented in .env.local — fill in during 2.5
+- Stripe test keys are in .env.local; need to add to Vercel env config before any 2.x task deploys
+
+**Code Review:** 5 findings addressed — corrupt types.ts header, updateProfile missing auth guard + is_active self-deactivation vector, asa_number type (optional vs nullable), instructor edit page missing asa_number in select, student history profile query .single() → .maybeSingle()
 
 ## Session 66 — 2026-04-15 15:12–15:43 (0.5 hrs)
 **Duration:** 0.5 hours | **Points:** 12 pts
