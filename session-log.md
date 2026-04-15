@@ -3,8 +3,47 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 65 — 2026-04-15 11:06 [open]
-**[PAUSED 11:25]** Working on: 1.5 student history/experience view. Left off at: plan approved, no code written yet. Naming agreed: call the page/label "Experience" (student-facing). Next: build per the approved plan — `StudentHistoryList` component, `/student/history` page, `/admin/students/[id]` view page, `/instructor/students/[id]` page, nav link, admin list link, instructor roster link, Playwright tests.
+## Session 65 — 2026-04-15 11:06–14:56 (0.6 hrs)
+**Duration:** 0.6 hours | **Points:** 5 pts
+**Task:** Phase 1.5 — Student history/Experience view
+
+**Completed:**
+- `src/lib/student-history.ts` — shared `fetchStudentHistory()` helper; sorts by newest session date
+- `src/components/student/student-history-list.tsx` — thin wrapper around `CourseAttendanceCard`, reusable across roles
+- `src/app/(student)/student/history/page.tsx` — "Experience" page for students; own history
+- `src/app/(admin)/admin/students/[id]/page.tsx` — admin view of any student's profile + full history; breadcrumb + Edit link
+- `src/app/(instructor)/instructor/students/[id]/page.tsx` — instructor view of any student's full history
+- `src/components/student/student-nav.tsx` + `mobile-nav-drawer.tsx` — "Experience" nav link added
+- `src/app/(admin)/admin/students/page.tsx` — "View" link added alongside "Edit" in student list
+- `src/app/(instructor)/instructor/sessions/[id]/page.tsx` — student names in roster are now links
+- `supabase/migrations/20260415184644_instructor_cross_course_read.sql` — 5 new SELECT policies giving instructors read access to all enrollments, attendance, sessions, courses, and student profiles
+- `supabase/tests/01_rls_profiles.sql`, `02_rls_courses.sql`, `03_rls_enrollments.sql` — pgTAP counts updated to reflect broadened instructor access
+- `tests/student-history.spec.ts` — 36 tests across 3 viewports (26 pass, 10 skip by design)
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Fix 4 code review deferrals (quick, top of next):
+  1. `instructor/students/[id]/page.tsx` — remove redundant `getUser()` + redirect (middleware already guards; admin page doesn't do this)
+  2. `student/history/page.tsx:12` — error display: `<div className="text-destructive">` → `<p className="text-sm text-destructive">`
+  3. `instructor/students/[id]/page.tsx:57` — stale `emptyMessage`: "No history found for courses you teach." → "No course history for this student."
+  4. Migration dead-policy comment: add note in `20260415184644_instructor_cross_course_read.sql` that the narrow baseline policies are superseded but retained (OR semantics, not a bug)
+- Then: 1.4 (course status audit via @architect), 1.6 (ASA number), 1.8 (password reset)
+- Remember: `supabase db push` to apply migration to remote (user confirmed done this session)
+
+**Context:**
+- Instructor RLS was scoped to own-courses only on all four tables (enrollments, session_attendance, sessions, courses) + profiles — all needed new broad policies for the Experience view to work
+- `fetchStudentHistory` accepts untyped `SupabaseClient` — consistent with existing tech debt; deferred to types.ts regeneration pass
+- `/kill-this` Playwright question is ambiguous ("Did you run it? If not, want to?") — "yes" answer is ambiguous; needs two separate questions
+- `/restart-this` does not stamp a `[RESUMED HH:MM]` line in the session log — gap identified, needs fix
+
+**Code Review — Findings:**
+1. `20260415184644_instructor_cross_course_read.sql` — superseded narrow baseline policies not dropped; still present alongside new broad ones. Not a runtime bug (OR semantics), but clutters dashboard. Deferred: add comment to migration.
+2. `instructor/students/[id]/page.tsx:14–15` — redundant `getUser()` + redirect; middleware already handles it. Fix next session.
+3. `student/history/page.tsx:12` — error element/sizing inconsistent with established pattern. Fix next session.
+4. `instructor/students/[id]/page.tsx:57` — stale empty message. Fix next session.
 
 ## Session 64 — 2026-04-14 19:52–20:50 (1.0 hrs)
 **Duration:** 1.0 hours | **Points:** 2 pts

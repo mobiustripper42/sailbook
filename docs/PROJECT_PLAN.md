@@ -66,7 +66,7 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.2 | ~~Set course back to Draft status (from Active)~~ | 2 | [x] <!-- completed 2026-04-13 --> revertToDraft action; Revert to Draft button in CourseStatusActions; self-contained Playwright test, 3/3 viewports. |
 | 1.3 | ~~Inactive instructor cascade — deactivating instructor clears course + session assignments~~ | 2 | [x] <!-- completed 2026-04-14 --> SECURITY DEFINER trigger; confirm dialog on Deactivate button; 5 pgTAP + 2 Playwright tests; DEC-019. 6 code review fixes deferred to next session. |
 | 1.4 | Course status review — confirm statuses cover all needs via @architect | 2 | Audit existing status logic. Probably fine as-is. |
-| 1.5 | Student history view — past enrollments, attendance, completions visible to admin/instructor/student | 5 | New page/component across three roles. Terminology TBD with Andy ("Sailing Record"?). |
+| 1.5 | ~~Student history view — past enrollments, attendance, completions visible to admin/instructor/student~~ | 5 | [x] <!-- completed 2026-04-15 --> `/student/history` ("Experience"), `/admin/students/[id]`, `/instructor/students/[id]`. Shared `fetchStudentHistory()` helper. RLS migration broadens instructor read to all student data. 36 Playwright + 67 pgTAP tests green. |
 | 1.6 | ASA number field — add to profiles, show in admin student list + student profile | 2 | Migration + UI. Not mandatory. |
 | 1.7 | Experience level — generic codes/lookup table + migrate experience levels onto it | 5 | DEC: generic codes table pattern. Reusable for qualifications, prereqs, skill names. |
 | 1.8 | Password reset — "Forgot password" on login page + reset flow | 3 | Supabase `resetPasswordForEmail()`. Uses default mailer until Phase 3. |
