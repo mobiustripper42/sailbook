@@ -3,6 +3,45 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 69 — 2026-04-15 16:27–16:59 (0.5 hrs)
+**Duration:** 0.5 hours | **Points:** 3 pts
+**Tasks:** Phase 1.8 (password reset), login email persistence fix
+
+**Completed:**
+- `src/app/(auth)/actions.ts` — requestPasswordReset + updatePassword server actions
+- `src/app/(auth)/forgot-password/page.tsx` — forgot password form; shows confirmation on submit
+- `src/app/(auth)/reset-password/page.tsx` — PASSWORD_RECOVERY event gate; new password form
+- `src/app/(auth)/login/page.tsx` — "Forgot password?" link; controlled email input (persists on failed login)
+- `src/proxy.ts` — /forgot-password + /reset-password added to PUBLIC_ROUTES; /reset-password excluded from logged-in redirect
+- `.env.local` — NEXT_PUBLIC_SITE_URL=http://localhost:3000 added
+- `supabase/config.toml` — localhost:3000/reset-password added to additional_redirect_urls
+- `tests/password-reset.spec.ts` — 18 Playwright tests, all passing
+- Phase 2.2 completed in parallel session (logged in Session 68)
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- `supabase stop && supabase start` to pick up config.toml redirect URL change
+- `supabase db push` to apply asa_number + payments migrations to remote
+- Fix code review findings before next feature (see Code Review below) — 3 are worth doing next session
+- Continue Phase 1: 1.7 (experience level codes), 1.9 (unsaved changes guard), 1.23 (student account page)
+- Add production URL to config.toml additional_redirect_urls before go-live
+
+**Context:**
+- supabase stop/start required (not just db reset) to reload config.toml changes
+- NEXT_PUBLIC_SITE_URL must be set in Vercel env before password reset goes live in production
+- reset-password page relies solely on onAuthStateChange PASSWORD_RECOVERY event (no getSession fallback — intentional)
+
+**Code Review:** 6 findings to address next session:
+1. **Security** — `requestPasswordReset` should guard against undefined NEXT_PUBLIC_SITE_URL; currently sends email with broken link silently returning success
+2. **Production blocker** — prod domain missing from config.toml additional_redirect_urls (add before go-live)
+3. **Bug** — `updatePassword` hardcodes redirect to /student/dashboard; admins/instructors land in wrong place after reset
+4. **Consistency** — forgot-password email input is uncontrolled (same bug just fixed on login page)
+5. **Consistency** — stale `router` dep in reset-password useEffect (not used; remove it)
+6. **Consistency** — requestPasswordReset/updatePassword return `{error}` not `string|null`; pre-existing auth group pattern, flag for harmonization
+
 ## Session 68 — 2026-04-15 16:26–16:38 (0.2 hrs)
 **Duration:** 0.2 hours | **Points:** 6 pts
 **Tasks:** Phase 2.2 (Stripe/payments schema), Phase 1.8 (password reset)
