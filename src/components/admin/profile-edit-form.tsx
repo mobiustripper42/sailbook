@@ -6,6 +6,7 @@ import { updateProfile } from '@/actions/profiles'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 
 type Profile = {
   id: string
@@ -30,6 +31,8 @@ export default function ProfileEditForm({
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [isDirty, setIsDirty] = useState(false)
+  const { confirmDiscard } = useUnsavedChanges(isDirty)
 
   function handleSubmit(formData: FormData) {
     setError(null)
@@ -51,7 +54,7 @@ export default function ProfileEditForm({
   }
 
   return (
-    <form action={handleSubmit} className="space-y-6 max-w-lg">
+    <form action={handleSubmit} className="space-y-6 max-w-lg" onChange={() => setIsDirty(true)}>
       <input type="hidden" name="id" value={profile.id} />
       <input type="hidden" name="return_path" value={returnPath} />
       <input type="hidden" name="is_admin_caller" value="true" />
@@ -125,7 +128,7 @@ export default function ProfileEditForm({
         <Button type="submit" disabled={pending}>
           {pending ? 'Saving…' : 'Save Changes'}
         </Button>
-        <Button type="button" variant="outline" onClick={() => router.push(returnPath)}>
+        <Button type="button" variant="outline" onClick={() => { if (confirmDiscard()) router.push(returnPath) }}>
           Cancel
         </Button>
       </div>

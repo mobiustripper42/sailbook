@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { createCourse } from '@/actions/courses'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 
 type CourseTypeOption = { id: string; name: string; short_code: string; max_students: number }
 type InstructorOption = { id: string; first_name: string; last_name: string }
@@ -27,9 +28,12 @@ type Props = {
 const DEFAULT_SESSION: SessionRow = { date: '', start_time: '08:00', end_time: '16:00', location: '' }
 
 export default function CourseForm({ courseTypes, instructors }: Props) {
+  const router = useRouter()
   const [error, formAction, pending] = useActionState(createCourse, null)
   const [sessions, setSessions] = useState<SessionRow[]>([{ ...DEFAULT_SESSION }])
   const [selectedTypeId, setSelectedTypeId] = useState('')
+  const [isDirty, setIsDirty] = useState(false)
+  const { confirmDiscard } = useUnsavedChanges(isDirty)
 
   const selectedType = courseTypes.find((ct) => ct.id === selectedTypeId)
 
@@ -46,7 +50,7 @@ export default function CourseForm({ courseTypes, instructors }: Props) {
   }
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="space-y-6" onChange={() => setIsDirty(true)}>
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <section className="space-y-4">
@@ -191,8 +195,12 @@ export default function CourseForm({ courseTypes, instructors }: Props) {
         <Button type="submit" disabled={pending}>
           {pending ? 'Creating…' : 'Create Course'}
         </Button>
-        <Button variant="ghost" asChild>
-          <Link href="/admin/courses">Cancel</Link>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => { if (confirmDiscard()) router.push('/admin/courses') }}
+        >
+          Cancel
         </Button>
       </div>
     </form>

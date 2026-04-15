@@ -65,11 +65,14 @@ export async function signOut() {
 }
 
 export async function requestPasswordReset(_: unknown, formData: FormData) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+  if (!siteUrl) return { error: 'Password reset is not available. Contact support.' }
+
   const supabase = await createClient()
   const email = formData.get('email') as string
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`,
+    redirectTo: `${siteUrl}/reset-password`,
   })
 
   if (error) return { error: error.message }
@@ -83,5 +86,10 @@ export async function updatePassword(_: unknown, formData: FormData) {
   const { error } = await supabase.auth.updateUser({ password })
 
   if (error) return { error: error.message }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  const meta = (user?.user_metadata ?? {}) as Record<string, unknown>
+  if (meta.is_admin) redirect('/admin/dashboard')
+  if (meta.is_instructor) redirect('/instructor/dashboard')
   redirect('/student/dashboard')
 }

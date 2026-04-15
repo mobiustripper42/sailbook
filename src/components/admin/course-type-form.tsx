@@ -1,12 +1,13 @@
 'use client'
 
-import { useActionState } from 'react'
-import Link from 'next/link'
+import { useActionState, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createCourseType, updateCourseType } from '@/actions/course-types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import type { CourseType } from '@/lib/supabase/types'
 
 type Props = {
@@ -14,14 +15,17 @@ type Props = {
 }
 
 export default function CourseTypeForm({ courseType }: Props) {
+  const router = useRouter()
   const action = courseType
     ? updateCourseType.bind(null, courseType.id)
     : createCourseType
 
   const [error, formAction, pending] = useActionState(action, null)
+  const [isDirty, setIsDirty] = useState(false)
+  const { confirmDiscard } = useUnsavedChanges(isDirty)
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="space-y-4" onChange={() => setIsDirty(true)}>
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <div className="space-y-2">
@@ -59,8 +63,12 @@ export default function CourseTypeForm({ courseType }: Props) {
         <Button type="submit" disabled={pending}>
           {pending ? 'Saving…' : courseType ? 'Save Changes' : 'Create'}
         </Button>
-        <Button variant="ghost" asChild>
-          <Link href="/admin/course-types">Cancel</Link>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => { if (confirmDiscard()) router.push('/admin/course-types') }}
+        >
+          Cancel
         </Button>
       </div>
     </form>

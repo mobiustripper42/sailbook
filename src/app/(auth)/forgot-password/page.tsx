@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import { requestPasswordReset } from "../actions";
 
 export default function ForgotPasswordPage() {
   const [state, action, pending] = useActionState(requestPasswordReset, null);
+  const [email, setEmail] = useState("");
 
   if (state && !state.error) {
     return (
@@ -61,6 +62,8 @@ export default function ForgotPasswordPage() {
               type="email"
               required
               autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
         </CardContent>

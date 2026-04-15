@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import SessionInstructorSelect from '@/components/admin/session-instructor-select'
 import MakeupSessionForm from '@/components/admin/makeup-session-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 
 type SessionData = {
   id: string
@@ -49,8 +50,10 @@ export default function SessionRow({
   const [isEditing, setIsEditing] = useState(false)
   const [editError, setEditError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [isDirty, setIsDirty] = useState(false)
   const [pending, startTransition] = useTransition()
   const isCancelled = session.status === 'cancelled'
+  const { confirmDiscard } = useUnsavedChanges(isDirty)
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -60,6 +63,7 @@ export default function SessionRow({
       const result = await updateSession(session.id, courseId, formData)
       if (result === null) {
         setIsEditing(false)
+        setIsDirty(false)
       } else {
         setEditError(result)
       }
@@ -133,8 +137,10 @@ export default function SessionRow({
                 {!isCancelled && (
                   <DropdownMenuItem
                     onSelect={() => {
+                      if (isEditing && !confirmDiscard()) return
                       setIsEditing((v) => !v)
                       setEditError(null)
+                      setIsDirty(false)
                     }}
                   >
                     {isEditing ? 'Close' : 'Edit'}
@@ -167,7 +173,7 @@ export default function SessionRow({
       {isEditing && (
         <TableRow>
           <TableCell colSpan={6} className="bg-muted/30">
-            <form onSubmit={handleSubmit} className="space-y-3 py-2">
+            <form onSubmit={handleSubmit} className="space-y-3 py-2" onChange={() => setIsDirty(true)}>
               {editError && <p className="text-sm text-destructive">{editError}</p>}
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1.5">
@@ -215,8 +221,10 @@ export default function SessionRow({
                   variant="ghost"
                   size="sm"
                   onClick={() => {
+                    if (!confirmDiscard()) return
                     setIsEditing(false)
                     setEditError(null)
+                    setIsDirty(false)
                   }}
                 >
                   Cancel

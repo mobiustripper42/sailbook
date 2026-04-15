@@ -24,25 +24,23 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     // Supabase delivers the recovery token as a hash fragment.
-    // The client SDK listens for it and fires AUTH_STATE_CHANGE with
-    // event = 'PASSWORD_RECOVERY', which establishes a session automatically.
+    // The client SDK fires PASSWORD_RECOVERY, which establishes a recovery session.
+    // We rely solely on this event — no getSession fallback — so a logged-in user
+    // without a valid recovery token cannot bypass the gate.
     const supabase = createClient();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event) => {
         if (event === "PASSWORD_RECOVERY") {
           setReady(true);
+        } else if (event === "SIGNED_OUT") {
+          setTokenError("Your reset link has expired. Please request a new one.");
         }
       }
     );
 
-    // Also check if we already have a recovery session (page reload case).
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setReady(true);
-    });
-
     return () => subscription.unsubscribe();
-  }, [router]);
+  }, []);
 
   if (tokenError) {
     return (

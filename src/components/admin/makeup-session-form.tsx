@@ -5,6 +5,7 @@ import { createMakeupSession } from '@/actions/sessions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 
 export default function MakeupSessionForm({
   originalSessionId,
@@ -26,6 +27,8 @@ export default function MakeupSessionForm({
   const action = createMakeupSession.bind(null, originalSessionId, courseId)
   const [error, formAction, pending] = useActionState(action, null)
   const [open, setOpen] = useState(false)
+  const [isDirty, setIsDirty] = useState(false)
+  const { confirmDiscard } = useUnsavedChanges(isDirty && open)
 
   const unlinked = missedCount - linkedCount
   const allLinked = missedCount > 0 && unlinked === 0
@@ -52,7 +55,7 @@ export default function MakeupSessionForm({
   }
 
   return (
-    <form action={formAction} className="space-y-3 border rounded-md p-4 bg-background">
+    <form action={formAction} className="space-y-3 border rounded-md p-4 bg-background" onChange={() => setIsDirty(true)}>
       <p className="text-sm font-medium">
         Schedule Makeup Session
         {unlinked > 0 && <span className="font-normal text-muted-foreground"> — {unlinked} student{unlinked !== 1 ? 's' : ''} need makeup</span>}
@@ -80,7 +83,7 @@ export default function MakeupSessionForm({
         <Button type="submit" size="sm" disabled={pending}>
           {pending ? 'Creating…' : 'Create Makeup'}
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
+        <Button type="button" variant="ghost" size="sm" onClick={() => { if (confirmDiscard()) { setOpen(false); setIsDirty(false) } }}>
           Cancel
         </Button>
       </div>
