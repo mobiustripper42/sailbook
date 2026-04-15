@@ -3,7 +3,41 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 72 — 2026-04-15 19:08 [open]
+## Session 72 — 2026-04-15 19:08–19:41 (0.6 hrs)
+**Duration:** 0.6 hours | **Points:** 4 pts
+**Tasks:** Phase 1.18 (logo + favicon), 1.19 (/dev dark mode), code review fixes (sessions 68 & 70), dark mode select fix
+
+**Completed:**
+- `src/app/(auth)/login/page.tsx` — logo.png placed inside CardHeader, right side, vertically centered with title; Image import added
+- `src/app/layout.tsx` — favicon.svg wired into metadata icons
+- `src/app/dev/page.tsx` — bg-white → bg-background text-foreground; bg-gray-50/100 → bg-muted; readable in both themes
+- `src/app/(student)/student/courses/[id]/actions.ts` — enrollment lookup .single() → .maybeSingle(); stripe_customer_id update now captures + logs error (non-fatal)
+- `src/app/api/test/enroll/route.ts` — NEXT_PUBLIC_DEV_MODE → NODE_ENV !== 'development' (removes env var from client bundle)
+- `supabase/migrations/20260415232000_add_payments_status_check.sql` — CHECK constraint on payments.status
+- `src/app/(auth)/register/page.tsx`, `src/components/admin/profile-edit-form.tsx`, `src/components/admin/user-edit-form.tsx` — bg-transparent → bg-background text-foreground on all native <select> elements (dark mode fix)
+- `docs/PROJECT_PLAN.md` — note added to 2.12: replace native <select> with shadcn <Select> at end-of-phase UI pass
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Fix 5 code review items from this session before next feature (see Code Review below) — items 1–2 are quick; item 3 is most important
+- `supabase db reset` (or `supabase db push`) to apply payments.status CHECK constraint migration
+- Continue Phase 2: 2.4 (enrollment hold expiration — scheduled job) or 2.5 (Stripe webhook)
+- Remaining Phase 1: 1.7, 1.10, 1.14, 1.15, 1.23
+
+**Context:**
+- Logo is h-20 w-auto inside CardHeader with items-center — adjust if logo proportions look off at different sizes
+- Native <select> dark mode: bg-background fixes the field but the browser dropdown popup is still unstyled — deferred to 2.12 (shadcn Select swap)
+- Enrollment upsert in createCheckoutSession still discards errors silently (Stripe session already exists at that point — partial-write risk; linked to 2.4 cleanup)
+
+**Code Review:** 5 findings — fix at start of next session:
+1. JSDoc comment in test/enroll/route.ts still says NEXT_PUBLIC_DEV_MODE — update to NODE_ENV
+2. Register page select uses shadow-sm; admin forms use shadow-xs — standardize to shadow-xs
+3. Enrollment upsert in createCheckoutSession (update + insert) discards errors silently — fix before 2.5
+4. !checkoutSession.url guard fires after enrollment write — add TODO comment linking to 2.4
+5. session_attendance upsert in test route doesn't check error — low urgency (test-only), but inconsistent with main path
 
 ## Session 71 — 2026-04-15 17:59–19:01 (1.0 hrs)
 **Duration:** 1.0 hours | **Points:** 3 pts

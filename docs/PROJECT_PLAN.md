@@ -79,8 +79,8 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.15 | Theme preference persistence — save theme_preference to profiles on toggle, load on login, default to 'system' for unauthenticated/login page | 3 | Column default changed from 'dark' to 'system'. Migration update needed. |
 | 1.16 | ~~Restore admin mobile hamburger menu — theme changes broke mobile nav~~ | 2 | [x] <!-- completed 2026-04-13 --> AdminMobileNavDrawer component; hidden md:flex on aside; test skips updated. |
 | 1.17 | ~~Session row Action dropdown — consolidate Attendance/Edit/Cancel/Delete into shadcn DropdownMenu~~ | 2 | [x] <!-- completed 2026-04-13 --> Single ··· DropdownMenu; SessionActions deleted; data-session-id on TableRow; all tests updated. |
-| 1.18 | Add logo to login page and favicon to browser tab | 2 | Ask human for the files. SVG favicon in public/, PNG logo on login page above sign-in form. |
-| 1.19 | Dark / Light theme not applyed to /dev instruction page, can read any text | 2 | Fix /dev instruction page so fonts are readable. |
+| 1.18 | ~~Add logo to login page and favicon to browser tab~~ | 2 | [x] <!-- completed 2026-04-15 --> logo.png in CardHeader (right, vertically centered); favicon.svg in layout metadata. |
+| 1.19 | ~~Dark / Light theme not applyed to /dev instruction page, can read any text~~ | 2 | [x] <!-- completed 2026-04-15 --> bg-white → bg-background text-foreground; gray hardcodes → bg-muted. |
 | 1.20 | ~~Instructor mobile hamburger menu — aside is always visible at all viewports, no mobile drawer exists~~ | 2 | [x] <!-- completed 2026-04-14 --> InstructorMobileNavDrawer component; hidden md:flex on aside; 9 Playwright tests. |
 | 1.21 | ~~Dev login helper — dropdown of seed users that auto-fills + submits the login form~~ | 2 | [x] <!-- completed 2026-04-14 --> DevLoginHelper component; NEXT_PUBLIC_DEV_MODE gate; 7 seed users; requestSubmit(); 4 Playwright tests. |
 | 1.22 | ~~End-of-phase @ui-reviewer pass~~ | — | [x] <!-- completed 2026-04-15 --> Run as part of Session 66 housekeeping. Findings folded into 6.3/6.4 which are now done. |
