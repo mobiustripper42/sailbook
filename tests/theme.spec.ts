@@ -19,7 +19,7 @@ test.describe('Theme toggle', () => {
   // If localStorage has 'dark', the page renders dark.
   test('localStorage dark preference renders dark on page load', async ({ page }) => {
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
-    // Set localStorage directly — tests ThemeSync's write + next-themes read in isolation
+    // Set localStorage directly — verifies next-themes reads it on page load
     await page.evaluate(() => localStorage.setItem('theme', 'dark'))
     await page.goto('/admin/courses')
     await expect(page.locator('html')).toHaveClass(/dark/)
