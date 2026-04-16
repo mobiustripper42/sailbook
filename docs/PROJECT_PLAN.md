@@ -71,7 +71,7 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.7 | ~~Experience level — generic codes/lookup table + migrate experience levels onto it~~ | 5 | [x] <!-- completed 2026-04-16 --> codes table + RLS + 8 pgTAP + 9 Playwright tests. DEC-021. Register page + admin edit forms now load from DB. |
 | 1.8 | ~~Password reset — "Forgot password" on login page + reset flow~~ | 3 | [x] <!-- completed 2026-04-15 --> requestPasswordReset + updatePassword actions; forgot-password + reset-password pages; proxy guard; Playwright tests. All code review findings fixed in session 71. |
 | 1.9 | ~~Unsaved changes guard — warn before leaving form with edits in progress~~ | 3 | [x] <!-- completed 2026-04-15 --> useUnsavedChanges hook: beforeunload + capture-phase click listener (sidebar nav) + pushState guard + popstate (back button). Wired to all admin edit/create/inline forms. 32 Playwright tests. |
-| 1.10 | Student "instructor notes" field + expand instructor roster (phone, email, age, notes indicator) | 3 | "Anything you want your instructor to know?" free text. Dot/asterisk on roster if populated. Andy request. |
+| 1.10 | ~~Student "instructor notes" field + expand instructor roster (phone, email, age, notes indicator)~~ | 3 | [x] <!-- completed 2026-04-16 --> Register form + student account page; blue dot indicator on roster; "Note from student" callout on detail page. |
 | 1.11 | ~~Spots remaining fix — only count confirmed enrollments against capacity~~ | 3 | [x] <!-- completed 2026-04-13 --> Both RPCs + admin detail page JS filter updated. Tests updated throughout; confirmTestEnrollment helper added. |
 | 1.12 | ~~Past courses not enrollable — filter student browse to exclude courses with all sessions in the past~~ | 2 | [x] <!-- completed 2026-04-14 --> Post-fetch JS filter on student browse page; courses with zero sessions remain visible. One accepted edge case: active course with future cancelled + past scheduled session still shows (pathological, ignored). |
 | 1.13 | ~~Dual-role nav toggle — "Switch to Student/Instructor View" for multi-role users~~ | 2 | [x] <!-- completed 2026-04-14 --> RoleToggle component; student + instructor layouts; mobile drawer support; 18 Playwright tests. |
@@ -84,7 +84,7 @@ Bugs, missing functionality, and quick profile improvements. Makes the existing 
 | 1.20 | ~~Instructor mobile hamburger menu — aside is always visible at all viewports, no mobile drawer exists~~ | 2 | [x] <!-- completed 2026-04-14 --> InstructorMobileNavDrawer component; hidden md:flex on aside; 9 Playwright tests. |
 | 1.21 | ~~Dev login helper — dropdown of seed users that auto-fills + submits the login form~~ | 2 | [x] <!-- completed 2026-04-14 --> DevLoginHelper component; NEXT_PUBLIC_DEV_MODE gate; 7 seed users; requestSubmit(); 4 Playwright tests. |
 | 1.22 | ~~End-of-phase @ui-reviewer pass~~ | — | [x] <!-- completed 2026-04-15 --> Run as part of Session 66 housekeeping. Findings folded into 6.3/6.4 which are now done. |
-| 1.23 | Student account page — let students edit their own name, phone, ASA number, and experience level | 3 | `/student/account`. ST-13 instructor notes field can land here too (alongside 1.10). |
+| 1.23 | ~~Student account page — let students edit their own name, phone, ASA number, and experience level~~ | 3 | [x] <!-- completed 2026-04-16 --> `/student/account` with full profile edit form; Account link in student nav + mobile drawer. |
 
 **Phase 1 total: 58 pts** (40 original + 3 for 1.15 + 2 for 1.16 + 2 for 1.17 + 2 for 1.18 + 2 for 1.19 + 2 for 1.20 + 2 for 1.21 + 3 for 1.23)
 **Projected hours: ~19 hrs**
@@ -214,6 +214,7 @@ Design quality, accessibility, navigation, convenience features.
 | 6.11 | Public landing page + contact form for sailbook.live | 3 | Currently drops straight to login. Basic public page + contact form. **Cuttable.** |
 | 6.12 | Security audit (V2 final) — run @security-agent, evaluate findings, fix serious issues, prime V3 backlog | 3 | Full V2 surface area: payments, notifications, waitlist, prereqs, qualifications. Non-serious findings seed V3 backlog. |
 | 6.13 | Using an agent redsign date and time picker (date picker isn't terrible, but time picker is almost unsable) | 3 | Human find time picker to be unusable. Needs redisign, then date picker to match (maybe even combine the two if that makes sense) |
+| 6.14 | Consolidate user/student/instructor profile edit screens | 2 | Three separate edit UIs with overlapping fields feel redundant. Audit overlap, design a unified approach (shared component or merged page per role). Low priority, nice for V2. |
 
 **Phase 6 total: 44 pts**
 **Projected hours: ~17 hrs**

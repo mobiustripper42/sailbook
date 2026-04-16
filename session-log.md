@@ -3,7 +3,38 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 76 — 2026-04-16 08:21 [open]
+## Session 76 — 2026-04-16 08:21–09:29 (1.2 hrs)
+**Duration:** 1h 10min | **Points:** 6 pts (1.10: 3pts + 1.23: 3pts)
+**Task:** Phase 1.10 — instructor notes field + expanded roster; Phase 1.23 — student account page
+
+**Completed:**
+- Migration: `instructor_notes text` added to profiles (`supabase/migrations/20260416082959_add_instructor_notes_to_profiles.sql`)
+- Register form: captures instructor notes textarea at signup (`src/app/(auth)/register/register-form.tsx`)
+- `updateStudentProfile` server action (`src/actions/profiles.ts`)
+- Student account page: full profile edit — name, phone, ASA, experience, notes (`src/app/(student)/student/account/page.tsx`, `src/components/student/student-account-form.tsx`)
+- Student nav + mobile drawer: Account link added
+- Session roster: email column + blue dot indicator for students with notes (`src/app/(instructor)/instructor/sessions/[id]/page.tsx`)
+- Student detail page: "Note from student" callout (`src/app/(instructor)/instructor/students/[id]/page.tsx`)
+- Dev test helper: `POST /api/test/assign-instructor` (`src/app/api/test/assign-instructor/route.ts`)
+- Placeholder color fix: unlayered `::placeholder` CSS override (`src/app/globals.css`)
+- Supabase types regenerated
+- New test file: `tests/instructor-notes.spec.ts` (serial mode, viewport-skipped mutation tests)
+- Fixed `instructor-views.spec.ts`: match by email instead of student name; "Upcoming" not "—" for attendance
+
+**In Progress:** Nothing — Phase 1 complete
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Quick code review fixes before Phase 2: add ~2000 char length cap to `instructor_notes` in `updateStudentProfile`; add pgTAP test asserting students can't read other students' notes
+- Confirm with Andy: is instructor access to student email in the session roster intentional?
+- Phase 2 kickoff — run `/pm` for task order recommendation
+
+**Context:**
+- Mutation tests writing to pw_student's profile row must skip mobile/tablet — all 3 Playwright projects run in parallel and hit the same DB row
+- "Profile updated." stays visible across sequential useActionState submits — wait for button to cycle through "Saving…" to confirm the second submit actually ran
+- Enrollment API auto-creates `expected` attendance records → attendance column shows "Upcoming" not "—"
+- Unlayered `::placeholder` wins over `@layer utilities` — correct approach for targeted pseudo-element overrides without touching design tokens
 
 ## Session 75 — 2026-04-16 00:05–00:22 (0.3 hrs)
 **Duration:** 0.3 hours | **Points:** 5 pts
