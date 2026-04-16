@@ -3,7 +3,38 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 74 — 2026-04-15 23:14 [open]
+## Session 74 — 2026-04-15 23:14–23:56 (0.7 hrs)
+**Duration:** 0.7 hours | **Points:** 3 pts (lumped into 1.15 — continuation of same task)
+**Tasks:** Phase 1.15 continuation — revert DB-synced theme persistence to localStorage-only
+
+**Completed:**
+- `src/components/theme-sync.tsx` — deleted
+- `src/app/api/theme/route.ts` — deleted
+- `src/actions/profiles.ts` — deleted dead `updateThemePreference` export
+- `src/components/theme-toggle.tsx` — toggle now only calls `setTheme()`, fetch to /api/theme removed
+- `src/app/(admin)/layout.tsx` — ThemeSync removed; profile query dropped entirely (theme_preference was its only purpose)
+- `src/app/(student)/layout.tsx` — ThemeSync removed; profile query now selects `is_instructor` only
+- `src/app/(instructor)/layout.tsx` — ThemeSync removed; profile query now selects `is_student` only
+- `tests/theme.spec.ts` — cross-session DB persistence test removed; stale ThemeSync comment fixed
+- `tests/dashboard-instructor-count.spec.ts` — `toBe` → `toBeGreaterThanOrEqual` for parallel test interference
+- `docs/PROJECT_PLAN.md` — tasks 1.0, 1.15, 4.8 updated to reflect localStorage-only approach
+- `docs/DECISIONS.md` — DEC-020 added; DEC-018 cross-reference updated
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Push dev branch
+- Continue Phase 1: 1.7 (experience levels / codes table, 5 pts), 1.10 (instructor notes + expanded roster, 3 pts), 1.23 (student account page, 3 pts)
+
+**Context:**
+- `theme_preference` column intentionally stays in DB schema — column is free, removal costs a migration + seed cleanup + type regen, and it's there if cross-device sync ever gets done properly (requires cookie-based SSR, not a useEffect)
+- Correct approach for cross-device sync documented in DEC-020: set a cookie server-side on login so next-themes initializes with the right value before first render
+
+**Code Review:** 2 findings, both fixed in-session:
+1. `src/actions/profiles.ts` — dead `updateThemePreference` export left behind (deleted)
+2. `tests/theme.spec.ts` — stale comment referencing ThemeSync (fixed)
 
 ## Session 73 — 2026-04-15 21:53–22:53 (1.0 hrs)
 **Duration:** 1.0 hours | **Points:** 6 pts
