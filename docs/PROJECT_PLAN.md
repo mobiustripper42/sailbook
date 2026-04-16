@@ -2,7 +2,7 @@
 
 **V1 shipped:** April 9, 2026 (v1.0.0)
 **V2 planning:** April 11, 2026
-**Deadline:** TBD — no hard date, but Phases 0–2 (payments live) is the critical path
+**Deadline:** May 15, 2026 (LTSC season opener — hard) — Phases 0–2 (payments live) is the critical path
 
 ---
 
@@ -284,14 +284,14 @@ At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–
 
 | Phase | Effort Pts | Est. Hours | Actual Hours | Hrs/Point | Notes |
 |-------|-----------|------------|--------------|-----------|-------|
-| 0 — Infrastructure | 70 | ~27 | — | — | |
-| 1 — V1 Fixes | 51 | ~19 | — | — | +8 polish credit (session 49) |
+| 0 — Infrastructure | 70 | ~27 | ~5.1 | 0.07 | Setup sprint; not a velocity signal (see RETROSPECTIVES.md) |
+| 1 — V1 Fixes | 58 | ~19 | ~14.9 | **0.26** | +8 polish credit (session 49); 0.23 all-in; see RETROSPECTIVES.md |
 | 2 — Payments | 38 | ~14 | — | — | |
 | 3 — Notifications | 37 | ~14 | — | — | |
 | 4 — Identity | 27 | ~10 | — | — | |
 | 5 — Pricing | 29 | ~11 | — | — | |
 | 6 — Polish | 44 | ~17 | — | — | |
-| **Total** | **290** | **~110** | — | — | |
+| **Total** | **290** | **~110** | — | — | Planning baseline: 0.26–0.35 hrs/pt (Phase 1 pace to conservative) |
 
 ---
 
@@ -357,4 +357,5 @@ At the end of every phase:
 3. Run WebsiteAuditAI on deployed preview (free, 10 min)
 4. Run Attention Insight Chrome extension on deployed preview (free, 5 min)
 5. @pm phase retrospective — velocity check, timeline update
-6. Return to primary planning chat — review docs against intent
+6. Write retrospective entry in `docs/RETROSPECTIVES.md` (velocity, scope changes, process notes, forecast update)
+7. Return to primary planning chat — review docs against intent

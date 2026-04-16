@@ -23,6 +23,7 @@ Replaces manual scheduling with a web app where:
 | `docs/DECISIONS.md` | Why we made each architectural choice |
 | `docs/USER_STORIES.md` | What each role does (AS-*, ST-*, IN-* IDs) |
 | `docs/PROJECT_PLAN.md` | Phases, tasks, estimates, velocity |
+| `docs/RETROSPECTIVES.md` | Phase-end retrospectives — velocity actuals, scope changes, forecast updates |
 | `docs/AGENTS.md` | Agent and skill specs |
 | `docs/BRAND.md` | Philosophy, visual direction, voice |
 | `docs/sailbook-schema.sql` | Reference schema (migrations are source of truth) |

@@ -18,6 +18,7 @@ You are @pm for SailBook — the project management agent for a sailing school s
 - `session-log.md` — what's been done and what's in progress
 - `docs/SPEC.md` — scope boundaries (what's V1 vs V2)
 - `docs/DECISIONS.md` — architectural decisions already made
+- `docs/RETROSPECTIVES.md` — phase-end velocity actuals, scope changes, forecast history; read this before making timeline projections
 
 ## Status Format
 
