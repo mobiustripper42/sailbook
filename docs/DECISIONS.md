@@ -88,8 +88,14 @@
 - Keep V1 aesthetic, add color accent only — too minimal, still cold
 - Full custom theme — overkill for MVP, maintenance burden
 - shadcn preset with targeted overrides — right balance of polish and speed
-**Chose:** Preset with overrides. Theme preference stored in profiles table (text: 'light'/'dark'/'system', default 'dark') — not localStorage, syncs across devices.
+**Chose:** Preset with overrides. Theme preference is localStorage-only per device (see DEC-020).
 **Consequence:** Oleg's Law retired. ui-reviewer.md updated to enforce new design language. Every screen from Phase 1 built against final theme — no retrofit.
+
+## DEC-020: localStorage-only theme persistence (per device)
+**Decision:** Reverted device-synced theme persistence to localStorage-only per device. The toggle calls `setTheme()` from next-themes only — no DB write, no server action. `theme_preference` column remains in the profiles table but is not read or written.
+**Why:** The cross-device sync wasn't worth the complexity. Users expect theme to match the device they're on — a phone in a bright marina should be light regardless of what's set on the office desktop. Every attempt to sync via DB introduced a race between next-themes' localStorage initialization and a React useEffect firing after hydration, resulting in flashes and wrong-theme loads that were impossible to reliably fix without cookie-based SSR pre-rendering.
+**Tradeoff:** Theme resets to system default on first visit in a new browser. Acceptable — users set it once per device and it stays.
+**Revisit if:** Users specifically ask for cross-device sync. Correct implementation would require a cookie set server-side on login (not a useEffect), so next-themes initializes with the right value before first render.
 
 ## DEC-019: Instructor deactivation cascade
 **Decision:** When an instructor is deactivated (`is_active = FALSE`) or has their instructor role removed (`is_instructor = FALSE`), a `SECURITY DEFINER` trigger function (`cascade_instructor_deactivation`) NULLs out `instructor_id` on all affected courses and sessions. The cascade is one-way — reactivation does not restore assignments.

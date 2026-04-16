@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/app/(auth)/actions'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { ThemeSync } from '@/components/theme-sync'
 import RoleToggle from '@/components/role-toggle'
 import InstructorDesktopNav from '@/components/instructor/instructor-desktop-nav'
 import InstructorMobileNavDrawer from '@/components/instructor/instructor-mobile-nav-drawer'
@@ -25,15 +24,13 @@ export default async function InstructorLayout({ children }: { children: React.R
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('theme_preference, is_student')
+    .select('is_student')
     .eq('id', user.id)
     .single()
-  const themePreference = (profile as { theme_preference?: string } | null)?.theme_preference ?? 'system'
   const isStudent = (profile as { is_student?: boolean } | null)?.is_student ?? false
 
   return (
     <div className="flex min-h-screen">
-      <ThemeSync preference={themePreference} />
       <aside className="hidden md:flex w-56 border-r bg-sidebar flex-col shrink-0">
         <div className="px-4 py-5 border-b">
           <Link href="/instructor/dashboard" className="font-semibold text-sm tracking-tight">

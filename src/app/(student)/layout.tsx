@@ -6,7 +6,6 @@ import { signOut } from '@/app/(auth)/actions'
 import StudentNav from '@/components/student/student-nav'
 import MobileNavDrawer from '@/components/student/mobile-nav-drawer'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { ThemeSync } from '@/components/theme-sync'
 import RoleToggle from '@/components/role-toggle'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -25,15 +24,13 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('theme_preference, is_instructor')
+    .select('is_instructor')
     .eq('id', user.id)
     .single()
-  const themePreference = (profile as { theme_preference?: string } | null)?.theme_preference ?? 'system'
   const isInstructor = (profile as { is_instructor?: boolean } | null)?.is_instructor ?? false
 
   return (
     <div className="flex min-h-screen">
-      <ThemeSync preference={themePreference} />
       <aside className="hidden md:flex w-56 border-r bg-sidebar flex-col shrink-0">
         <div className="px-4 py-5 border-b">
           <Link href="/student/dashboard" className="font-semibold text-sm tracking-tight">

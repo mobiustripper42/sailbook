@@ -67,43 +67,4 @@ test.describe('Theme toggle', () => {
     await expect(page.getByRole('button', { name: /switch to/i })).toBeVisible()
   })
 
-  // Full round-trip: toggle → DB save → fresh browser session → ThemeSync re-applies
-  // Uses pw_student to avoid conflicts with toggle tests that modify pw_admin.
-  // Restores dark at the end so the DB state is clean for subsequent runs.
-  test('theme preference persists across a fresh login', async ({ browser }) => {
-    const ctx1 = await browser.newContext()
-    const page1 = await ctx1.newPage()
-    try {
-      await loginAs(page1, 'pw_student@ltsc.test', '/student/dashboard')
-      // Force dark in localStorage, navigate so it takes effect
-      await page1.evaluate(() => localStorage.setItem('theme', 'dark'))
-      await page1.goto('/student/courses')
-      await expect(page1.locator('html')).toHaveClass(/dark/)
-      // Toggle to light → saves 'light' to DB via /api/theme
-      await page1.getByRole('button', { name: 'Switch to light mode' }).click()
-      await expect(page1.locator('html')).not.toHaveClass(/dark/)
-      await page1.waitForLoadState('networkidle')
-    } finally {
-      await ctx1.close()
-    }
-
-    // Fresh browser context — localStorage is empty. ThemeSync fires on first
-    // page load and writes 'light' (from DB). On second page load, next-themes
-    // reads 'light' from localStorage and applies it.
-    const ctx2 = await browser.newContext()
-    const page2 = await ctx2.newPage()
-    try {
-      await loginAs(page2, 'pw_student@ltsc.test', '/student/dashboard')
-      // ThemeSync has now written 'light' to localStorage
-      await page2.goto('/student/courses')
-      await expect(page2.locator('html')).not.toHaveClass(/dark/)
-
-      // Restore dark so subsequent test runs start clean
-      await page2.getByRole('button', { name: 'Switch to dark mode' }).click()
-      await expect(page2.locator('html')).toHaveClass(/dark/)
-      await page2.waitForLoadState('networkidle')
-    } finally {
-      await ctx2.close()
-    }
-  })
 })

@@ -21,14 +21,7 @@ export function ThemeToggle() {
   const isDark = (resolvedTheme ?? 'dark') !== 'light'
 
   function toggle() {
-    const next = isDark ? 'light' : 'dark'
-    setTheme(next)
-    // Save to DB without triggering a server action re-render
-    void fetch('/api/theme', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ theme: next }),
-    })
+    setTheme(isDark ? 'light' : 'dark')
   }
 
   return (

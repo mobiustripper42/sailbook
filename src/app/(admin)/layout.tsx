@@ -6,7 +6,6 @@ import { signOut } from '@/app/(auth)/actions'
 import AdminNav from '@/components/admin/admin-nav'
 import AdminMobileNavDrawer from '@/components/admin/admin-mobile-nav-drawer'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { ThemeSync } from '@/components/theme-sync'
 
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient()
@@ -22,16 +21,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const name = (`${user.user_metadata?.first_name ?? ''} ${user.user_metadata?.last_name ?? ''}`.trim() || user.email) ?? ''
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('theme_preference')
-    .eq('id', user.id)
-    .single()
-  const themePreference = (profile as { theme_preference?: string } | null)?.theme_preference ?? 'system'
-
   return (
     <div className="flex min-h-screen">
-      <ThemeSync preference={themePreference} />
       <aside className="hidden md:flex w-56 border-r bg-sidebar flex-col shrink-0">
         <div className="px-4 py-5 border-b">
           <Link href="/admin/dashboard" className="font-semibold text-sm tracking-tight">
