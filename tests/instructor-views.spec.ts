@@ -165,12 +165,12 @@ test.describe('Instructor session roster', () => {
     await expect(page.getByText(/1 \/ 4/)).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Roster' })).toBeVisible();
 
-    // pw_student appears as "Student, PW" in the table
-    await expect(page.getByRole('cell', { name: /Student, PW/ })).toBeVisible();
+    // pw_student appears in the table — match by email to avoid parallel test name mutations
+    await expect(page.getByRole('cell', { name: 'pw_student@ltsc.test' })).toBeVisible();
 
-    // Attendance column shows "—" (not yet marked)
-    const studentRow = page.getByRole('row', { name: /Student, PW/ });
-    await expect(studentRow.getByText('—')).toBeVisible();
+    // Attendance column shows "Upcoming" (enrollment creates an 'expected' record)
+    const studentRow = page.getByRole('row', { name: /pw_student@ltsc\.test/ });
+    await expect(studentRow.getByText('Upcoming')).toBeVisible();
   });
 
   test('back link returns to instructor dashboard', async ({ page, browser }) => {

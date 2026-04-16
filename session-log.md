@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 76 — 2026-04-16 08:21 [open]
+
 ## Session 75 — 2026-04-16 00:05–00:22 (0.3 hrs)
 **Duration:** 0.3 hours | **Points:** 5 pts
 **Task:** Phase 1.7 — generic codes/lookup table + migrate experience levels

@@ -48,6 +48,44 @@ export async function updateUserProfile(formData: FormData) {
   return { success: true }
 }
 
+export async function updateStudentProfile(
+  _: unknown,
+  formData: FormData
+): Promise<{ error: string | null }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const first_name = (formData.get('first_name') as string).trim()
+  const last_name = (formData.get('last_name') as string).trim()
+  const phone = (formData.get('phone') as string)?.trim() || null
+  const asa_number = (formData.get('asa_number') as string)?.trim() || null
+  const experience_level = (formData.get('experience_level') as string) || null
+  const instructor_notes = (formData.get('instructor_notes') as string)?.trim() || null
+
+  if (!first_name || !last_name) {
+    return { error: 'First name and last name are required.' }
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      first_name,
+      last_name,
+      phone,
+      asa_number,
+      experience_level: experience_level === '—' ? null : experience_level,
+      instructor_notes,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', user.id)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/student/account')
+  return { error: null }
+}
+
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient()
 

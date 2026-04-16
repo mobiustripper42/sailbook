@@ -28,6 +28,7 @@ export async function register(_: unknown, formData: FormData) {
   const lastName = formData.get('lastName') as string
   const phone = (formData.get('phone') as string) || null
   const experienceLevel = (formData.get('experienceLevel') as string) || null
+  const instructorNotes = (formData.get('instructorNotes') as string)?.trim() || null
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -50,6 +51,7 @@ export async function register(_: unknown, formData: FormData) {
       is_instructor: false,
       is_student: true,
       experience_level: experienceLevel,
+      instructor_notes: instructorNotes,
     })
 
     if (profileError) return { error: 'Account created but profile setup failed.' }

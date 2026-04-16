@@ -75,6 +75,16 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
             </select>
           </div>
           <div className="space-y-2">
+            <Label htmlFor="instructorNotes">Anything you want an instructor to know? <span className="text-muted-foreground font-normal">(optional)</span></Label>
+            <textarea
+              id="instructorNotes"
+              name="instructorNotes"
+              rows={3}
+              className="flex w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+              placeholder="Prior sailing experience, medical conditions, seasickness, etc."
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"

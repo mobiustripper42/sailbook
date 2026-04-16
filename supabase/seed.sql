@@ -163,7 +163,7 @@ INSERT INTO public.profiles (id, email, first_name, last_name, is_admin, is_inst
 INSERT INTO public.codes (category, value, label, description, sort_order) VALUES
   ('experience_level', 'beginner',     'Beginner',     'Little or no sailing experience',          10),
   ('experience_level', 'intermediate', 'Intermediate', 'Some sailing experience',                  20),
-  ('experience_level', 'advanced',     'Confident on the water', 'Comfortable and confident on the water',   30)
+  ('experience_level', 'advanced',     'Advanced',               'Confident on the water',                  30)
 ON CONFLICT (category, value) DO NOTHING;
 
 -- ============================================================

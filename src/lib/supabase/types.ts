@@ -286,6 +286,7 @@ export type Database = {
           experience_level: string | null
           first_name: string
           id: string
+          instructor_notes: string | null
           is_active: boolean | null
           is_admin: boolean
           is_instructor: boolean
@@ -303,6 +304,7 @@ export type Database = {
           experience_level?: string | null
           first_name: string
           id: string
+          instructor_notes?: string | null
           is_active?: boolean | null
           is_admin?: boolean
           is_instructor?: boolean
@@ -320,6 +322,7 @@ export type Database = {
           experience_level?: string | null
           first_name?: string
           id?: string
+          instructor_notes?: string | null
           is_active?: boolean | null
           is_admin?: boolean
           is_instructor?: boolean

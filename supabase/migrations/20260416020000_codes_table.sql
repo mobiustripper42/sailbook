@@ -37,4 +37,4 @@ CREATE POLICY "codes_admin_all"
 INSERT INTO public.codes (category, value, label, description, sort_order) VALUES
   ('experience_level', 'beginner',     'Beginner',     'Little or no sailing experience',     10),
   ('experience_level', 'intermediate', 'Intermediate', 'Some sailing experience',              20),
-  ('experience_level', 'advanced',     'Confident on the water', 'Comfortable and confident on the water', 30);
+  ('experience_level', 'advanced',     'Advanced',               'Confident on the water',                30);

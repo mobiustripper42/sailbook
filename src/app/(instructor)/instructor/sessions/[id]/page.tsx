@@ -21,6 +21,8 @@ type StudentRow = {
   first_name: string
   last_name: string
   phone: string | null
+  email: string
+  has_instructor_notes: boolean
   attendance_status: AttendanceStatus | null
   makeup_session_id: string | null
   makeup_from_date: string | null
@@ -67,7 +69,7 @@ export default async function InstructorSessionRosterPage({
     .from('enrollments')
     .select(`
       id, student_id, status,
-      profiles!enrollments_student_id_fkey ( first_name, last_name, phone )
+      profiles!enrollments_student_id_fkey ( first_name, last_name, phone, email, instructor_notes )
     `)
     .eq('course_id', course.id)
     .neq('status', 'cancelled')
@@ -101,6 +103,8 @@ export default async function InstructorSessionRosterPage({
       first_name: string
       last_name: string
       phone: string | null
+      email: string
+      instructor_notes: string | null
     }
     const attendance = attendanceMap.get(e.id)
     return {
@@ -109,6 +113,8 @@ export default async function InstructorSessionRosterPage({
       first_name: profile.first_name,
       last_name: profile.last_name,
       phone: profile.phone,
+      email: profile.email,
+      has_instructor_notes: !!profile.instructor_notes,
       attendance_status: (attendance?.status as AttendanceStatus) ?? null,
       makeup_session_id: attendance?.makeup_session_id ?? null,
       makeup_from_date: makeupMap.get(e.id) ?? null,
@@ -164,6 +170,7 @@ export default async function InstructorSessionRosterPage({
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Phone</TableHead>
+                  <TableHead>Email</TableHead>
                   <TableHead>Attendance</TableHead>
                 </TableRow>
               </TableHeader>
@@ -178,6 +185,12 @@ export default async function InstructorSessionRosterPage({
                         >
                           {s.last_name}, {s.first_name}
                         </Link>
+                        {s.has_instructor_notes && (
+                          <span
+                            className="inline-block w-1.5 h-1.5 rounded-full bg-primary shrink-0"
+                            title="Student left a note for their instructor"
+                          />
+                        )}
                         {s.makeup_from_date && (
                           <Badge variant="secondary" className="text-xs font-normal">
                             Makeup from {fmtDateLong(s.makeup_from_date)}
@@ -187,6 +200,9 @@ export default async function InstructorSessionRosterPage({
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {s.phone ?? '—'}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {s.email}
                     </TableCell>
                     <TableCell>
                       {s.attendance_status ? (

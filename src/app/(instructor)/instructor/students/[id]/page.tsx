@@ -14,7 +14,7 @@ export default async function InstructorStudentViewPage({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name, experience_level')
+    .select('id, first_name, last_name, experience_level, instructor_notes')
     .eq('id', id)
     .eq('is_student', true)
     .single()
@@ -42,6 +42,12 @@ export default async function InstructorStudentViewPage({
           <p className="text-sm text-muted-foreground capitalize">
             Experience: {profile.experience_level}
           </p>
+        )}
+        {profile.instructor_notes && (
+          <div className="mt-3 rounded-md border bg-muted/50 px-4 py-3 text-sm">
+            <p className="text-xs text-muted-foreground font-medium mb-1">Note from student</p>
+            <p>{profile.instructor_notes}</p>
+          </div>
         )}
       </div>
 

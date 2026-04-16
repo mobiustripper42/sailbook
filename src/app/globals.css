@@ -134,3 +134,12 @@
     @apply font-sans;
   }
 }
+
+/* Placeholder text — unlayered so it wins over @layer utilities without !important.
+   Targets ::placeholder specifically without touching muted-foreground everywhere else. */
+::placeholder {
+  color: oklch(0.8 0.021 213.5); /* light mode: clearly lighter than input text */
+}
+.dark ::placeholder {
+  color: oklch(0.35 0.014 214.4); /* dark mode: clearly darker than foreground text */
+}
