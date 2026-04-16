@@ -3,7 +3,40 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 73 — 2026-04-15 21:53 [open]
+## Session 73 — 2026-04-15 21:53–22:53 (1.0 hrs)
+**Duration:** 1.0 hours | **Points:** 6 pts
+**Tasks:** Session 72 code review fixes, Phase 1.14 (dashboard instructor count tests), Phase 1.15 (theme preference persistence)
+
+**Completed:**
+- `src/app/api/test/enroll/route.ts` — JSDoc updated (NEXT_PUBLIC_DEV_MODE → NODE_ENV); session_attendance upsert now checks and returns error
+- `src/app/(auth)/register/page.tsx` — select `shadow-sm` → `shadow-xs`
+- `src/app/(student)/student/courses/[id]/actions.ts` — enrollment upsert in `createCheckoutSession` now returns errors (update + insert); TODO comment on `!checkoutSession.url` guard linking to 2.4
+- `supabase/migrations/20260416010000_change_theme_preference_default.sql` — column default `theme_preference` `'dark'` → `'system'`
+- `src/components/theme-provider.tsx` — `defaultTheme="dark"` → `"system"` (unauthenticated pages follow OS)
+- `src/app/(admin)/layout.tsx`, `(student)/layout.tsx`, `(instructor)/layout.tsx` — fallback `?? 'dark'` → `?? 'system'`
+- `supabase/seed.sql` — `theme_preference` column added to profiles INSERT; all seed users pinned to `'dark'` explicitly
+- `src/components/theme-sync.tsx` — comment updated to document localStorage-first-render limitation
+- `tests/theme.spec.ts` — rewritten: localStorage isolation for toggle tests (prevents parallel viewport DB pollution); adds unauthenticated system-default test and cross-session persistence test (uses pw_student, restores dark on exit)
+- `tests/dashboard-instructor-count.spec.ts` — new: 3 tests covering warning card, count increment (desktop-only), session "Course default" label
+- `docs/PROJECT_PLAN.md` — task 4.8 added (cookie-based theme sync); 4.9 is end-of-phase review
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- `supabase db push` to apply `20260416010000_change_theme_preference_default.sql` to remote
+- Continue Phase 1: 1.7 (experience levels / codes table, 5 pts), 1.10 (instructor notes + expanded roster, 3 pts), 1.23 (student account page, 3 pts)
+
+**Context:**
+- Theme FOUC on first page after login is a known limitation: ThemeSync writes 'dark' to localStorage in a useEffect, but next-themes already initialized from `defaultTheme="system"`. Fix is task 4.8 (cookie-based pre-population). Fully documented in theme-sync.tsx.
+- Theme toggle tests pre-seed localStorage directly (`page.evaluate(() => localStorage.setItem('theme', 'dark'))`) to avoid DB state pollution from parallel viewport projects — do not remove this pattern
+- `supabase db reset` needed before running theme tests if toggle tests were interrupted mid-run (pw_student or pw_admin DB state may be stale)
+
+**Code Review:** 3 findings:
+1. "Toggle is visible" tests don't clear localStorage first — inconsistent with rest of suite (low risk, tests use `/switch to/i` not a specific label)
+2. Persistence test DB restore could be left dirty if test fails mid-run between ctx1/ctx2 — no afterAll cleanup hook
+3. theme-sync.tsx comment says "next page navigation" — should say "next full page load" (minor precision)
 
 ## Session 72 — 2026-04-15 19:08–19:41 (0.6 hrs)
 **Duration:** 0.6 hours | **Points:** 4 pts
