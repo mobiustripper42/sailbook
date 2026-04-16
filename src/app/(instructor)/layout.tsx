@@ -28,7 +28,7 @@ export default async function InstructorLayout({ children }: { children: React.R
     .select('theme_preference, is_student')
     .eq('id', user.id)
     .single()
-  const themePreference = (profile as { theme_preference?: string } | null)?.theme_preference ?? 'dark'
+  const themePreference = (profile as { theme_preference?: string } | null)?.theme_preference ?? 'system'
   const isStudent = (profile as { is_student?: boolean } | null)?.is_student ?? false
 
   return (

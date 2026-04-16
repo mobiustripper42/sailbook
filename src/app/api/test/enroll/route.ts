@@ -1,6 +1,6 @@
 /**
  * DEV/TEST ONLY — creates a confirmed enrollment without going through Stripe.
- * Gated behind NEXT_PUBLIC_DEV_MODE. Never deploy this without that flag false.
+ * Gated behind NODE_ENV !== 'development'. Never deploy with NODE_ENV=development.
  *
  * POST /api/test/enroll
  * Body: { courseId: string; studentEmail: string }
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     .eq('course_id', courseId)
 
   if (sessions && sessions.length > 0) {
-    await admin
+    const { error: attendanceErr } = await admin
       .from('session_attendance')
       .upsert(
         sessions.map((s) => ({
@@ -79,6 +79,7 @@ export async function POST(req: NextRequest) {
         })),
         { onConflict: 'session_id,enrollment_id' }
       )
+    if (attendanceErr) return NextResponse.json({ error: attendanceErr.message }, { status: 500 })
   }
 
   return NextResponse.json({ enrollmentId })

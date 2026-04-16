@@ -214,7 +214,7 @@ export async function createCheckoutSession(
 
   // Upsert enrollment with pending_payment hold
   if (existing) {
-    await supabase
+    const { error: updateErr } = await supabase
       .from('enrollments')
       .update({
         status: 'pending_payment',
@@ -223,8 +223,9 @@ export async function createCheckoutSession(
         enrolled_at: now.toISOString(),
       })
       .eq('id', existing.id)
+    if (updateErr) return { error: updateErr.message }
   } else {
-    await supabase
+    const { error: insertErr } = await supabase
       .from('enrollments')
       .insert({
         course_id: courseId,
@@ -233,10 +234,12 @@ export async function createCheckoutSession(
         hold_expires_at: holdExpiry.toISOString(),
         stripe_checkout_session_id: checkoutSession.id,
       })
+    if (insertErr) return { error: insertErr.message }
   }
 
   revalidatePath(`/student/courses/${courseId}`)
 
+  // TODO(2.4): if url is missing the hold is written but student can't pay — expiry will clean it up
   if (!checkoutSession.url) {
     return { error: 'Failed to create checkout session. Please try again.' }
   }

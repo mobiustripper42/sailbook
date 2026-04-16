@@ -9,9 +9,11 @@ const SYNC_KEY = 'sailbook-theme-synced'
 // page navigation (which would override the user's in-session toggle).
 // On a fresh login (new tab, new device), the DB preference is applied.
 //
-// Writes directly to localStorage (next-themes storage key) instead of
-// calling setTheme() to avoid triggering a context update → re-render
-// cascade that destabilizes the ThemeToggle mounted state.
+// Writes directly to localStorage (next-themes storage key) so the
+// preference takes effect on the next page navigation. On the very first
+// page after login, the ThemeProvider's defaultTheme="system" renders
+// briefly before localStorage is populated — acceptable trade-off vs.
+// the re-render cascade from calling setTheme() during hydration.
 export function ThemeSync({ preference }: { preference: string }) {
   useEffect(() => {
     if (!sessionStorage.getItem(SYNC_KEY)) {

@@ -162,9 +162,10 @@ Clean onboarding. Richer student and instructor records.
 | 4.5 | (NOT REQUIRED) Link admin-created student to login — student creates account, admin links to existing profile | 3 | Depends on 4.4 architecture. Might be as simple as "student resets password." |
 | 4.6 | Instructor notes on sessions — text field per session, visible to all instructors + admin | 3 | IN-5 from V1 backlog. `notes` column already exists on sessions table. UI only. |
 | 4.7 | Instructor profile expansion — availability field + bio/website link | 3 | General availability for admin assignment. Name links to LTSC website bio. Andy request. |
-| 4.8 | End-of-phase @ui-reviewer and lint pass | 2 | Focus on profile expansion pages, invite flow, instructor onboarding. |
+| 4.8 | Cookie-based theme sync — zero-FOUC on first page after login | 2 | On login, set `sailbook_theme` cookie. Root layout (Server Component) reads cookie and renders inline `<script>` that pre-populates `localStorage['theme']` before next-themes' own init script runs. Eliminates the brief light-flash for dark-preference users after login. ThemeSync stays as-is; this just front-runs it. |
+| 4.9 | End-of-phase @ui-reviewer and lint pass | 2 | Focus on profile expansion pages, invite flow, instructor onboarding. |
 
-**Phase 4 total: 29 pts**
+**Phase 4 total: 31 pts**
 **Projected hours: ~10 hrs**
 
 **Ejection point:** Instructors get proper onboarding. Student profiles are richer. Instructor notes captured. Admin can create students for non-technical users.

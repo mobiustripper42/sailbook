@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 73 — 2026-04-15 21:53 [open]
+
 ## Session 72 — 2026-04-15 19:08–19:41 (0.6 hrs)
 **Duration:** 0.6 hours | **Points:** 4 pts
 **Tasks:** Phase 1.18 (logo + favicon), 1.19 (/dev dark mode), code review fixes (sessions 68 & 70), dark mode select fix

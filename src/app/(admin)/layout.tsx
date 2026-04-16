@@ -27,7 +27,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .select('theme_preference')
     .eq('id', user.id)
     .single()
-  const themePreference = (profile as { theme_preference?: string } | null)?.theme_preference ?? 'dark'
+  const themePreference = (profile as { theme_preference?: string } | null)?.theme_preference ?? 'system'
 
   return (
     <div className="flex min-h-screen">

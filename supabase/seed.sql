@@ -144,17 +144,17 @@ INSERT INTO auth.identities (id, user_id, provider_id, identity_data, provider, 
   ('f1000000-0000-0000-0000-000000000002','f1000000-0000-0000-0000-000000000002','pw_instructor@ltsc.test','{"sub":"f1000000-0000-0000-0000-000000000002","email":"pw_instructor@ltsc.test"}','email',now(),now(),now()),
   ('f1000000-0000-0000-0000-000000000003','f1000000-0000-0000-0000-000000000003','pw_student@ltsc.test',   '{"sub":"f1000000-0000-0000-0000-000000000003","email":"pw_student@ltsc.test"}',   'email',now(),now(),now());
 
-INSERT INTO public.profiles (id, email, first_name, last_name, is_admin, is_instructor, is_student, experience_level, asa_number) VALUES
-  ('a1000000-0000-0000-0000-000000000001', 'andy@ltsc.test',         'Andy',   'Kaminski',   true,  false, false, null,           null),
-  ('a1000000-0000-0000-0000-000000000002', 'mike@ltsc.test',         'Mike',   'Theriault',  false, true,  false, null,           null),
-  ('a1000000-0000-0000-0000-000000000003', 'lisa@ltsc.test',         'Lisa',   'Chen',       false, true,  false, null,           null),
-  ('a1000000-0000-0000-0000-000000000004', 'chris@ltsc.test',        'Chris',  'Marino',     false, true,  true,  'intermediate', null),
-  ('a1000000-0000-0000-0000-000000000005', 'sam@ltsc.test',          'Sam',    'Davies',     false, false, true,  'beginner',     '101234'),
-  ('a1000000-0000-0000-0000-000000000006', 'alex@ltsc.test',         'Alex',   'Rivera',     false, false, true,  'beginner',     null),
-  ('a1000000-0000-0000-0000-000000000007', 'jordan@ltsc.test',       'Jordan', 'Park',       false, false, true,  null,           null),
-  ('f1000000-0000-0000-0000-000000000001', 'pw_admin@ltsc.test',     'PW',     'Admin',      true,  false, false, null,           null),
-  ('f1000000-0000-0000-0000-000000000002', 'pw_instructor@ltsc.test','PW',     'Instructor', false, true,  false, null,           null),
-  ('f1000000-0000-0000-0000-000000000003', 'pw_student@ltsc.test',   'PW',     'Student',    false, false, true,  null,           null);
+INSERT INTO public.profiles (id, email, first_name, last_name, is_admin, is_instructor, is_student, experience_level, asa_number, theme_preference) VALUES
+  ('a1000000-0000-0000-0000-000000000001', 'andy@ltsc.test',         'Andy',   'Kaminski',   true,  false, false, null,           null,     'dark'),
+  ('a1000000-0000-0000-0000-000000000002', 'mike@ltsc.test',         'Mike',   'Theriault',  false, true,  false, null,           null,     'dark'),
+  ('a1000000-0000-0000-0000-000000000003', 'lisa@ltsc.test',         'Lisa',   'Chen',       false, true,  false, null,           null,     'dark'),
+  ('a1000000-0000-0000-0000-000000000004', 'chris@ltsc.test',        'Chris',  'Marino',     false, true,  true,  'intermediate', null,     'dark'),
+  ('a1000000-0000-0000-0000-000000000005', 'sam@ltsc.test',          'Sam',    'Davies',     false, false, true,  'beginner',     '101234', 'dark'),
+  ('a1000000-0000-0000-0000-000000000006', 'alex@ltsc.test',         'Alex',   'Rivera',     false, false, true,  'beginner',     null,     'dark'),
+  ('a1000000-0000-0000-0000-000000000007', 'jordan@ltsc.test',       'Jordan', 'Park',       false, false, true,  null,           null,     'dark'),
+  ('f1000000-0000-0000-0000-000000000001', 'pw_admin@ltsc.test',     'PW',     'Admin',      true,  false, false, null,           null,     'dark'),
+  ('f1000000-0000-0000-0000-000000000002', 'pw_instructor@ltsc.test','PW',     'Instructor', false, true,  false, null,           null,     'dark'),
+  ('f1000000-0000-0000-0000-000000000003', 'pw_student@ltsc.test',   'PW',     'Student',    false, false, true,  null,           null,     'dark');
 
 -- ============================================================
 -- COURSE TYPES
