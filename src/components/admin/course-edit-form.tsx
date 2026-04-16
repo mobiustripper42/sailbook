@@ -15,7 +15,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
-import type { Course } from '@/lib/supabase/types'
+import type { Tables } from '@/lib/supabase/types'
+
+type Course = Tables<'courses'>
 
 type Props = {
   course: Course

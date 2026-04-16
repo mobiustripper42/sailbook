@@ -34,6 +34,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      codes: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          label: string
+          sort_order: number
+          value: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          sort_order?: number
+          value: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          sort_order?: number
+          value?: string
+        }
+        Relationships: []
+      }
       course_types: {
         Row: {
           certification_body: string | null
@@ -583,7 +616,3 @@ export const Constants = {
   },
 } as const
 
-
-// Convenience row type aliases
-export type Course = import("./types").Database["public"]["Tables"]["courses"]["Row"]
-export type CourseType = import("./types").Database["public"]["Tables"]["course_types"]["Row"]

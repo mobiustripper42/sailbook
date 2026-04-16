@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 75 — 2026-04-16 00:05 [open]
+
 ## Session 74 — 2026-04-15 23:14–23:56 (0.7 hrs)
 **Duration:** 0.7 hours | **Points:** 3 pts (lumped into 1.15 — continuation of same task)
 **Tasks:** Phase 1.15 continuation — revert DB-synced theme persistence to localStorage-only

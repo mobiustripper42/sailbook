@@ -104,13 +104,20 @@
 **Tradeoff:** Cascade is silent — no event or notification is emitted. Andy sees the cleared assignments on the courses page; no separate audit trail for "why is this course unassigned."
 **Revisit if:** We add an audit log table and need to record the reason for assignment removal.
 
+## DEC-021: Generic codes/lookup table pattern
+**Decision:** All configurable dropdown/lookup values live in a `codes` table with `(category, value, label, description, sort_order, is_active)`. First use: experience levels (`category = 'experience_level'`). Reusable for qualification types, prerequisite names, skill names, and anything else that currently would be a hardcoded enum or `<option>` list.
+**Why:** Hardcoded option lists in components mean a code deploy to add a new level. The codes table lets Andy (or future admin UI) add/retire values without touching code. It also makes the schema self-documenting — the full list of valid experience levels lives in the database, not scattered across three files.
+**Structure:** `profiles.experience_level` remains a `varchar` column with no FK constraint. App reads valid options from codes at render time. Deactivated codes stay in the DB (historical records keep their values); they just don't appear in dropdowns.
+**No FK constraint:** Adding a FK from `profiles.experience_level` to `codes.value` would require a partial index or composite key reference and would block retiring a code if any profile still holds it. The softer approach (app-level filtering) is sufficient — this isn't financial data.
+**Tradeoff:** No admin UI for codes in Phase 1. Andy edits directly via SQL. Polish task 6.x to add a UI if needed.
+
 ---
 
 ## V2 Decisions (to be resolved during build)
 
 | ID | Decision | When | Who | Status |
 |----|----------|------|-----|--------|
-| DEC-TBD | Generic codes/lookup table pattern | Phase 1, task 1.7 | @architect | Pending |
+| DEC-021 | Generic codes/lookup table pattern | Phase 1, task 1.7 | DEC entry | Done |
 | DEC-019 | Inactive instructor cascade behavior | Phase 1, task 1.3 | DEC entry | Done |
 | DEC-TBD | Pessimistic inventory / enrollment hold duration | Phase 2, task 2.3 | DEC + Andy | Pending |
 | DEC-TBD | Cancellation refund policy (full? time-based? admin override?) | Phase 2, task 2.7 | Andy | Pending |

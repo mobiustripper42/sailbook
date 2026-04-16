@@ -7,12 +7,20 @@ export default async function EditInstructorPage({ params }: { params: Promise<{
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name, email, phone, experience_level, asa_number, is_active, is_student, is_instructor')
-    .eq('id', id)
-    .eq('is_instructor', true)
-    .single()
+  const [{ data: profile }, { data: codes }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, first_name, last_name, email, phone, experience_level, asa_number, is_active, is_student, is_instructor')
+      .eq('id', id)
+      .eq('is_instructor', true)
+      .single(),
+    supabase
+      .from('codes')
+      .select('value, label, description')
+      .eq('category', 'experience_level')
+      .eq('is_active', true)
+      .order('sort_order'),
+  ])
 
   if (!profile) notFound()
 
@@ -27,7 +35,7 @@ export default async function EditInstructorPage({ params }: { params: Promise<{
       <h1 className="text-2xl font-semibold mb-6">
         Edit Instructor — {profile.first_name} {profile.last_name}
       </h1>
-      <ProfileEditForm profile={profile} returnPath="/admin/instructors" />
+      <ProfileEditForm profile={profile} returnPath="/admin/instructors" experienceCodes={codes ?? []} />
     </div>
   )
 }

@@ -21,12 +21,20 @@ type Profile = {
   is_instructor: boolean
 }
 
+type ExperienceCode = {
+  value: string
+  label: string
+  description: string | null
+}
+
 export default function ProfileEditForm({
   profile,
   returnPath,
+  experienceCodes = [],
 }: {
   profile: Profile
   returnPath: string
+  experienceCodes?: ExperienceCode[]
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -104,9 +112,11 @@ export default function ProfileEditForm({
             className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <option value="—">Not set</option>
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced">Advanced</option>
+            {experienceCodes.map((code) => (
+              <option key={code.value} value={code.value}>
+                {code.label}
+              </option>
+            ))}
           </select>
         </div>
       )}

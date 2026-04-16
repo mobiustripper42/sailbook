@@ -157,6 +157,16 @@ INSERT INTO public.profiles (id, email, first_name, last_name, is_admin, is_inst
   ('f1000000-0000-0000-0000-000000000003', 'pw_student@ltsc.test',   'PW',     'Student',    false, false, true,  null,           null,     'dark');
 
 -- ============================================================
+-- CODES (lookup/dropdown values)
+-- ============================================================
+
+INSERT INTO public.codes (category, value, label, description, sort_order) VALUES
+  ('experience_level', 'beginner',     'Beginner',     'Little or no sailing experience',          10),
+  ('experience_level', 'intermediate', 'Intermediate', 'Some sailing experience',                  20),
+  ('experience_level', 'advanced',     'Confident on the water', 'Comfortable and confident on the water',   30)
+ON CONFLICT (category, value) DO NOTHING;
+
+-- ============================================================
 -- COURSE TYPES
 -- ============================================================
 

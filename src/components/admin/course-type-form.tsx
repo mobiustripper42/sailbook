@@ -8,7 +8,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
-import type { CourseType } from '@/lib/supabase/types'
+import type { Tables } from '@/lib/supabase/types'
+
+type CourseType = Tables<'course_types'>
 
 type Props = {
   courseType?: CourseType
