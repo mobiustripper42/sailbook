@@ -3,7 +3,42 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 75 — 2026-04-16 00:05 [open]
+## Session 75 — 2026-04-16 00:05–00:22 (0.3 hrs)
+**Duration:** 0.3 hours | **Points:** 5 pts
+**Task:** Phase 1.7 — generic codes/lookup table + migrate experience levels
+
+**Completed:**
+- `supabase/migrations/20260416020000_codes_table.sql` — codes table, RLS (anon SELECT active; admin ALL), seeded with beginner / intermediate / advanced (desc: Confident on the water)
+- `supabase/seed.sql` — codes rows with ON CONFLICT DO NOTHING
+- `supabase/tests/07_rls_codes.sql` — 8 pgTAP RLS tests; all 85 pgTAP tests green
+- `src/app/(auth)/register/register-form.tsx` — extracted client form, takes experienceCodes prop
+- `src/app/(auth)/register/page.tsx` — converted to server component, fetches codes, passes to form
+- `src/components/admin/profile-edit-form.tsx` — experienceCodes prop replaces hardcoded options
+- `src/app/(admin)/admin/students/[id]/edit/page.tsx` — fetches codes in parallel with profile
+- `src/app/(admin)/admin/instructors/[id]/edit/page.tsx` — same
+- `src/components/admin/course-edit-form.tsx` + `course-type-form.tsx` — fixed stale named type imports broken by type regen
+- `docs/DECISIONS.md` — DEC-021 added; DEC-TBD resolved
+- `tests/codes.spec.ts` — 9 Playwright tests; all green
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- `supabase db push` to apply codes migration to remote
+- Task 1.10 — instructor notes field + expanded roster (3 pts)
+- Task 1.23 — student account page (3 pts)
+
+**Context:**
+- profiles.experience_level stays varchar with no FK — intentional (DEC-021). Retiring a code doesn't break existing profiles; retired codes just disappear from dropdowns.
+- Seed data lives in both the migration (for prod via db push) and seed.sql (for local db reset) — ON CONFLICT DO NOTHING prevents duplication. If you update a label, update both files.
+- Type regen wiped two custom named exports (Course, CourseType) — replaced with Tables<'courses'> / Tables<'course_types'>. Watch for this on future regen.
+
+**Code Review:** 4 findings (all advisory):
+1. Seed data duplicated between migration and seed.sql — intentional, ON CONFLICT DO NOTHING already in place
+2. No pgTAP test for admin SELECT of inactive codes — gap if admin audit UI ever lands
+3. codes fetch on instructor edit page is a no-op for pure instructors (experience field only shown when is_student) — minor wasted query
+4. ExperienceCode type defined in two files — extract to shared location if more callsites emerge
 
 ## Session 74 — 2026-04-15 23:14–23:56 (0.7 hrs)
 **Duration:** 0.7 hours | **Points:** 3 pts (lumped into 1.15 — continuation of same task)
