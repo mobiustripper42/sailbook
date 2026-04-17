@@ -67,6 +67,10 @@ export async function updateStudentProfile(
     return { error: 'First name and last name are required.' }
   }
 
+  if (instructor_notes && instructor_notes.length > 2000) {
+    return { error: 'Notes must be 2000 characters or fewer.' }
+  }
+
   const { error } = await supabase
     .from('profiles')
     .update({

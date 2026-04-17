@@ -58,7 +58,7 @@ export default async function StudentCourseDetailPage({
   const { data: myEnrollment } = user
     ? await supabase
         .from('enrollments')
-        .select('id, status')
+        .select('id, status, hold_expires_at')
         .eq('course_id', id)
         .eq('student_id', user.id)
         .single()
@@ -68,6 +68,11 @@ export default async function StudentCourseDetailPage({
     myEnrollment.status !== 'cancelled' &&
     myEnrollment.status !== 'pending_payment'
   const hasPendingPayment = myEnrollment?.status === 'pending_payment'
+  const isHoldExpired = hasPendingPayment &&
+    (myEnrollment?.hold_expires_at == null || new Date(myEnrollment.hold_expires_at) <= new Date())
+  const holdMinutesRemaining = hasPendingPayment && !isHoldExpired && myEnrollment?.hold_expires_at
+    ? Math.ceil((new Date(myEnrollment.hold_expires_at).getTime() - Date.now()) / 60000)
+    : 0
 
   // Fetch attendance records if enrolled
   const { data: myAttendance } = isEnrolled
@@ -244,10 +249,12 @@ export default async function StudentCourseDetailPage({
               <Badge className="text-sm px-3 py-1">Enrolled</Badge>
             )}
           </div>
-        ) : hasPendingPayment ? (
-          <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="text-sm px-3 py-1">Payment pending</Badge>
-            <span className="text-sm text-muted-foreground">Complete your payment to confirm your spot.</span>
+        ) : hasPendingPayment && !isHoldExpired ? (
+          <div className="space-y-2">
+            <EnrollButton courseId={id} label="Resume Payment" />
+            <p className="text-sm text-muted-foreground">
+              Your spot is held for {holdMinutesRemaining} more {holdMinutesRemaining === 1 ? 'minute' : 'minutes'}.
+            </p>
           </div>
         ) : (
           <EnrollButton

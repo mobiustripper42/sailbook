@@ -8,9 +8,10 @@ interface EnrollButtonProps {
   courseId: string
   disabled?: boolean
   disabledReason?: string
+  label?: string
 }
 
-export default function EnrollButton({ courseId, disabled, disabledReason }: EnrollButtonProps) {
+export default function EnrollButton({ courseId, disabled, disabledReason, label }: EnrollButtonProps) {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
@@ -37,7 +38,7 @@ export default function EnrollButton({ courseId, disabled, disabledReason }: Enr
   return (
     <div className="space-y-2">
       <Button onClick={handleEnroll} disabled={pending} className="w-full sm:w-auto">
-        {pending ? 'Preparing checkout…' : 'Register & Pay'}
+        {pending ? 'Preparing checkout…' : (label ?? 'Register & Pay')}
       </Button>
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>

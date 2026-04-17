@@ -8,7 +8,7 @@
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(12);
+SELECT plan(13);
 
 -- ============================================================
 -- HELPERS
@@ -128,6 +128,13 @@ SELECT is(
    WHERE id = 'a1000000-0000-0000-0000-000000000006'),
   0,
   'student: cannot read another student profile (alex)'
+);
+
+SELECT is(
+  (SELECT instructor_notes FROM public.profiles
+   WHERE id = 'a1000000-0000-0000-0000-000000000006'),
+  NULL,
+  'student: instructor_notes from another student profile returns NULL (row blocked by RLS)'
 );
 
 SELECT is(
