@@ -3,6 +3,10 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 77 — 2026-04-17 12:38 [open]
+**[PAUSED 13:10]**
+**[RESUMED 08:31]** Working on: Phase 2.4 — enrollment hold expiry. Left off at: all code complete and committed (cron route, Resume Payment UX, pgTAP debt, Playwright tests 3/3 passing). Next: run `supabase test db` to confirm pgTAP test #13 green, then visually verify Resume Payment UX in the browser, then move to Phase 2.5 (Stripe webhook).
+
 ## Session 76 — 2026-04-16 08:21–09:29 (1.2 hrs)
 **Duration:** 1h 10min | **Points:** 6 pts (1.10: 3pts + 1.23: 3pts)
 **Task:** Phase 1.10 — instructor notes field + expanded roster; Phase 1.23 — student account page

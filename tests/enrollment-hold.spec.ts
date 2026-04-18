@@ -73,11 +73,46 @@ test.describe('enrollment hold expiry', () => {
     }
   })
 
-  test('cron endpoint expires pending_payment holds past their expiry', async ({ request }) => {
+  test('cron endpoint expires pending_payment holds past their expiry', async ({ browser, request }) => {
     test.skip(test.info().project.name !== 'desktop')
-    const res = await request.get('http://localhost:3000/api/cron/expire-holds')
-    expect(res.ok()).toBeTruthy()
-    const body = await res.json() as { expired: number }
-    expect(typeof body.expired).toBe('number')
+
+    // Create course and seed an expired hold
+    const adminCtx = await browser.newContext()
+    const adminPage = await adminCtx.newPage()
+    let courseId: string
+    try {
+      courseId = await createTestCourse(adminPage, { capacity: 4, title: `Cron Expiry ${Math.random().toString(36).slice(2, 7)}` })
+    } finally {
+      await adminCtx.close()
+    }
+
+    const apiCtx = await browser.newContext()
+    const apiPage = await apiCtx.newPage()
+    try {
+      const res = await apiPage.request.post('http://localhost:3000/api/test/set-pending-hold', {
+        data: { courseId, studentEmail: 'pw_student@ltsc.test', expired: true },
+      })
+      expect(res.ok()).toBeTruthy()
+    } finally {
+      await apiCtx.close()
+    }
+
+    // Fire the cron endpoint
+    const cronRes = await request.get('http://localhost:3000/api/cron/expire-holds')
+    expect(cronRes.ok()).toBeTruthy()
+    const body = await cronRes.json() as { expired: number }
+    expect(body.expired).toBeGreaterThanOrEqual(1)
+
+    // Student should now see Register & Pay — hold was cleaned up
+    const studentCtx = await browser.newContext()
+    const studentPage = await studentCtx.newPage()
+    try {
+      await loginAs(studentPage, 'pw_student@ltsc.test', '/student/dashboard')
+      await studentPage.goto(`/student/courses/${courseId}`)
+      await expect(studentPage.getByRole('button', { name: 'Register & Pay' })).toBeVisible()
+      await expect(studentPage.getByText('Payment pending')).not.toBeVisible()
+    } finally {
+      await studentCtx.close()
+    }
   })
 })
