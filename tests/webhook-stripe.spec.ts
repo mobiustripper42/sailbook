@@ -83,22 +83,59 @@ test.describe('Stripe webhook', () => {
     }
   })
 
-  test('duplicate webhook event is handled idempotently', async ({ request }) => {
+  test('duplicate webhook event is handled idempotently (no duplicate payment rows)', async ({
+    browser,
+    request,
+  }) => {
     test.skip(test.info().project.name !== 'desktop')
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
     test.skip(!webhookSecret, 'STRIPE_WEBHOOK_SECRET not set')
 
-    // Unknown session — no enrollment in DB, but should return 200 both times (not 500)
     const sessionId = `cs_test_dupe_${runId()}`
-    const payload = makeCheckoutEvent(sessionId)
-    const sig = signPayload(payload, webhookSecret!)
-    const headers = { 'content-type': 'application/json', 'stripe-signature': sig }
+    let courseId: string
 
+    const adminCtx = await browser.newContext()
+    const adminPage = await adminCtx.newPage()
+    try {
+      courseId = await createTestCourse(adminPage, {
+        capacity: 4,
+        title: `Dupe Webhook ${runId()}`,
+      })
+    } finally {
+      await adminCtx.close()
+    }
+
+    await request.post('http://localhost:3000/api/test/set-pending-hold', {
+      data: { courseId, studentEmail: 'pw_student@ltsc.test', checkoutSessionId: sessionId },
+    })
+
+    // Fire the same event twice — simulates Stripe retrying after a timeout
+    const payload = makeCheckoutEvent(sessionId)
+    const headers = {
+      'content-type': 'application/json',
+      'stripe-signature': signPayload(payload, webhookSecret!),
+    }
     const res1 = await request.post('http://localhost:3000/api/webhooks/stripe', { data: payload, headers })
     expect(res1.ok()).toBeTruthy()
 
-    const res2 = await request.post('http://localhost:3000/api/webhooks/stripe', { data: payload, headers })
+    // Second delivery uses a fresh signature (new timestamp) — same payload
+    const headers2 = {
+      'content-type': 'application/json',
+      'stripe-signature': signPayload(payload, webhookSecret!),
+    }
+    const res2 = await request.post('http://localhost:3000/api/webhooks/stripe', { data: payload, headers: headers2 })
     expect(res2.ok()).toBeTruthy()
+
+    // Student still shows Enrolled (not an error state)
+    const studentCtx = await browser.newContext()
+    const studentPage = await studentCtx.newPage()
+    try {
+      await loginAs(studentPage, 'pw_student@ltsc.test', '/student/dashboard')
+      await studentPage.goto(`/student/courses/${courseId}`)
+      await expect(studentPage.getByText('Enrolled').first()).toBeVisible({ timeout: 10000 })
+    } finally {
+      await studentCtx.close()
+    }
   })
 
   test('invalid signature returns 400', async ({ request }) => {

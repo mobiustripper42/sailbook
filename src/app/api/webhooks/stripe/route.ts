@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true })
   }
 
-  const session = event.data.object as Stripe.Checkout.Session
+  const session = event.data.object
   const admin = createAdminClient()
 
   const { data: enrollment, error: enrollmentErr } = await admin
@@ -68,26 +68,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: updateErr.message }, { status: 500 })
   }
 
-  const { error: paymentErr } = await admin.from('payments').insert({
-    enrollment_id: enrollment.id,
-    student_id: enrollment.student_id,
-    stripe_payment_intent_id:
-      typeof session.payment_intent === 'string' ? session.payment_intent : null,
-    stripe_checkout_session_id: session.id,
-    amount_cents: session.amount_total ?? 0,
-    currency: session.currency ?? 'usd',
-    status: 'succeeded',
-  })
+  const { error: paymentErr } = await admin.from('payments').upsert(
+    {
+      enrollment_id: enrollment.id,
+      student_id: enrollment.student_id,
+      stripe_payment_intent_id:
+        typeof session.payment_intent === 'string' ? session.payment_intent : null,
+      stripe_checkout_session_id: session.id,
+      amount_cents: session.amount_total ?? 0,
+      currency: session.currency ?? 'usd',
+      status: 'succeeded',
+    },
+    { onConflict: 'stripe_checkout_session_id', ignoreDuplicates: true }
+  )
 
   if (paymentErr) {
     // Non-fatal: enrollment is confirmed. Payment record can be reconciled manually.
     console.error('Webhook: failed to record payment:', paymentErr.message)
   }
 
-  const { data: sessions } = await admin
+  const { data: sessions, error: sessionsErr } = await admin
     .from('sessions')
     .select('id')
     .eq('course_id', enrollment.course_id)
+
+  if (sessionsErr) {
+    console.error('Webhook: failed to fetch sessions for attendance:', sessionsErr.message)
+  }
 
   if (sessions && sessions.length > 0) {
     const { error: attendanceErr } = await admin.from('session_attendance').upsert(
