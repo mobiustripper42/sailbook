@@ -3,6 +3,29 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 78 — 2026-04-18 (tooling)
+**Duration:** ~0.2 hrs | **Points:** 0 (tooling, not SailBook feature work)
+**Task:** Build `/sync-config` skill + backport workflow improvements to dev-config
+
+**Completed:**
+- Created `~/.claude/skills/sync-config/SKILL.md` — new skill that diffs live skills/agents vs dev-config templates, classifies structural vs project-name changes, and propagates structural improvements back
+- Backported to `dev-config/claude/skills/kill-this/SKILL.md`: added Step 1 Playwright suite check (was missing from template)
+- Backported to `dev-config/claude/skills/restart-this/SKILL.md`: added Step 1 RESUMED timestamp stamp + "resumed at HH:MM" in briefing (was missing from template)
+- Added `dev-config/claude/skills/sync-config/SKILL.md` (generic version)
+- Fixed live bug in `~/.claude/skills/its-dead/SKILL.md`: `[start]` → `[open]` (2 places; dev-config was already correct)
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:** Resume Phase 2.5 — Stripe webhook (`app/api/webhooks/stripe/route.ts`). Run `/its-alive` to start a proper session.
+
+**Context:**
+- `~/.claude/skills/` is local-only, not in any repo. `~/dev-config` is the canonical source — copy skills from there when bootstrapping new projects.
+- `sync-config` skill won't be available in the session it's created; needs a new session to load.
+
+---
+
 ## Session 77 — 2026-04-17 12:38–2026-04-18 10:51 (1.9 hrs)
 **Duration:** 1h 55min (32 min + 16 min + 65 min across 3 work blocks) | **Points:** 5 pts (2.4)
 **Task:** Phase 2.4 — enrollment hold expiry validation + capacity bug fix
