@@ -105,6 +105,7 @@ test.describe('enrollment hold expiry', () => {
       await loginAs(student2Page, 'pw_student2@ltsc.test', '/student/dashboard')
       await student2Page.goto(`/student/courses/${courseId}`)
       await expect(student2Page.getByRole('button', { name: 'Course Full' })).toBeVisible()
+      await expect(student2Page.getByRole('button', { name: 'Course Full' })).toBeDisabled()
       await expect(student2Page.getByRole('button', { name: 'Register & Pay' })).not.toBeVisible()
     } finally {
       await student2Ctx.close()

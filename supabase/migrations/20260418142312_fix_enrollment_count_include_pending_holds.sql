@@ -4,7 +4,7 @@
 
 CREATE OR REPLACE FUNCTION "public"."get_all_course_enrollment_counts"()
   RETURNS TABLE("course_id" "uuid", "active_count" integer)
-  LANGUAGE "sql" STABLE SECURITY DEFINER
+  LANGUAGE "sql" VOLATILE SECURITY DEFINER
   SET "search_path" TO 'public'
   AS $$
   SELECT course_id, COUNT(*)::INTEGER AS active_count
@@ -16,7 +16,7 @@ $$;
 
 CREATE OR REPLACE FUNCTION "public"."get_course_active_enrollment_count"("p_course_id" "uuid")
   RETURNS integer
-  LANGUAGE "sql" STABLE SECURITY DEFINER
+  LANGUAGE "sql" VOLATILE SECURITY DEFINER
   SET "search_path" TO 'public'
   AS $$
   SELECT COUNT(*)::INTEGER

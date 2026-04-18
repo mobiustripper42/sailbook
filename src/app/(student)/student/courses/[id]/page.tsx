@@ -61,7 +61,7 @@ export default async function StudentCourseDetailPage({
         .select('id, status, hold_expires_at')
         .eq('course_id', id)
         .eq('student_id', user.id)
-        .single()
+        .maybeSingle()
     : { data: null }
 
   const isEnrolled = myEnrollment &&
