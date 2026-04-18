@@ -3,11 +3,46 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 77 — 2026-04-17 12:38 [open]
-**[PAUSED 13:10]**
-**[RESUMED 08:31]**
-**[PAUSED 08:47]**
-**[RESUMED 09:46]** Working on: Phase 2.4 wrap-up / Phase 2.5 prep. Left off at: cron e2e test rewritten and passing (3/3). Visual browser test of Resume Payment UX in progress by user. Next: confirm visual test passes, then start Phase 2.5 — Stripe webhook (`app/api/webhooks/stripe/route.ts`). Working on: Phase 2.4 — enrollment hold expiry. Left off at: all code complete and committed (cron route, Resume Payment UX, pgTAP debt, Playwright tests 3/3 passing). Next: run `supabase test db` to confirm pgTAP test #13 green, then visually verify Resume Payment UX in the browser, then move to Phase 2.5 (Stripe webhook).
+## Session 77 — 2026-04-17 12:38–2026-04-18 10:51 (1.9 hrs)
+**Duration:** 1h 55min (32 min + 16 min + 65 min across 3 work blocks) | **Points:** 5 pts (2.4)
+**Task:** Phase 2.4 — enrollment hold expiry validation + capacity bug fix
+
+**Completed:**
+- pgTAP 86/86 green, Playwright 4/4 green on enrollment-hold.spec.ts (full suite passed)
+- Bug fix: enrollment count RPCs only counted `confirmed` rows — multiple students could
+  reach Stripe checkout on a 1-seat course. Fixed to include active `pending_payment` holds.
+  (`supabase/migrations/20260418142312_fix_enrollment_count_include_pending_holds.sql`)
+- RPCs changed STABLE → VOLATILE (now() makes results time-sensitive; caching unsafe)
+- Course detail enrollment query `.single()` → `.maybeSingle()` to avoid silently swallowing
+  PGRST116 for unenrolled students (`src/app/(student)/student/courses/[id]/page.tsx`)
+- Cron e2e test rewritten: full seed→fire→verify flow replacing smoke test
+- New test: `pw_student2` seed user + "active hold blocks second student" Playwright test
+  (`supabase/seed.sql`, `tests/enrollment-hold.spec.ts`)
+- Dev environment indicator: red bar on localhost, yellow on Vercel preview
+  (`src/app/layout.tsx`)
+- Pre-Launch checklist added to `docs/PROJECT_PLAN.md`
+- Vercel Hobby tier cron behavior confirmed: sub-daily schedules silently block deploys;
+  `*/1 * * * *` broken in prod; daily `0 9 * * *` restored
+
+**In Progress:** Nothing — Phase 2.4 complete
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- `supabase db push` to apply capacity hold fix to prod
+- Start Phase 2.5 — Stripe webhook (`src/app/api/webhooks/stripe/route.ts`):
+  verify signature, confirm enrollment on `checkout.session.completed` event
+
+**Context:**
+- Enrollment count RPCs must be VOLATILE — hold_expires_at > now() means results change
+  over time; STABLE allows Postgres to cache stale counts within a transaction
+- Course Full button on detail page is a disabled `<button>`, not a link — test assertion
+  must use `getByRole('button')` not `getByRole('link')`
+- Vercel preview yellow bar uses `process.env.VERCEL_ENV` in a Server Component — correct,
+  no NEXT_PUBLIC_ needed since it never runs client-side
+
+**Code Review:** 4 findings — 2 fixed (VOLATILE RPCs, maybeSingle), 1 cleanup applied
+(toBeDisabled assertion), 1 advisory (VERCEL_ENV preview bar — server component, no action needed)
 
 ## Session 76 — 2026-04-16 08:21–09:29 (1.2 hrs)
 **Duration:** 1h 10min | **Points:** 6 pts (1.10: 3pts + 1.23: 3pts)
