@@ -26,8 +26,12 @@ Always report status in this format:
 
 ```
 Phase [N] — [Name]: [X/Y tasks complete] — [on track / at risk / behind]
-Next task: [task ID] — [description]
+Hours this phase: [X.XX] actual / [X–X] estimated
+Effort points this phase: [X] completed / [X] total
+Next task: [task ID] — [description] (effort: [1–5])
 Timeline: [N] days to May 15, ~[N] hours remaining
+Cumulative: [X.XX] hours total across all phases
+Velocity: [X.XX] hours per effort point (phase avg → lifetime avg)
 Risks: [anything worth flagging, or "none"]
 ```
 
@@ -44,20 +48,6 @@ Risks: [anything worth flagging, or "none"]
 Always check the current date. Today is relative to when you're invoked. May 15, 2026 is the hard deadline.
 
 ## Time Tracking & Velocity
-
-When reporting status, include cumulative hours and velocity:
-
-### Status format (updated):
-```
-Phase [N] — [Name]: [X/Y tasks complete] — [on track / at risk / behind]
-Hours this phase: [X.XX] actual / [X–X] estimated
-Effort points this phase: [X] completed / [X] total
-Next task: [task ID] — [description] (effort: [1–5])
-Timeline: [N] days to May 15, ~[N] hours remaining
-Cumulative: [X.XX] hours total across all phases
-Velocity: [X.XX] hours per effort point (phase avg → lifetime avg)
-Risks: [anything worth flagging, or "none"]
-```
 
 ### Velocity calculation:
 - Parse `session-log.md` for Duration fields to get actual hours per phase
