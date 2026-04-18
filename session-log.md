@@ -3,6 +3,47 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 79 — 2026-04-18 16:45–17:51 (0.83 hrs)
+**Duration:** 50 min (adjusted) | **Points:** 5 pts (2.5)
+**Task:** Phase 2.5 — Stripe webhook endpoint
+
+**Completed:**
+- `src/app/api/webhooks/stripe/route.ts` — POST handler: verifies Stripe signature,
+  handles checkout.session.completed, confirms enrollment, clears hold_expires_at,
+  upserts payments row, upserts session_attendance for all course sessions
+- Idempotency guard: already-confirmed enrollments return 200 with no side effects
+- Unknown session IDs return 200 (prevents Stripe from retrying indefinitely)
+- Migration: `payments.stripe_checkout_session_id` UNIQUE constraint + replaced
+  non-unique index (prevents duplicate payment rows on concurrent webhook delivery)
+- `src/app/api/test/set-pending-hold/route.ts` — optional `checkoutSessionId` param
+  (prevents maybeSingle() errors when multiple tests accumulate the same placeholder ID)
+- `tests/webhook-stripe.spec.ts` — 4 desktop tests: happy path, idempotent double-fire
+  (real enrollment, fires twice, verifies Enrolled badge), bad sig → 400, unknown → 200
+- `.env.local` — STRIPE_WEBHOOK_SECRET set with real Stripe CLI webhook secret
+- Verified end-to-end with Stripe CLI: checkout completed, 200 OK, enrollment confirmed
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- `supabase db push` to apply UNIQUE constraint migration to prod
+- Start Phase 2.7 — student self-cancellation + Stripe refund
+
+**Context:**
+- Stripe HMAC uses the raw whsec_xxx string as the key (no base64 decoding) —
+  `crypto.createHmac('sha256', secret)` where secret is the full whsec_... value
+- Webhook secret in .env.local is from `stripe listen` (Stripe CLI); replace with
+  Stripe Dashboard webhook secret when going live (different value)
+- UNIQUE constraint on payments.stripe_checkout_session_id is the DB-level idempotency
+  backstop; the application-layer guard (status === 'confirmed') handles the common case
+
+**Code Review:** 5 findings — 2 bugs fixed (duplicate payment race condition + idempotency
+test coverage), 1 cleanup applied (sessions error logging), 1 consistency fixed (type
+assertion removed), 1 advisory (project-level skip pattern — non-blocking)
+
+---
+
 ## Session 78 — 2026-04-18 (tooling)
 **Duration:** ~0.2 hrs | **Points:** 0 (tooling, not SailBook feature work)
 **Task:** Build `/sync-config` skill + backport workflow improvements to dev-config
