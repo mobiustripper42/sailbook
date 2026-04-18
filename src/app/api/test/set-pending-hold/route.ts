@@ -3,9 +3,10 @@
  * Used by Playwright tests to set up hold expiry scenarios.
  *
  * POST /api/test/set-pending-hold
- * Body: { courseId: string; studentEmail: string; expired?: boolean }
+ * Body: { courseId: string; studentEmail: string; expired?: boolean; checkoutSessionId?: string }
  *   expired: true  → hold_expires_at set 1 minute in the past
  *   expired: false → hold_expires_at set 30 minutes in the future (default)
+ *   checkoutSessionId → stripe_checkout_session_id to set (default: 'cs_test_placeholder')
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -15,10 +16,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Not available' }, { status: 403 })
   }
 
-  const { courseId, studentEmail, expired = false } = await req.json() as {
+  const { courseId, studentEmail, expired = false, checkoutSessionId = 'cs_test_placeholder' } = await req.json() as {
     courseId: string
     studentEmail: string
     expired?: boolean
+    checkoutSessionId?: string
   }
 
   if (!courseId || !studentEmail) {
@@ -51,7 +53,7 @@ export async function POST(req: NextRequest) {
       .update({
         status: 'pending_payment',
         hold_expires_at: holdExpiresAt,
-        stripe_checkout_session_id: 'cs_test_placeholder',
+        stripe_checkout_session_id: checkoutSessionId,
       })
       .eq('id', existing.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -65,7 +67,7 @@ export async function POST(req: NextRequest) {
       student_id: user.id,
       status: 'pending_payment',
       hold_expires_at: holdExpiresAt,
-      stripe_checkout_session_id: 'cs_test_placeholder',
+      stripe_checkout_session_id: checkoutSessionId,
     })
     .select('id')
     .single()
