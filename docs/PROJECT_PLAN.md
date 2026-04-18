@@ -359,3 +359,16 @@ At the end of every phase:
 5. @pm phase retrospective — velocity check, timeline update
 6. Write retrospective entry in `docs/RETROSPECTIVES.md` (velocity, scope changes, process notes, forecast update)
 7. Return to primary planning chat — review docs against intent
+
+---
+
+## Pre-Launch Checklist
+
+Before go-live (real data, real students):
+
+- [ ] **Vercel cron — live fire test.** The `expire-holds` cron was only tested via curl locally (Hobby tier rejects sub-daily schedules, so `*/1 * * * *` can't be verified in prod without Pro). Before launch: upgrade to Pro or use pg_cron, deploy with a short schedule, watch Vercel dashboard → Settings → Cron Jobs confirm it fires and `expired` count is correct, then set schedule to production value. Do NOT assume curl = prod parity.
+- [ ] Stripe webhook signing secret set in prod env vars
+- [ ] `CRON_SECRET` set in prod env vars (or remove if not needed)
+- [ ] Twilio / Resend credentials set and `NOTIFICATIONS_ENABLED=true`
+- [ ] `supabase db push` applied to prod Supabase project
+- [ ] Smoke test: student registers → pays → sees enrollment → admin sees payment status

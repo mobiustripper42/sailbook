@@ -28,6 +28,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={nunitoSans.variable} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
+        {process.env.NODE_ENV === 'development' && (
+          <div className="fixed top-0 left-0 right-0 h-0.5 bg-red-500 z-[9999]" />
+        )}
+        {process.env.VERCEL_ENV === 'preview' && (
+          <div className="fixed top-0 left-0 right-0 h-0.5 bg-yellow-400 z-[9999]" />
+        )}
         <ThemeProvider>
           <NavProgress>{children}</NavProgress>
         </ThemeProvider>

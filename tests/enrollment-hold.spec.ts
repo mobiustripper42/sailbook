@@ -73,6 +73,44 @@ test.describe('enrollment hold expiry', () => {
     }
   })
 
+  test('active hold blocks second student on a full course', async ({ browser }) => {
+    test.skip(test.info().project.name !== 'desktop')
+
+    // Capacity-1 course so a single active hold makes it full
+    const adminCtx = await browser.newContext()
+    const adminPage = await adminCtx.newPage()
+    let courseId: string
+    try {
+      courseId = await createTestCourse(adminPage, { capacity: 1, title: `Hold Blocks ${Math.random().toString(36).slice(2, 7)}` })
+    } finally {
+      await adminCtx.close()
+    }
+
+    // Seed an active hold for pw_student (occupies the only seat)
+    const apiCtx = await browser.newContext()
+    const apiPage = await apiCtx.newPage()
+    try {
+      const res = await apiPage.request.post('http://localhost:3000/api/test/set-pending-hold', {
+        data: { courseId, studentEmail: 'pw_student@ltsc.test', expired: false },
+      })
+      expect(res.ok()).toBeTruthy()
+    } finally {
+      await apiCtx.close()
+    }
+
+    // pw_student2 visits the course — should see Course Full, not Register & Pay
+    const student2Ctx = await browser.newContext()
+    const student2Page = await student2Ctx.newPage()
+    try {
+      await loginAs(student2Page, 'pw_student2@ltsc.test', '/student/dashboard')
+      await student2Page.goto(`/student/courses/${courseId}`)
+      await expect(student2Page.getByRole('button', { name: 'Course Full' })).toBeVisible()
+      await expect(student2Page.getByRole('button', { name: 'Register & Pay' })).not.toBeVisible()
+    } finally {
+      await student2Ctx.close()
+    }
+  })
+
   test('cron endpoint expires pending_payment holds past their expiry', async ({ browser, request }) => {
     test.skip(test.info().project.name !== 'desktop')
 

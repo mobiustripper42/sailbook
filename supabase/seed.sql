@@ -130,6 +130,16 @@ INSERT INTO auth.users (
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"PW","last_name":"Student","is_admin":false,"is_instructor":false,"is_student":true}',
+   now(), now()),
+
+  -- Playwright: second student test user (for multi-student capacity tests)
+  ('f1000000-0000-0000-0000-000000000004',
+   '00000000-0000-0000-0000-000000000000',
+   'authenticated', 'authenticated', 'pw_student2@ltsc.test',
+   extensions.crypt('qwert12345', extensions.gen_salt('bf')), now(),
+   '', '', '', '', '', '',
+   '{"provider":"email","providers":["email"]}',
+   '{"first_name":"PW","last_name":"Student2","is_admin":false,"is_instructor":false,"is_student":true}',
    now(), now());
 
 INSERT INTO auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at) VALUES
@@ -142,7 +152,8 @@ INSERT INTO auth.identities (id, user_id, provider_id, identity_data, provider, 
   ('a1000000-0000-0000-0000-000000000007','a1000000-0000-0000-0000-000000000007','jordan@ltsc.test',       '{"sub":"a1000000-0000-0000-0000-000000000007","email":"jordan@ltsc.test"}',       'email',now(),now(),now()),
   ('f1000000-0000-0000-0000-000000000001','f1000000-0000-0000-0000-000000000001','pw_admin@ltsc.test',     '{"sub":"f1000000-0000-0000-0000-000000000001","email":"pw_admin@ltsc.test"}',     'email',now(),now(),now()),
   ('f1000000-0000-0000-0000-000000000002','f1000000-0000-0000-0000-000000000002','pw_instructor@ltsc.test','{"sub":"f1000000-0000-0000-0000-000000000002","email":"pw_instructor@ltsc.test"}','email',now(),now(),now()),
-  ('f1000000-0000-0000-0000-000000000003','f1000000-0000-0000-0000-000000000003','pw_student@ltsc.test',   '{"sub":"f1000000-0000-0000-0000-000000000003","email":"pw_student@ltsc.test"}',   'email',now(),now(),now());
+  ('f1000000-0000-0000-0000-000000000003','f1000000-0000-0000-0000-000000000003','pw_student@ltsc.test',   '{"sub":"f1000000-0000-0000-0000-000000000003","email":"pw_student@ltsc.test"}',   'email',now(),now(),now()),
+  ('f1000000-0000-0000-0000-000000000004','f1000000-0000-0000-0000-000000000004','pw_student2@ltsc.test',  '{"sub":"f1000000-0000-0000-0000-000000000004","email":"pw_student2@ltsc.test"}',  'email',now(),now(),now());
 
 INSERT INTO public.profiles (id, email, first_name, last_name, is_admin, is_instructor, is_student, experience_level, asa_number, theme_preference) VALUES
   ('a1000000-0000-0000-0000-000000000001', 'andy@ltsc.test',         'Andy',   'Kaminski',   true,  false, false, null,           null,     'dark'),
@@ -154,7 +165,8 @@ INSERT INTO public.profiles (id, email, first_name, last_name, is_admin, is_inst
   ('a1000000-0000-0000-0000-000000000007', 'jordan@ltsc.test',       'Jordan', 'Park',       false, false, true,  null,           null,     'dark'),
   ('f1000000-0000-0000-0000-000000000001', 'pw_admin@ltsc.test',     'PW',     'Admin',      true,  false, false, null,           null,     'dark'),
   ('f1000000-0000-0000-0000-000000000002', 'pw_instructor@ltsc.test','PW',     'Instructor', false, true,  false, null,           null,     'dark'),
-  ('f1000000-0000-0000-0000-000000000003', 'pw_student@ltsc.test',   'PW',     'Student',    false, false, true,  null,           null,     'dark');
+  ('f1000000-0000-0000-0000-000000000003', 'pw_student@ltsc.test',   'PW',     'Student',    false, false, true,  null,           null,     'dark'),
+  ('f1000000-0000-0000-0000-000000000004', 'pw_student2@ltsc.test',  'PW',     'Student2',   false, false, true,  null,           null,     'dark');
 
 -- ============================================================
 -- CODES (lookup/dropdown values)
@@ -356,8 +368,10 @@ INSERT INTO public.session_attendance (session_id, enrollment_id, status) VALUES
 --   pw_admin@ltsc.test      → Playwright admin test user
 --   pw_instructor@ltsc.test → Playwright instructor test user
 --   pw_student@ltsc.test    → Playwright student test user
+--   pw_student2@ltsc.test   → Playwright second student (multi-student capacity tests)
 --
 -- Playwright UUIDs (f1 block)
 --   f1000000-0000-0000-0000-000000000001  pw_admin
 --   f1000000-0000-0000-0000-000000000002  pw_instructor
 --   f1000000-0000-0000-0000-000000000003  pw_student
+--   f1000000-0000-0000-0000-000000000004  pw_student2
