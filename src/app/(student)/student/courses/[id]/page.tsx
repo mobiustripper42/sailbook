@@ -15,6 +15,7 @@ import { fmtDateLong, fmtTime } from '@/lib/utils'
 import { attendanceStatusConfig } from '@/lib/attendance'
 import type { AttendanceStatus } from '@/lib/attendance'
 import EnrollButton from '@/components/student/enroll-button'
+import CancelEnrollmentButton from '@/components/student/cancel-enrollment-button'
 
 export default async function StudentCourseDetailPage({
   params,
@@ -66,12 +67,15 @@ export default async function StudentCourseDetailPage({
 
   const isEnrolled = myEnrollment &&
     myEnrollment.status !== 'cancelled' &&
-    myEnrollment.status !== 'pending_payment'
+    myEnrollment.status !== 'pending_payment' &&
+    myEnrollment.status !== 'cancel_requested'
+  const isCancellationRequested = myEnrollment?.status === 'cancel_requested'
   const hasPendingPayment = myEnrollment?.status === 'pending_payment'
   const isHoldExpired = hasPendingPayment &&
     (myEnrollment?.hold_expires_at == null || new Date(myEnrollment.hold_expires_at) <= new Date())
+  const now = new Date().getTime()
   const holdMinutesRemaining = hasPendingPayment && !isHoldExpired && myEnrollment?.hold_expires_at
-    ? Math.ceil((new Date(myEnrollment.hold_expires_at).getTime() - Date.now()) / 60000)
+    ? Math.ceil((new Date(myEnrollment.hold_expires_at).getTime() - now) / 60000)
     : 0
 
   // Fetch attendance records if enrolled
@@ -238,15 +242,25 @@ export default async function StudentCourseDetailPage({
       </Card>
 
       <div className="pt-2">
-        {isEnrolled ? (
+        {isCancellationRequested ? (
           <div className="flex items-center gap-3">
-            {myEnrollment.status === 'registered' ? (
-              <>
-                <Badge variant="secondary" className="text-sm px-3 py-1">Pending confirmation</Badge>
-                <span className="text-sm text-muted-foreground">Pending admin review.</span>
-              </>
-            ) : (
-              <Badge className="text-sm px-3 py-1">Enrolled</Badge>
+            <Badge variant="secondary" className="text-sm px-3 py-1">Cancellation Requested</Badge>
+            <span className="text-sm text-muted-foreground">Pending admin review. You&apos;ll be contacted once processed.</span>
+          </div>
+        ) : isEnrolled ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              {myEnrollment.status === 'registered' ? (
+                <>
+                  <Badge variant="secondary" className="text-sm px-3 py-1">Pending confirmation</Badge>
+                  <span className="text-sm text-muted-foreground">Pending admin review.</span>
+                </>
+              ) : (
+                <Badge className="text-sm px-3 py-1">Enrolled</Badge>
+              )}
+            </div>
+            {myEnrollment.status === 'confirmed' && (
+              <CancelEnrollmentButton enrollmentId={myEnrollment.id} courseId={id} />
             )}
           </div>
         ) : hasPendingPayment && !isHoldExpired ? (

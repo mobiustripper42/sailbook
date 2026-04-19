@@ -32,3 +32,30 @@ export async function cancelEnrollment(enrollmentId: string, courseId: string) {
   revalidatePath(`/admin/courses/${courseId}`)
   return { error: null }
 }
+
+export async function requestCancellation(enrollmentId: string, courseId: string) {
+  const supabase = await createClient()
+
+  // Verify the enrollment is in a cancellable state before attempting the update.
+  // RLS enforces ownership + confirmed-only transition; this check surfaces a
+  // clear error instead of a silent RLS rejection.
+  const { data: enrollment } = await supabase
+    .from('enrollments')
+    .select('status')
+    .eq('id', enrollmentId)
+    .maybeSingle()
+
+  if (!enrollment) return { error: 'Enrollment not found.' }
+  if (enrollment.status !== 'confirmed') return { error: 'Only confirmed enrollments can be cancelled.' }
+
+  const { error } = await supabase
+    .from('enrollments')
+    .update({ status: 'cancel_requested', updated_at: new Date().toISOString() })
+    .eq('id', enrollmentId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath(`/student/courses/${courseId}`)
+  revalidatePath('/student/courses')
+  return { error: null }
+}

@@ -215,8 +215,9 @@ Design quality, accessibility, navigation, convenience features.
 | 6.12 | Security audit (V2 final) — run @security-agent, evaluate findings, fix serious issues, prime V3 backlog | 3 | Full V2 surface area: payments, notifications, waitlist, prereqs, qualifications. Non-serious findings seed V3 backlog. |
 | 6.13 | Using an agent redsign date and time picker (date picker isn't terrible, but time picker is almost unsable) | 3 | Human find time picker to be unusable. Needs redisign, then date picker to match (maybe even combine the two if that makes sense) |
 | 6.14 | Consolidate user/student/instructor profile edit screens | 2 | Three separate edit UIs with overlapping fields feel redundant. Audit overlap, design a unified approach (shared component or merged page per role). Low priority, nice for V2. |
+| 6.15 | Admin dashboard — pending cancellation requests widget | 3 | Surface `cancel_requested` enrollments as a count/list on the admin dashboard, similar to the existing pending-enrollment alert. Links to the enrollment detail. |
 
-**Phase 6 total: 44 pts**
+**Phase 6 total: 47 pts**
 **Projected hours: ~17 hrs**
 
 **Ejection point:** The app looks and feels professional. Accessible. Navigable. Polished. Security verified.

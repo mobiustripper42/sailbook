@@ -29,6 +29,7 @@ function enrollmentStatusLabel(status: string): string {
   if (status === 'confirmed') return 'Enrolled'
   if (status === 'cancelled') return 'Cancelled'
   if (status === 'completed') return 'Completed'
+  if (status === 'cancel_requested') return 'Cancellation Requested'
   return status
 }
 
@@ -104,7 +105,7 @@ export default async function CourseBrowsePage() {
             const isEnrolled = myStatus !== undefined
 
             return (
-              <Card key={c.id} size="sm" className="flex flex-col">
+              <Card key={c.id} size="sm" className="flex flex-col" data-testid="course-card">
                 <CardHeader>
                   <div className="flex items-start justify-between gap-2">
                     <CardTitle className="text-base leading-snug">

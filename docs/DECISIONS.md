@@ -111,16 +111,22 @@
 **No FK constraint:** Adding a FK from `profiles.experience_level` to `codes.value` would require a partial index or composite key reference and would block retiring a code if any profile still holds it. The softer approach (app-level filtering) is sufficient — this isn't financial data.
 **Tradeoff:** No admin UI for codes in Phase 1. Andy edits directly via SQL. Polish task 6.x to add a UI if needed.
 
+## DEC-022: Student cancellation refund policy
+**Decision:** Students request cancellation; admin processes the refund manually. No automated Stripe refund from student action. Students can transition a `confirmed` enrollment to `cancel_requested` via the UI. Admin reviews the request in the enrollment view and issues the refund + final cancellation from the dashboard (Phase 2.8).
+**Why:** LTSC is a small school where Andy knows every student. Giving him control over refund decisions avoids abuse (cancelling 10 minutes before class) without requiring a policy engine. A deadline-based policy (Phase 6) can layer on later if volume demands it.
+**Status:** `cancel_requested` is a terminal student-facing state — students cannot self-transition out of it. Only admins can move it to `cancelled`. RLS enforces: students can only update `confirmed → cancel_requested`, not `confirmed → cancelled`.
+**Phase 6:** Add deadline-based automatic refund eligibility (e.g., full refund if cancelled ≥ 7 days before first session, none after).
+
 ---
 
 ## V2 Decisions (to be resolved during build)
 
 | ID | Decision | When | Who | Status |
 |----|----------|------|-----|--------|
+| DEC-022 | Student cancellation refund policy | Phase 2, task 2.7 | Andy | Done |
 | DEC-021 | Generic codes/lookup table pattern | Phase 1, task 1.7 | DEC entry | Done |
 | DEC-019 | Inactive instructor cascade behavior | Phase 1, task 1.3 | DEC entry | Done |
 | DEC-TBD | Pessimistic inventory / enrollment hold duration | Phase 2, task 2.3 | DEC + Andy | Pending |
-| DEC-TBD | Cancellation refund policy (full? time-based? admin override?) | Phase 2, task 2.7 | Andy | Pending |
 | DEC-TBD | Scheduled job infrastructure (Vercel Cron vs Supabase Edge Functions) | Phase 2, task 2.4 | @architect | Pending |
 | DEC-TBD | Notification settings storage (table vs JSON column) | Phase 3, task 3.8 | @architect | Pending |
 | DEC-TBD | Admin-created student architecture (profile without auth?) | Phase 4, task 4.4 | @architect | Pending |

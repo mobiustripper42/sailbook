@@ -3,7 +3,7 @@
 --   - Non-admins cannot INSERT courses, sessions, course_types
 --   - Instructors cannot INSERT enrollments
 --   - Students cannot escalate enrollment status (completed/confirmed)
---   - Students CAN cancel their own enrollment
+--   - Students CAN request cancellation (confirmed → cancel_requested); cannot directly cancel (DEC-022)
 --   - Students cannot escalate session_attendance status to present or absent
 --   - get_enrolled_course_ids excludes cancelled enrollments (c004 sessions invisible
 --     after cancelling a non-completed enrollment that was the only route to c004)
@@ -12,7 +12,7 @@
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(11);
+SELECT plan(12);
 
 CREATE SCHEMA IF NOT EXISTS tests;
 
@@ -128,14 +128,23 @@ SELECT throws_ok(
   'student: cannot escalate own enrollment status to confirmed'
 );
 
--- Student CAN cancel their own enrollment
-UPDATE public.enrollments SET status = 'cancelled'
+-- Student CAN request cancellation (cancel_requested) — direct cancel is no longer allowed
+UPDATE public.enrollments SET status = 'cancel_requested'
 WHERE id = 'e1000000-0000-0000-0000-000000000001';
 
 SELECT is(
   (SELECT status FROM public.enrollments WHERE id = 'e1000000-0000-0000-0000-000000000001'),
-  'cancelled',
-  'student: can cancel own enrollment (status=cancelled is allowed)'
+  'cancel_requested',
+  'student: can request cancellation (confirmed → cancel_requested)'
+);
+
+-- Student cannot directly cancel — must go through admin-approved flow
+SELECT throws_ok(
+  $$ UPDATE public.enrollments SET status = 'cancelled'
+     WHERE id = 'e1000000-0000-0000-0000-000000000003' $$,
+  '42501',
+  NULL,
+  'student: cannot set confirmed → cancelled directly (DEC-022)'
 );
 
 RESET ROLE;
@@ -178,21 +187,18 @@ RESET ROLE;
 -- sessions disappear — the active-courses policy does not cover completed courses.
 -- ============================================================
 
--- Set up: downgrade e004 from 'completed' to 'confirmed' as postgres so sam can cancel it
-UPDATE public.enrollments SET status = 'confirmed'
+-- Set up: cancel e004 as postgres (admin-equivalent) — students can no longer directly cancel (DEC-022)
+UPDATE public.enrollments SET status = 'cancelled'
 WHERE id = 'e1000000-0000-0000-0000-000000000004';
 
 SELECT tests.authenticate('a1000000-0000-0000-0000-000000000005', p_is_student => true);
 SET LOCAL ROLE authenticated;
 
-UPDATE public.enrollments SET status = 'cancelled'
-WHERE id = 'e1000000-0000-0000-0000-000000000004';
-
 SELECT is(
   (SELECT count(*)::int FROM public.sessions
    WHERE course_id = 'c1000000-0000-0000-0000-000000000004'),
   0,
-  'student: cancelling enrollment removes session visibility for non-active course (c004 sessions gone)'
+  'student: cancelled enrollment removes session visibility for non-active course (c004 sessions gone)'
 );
 
 RESET ROLE;

@@ -91,8 +91,8 @@ SET LOCAL ROLE authenticated;
 
 SELECT is(
   (SELECT count(*)::int FROM public.profiles),
-  10,
-  'admin: can read all 10 profiles'
+  11,
+  'admin: can read all 11 profiles'
 );
 
 UPDATE public.profiles SET phone = '555-0100'

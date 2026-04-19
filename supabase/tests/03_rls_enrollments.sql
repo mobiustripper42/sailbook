@@ -6,7 +6,7 @@
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(16);
+SELECT plan(19);
 
 -- Reuse authenticate() helper (same pattern as 01/02)
 CREATE SCHEMA IF NOT EXISTS tests;
@@ -124,6 +124,36 @@ SELECT throws_ok(
   '42501',
   NULL,
   'student: cannot insert enrollment for another student'
+);
+
+-- Student (sam): can request cancellation on own confirmed enrollment (e001)
+UPDATE public.enrollments SET status = 'cancel_requested'
+WHERE id = 'e1000000-0000-0000-0000-000000000001';
+
+SELECT is(
+  (SELECT status FROM public.enrollments WHERE id = 'e1000000-0000-0000-0000-000000000001'),
+  'cancel_requested',
+  'student (sam): can set confirmed → cancel_requested'
+);
+
+-- Student (sam): cannot undo cancel_requested → confirmed.
+-- USING restricts to status='confirmed' rows; the row is invisible for UPDATE (0 rows, no exception).
+UPDATE public.enrollments SET status = 'confirmed'
+WHERE id = 'e1000000-0000-0000-0000-000000000001';
+
+SELECT is(
+  (SELECT status FROM public.enrollments WHERE id = 'e1000000-0000-0000-0000-000000000001'),
+  'cancel_requested',
+  'student (sam): cannot undo cancel_requested (USING restricts to confirmed rows)'
+);
+
+-- Student (sam): cannot set confirmed → cancelled directly (must go through request flow)
+SELECT throws_ok(
+  $$ UPDATE public.enrollments SET status = 'cancelled'
+     WHERE id = 'e1000000-0000-0000-0000-000000000003' $$,
+  '42501',
+  NULL,
+  'student (sam): cannot set confirmed → cancelled directly'
 );
 
 RESET ROLE;

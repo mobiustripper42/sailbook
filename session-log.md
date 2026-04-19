@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 80 — 2026-04-18 18:10 [open]
+
 ## Session 79 — 2026-04-18 16:45–17:51 (0.83 hrs)
 **Duration:** 50 min (adjusted) | **Points:** 5 pts (2.5)
 **Task:** Phase 2.5 — Stripe webhook endpoint
