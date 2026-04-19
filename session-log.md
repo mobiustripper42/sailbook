@@ -3,7 +3,48 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 80 — 2026-04-18 18:10 [open]
+## Session 80 — 2026-04-18 18:10–18:40 (0.50 hrs)
+**Duration:** 30 min (adjusted — session open overnight) | **Points:** 5 pts (2.7)
+**Task:** Phase 2.7 — student self-cancellation request flow
+
+**Completed:**
+- Migration: `20260418221000_add_cancellation_requested_status.sql` — new RLS
+  policy allows students to transition confirmed → cancel_requested only
+  (direct confirmed → cancelled now blocked at DB layer, DEC-022)
+- `src/actions/enrollments.ts` — `requestCancellation` server action
+- `src/components/student/cancel-enrollment-button.tsx` — AlertDialog confirm step
+- `src/app/(student)/student/courses/[id]/page.tsx` — Request Cancellation button
+  on confirmed enrollments; Cancellation Requested state after
+- `src/app/(student)/student/courses/page.tsx` — Cancellation Requested badge
+- `src/components/ui/alert-dialog.tsx` — shadcn alert-dialog added
+- DEC-022: admin-controlled refund policy documented; Phase 6 deadline option noted
+- pgTAP gap + profile count fixes (90/90); Playwright 2/2
+- Phase 6.15 added: admin dashboard pending cancellation requests widget
+- Branch: switched back to dev (main stays clean; Andy tests on dev)
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- `supabase db push` to apply cancel_requested RLS migration to prod
+- Phase 2.8 — admin enrollment view: payment status, Stripe link, Refund & Cancel button
+- Before 2.8: patch WITH CHECK column scope (see Code Review)
+
+**Context:**
+- `cancel_requested` (16 chars) not `cancellation_requested` (23) — varchar(20) limit on status column
+- Admin cancellation (confirmed → cancelled) still works via existing `cancelEnrollment` action; RLS student-only restriction is scoped to the student UPDATE policy
+- 04_rls_gaps.sql had a test that verified students could directly cancel — updated to reflect new policy
+- Date.now() flagged by react-compiler lint rule; replaced with new Date().getTime()
+
+**Code Review:** 1 security finding — student UPDATE `WITH CHECK` doesn't prevent
+  mutating non-status columns (course_id, hold_expires_at) during the
+  cancel-request transition. Fix: tighten WITH CHECK in a follow-up migration
+  before prod push. 2 consistency notes (pre-flight SELECT missing student_id
+  filter; no session guard on server actions) — both match existing patterns,
+  low priority.
+
+---
 
 ## Session 79 — 2026-04-18 16:45–17:51 (0.83 hrs)
 **Duration:** 50 min (adjusted) | **Points:** 5 pts (2.5)
