@@ -3,7 +3,61 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 81 — 2026-04-19 22:38 [open]
+## Session 81 — 2026-04-19 22:38–23:36 (1.00 hr)
+**Duration:** 60 min | **Points:** 5 pts (2.8 expanded to include partial refund: 3 base + 2)
+**Task:** Phase 2.8 — admin enrollment view: payment status, Stripe link, partial refund trigger
+
+**Completed:**
+- Migration `20260420024623_tighten_student_enrollment_with_check.sql` — closes WITH CHECK
+  gap from session 80 code review: adds `hold_expires_at IS NULL` so students can't extend
+  a payment hold during a cancel-request transition
+- `src/actions/enrollments.ts` — `processRefund(enrollmentId, courseId, refundAmountCents?)`
+  server action: Stripe partial/full refund, payments row update, enrollment cancel + attendance flip
+- `src/app/(admin)/admin/courses/[id]/page.tsx` — Payment column: amount, refund display
+  (strikethrough + −$X.XX), Stripe dashboard link; separate payments query keyed by enrollment_id
+- `src/components/admin/enrollment-actions.tsx` — "Process Refund" dialog (dollar input,
+  max validation) for cancel_requested + payment; "Cancel (no refund)" when no payment
+- `src/app/api/test/set-cancel-requested/route.ts` — dev helper: seeds payment row given
+  external Stripe PI id, sets enrollment to cancel_requested
+- `tests/enrollment-refund.spec.ts` — 4/4 desktop tests: payment dash, cancel_requested
+  buttons, no-refund cancel, full E2E partial refund with real Stripe test PI
+- `docs/PROJECT_PLAN.md` — added 6.16: show refund amount to student (2 pts)
+- pgTAP 90/90, build clean
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- `supabase db push` to apply WITH CHECK migration to prod
+- Fix code review findings before next prod push (see Code Review below)
+- Phase 2.9 — member pricing field (`member_price` on courses, checkout picks correct price)
+
+**Context:**
+- Stripe CLI typo: `stripe listen` must forward to `/api/webhooks/stripe` (with the 'e') —
+  easy to mistype as `/api/webhooks/strip`
+- AlertDialogAction auto-dismisses the dialog on click regardless of validation — need to
+  control open state manually for inline error display (code review finding)
+- Stripe PI creation in Playwright tests must happen in the test process (Node), not inside
+  the Next.js dev server route — HMR doesn't reliably pick up new API routes mid-run
+
+**Code Review:**
+- **BUG** `enrollment-actions.tsx:131` — `AlertDialogAction` auto-dismisses before validation
+  error can be shown; replace with controlled `open`/`onOpenChange` + plain `<Button>`
+- **BUG** `enrollments.ts:85` — no idempotency key on `stripe.refunds.create`; double-refund
+  risk on retry; fix: pass `{ idempotency_key: payment.id }` as second arg
+- **SECURITY** `enrollments.ts:64` — `processRefund` has no explicit admin check; Stripe call
+  fires before RLS-enforced Supabase write; add `is_admin` check at top of action
+- **CONSISTENCY** `enrollments.ts:103` — if payments update fails after Stripe refund,
+  no logging; add `console.error` at minimum
+- **CONSISTENCY** `set-cancel-requested/route.ts:19` — missing "Never deploy with NODE_ENV=development"
+  doc comment present on other test routes
+- **CLEANUP** `courses/[id]/page.tsx:78` — payments query returns `pending` rows too;
+  filter to `.in('status', ['succeeded', 'refunded'])`
+- **CLEANUP** `supabase/tests/03_rls_enrollments.sql` — no pgTAP test for the new
+  `hold_expires_at IS NULL` WITH CHECK constraint
+
+---
 
 ## Session 80 — 2026-04-18 18:10–18:40 (0.50 hrs)
 **Duration:** 30 min (adjusted — session open overnight) | **Points:** 5 pts (2.7)
