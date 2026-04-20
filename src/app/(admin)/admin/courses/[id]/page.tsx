@@ -74,6 +74,18 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     .eq('course_id', id)
     .order('enrolled_at')
 
+  const enrollmentIds = (enrollments ?? []).map((e) => e.id)
+  const { data: paymentRows } = enrollmentIds.length > 0
+    ? await supabase
+        .from('payments')
+        .select('enrollment_id, amount_cents, refund_amount_cents, stripe_payment_intent_id, status')
+        .in('enrollment_id', enrollmentIds)
+    : { data: [] }
+
+  const paymentByEnrollment = new Map(
+    (paymentRows ?? []).map((p) => [p.enrollment_id, p])
+  )
+
   const type = course.course_types as { name: string; short_code: string } | null
   const instructor = course.instructor as { id: string; first_name: string; last_name: string } | null
 
@@ -172,6 +184,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   <TableHead>Student</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Payment</TableHead>
                   <TableHead>Enrolled</TableHead>
                   <TableHead className="w-32" />
                 </TableRow>
@@ -179,6 +192,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <TableBody>
                 {enrollments?.map((e) => {
                   const student = e.student as { first_name: string; last_name: string; email: string } | null
+                  const payment = paymentByEnrollment.get(e.id) ?? null
                   return (
                     <TableRow key={e.id}>
                       <TableCell>{student ? `${student.first_name} ${student.last_name}` : '—'}</TableCell>
@@ -188,11 +202,45 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                           {e.status}
                         </Badge>
                       </TableCell>
+                      <TableCell className="text-sm">
+                        {payment ? (
+                          <span className="flex items-center gap-1.5">
+                            <span className={payment.status === 'refunded' ? 'text-muted-foreground line-through' : ''}>
+                              ${(payment.amount_cents / 100).toFixed(2)}
+                            </span>
+                            {payment.status === 'refunded' && payment.refund_amount_cents != null && (
+                              <span className="text-muted-foreground">
+                                −${(payment.refund_amount_cents / 100).toFixed(2)}
+                              </span>
+                            )}
+                            {payment.stripe_payment_intent_id && (
+                              <a
+                                href={`https://dashboard.stripe.com/test/payments/${payment.stripe_payment_intent_id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-muted-foreground underline hover:text-foreground"
+                              >
+                                Stripe ↗
+                              </a>
+                            )}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         {new Date(e.enrolled_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <EnrollmentActions enrollmentId={e.id} courseId={id} status={e.status} />
+                        <EnrollmentActions
+                          enrollmentId={e.id}
+                          courseId={id}
+                          status={e.status}
+                          payment={payment ? {
+                            amountCents: payment.amount_cents,
+                            paymentIntentId: payment.stripe_payment_intent_id ?? null,
+                          } : null}
+                        />
                       </TableCell>
                     </TableRow>
                   )

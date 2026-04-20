@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 81 — 2026-04-19 22:38 [open]
+
 ## Session 80 — 2026-04-18 18:10–18:40 (0.50 hrs)
 **Duration:** 30 min (adjusted — session open overnight) | **Points:** 5 pts (2.7)
 **Task:** Phase 2.7 — student self-cancellation request flow

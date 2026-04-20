@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { stripe } from '@/lib/stripe'
 
 export async function confirmEnrollment(enrollmentId: string, courseId: string) {
   const supabase = await createClient()
@@ -58,4 +59,50 @@ export async function requestCancellation(enrollmentId: string, courseId: string
   revalidatePath(`/student/courses/${courseId}`)
   revalidatePath('/student/courses')
   return { error: null }
+}
+
+export async function processRefund(
+  enrollmentId: string,
+  courseId: string,
+  refundAmountCents?: number,
+): Promise<{ error: string | null }> {
+  const supabase = await createClient()
+
+  const { data: payment } = await supabase
+    .from('payments')
+    .select('id, stripe_payment_intent_id, amount_cents, status')
+    .eq('enrollment_id', enrollmentId)
+    .eq('status', 'succeeded')
+    .maybeSingle()
+
+  if (payment?.stripe_payment_intent_id) {
+    const amountToRefund = refundAmountCents ?? payment.amount_cents
+    if (amountToRefund <= 0 || amountToRefund > payment.amount_cents) {
+      return { error: 'Refund amount must be between $0.01 and the original charge.' }
+    }
+
+    try {
+      await stripe.refunds.create({
+        payment_intent: payment.stripe_payment_intent_id,
+        ...(refundAmountCents ? { amount: refundAmountCents } : {}),
+      })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Stripe refund failed.'
+      return { error: msg }
+    }
+
+    const { error: updateErr } = await supabase
+      .from('payments')
+      .update({
+        status: 'refunded',
+        refund_amount_cents: amountToRefund,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', payment.id)
+
+    if (updateErr) return { error: updateErr.message }
+  }
+
+  // Cancel the enrollment and flip attendance records
+  return cancelEnrollment(enrollmentId, courseId)
 }
