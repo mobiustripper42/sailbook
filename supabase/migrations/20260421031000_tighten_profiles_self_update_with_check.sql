@@ -28,6 +28,9 @@ AS $$
   );
 $$;
 
+-- Explicit grant — Postgres defaults EXECUTE to PUBLIC, but be explicit for SECURITY DEFINER functions.
+GRANT EXECUTE ON FUNCTION public.profile_role_flags_unchanged(uuid, boolean, boolean, boolean, boolean, boolean) TO authenticated;
+
 DROP POLICY "Users can update own profile" ON public.profiles;
 
 CREATE POLICY "Users can update own profile" ON public.profiles

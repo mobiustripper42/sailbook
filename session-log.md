@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 84 — 2026-04-20 23:39 [open]
+
 ## Session 83 — 2026-04-20 23:07–23:34 (0.42 hr)
 **Duration:** 25 min | **Points:** 5 pts (2.10)
 **Task:** Phase 2.9 code review fixes + Phase 2.10 Playwright E2E payment test

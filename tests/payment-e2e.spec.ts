@@ -15,9 +15,7 @@ import Stripe from 'stripe'
 import { createTestCourse, loginAs, runId } from './helpers'
 
 function stripeClient() {
-  const key = process.env.STRIPE_SECRET_KEY
-  if (!key) throw new Error('STRIPE_SECRET_KEY not set in test env')
-  return new Stripe(key, { apiVersion: '2026-03-25.dahlia', typescript: true })
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-03-25.dahlia', typescript: true })
 }
 
 test.describe('Full payment chain E2E', () => {
@@ -30,6 +28,10 @@ test.describe('Full payment chain E2E', () => {
   const PRICE = 150
 
   test.beforeAll(async ({ browser }) => {
+    test.skip(
+      !process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET,
+      'STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET not set'
+    )
     test.setTimeout(60000)
     const ctx = await browser.newContext()
     const page = await ctx.newPage()
@@ -69,7 +71,8 @@ test.describe('Full payment chain E2E', () => {
     expect(sessionIdMatch, 'Stripe checkout session ID not found in redirect URL').toBeTruthy()
     checkoutSessionId = sessionIdMatch![1]
 
-    // Create a real Stripe test PI so processRefund can actually refund it later.
+    // Create a real Stripe test charge — pm_card_visa is auto-confirmed in test mode.
+    // Test 3 refunds this PI; cleanup is handled by Stripe test mode, not us.
     const pi = await stripe.paymentIntents.create({
       amount: PRICE * 100,
       currency: 'usd',
@@ -103,7 +106,8 @@ test.describe('Full payment chain E2E', () => {
       timestamp,
     })
 
-    const webhookRes = await fetch('http://localhost:3000/api/webhooks/stripe', {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+    const webhookRes = await fetch(`${baseUrl}/api/webhooks/stripe`, {
       method: 'POST',
       headers: {
         'stripe-signature': signature,

@@ -118,7 +118,7 @@ test.describe('Student — checkout button', () => {
 // ─── Capacity Enforcement ────────────────────────────────────────────────────
 
 test.describe('Student — capacity enforcement', () => {
-  test('full course shows disabled Course Full button on course detail', async ({ page, browser }) => {
+  test('full course shows disabled Course Full button on course detail', async ({ browser }) => {
     test.skip(test.info().project.name !== 'desktop');
     test.setTimeout(90000);
 
@@ -152,7 +152,7 @@ test.describe('Student — capacity enforcement', () => {
     }
   });
 
-  test('full course card shows Full badge on browse page', async ({ page, browser }) => {
+  test('full course card shows Full badge on browse page', async ({ browser }) => {
     test.skip(test.info().project.name !== 'desktop');
     test.setTimeout(90000);
 

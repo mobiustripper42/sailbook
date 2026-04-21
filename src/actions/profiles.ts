@@ -124,10 +124,8 @@ export async function updateProfile(formData: FormData) {
     experience_level: experience_level === '—' ? null : experience_level,
     asa_number,
     updated_at: new Date().toISOString(),
-  }
-  if (isAdmin) {
-    updates.is_active = formData.get('is_active') === 'true'
-    updates.is_member = formData.get('is_member') === 'on'
+    is_active: formData.get('is_active') === 'true',
+    is_member: formData.get('is_member') === 'on',
   }
 
   const { error } = await supabase

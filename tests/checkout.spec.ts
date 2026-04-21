@@ -41,7 +41,7 @@ test.describe('Stripe Checkout — initiation', () => {
     expect(page.url()).toMatch(/checkout\.stripe\.com/);
   });
 
-  test('full course shows disabled Course Full button', async ({ page, browser }) => {
+  test('full course shows disabled Course Full button', async ({ browser }) => {
     test.skip(test.info().project.name !== 'desktop');
     test.setTimeout(60000);
 
