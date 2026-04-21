@@ -3,7 +3,39 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 84 — 2026-04-20 23:39 [open]
+## Session 84 — 2026-04-20 23:39–23:51 (0.25 hr)
+**Duration:** 15 min | **Points:** 3 pts (2.11 + 2.12 partial + CR fixes)
+**Task:** Phase 2 code review fixes + 2.11 README + 2.12 lint/ui-reviewer
+
+**Completed:**
+- 5 code review fixes from session 83:
+  - `src/actions/profiles.ts:128` — removed dead `if (isAdmin)` wrapper; `is_active`/`is_member` now unconditional (admin gate at line 118 still holds)
+  - `tests/payment-e2e.spec.ts` — `test.skip` guard for missing Stripe keys in `beforeAll`; webhook URL uses `NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'`; added comment on real Stripe test charge
+  - `supabase/migrations/20260421031000` — explicit `GRANT EXECUTE ON FUNCTION profile_role_flags_unchanged TO authenticated`
+- Phase 2.11: README rewritten — Stripe key setup, webhook CLI (`stripe listen`), test cards, test commands
+- Phase 2.12: ESLint 0 errors / 0 warnings; no native `<select>` elements found (already shadcn); @ui-reviewer run (7/10) — findings deferred to next session
+- 12/12 payment E2E tests still passing after all changes
+
+**In Progress:** Nothing
+
+**Blocked:** `supabase db push` still pending (migration 20260421031000 not yet on prod)
+
+**Next Steps:**
+- `supabase db reset` (migration file amended with GRANT EXECUTE) → `supabase db push` to push to prod
+- User-driven UI changes: button/badge CSS updates
+- Fix Phase 2.12 ui-reviewer findings: `pt-12` on checkout pages, `size="sm"` on checkout cards, hardcoded `text-green-600` in student-account-form, raw `<p>` empty states → `<EmptyState />`, `variant="ghost"` → `variant="destructive"` on admin Cancel enrollment button
+- After UI work: close Phase 2, move to Phase 3
+
+**Context:**
+- `profile_role_flags_unchanged` GRANT EXECUTE was added to the migration file after local DB already applied it — need `db reset` before `db push`
+- ui-reviewer findings deferred to next session: window.confirm/prompt in admin (enrollment-actions + session-row), mobile table layout on student course detail, Location column truncation, Spinner extraction, theme profile wiring
+
+**Code Review:**
+- **SECURITY** `profiles.ts` — admin-only fields now unconditional (safe via early return at line 118, but latent if restructured); add comment flagging them as admin-only
+- **SECURITY** `01_rls_profiles.sql` — pgTAP only tests `is_member` self-elevation; missing coverage for `is_admin`, `is_instructor`, `is_active`
+- **BUG** `payment-e2e.spec.ts:18` — `stripeClient()` uses `!` non-null assertion; if key missing in CI, fails unclearly rather than clean skip
+- **CONSISTENCY** `profiles.ts` — `updateProfile`/`updateUserProfile` return `{ success: true }` instead of `{ error: null }` (DEC-015 divergence)
+- **CLEANUP** migration comment on `GRANT EXECUTE` slightly misleading about Supabase role model
 
 ## Session 83 — 2026-04-20 23:07–23:34 (0.42 hr)
 **Duration:** 25 min | **Points:** 5 pts (2.10)

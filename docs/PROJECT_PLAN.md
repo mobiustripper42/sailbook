@@ -111,7 +111,7 @@ The app makes money. Student self-cancellation ships here (ST-10).
 | 2.8 | ~~Admin enrollment view — payment status, Stripe link, manual refund trigger~~ | 5 | [x] <!-- completed 2026-04-19 --> Payment column with amount/refund display + Stripe link. Process Refund dialog with partial amount input. WITH CHECK security fix. 4 Playwright tests. Scope expanded +2 pts to include partial refund. |
 | 2.9 | ~~Member pricing field — `member_price` on courses alongside `price`~~ | 2 | [x] <!-- completed 2026-04-20 --> `member_price` on courses, `is_member` on profiles. Checkout picks member price for members. Admin course forms + student edit updated. Student course detail shows member price. 3 Playwright tests. |
 | 2.10 | ~~Playwright end-to-end payment test — register → pay → confirm → cancel → refund~~ | 5 | [x] <!-- completed 2026-04-20 --> Intercepts Stripe redirect to capture session ID, fires signed checkout.session.completed webhook, tests full confirm→cancel→refund chain. 12/12 across 3 viewports. |
-| 2.11 | README: Stripe setup instructions — keys, webhook config, test mode | 1 | Document `.env.local` keys, webhook CLI setup, and test card reference for new devs. |
+| 2.11 | ~~README: Stripe setup instructions — keys, webhook config, test mode~~ | 1 | [x] <!-- completed 2026-04-20 --> Full README rewrite: Stripe keys, webhook CLI setup, test cards, test commands. |
 | 2.12 | End-of-phase @ui-reviewer and lint pass | 2 | Run after payment UI is wired. Focus on checkout flow, confirmation page, payment status in enrollment list. Also: replace all native `<select>` elements with shadcn `<Select>` (experience level, status dropdowns) — bg-transparent breaks dark mode, should have been caught by ui-reviewer. |
 
 **Phase 2 total: 40 pts**
