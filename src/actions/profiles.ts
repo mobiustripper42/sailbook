@@ -108,8 +108,15 @@ export async function updateProfile(formData: FormData) {
     return { error: 'First name and last name are required.' }
   }
 
-  // Only admins may flip is_active and is_member.
-  const isAdmin = formData.get('is_admin_caller') === 'true'
+  // Verify admin server-side — never trust client-supplied flags.
+  const { data: callerProfile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .maybeSingle()
+  const isAdmin = callerProfile?.is_admin === true
+  if (!isAdmin) return { error: 'Unauthorized.' }
+
   const updates: Record<string, unknown> = {
     first_name,
     last_name,

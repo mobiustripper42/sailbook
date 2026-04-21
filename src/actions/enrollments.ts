@@ -95,7 +95,7 @@ export async function processRefund(
       await stripe.refunds.create({
         payment_intent: payment.stripe_payment_intent_id,
         ...(refundAmountCents ? { amount: refundAmountCents } : {}),
-      }, { idempotencyKey: payment.id })
+      }, { idempotencyKey: `${payment.id}-${amountToRefund}` })
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Stripe refund failed.'
       return { error: msg }

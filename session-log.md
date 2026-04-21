@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 83 — 2026-04-20 23:07 [open]
+
 ## Session 82 — 2026-04-20 22:00–23:02 (1.00 hr)
 **Duration:** 60 min | **Points:** 2 pts (2.9)
 **Task:** Phase 2.8 code review fixes + Phase 2.9 member pricing

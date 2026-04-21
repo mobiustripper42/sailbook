@@ -66,7 +66,6 @@ export default function ProfileEditForm({
     <form action={handleSubmit} className="space-y-6 max-w-lg" onChange={() => setIsDirty(true)}>
       <input type="hidden" name="id" value={profile.id} />
       <input type="hidden" name="return_path" value={returnPath} />
-      <input type="hidden" name="is_admin_caller" value="true" />
 
       {error && (
         <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">

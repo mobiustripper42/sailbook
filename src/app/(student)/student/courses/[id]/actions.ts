@@ -159,7 +159,7 @@ export async function createCheckoutSession(
   // Get or create Stripe customer
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name, stripe_customer_id, is_member')
+    .select('id, first_name, last_name, stripe_customer_id, is_member, is_student')
     .eq('id', user.id)
     .single()
 
@@ -187,7 +187,7 @@ export async function createCheckoutSession(
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
   const holdExpiry = new Date(now.getTime() + holdMinutes * 60 * 1000)
 
-  const isMember = profile?.is_member ?? false
+  const isMember = (profile?.is_member ?? false) && (profile?.is_student ?? false)
   const chargePrice = (isMember && course.member_price != null) ? course.member_price : course.price
 
   // Create Stripe Checkout Session

@@ -8,7 +8,7 @@
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(13);
+SELECT plan(14);
 
 -- ============================================================
 -- HELPERS
@@ -152,6 +152,14 @@ SELECT is(
    WHERE id = 'a1000000-0000-0000-0000-000000000005'),
   'Samantha',
   'student: can update own profile'
+);
+
+-- WITH CHECK blocks self-elevation of role/status flags
+SELECT throws_ok(
+  $$UPDATE public.profiles SET is_member = true WHERE id = 'a1000000-0000-0000-0000-000000000005'$$,
+  '42501',
+  NULL,
+  'student: cannot self-set is_member (WITH CHECK blocks role flag changes)'
 );
 
 -- Attempt cross-user update (should be silently blocked by RLS)
