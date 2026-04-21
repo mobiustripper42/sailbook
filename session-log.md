@@ -3,7 +3,40 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 82 — 2026-04-20 22:00 [open]
+## Session 82 — 2026-04-20 22:00–23:02 (1.00 hr)
+**Duration:** 60 min | **Points:** 2 pts (2.9)
+**Task:** Phase 2.8 code review fixes + Phase 2.9 member pricing
+
+**Completed:**
+- Fixed 7 code review items from session 81: `is_admin` guard on `processRefund` (with `user.id` filter to avoid maybeSingle ambiguity on admin), idempotency key on `stripe.refunds.create`, controlled AlertDialog open state (AlertDialogAction → plain Button + `open`/`onOpenChange`), payments query filtered to `['succeeded','refunded']`, `console.error` on payment update failure, pgTAP WITH CHECK test (plan 19→20), dev route deploy comment
+- Phase 2.9 migration: `member_price numeric(10,2)` on `courses`, `is_member boolean` on `profiles`
+- Checkout action picks member price when `profile.is_member && course.member_price != null`
+- Admin course create/edit forms include Member Price ($) field
+- Admin student/instructor edit form includes LTSC Member checkbox; `updateProfile` gates write behind `is_admin_caller`
+- Student course detail shows member price with strikethrough original + "Member price applied" label
+- Types regenerated; build clean; pgTAP 91/91; 3 Playwright member-pricing tests passing
+- Fixed 4 full-suite regressions: `Price ($)` label ambiguity → `{ exact: true }` in helpers.ts + dashboard test; mobile enrollment table click interception → `{ force: true }`; row selector PW Student/Student2 collision → email-based filter
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- `supabase db push` to apply `20260421020700_add_member_pricing.sql` to prod
+- Fix code review findings (see Code Review below) before next prod push
+- Phase 2.10 — Playwright end-to-end payment test
+
+**Context:**
+- `processRefund` is_admin check must include `.eq('id', user.id)` — admin can see all profiles so `maybeSingle()` without filter returns null, causing Unauthorized error
+- Mobile admin enrollment table: buttons inside horizontally-scrollable table intercept pointer events from Sessions card above; use `{ force: true }` for clicks on enrollment action buttons
+- `filter({ hasText: 'PW Student' })` matches "PW Student2" too — always use email as row selector when both seed students appear in same table
+
+**Code Review:**
+- **SECURITY** `profiles.ts:112` — `is_member` write gated behind `is_admin_caller=true` hidden form field (client-supplied); student could bypass. Need RLS WITH CHECK on self-update policy or server-side admin verify. Same gap exists for `is_admin`, `is_instructor`, `is_active`
+- **SECURITY** `actions.ts:190` — member price set at checkout creation; confirm Stripe webhook doesn't re-derive price from profile (would be a race condition). Likely fine but worth verifying
+- **BUG** `enrollments.ts:95` — idempotency key is `payment.id` alone; partial refund retry with different amount returns cached Stripe response. Fix: `${payment.id}-${amountToRefund}`
+- **CONSISTENCY** `01_rls_profiles.sql` — no pgTAP test that student can't self-set `is_member` (needs WITH CHECK policy first)
+- **CONSISTENCY** `checkout actions.ts` — member price applies to `is_member` regardless of `is_student`; document or enforce
 
 ## Session 81 — 2026-04-19 22:38–23:36 (1.00 hr)
 **Duration:** 60 min | **Points:** 5 pts (2.8 expanded to include partial refund: 3 base + 2)
