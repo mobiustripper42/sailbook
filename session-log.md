@@ -3,7 +3,41 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 83 — 2026-04-20 23:07 [open]
+## Session 83 — 2026-04-20 23:07–23:34 (0.42 hr)
+**Duration:** 25 min | **Points:** 5 pts (2.10)
+**Task:** Phase 2.9 code review fixes + Phase 2.10 Playwright E2E payment test
+
+**Completed:**
+- Fixed 5 code review items from session 82:
+  - `src/actions/profiles.ts` — replaced `is_admin_caller` hidden-field trust with server-side DB admin verify
+  - `src/components/admin/profile-edit-form.tsx` — removed exploitable `is_admin_caller` hidden input
+  - `supabase/migrations/20260421031000_tighten_profiles_self_update_with_check.sql` — SECURITY DEFINER helper function + WITH CHECK policy blocking role/status self-elevation (infinite recursion solved via SECURITY DEFINER, not correlated subquery)
+  - `supabase/tests/01_rls_profiles.sql` — `throws_ok` test for student can't self-set `is_member` (plan 13→14, 92/92 passing)
+  - `src/actions/enrollments.ts` — idempotency key: `${payment.id}-${amountToRefund}`
+  - `src/app/(student)/student/courses/[id]/actions.ts` — member pricing guards `is_student` + profile select adds `is_student`
+- Phase 2.10: `tests/payment-e2e.spec.ts` — full chain test: intercepts Stripe redirect URL (captures `cs_test_` session ID without navigating to Stripe), creates real Stripe PI, fires signed `checkout.session.completed` webhook to local server, verifies confirm → cancel → refund. 12/12 passing across 3 viewports.
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- `supabase db push` to apply `20260421031000_tighten_profiles_self_update_with_check.sql` to prod
+- Fix code review findings below before next session
+- Phase 2.11 — README: Stripe setup instructions (1 pt)
+- Phase 2.12 — End-of-phase @ui-reviewer + lint pass, replace native `<select>` with shadcn (2 pts)
+
+**Context:**
+- RLS WITH CHECK policies that do `FROM public.profiles WHERE id = auth.uid()` cause infinite recursion — the subquery triggers the same policy. Fix: SECURITY DEFINER function that bypasses RLS for the old-value lookup.
+- Stripe Checkout redirect URL format: `checkout.stripe.com/c/pay/cs_test_xxx` — extract with `/(cs_test_[^?&#/]+)/`
+- `page.waitForRequest()` resolves when the request fires, before `page.route()` aborts it — safe to capture URL before aborting navigation
+
+**Code Review:**
+- **CONSISTENCY** `profiles.ts:128` — `if (isAdmin)` block is dead code after early return at line 118; remove wrapper and unconditionally include `is_active`/`is_member` in updates
+- **CONSISTENCY** `payment-e2e.spec.ts:18` — `stripeClient()` throws hard if `STRIPE_SECRET_KEY` missing; should `test.skip` instead of crashing, consistent with other webhook test patterns
+- **CONSISTENCY** `payment-e2e.spec.ts:106` — webhook URL hardcoded as `http://localhost:3000`; use `process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'`
+- **CLEANUP** migration: no `GRANT EXECUTE` on `profile_role_flags_unchanged` for `authenticated` — verify implicit grant or add explicit
+- **CLEANUP** `payment-e2e.spec.ts:75` — add comment noting PI creates a real Stripe test charge (refunded in Test 3)
 
 ## Session 82 — 2026-04-20 22:00–23:02 (1.00 hr)
 **Duration:** 60 min | **Points:** 2 pts (2.9)
