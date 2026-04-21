@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function CheckoutSuccessPage() {
   return (
-    <div className="max-w-lg mx-auto pt-12">
-      <Card>
+    <div className="max-w-lg mx-auto">
+      <Card size="sm">
         <CardHeader>
           <CardTitle>You&apos;re registered!</CardTitle>
         </CardHeader>
@@ -17,7 +17,7 @@ export default function CheckoutSuccessPage() {
             <Button asChild>
               <Link href="/student/dashboard">Go to dashboard</Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button variant="ghost" asChild>
               <Link href="/student/courses">Browse courses</Link>
             </Button>
           </div>

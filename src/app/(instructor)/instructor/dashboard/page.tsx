@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { fmtTime } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/empty-state'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 function fmtDate(d: string) {
@@ -89,7 +90,7 @@ export default async function InstructorDashboard() {
 
       {/* Upcoming sessions */}
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No upcoming sessions assigned to you.</p>
+        <EmptyState message="No upcoming sessions assigned to you." />
       ) : (
         <div>
           <h2 className="text-sm font-semibold text-muted-foreground mb-3">Upcoming Sessions</h2>
@@ -109,9 +110,9 @@ export default async function InstructorDashboard() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <Badge variant="outline" className="text-xs">
+                    <span className="text-xs text-muted-foreground">
                       {activeEnrollments} / {course.capacity}
-                    </Badge>
+                    </span>
                     <Link
                       href={`/instructor/sessions/${s.id}`}
                       className="text-xs text-muted-foreground hover:text-foreground"

@@ -101,7 +101,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           </p>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold">{course.title ?? type?.name}</h1>
-            <Badge variant={course.status === 'active' ? 'default' : 'secondary'}>{course.status}</Badge>
+            <Badge variant={course.status === 'active' ? 'ok' : 'neutral'}>{course.status}</Badge>
           </div>
           {course.title && <p className="text-muted-foreground">{type?.name}</p>}
           <p className="text-sm text-muted-foreground mt-1">
@@ -111,7 +111,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" asChild>
+          <Button variant="ghost" asChild>
             <Link href={`/admin/courses/${id}/edit`}>Edit</Link>
           </Button>
           <CourseStatusActions id={id} status={course.status} />
@@ -199,8 +199,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                       <TableCell>{student ? `${student.first_name} ${student.last_name}` : '—'}</TableCell>
                       <TableCell>{student?.email ?? '—'}</TableCell>
                       <TableCell>
-                        <Badge variant={e.status === 'confirmed' ? 'default' : 'secondary'}>
-                          {e.status}
+                        <Badge variant={e.status === 'confirmed' ? 'ok' : e.status === 'cancel_requested' ? 'warn' : 'neutral'}>
+                          {e.status === 'confirmed' ? 'Enrolled' : e.status === 'registered' ? 'Pending confirmation' : e.status}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">

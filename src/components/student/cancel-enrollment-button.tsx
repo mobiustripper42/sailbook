@@ -36,7 +36,7 @@ export default function CancelEnrollmentButton({ enrollmentId, courseId }: Cance
     <div className="space-y-2">
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="outline" disabled={pending} className="w-full sm:w-auto">
+          <Button variant="ghost" disabled={pending} className="w-full sm:w-auto">
             {pending ? 'Submitting…' : 'Request Cancellation'}
           </Button>
         </AlertDialogTrigger>

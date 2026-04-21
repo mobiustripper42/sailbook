@@ -64,7 +64,7 @@ export default async function StudentsPage() {
                     <TableCell className="capitalize">{s.experience_level ?? '—'}</TableCell>
                     <TableCell>{activeCount}</TableCell>
                     <TableCell>
-                      <Badge variant={s.is_active ? 'default' : 'secondary'}>
+                      <Badge variant={s.is_active ? 'ok' : 'neutral'}>
                         {s.is_active ? 'Active' : 'Inactive'}
                       </Badge>
                     </TableCell>

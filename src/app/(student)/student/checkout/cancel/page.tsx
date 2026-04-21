@@ -11,8 +11,8 @@ export default async function CheckoutCancelPage({
   const holdMinutes = parseInt(process.env.ENROLLMENT_HOLD_MINUTES ?? '15', 10)
 
   return (
-    <div className="max-w-lg mx-auto pt-12">
-      <Card>
+    <div className="max-w-lg mx-auto">
+      <Card size="sm">
         <CardHeader>
           <CardTitle>Payment cancelled</CardTitle>
         </CardHeader>
@@ -27,7 +27,7 @@ export default async function CheckoutCancelPage({
                 <Link href={`/student/courses/${course_id}`}>Return to course</Link>
               </Button>
             )}
-            <Button variant="outline" asChild>
+            <Button variant="ghost" asChild>
               <Link href="/student/courses">Browse courses</Link>
             </Button>
           </div>

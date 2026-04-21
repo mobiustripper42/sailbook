@@ -84,7 +84,6 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
         {optimisticStatus === 'registered' && (
           <Button
             size="sm"
-            variant="outline"
             disabled={pending}
             onClick={() => handle('confirmed', () => confirmEnrollment(enrollmentId, courseId))}
           >
@@ -97,7 +96,7 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
         {optimisticStatus === 'cancel_requested' && payment ? (
           <AlertDialog open={refundDialogOpen} onOpenChange={setRefundDialogOpen}>
             <AlertDialogTrigger asChild>
-              <Button size="sm" variant="outline" disabled={pending}>
+              <Button size="sm" variant="ghost" disabled={pending}>
                 Process Refund
               </Button>
             </AlertDialogTrigger>

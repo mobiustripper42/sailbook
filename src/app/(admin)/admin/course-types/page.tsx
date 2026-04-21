@@ -63,7 +63,7 @@ export default async function CourseTypesPage() {
                   <TableCell>{ct.max_students}</TableCell>
                   <TableCell>{ct.min_hours ?? '—'}</TableCell>
                   <TableCell>
-                    <Badge variant={ct.is_active ? 'default' : 'secondary'}>
+                    <Badge variant={ct.is_active ? 'ok' : 'neutral'}>
                       {ct.is_active ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>

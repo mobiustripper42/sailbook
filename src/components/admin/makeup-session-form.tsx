@@ -41,7 +41,7 @@ export default function MakeupSessionForm({
             Makeup scheduled ({linkedCount} student{linkedCount !== 1 ? 's' : ''})
           </span>
         ) : (
-          <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
+          <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(true)}>
             Schedule Makeup{unlinked > 0 ? ` (${unlinked} student${unlinked !== 1 ? 's' : ''})` : ''}
           </Button>
         )}

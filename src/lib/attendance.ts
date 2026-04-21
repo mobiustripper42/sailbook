@@ -2,10 +2,10 @@ export type AttendanceStatus = 'expected' | 'attended' | 'missed' | 'excused'
 
 export const attendanceStatusConfig: Record<
   AttendanceStatus,
-  { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+  { label: string; variant: 'ok' | 'neutral' | 'warn' | 'alert' }
 > = {
-  attended: { label: 'Attended', variant: 'default' },
-  missed: { label: 'Missed', variant: 'destructive' },
-  excused: { label: 'Excused', variant: 'secondary' },
-  expected: { label: 'Upcoming', variant: 'outline' },
+  attended: { label: 'Attended', variant: 'ok' },
+  missed: { label: 'Missed', variant: 'alert' },
+  excused: { label: 'Excused', variant: 'neutral' },
+  expected: { label: 'Upcoming', variant: 'neutral' },
 }

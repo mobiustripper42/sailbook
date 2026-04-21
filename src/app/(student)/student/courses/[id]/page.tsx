@@ -125,10 +125,10 @@ export default async function StudentCourseDetailPage({
         <div className="flex items-center gap-3 flex-wrap">
           <h1 className="text-2xl font-semibold">{course.title ?? type?.name}</h1>
           {type?.short_code && (
-            <Badge variant="outline">{type.short_code}</Badge>
+            <Badge variant="neutral">{type.short_code}</Badge>
           )}
           {type?.certification_body && (
-            <Badge variant="secondary">{type.certification_body}</Badge>
+            <Badge variant="neutral">{type.certification_body}</Badge>
           )}
         </div>
         {course.title && type?.name && (
@@ -216,7 +216,7 @@ export default async function StudentCourseDetailPage({
                       <TableCell className={dimClass}>{s.location ?? '—'}</TableCell>
                       <TableCell>
                         {isCancelled && (
-                          <Badge variant="outline">Cancelled</Badge>
+                          <Badge variant="neutral">Cancelled</Badge>
                         )}
                         {sessionInstructor && (
                           <p className="text-xs text-muted-foreground mt-1">
@@ -259,7 +259,7 @@ export default async function StudentCourseDetailPage({
       <div className="pt-2">
         {isCancellationRequested ? (
           <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="text-sm px-3 py-1">Cancellation Requested</Badge>
+            <Badge variant="warn">Cancellation Requested</Badge>
             <span className="text-sm text-muted-foreground">Pending admin review. You&apos;ll be contacted once processed.</span>
           </div>
         ) : isEnrolled ? (
@@ -267,11 +267,11 @@ export default async function StudentCourseDetailPage({
             <div className="flex items-center gap-3">
               {myEnrollment.status === 'registered' ? (
                 <>
-                  <Badge variant="secondary" className="text-sm px-3 py-1">Pending confirmation</Badge>
+                  <Badge variant="neutral">Pending confirmation</Badge>
                   <span className="text-sm text-muted-foreground">Pending admin review.</span>
                 </>
               ) : (
-                <Badge className="text-sm px-3 py-1">Enrolled</Badge>
+                <Badge variant="ok">Enrolled</Badge>
               )}
             </div>
             {myEnrollment.status === 'confirmed' && (

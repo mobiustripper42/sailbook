@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { saveAttendance } from '@/actions/attendance'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/empty-state'
 import {
   Table,
   TableBody,
@@ -43,11 +44,11 @@ const statusOptions = [
   { value: 'excused', label: 'Excused' },
 ] as const
 
-const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  expected: 'outline',
-  attended: 'default',
-  missed: 'destructive',
-  excused: 'secondary',
+const statusVariant: Record<string, 'ok' | 'neutral' | 'alert'> = {
+  expected: 'neutral',
+  attended: 'ok',
+  missed: 'alert',
+  excused: 'neutral',
 }
 
 export default function AttendanceForm({ courseId, sessionId, students }: Props) {
@@ -88,15 +89,15 @@ export default function AttendanceForm({ courseId, sessionId, students }: Props)
   const hasChanges = students.some((s) => records[s.enrollment_id] !== s.current_status)
 
   if (students.length === 0) {
-    return <p className="text-sm text-muted-foreground">No enrolled students for this session.</p>
+    return <EmptyState message="No enrolled students for this session." />
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <span className="text-sm text-muted-foreground">Quick:</span>
-        <Button variant="outline" size="sm" onClick={() => markAll('attended')}>All Attended</Button>
-        <Button variant="outline" size="sm" onClick={() => markAll('missed')}>All Missed</Button>
+        <Button variant="ghost" size="sm" onClick={() => markAll('attended')}>All Attended</Button>
+        <Button variant="ghost" size="sm" onClick={() => markAll('missed')}>All Missed</Button>
       </div>
 
       <Table>
@@ -144,7 +145,13 @@ export default function AttendanceForm({ courseId, sessionId, students }: Props)
           </span>
         )}
         {hasChanges && !message && (
-          <span className="text-sm text-muted-foreground">Unsaved changes</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setRecords(Object.fromEntries(students.map((s) => [s.enrollment_id, s.current_status])))}
+          >
+            Cancel
+          </Button>
         )}
       </div>
     </div>

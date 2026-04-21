@@ -112,15 +112,15 @@ export default async function CourseBrowsePage() {
                       {c.title ?? type?.name ?? '—'}
                     </CardTitle>
                     {isEnrolled ? (
-                      <Badge variant={myStatus === 'confirmed' ? 'default' : 'secondary'} className="shrink-0">
+                      <Badge variant={myStatus === 'confirmed' ? 'ok' : myStatus === 'cancel_requested' ? 'warn' : 'neutral'} className="shrink-0">
                         {enrollmentStatusLabel(myStatus!)}
                       </Badge>
                     ) : isFull ? (
-                      <Badge variant="secondary" className="shrink-0">Full</Badge>
+                      <Badge variant="neutral" className="shrink-0">Full</Badge>
                     ) : (
-                      <Badge variant="outline" className="shrink-0 text-xs">
+                      <span className="text-xs text-muted-foreground shrink-0">
                         {spotsRemaining} spot{spotsRemaining !== 1 ? 's' : ''} left
-                      </Badge>
+                      </span>
                     )}
                   </div>
                   {c.title && type?.name && (
@@ -155,7 +155,7 @@ export default async function CourseBrowsePage() {
                   <Button
                     asChild
                     className="w-full"
-                    variant={!isEnrolled && isFull ? 'secondary' : 'default'}
+                    variant="default"
                     disabled={!isEnrolled && isFull}
                   >
                     <Link href={`/student/courses/${c.id}`}>

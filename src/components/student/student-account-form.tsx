@@ -36,7 +36,7 @@ export default function StudentAccountForm({
         <p className="text-sm text-destructive">{state.error}</p>
       )}
       {state && !state.error && (
-        <p className="text-sm text-green-600 dark:text-green-400">Profile updated.</p>
+        <p className="text-sm text-primary">Profile updated.</p>
       )}
 
       <div className="grid grid-cols-2 gap-3">

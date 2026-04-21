@@ -151,7 +151,7 @@ export default function ProfileEditForm({
         <Button type="submit" disabled={pending}>
           {pending ? 'Saving…' : 'Save Changes'}
         </Button>
-        <Button type="button" variant="outline" onClick={() => { if (confirmDiscard()) router.push(returnPath) }}>
+        <Button type="button" variant="ghost" onClick={() => { if (confirmDiscard()) router.push(returnPath) }}>
           Cancel
         </Button>
       </div>

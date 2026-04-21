@@ -155,7 +155,7 @@ export default function UserEditForm({
         <Button type="submit" disabled={pending}>
           {pending ? 'Saving…' : 'Save Changes'}
         </Button>
-        <Button type="button" variant="outline" onClick={() => { if (confirmDiscard()) router.push('/admin/users') }}>
+        <Button type="button" variant="ghost" onClick={() => { if (confirmDiscard()) router.push('/admin/users') }}>
           Cancel
         </Button>
       </div>

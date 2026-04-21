@@ -133,7 +133,7 @@ export default function CourseForm({ courseTypes, instructors }: Props) {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-medium">Sessions</h2>
-          <Button type="button" variant="outline" size="sm" onClick={addSession}>
+          <Button type="button" variant="ghost" size="sm" onClick={addSession}>
             + Add Session
           </Button>
         </div>

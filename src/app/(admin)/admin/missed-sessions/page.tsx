@@ -118,7 +118,7 @@ export default async function MissedSessionsPage() {
                       {group.studentName}
                     </Link>
                   </CardTitle>
-                  <Badge variant="secondary">
+                  <Badge variant="alert">
                     {group.records.length} missed
                   </Badge>
                 </div>

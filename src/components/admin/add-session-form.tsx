@@ -16,7 +16,7 @@ export default function AddSessionForm({ courseId }: { courseId: string }) {
 
   if (!open) {
     return (
-      <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
+      <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(true)}>
         + Add Session
       </Button>
     )

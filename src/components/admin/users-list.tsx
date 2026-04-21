@@ -110,16 +110,16 @@ export default function UsersList({ users }: { users: User[] }) {
                   <TableCell>{u.email}</TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
-                      {u.is_admin && <Badge variant="default">Admin</Badge>}
-                      {u.is_instructor && <Badge variant="secondary">Instructor</Badge>}
-                      {u.is_student && <Badge variant="outline">Student</Badge>}
+                      {u.is_admin && <Badge variant="ok">Admin</Badge>}
+                      {u.is_instructor && <Badge variant="neutral">Instructor</Badge>}
+                      {u.is_student && <Badge variant="neutral">Student</Badge>}
                       {!u.is_admin && !u.is_instructor && !u.is_student && (
                         <span className="text-sm text-muted-foreground">—</span>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={u.is_active ? 'default' : 'secondary'}>
+                    <Badge variant={u.is_active ? 'ok' : 'neutral'}>
                       {u.is_active ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>

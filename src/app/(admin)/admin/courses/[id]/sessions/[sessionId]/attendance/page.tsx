@@ -96,10 +96,10 @@ export default async function AttendancePage({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant={session.status === 'scheduled' ? 'default' : session.status === 'cancelled' ? 'destructive' : 'secondary'}>
+          <Badge variant={session.status === 'scheduled' ? 'ok' : session.status === 'cancelled' ? 'alert' : 'neutral'}>
             {session.status}
           </Badge>
-          <Button variant="outline" asChild>
+          <Button variant="ghost" asChild>
             <Link href={`/admin/courses/${courseId}`}>Back to Course</Link>
           </Button>
         </div>

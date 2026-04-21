@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 85 — 2026-04-21 10:16 [open]
+
 ## Session 84 — 2026-04-20 23:39–23:51 (0.25 hr)
 **Duration:** 15 min | **Points:** 3 pts (2.11 + 2.12 partial + CR fixes)
 **Task:** Phase 2 code review fixes + 2.11 README + 2.12 lint/ui-reviewer

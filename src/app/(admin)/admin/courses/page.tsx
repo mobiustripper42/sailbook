@@ -85,8 +85,8 @@ export default async function CoursesPage() {
                     <TableCell>{enrollmentCount} / {c.capacity}</TableCell>
                     <TableCell>{c.price != null ? `$${c.price}` : '—'}</TableCell>
                     <TableCell>
-                      <Badge variant={c.status === 'active' ? 'default' : 'secondary'}>
-                        {c.status}
+                      <Badge variant={c.status === 'active' ? 'ok' : 'neutral'}>
+                        {c.status.charAt(0).toUpperCase() + c.status.slice(1)}
                       </Badge>
                     </TableCell>
                     <TableCell>

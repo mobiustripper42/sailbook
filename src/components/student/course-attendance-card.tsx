@@ -25,10 +25,10 @@ type CourseAttendance = {
   missedCount: number
 }
 
-function enrollmentStatusVariant(status: string): 'default' | 'secondary' | 'outline' {
-  if (status === 'confirmed') return 'default'
-  if (status === 'registered') return 'secondary'
-  return 'outline'
+function enrollmentStatusVariant(status: string): 'ok' | 'neutral' | 'warn' {
+  if (status === 'confirmed' || status === 'completed') return 'ok'
+  if (status === 'cancel_requested') return 'warn'
+  return 'neutral'
 }
 
 function enrollmentStatusLabel(status: string): string {
@@ -50,7 +50,7 @@ export default function CourseAttendanceCard({ course }: { course: CourseAttenda
               {enrollmentStatusLabel(course.enrollmentStatus)}
             </Badge>
             {course.missedCount > 0 && (
-              <Badge variant="destructive">
+              <Badge variant="alert">
                 {course.missedCount} {course.missedCount === 1 ? 'needs' : 'need'} makeup
               </Badge>
             )}
@@ -82,7 +82,7 @@ export default function CourseAttendanceCard({ course }: { course: CourseAttenda
                     <span className="text-muted-foreground">· {r.location}</span>
                   )}
                   {r.cancelled && (
-                    <Badge variant="outline" className="text-xs">Cancelled</Badge>
+                    <Badge variant="neutral">Cancelled</Badge>
                   )}
                 </div>
                 <div className="flex items-center gap-2">

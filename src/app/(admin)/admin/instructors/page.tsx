@@ -49,7 +49,7 @@ export default async function InstructorsPage() {
                   <TableCell>{i.email}</TableCell>
                   <TableCell>{i.phone ?? '—'}</TableCell>
                   <TableCell>
-                    <Badge variant={i.is_active ? 'default' : 'secondary'}>
+                    <Badge variant={i.is_active ? 'ok' : 'neutral'}>
                       {i.is_active ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>

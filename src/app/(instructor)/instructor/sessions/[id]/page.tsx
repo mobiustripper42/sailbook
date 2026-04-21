@@ -138,7 +138,7 @@ export default async function InstructorSessionRosterPage({
       <div className="space-y-1">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold">{courseTitle}</h1>
-          {isCancelled && <Badge variant="outline">Cancelled</Badge>}
+          {isCancelled && <Badge variant="alert">Cancelled</Badge>}
         </div>
         <p className="text-sm text-muted-foreground">
           {fmtDateLong(session.date)} · {fmtTime(session.start_time)} – {fmtTime(session.end_time)}
@@ -192,7 +192,7 @@ export default async function InstructorSessionRosterPage({
                           />
                         )}
                         {s.makeup_from_date && (
-                          <Badge variant="secondary" className="text-xs font-normal">
+                          <Badge variant="warn">
                             Makeup from {fmtDateLong(s.makeup_from_date)}
                           </Badge>
                         )}

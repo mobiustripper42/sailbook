@@ -39,10 +39,10 @@ function fmtDate(d: string) {
   })
 }
 
-function enrollmentStatusVariant(status: string): 'default' | 'secondary' | 'outline' {
-  if (status === 'confirmed') return 'default'
-  if (status === 'registered') return 'secondary'
-  return 'outline'
+function enrollmentStatusVariant(status: string): 'ok' | 'neutral' | 'warn' {
+  if (status === 'confirmed' || status === 'completed') return 'ok'
+  if (status === 'cancel_requested') return 'warn'
+  return 'neutral'
 }
 
 function enrollmentStatusLabel(status: string): string {
@@ -177,7 +177,7 @@ export default function MyCoursesList({ courses }: Props) {
                     })}
                   </div>
                 )}
-                <Button asChild variant="outline" size="sm" className="w-full mt-1">
+                <Button asChild variant="ghost" size="sm" className="w-full mt-1">
                   <Link href={`/student/courses/${c.courseId}`}>View Course</Link>
                 </Button>
               </CardContent>

@@ -119,7 +119,7 @@ export default async function StudentDashboard() {
                     {nextSession.location ? ` · ${nextSession.location}` : ''}
                   </p>
                 </div>
-                <Button asChild variant="outline" size="sm" className="shrink-0">
+                <Button asChild variant="ghost" size="sm" className="shrink-0">
                   <Link href={`/student/courses/${nextSession.course?.id}`}>View Course</Link>
                 </Button>
               </div>
@@ -160,8 +160,8 @@ export default async function StudentDashboard() {
                       >
                         {course?.title ?? course?.course_types?.name ?? '—'}
                       </Link>
-                      <Badge variant={enrollment.status === 'confirmed' ? 'default' : 'secondary'} className="capitalize text-xs shrink-0">
-                        {enrollment.status}
+                      <Badge variant={enrollment.status === 'confirmed' ? 'ok' : enrollment.status === 'cancel_requested' ? 'warn' : 'neutral'} className="shrink-0">
+                        {enrollment.status === 'confirmed' ? 'Enrolled' : enrollment.status === 'registered' ? 'Pending confirmation' : enrollment.status}
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">

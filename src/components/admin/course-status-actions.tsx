@@ -30,7 +30,7 @@ export default function CourseStatusActions({ id, status }: { id: string; status
         )}
         {status === 'active' && (
           <>
-            <Button variant="outline" onClick={() => {
+            <Button variant="ghost" onClick={() => {
               if (!window.confirm('Revert this course to Draft? It will no longer be visible to students.')) return
               handle(() => revertToDraft(id))
             }} disabled={pending}>
@@ -38,7 +38,7 @@ export default function CourseStatusActions({ id, status }: { id: string; status
                 ? <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
                 : 'Revert to Draft'}
             </Button>
-            <Button variant="outline" onClick={() => {
+            <Button variant="ghost" onClick={() => {
               if (!window.confirm('Mark this course as completed?')) return
               handle(() => completeCourse(id))
             }} disabled={pending}>
@@ -49,7 +49,7 @@ export default function CourseStatusActions({ id, status }: { id: string; status
           </>
         )}
         {status !== 'cancelled' && (
-          <Button variant="outline" onClick={() => {
+          <Button variant="ghost" onClick={() => {
             if (!window.confirm('Cancel this course? This cannot be undone easily.')) return
             handle(() => cancelCourse(id))
           }} disabled={pending}>

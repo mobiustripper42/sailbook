@@ -115,10 +115,10 @@ export default function SessionRow({
           <Badge
             variant={
               session.status === 'scheduled'
-                ? 'default'
+                ? 'ok'
                 : isCancelled
-                ? 'destructive'
-                : 'secondary'
+                ? 'alert'
+                : 'neutral'
             }
             title={isCancelled && session.cancel_reason ? session.cancel_reason : undefined}
           >
