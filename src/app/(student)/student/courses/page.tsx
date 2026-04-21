@@ -152,16 +152,15 @@ export default async function CourseBrowsePage() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button
-                    asChild
-                    className="w-full"
-                    variant="default"
-                    disabled={!isEnrolled && isFull}
-                  >
-                    <Link href={`/student/courses/${c.id}`}>
-                      {isEnrolled ? 'View' : isFull ? 'Course Full' : 'View & Enroll'}
-                    </Link>
-                  </Button>
+                  {!isEnrolled && isFull ? (
+                    <Button className="w-full" disabled>Course Full</Button>
+                  ) : (
+                    <Button asChild className="w-full">
+                      <Link href={`/student/courses/${c.id}`}>
+                        {isEnrolled ? 'View' : 'View & Enroll'}
+                      </Link>
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             )

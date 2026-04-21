@@ -139,7 +139,7 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
         ) : optimisticStatus === 'cancel_requested' ? (
           <Button
             size="sm"
-            variant="outline"
+            variant="ghost"
             disabled={pending}
             onClick={() => handle('cancelled', () => cancelEnrollment(enrollmentId, courseId))}
           >

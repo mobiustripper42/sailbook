@@ -51,7 +51,7 @@ export default function ResetPasswordPage() {
         </CardHeader>
         <CardFooter>
           <Button
-            variant="outline"
+            variant="ghost"
             className="w-full"
             onClick={() => router.push("/forgot-password")}
           >
