@@ -140,10 +140,10 @@ Users know what's happening. Auth is production-grade.
 | 3.11 | OAuth login — Google | 2 | Supabase toggle + Google Cloud console. Email/password remains fallback. |
 | 3.12 | Security audit — run @security-agent, evaluate findings, fix serious issues | 3 | Post-auth-hardening + payments-live audit. Non-serious findings move to backlog. |
 | 3.13 | README: Twilio/Resend setup instructions — keys, sender config | 1 | Document Twilio phone number, Resend API key, domain verification, and sender config for new devs. |
-| 3.14 | End-of-phase @ui-reviewer and lint pass | 2 | Focus on notification preference UI, new auth flows (email verify, OAuth). |
+| 3.14 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on notification preference UI, new auth flows (email verify, OAuth). |
 
-**Phase 3 total: 39 pts**
-**Projected hours: ~14 hrs**
+**Phase 3 total: 42 pts**
+**Projected hours: ~16 hrs**
 
 **Ejection point:** Students get confirmations, cancellation notices, and reminders. Auth is solid with email verification and OAuth. Security audited. The school runs without phone calls.
 
@@ -163,10 +163,10 @@ Clean onboarding. Richer student and instructor records.
 | 4.6 | Instructor notes on sessions — text field per session, visible to all instructors + admin | 3 | IN-5 from V1 backlog. `notes` column already exists on sessions table. UI only. |
 | 4.7 | Instructor profile expansion — availability field + bio/website link | 3 | General availability for admin assignment. Name links to LTSC website bio. Andy request. |
 | 4.8 | ~~Cookie-based theme sync~~ | 2 | [x] <!-- removed 2026-04-15 --> Superseded by DEC-020: theme is localStorage-only per device. No cross-device sync, no FOUC problem to solve. |
-| 4.9 | End-of-phase @ui-reviewer and lint pass | 2 | Focus on profile expansion pages, invite flow, instructor onboarding. |
+| 4.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on profile expansion pages, invite flow, instructor onboarding. |
 
-**Phase 4 total: 31 pts**
-**Projected hours: ~10 hrs**
+**Phase 4 total: 34 pts**
+**Projected hours: ~11 hrs**
 
 **Ejection point:** Instructors get proper onboarding. Student profiles are richer. Instructor notes captured. Admin can create students for non-technical users.
 
@@ -186,10 +186,10 @@ Flexible pricing, enrollment safety rails, and waitlist.
 | 5.6 | (probalby will not happen) Duplicate enrollment in same course type — warn student + flag for admin | 3 | ⚠️ Scope creep risk. Keep tight: warning on enrollment + admin dashboard flag. No auto-clear. |
 | 5.7 | Waitlist — full course → join waitlist → notify on opening | 8 | New table, student UI, admin visibility, notification on spot opening. Depends on Phase 3 notifications. Andy request. |
 | 5.8 | Low enrollment warning — dashboard tile for courses below minimum threshold approaching start date | 2 | Same pattern as "courses without instructors." Meaningful only with payments live. Andy request. |
-| 5.9 | End-of-phase @ui-reviewer and lint pass | 2 | Focus on waitlist UI, prerequisite warning flow, discount code display on checkout. |
+| 5.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on waitlist UI, prerequisite warning flow, discount code display on checkout. |
 
-**Phase 5 total: 31 pts**
-**Projected hours: ~11 hrs**
+**Phase 5 total: 34 pts**
+**Projected hours: ~12 hrs**
 
 **Ejection point:** Pricing is flexible. Enrollment has safety rails. Prerequisite and waitlist systems exist. Low enrollment flagged early.
 
@@ -217,9 +217,10 @@ Design quality, accessibility, navigation, convenience features.
 | 6.14 | Consolidate user/student/instructor profile edit screens | 2 | Three separate edit UIs with overlapping fields feel redundant. Audit overlap, design a unified approach (shared component or merged page per role). Low priority, nice for V2. |
 | 6.15 | Admin dashboard — pending cancellation requests widget | 3 | Surface `cancel_requested` enrollments as a count/list on the admin dashboard, similar to the existing pending-enrollment alert. Links to the enrollment detail. |
 | 6.16 | Show refund amount to student — display refund details on student My Courses and course detail pages when enrollment is cancelled with a refund on record | 2 | Pull from payments table (refund_amount_cents). Show "Refunded $X.XX" badge or line alongside cancelled status. |
+| 6.17 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Full V2 surface area. Final retrospective before handoff. |
 
-**Phase 6 total: 49 pts**
-**Projected hours: ~17 hrs**
+**Phase 6 total: 54 pts**
+**Projected hours: ~19 hrs**
 
 **Ejection point:** The app looks and feels professional. Accessible. Navigable. Polished. Security verified.
 

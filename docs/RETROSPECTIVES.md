@@ -6,6 +6,92 @@ Format per entry: velocity, scope changes, what worked, what didn't, forecast up
 
 ---
 
+## Phase 2 — Payments (Stripe)
+**Completed:** 2026-04-21  
+**Sessions:** 67–85 (minus Phase 1 sessions 71, 73–76; minus tooling session 78)
+
+### Velocity
+
+| Metric | Value |
+|--------|-------|
+| Effort points (original plan) | 38 pts |
+| Effort points (after 2.8 partial-refund expansion) | 40 pts |
+| Projected hours | ~14 hrs |
+| Actual hours | ~8.7 hrs |
+| **Hrs/point** | **0.22** |
+| vs. Phase 1 actual (0.26 hrs/pt) | 15% faster |
+| vs. V1 baseline (0.38 hrs/pt) | 42% faster |
+
+**Why faster than Phase 1:** Phase 2 had fewer small 2-pt tasks inflating the point count — it was mostly 5-pointers with real density. The Playwright helpers and Stripe test-mode patterns also paid off fast once established. The deferred-CR pattern added a tax at every session start, but not enough to drag the average up significantly.
+
+### Weekly Pace
+
+| Date range | Hours |
+|------------|-------|
+| Apr 15 (Phase 2 kickoff, mixed with Phase 1) | ~0.6 |
+| Apr 17–18 (2.4–2.5) | ~2.7 |
+| Apr 19 (2.8) | ~1.0 |
+| Apr 20 (2.9–2.11) | ~1.7 |
+| Apr 21 (2.12 + CR close) | ~1.3 |
+
+Phase 2 ran April 15–21 across 7 days. Work was uneven — heavily front-loaded Apr 15 and then Apr 17–21. Not a sustainable daily pace, but it shipped cleanly.
+
+### Scope Changes
+
+Tasks added or expanded during Phase 2:
+- **2.8 expanded** — partial refund support (+2 pts; partial refunds are a legitimate admin need, worth it)
+- **6.15 added** (admin pending cancellation widget) — discovered need during 2.7; parked in Phase 6
+- **6.16 added** (show refund amount to student) — discovered during 2.8; parked in Phase 6
+
+No tasks were added to Phase 2 itself. New discoveries were pushed to Phase 6 rather than scope-creeping the current phase — this is the right pattern.
+
+Original: 38 pts. Final: 40 pts (+2, +5%). Tighter than Phase 1 (+45%).
+
+### What Worked
+
+- **E2E Playwright payment test (2.10)** — intercepting the Stripe redirect to capture `cs_test_` session ID without actually navigating to Stripe was elegant. The test covers the entire confirm→cancel→refund chain with a real Stripe test charge. High confidence on the most critical flow in the app.
+- **DB-level idempotency backstop** — UNIQUE constraint on `payments.stripe_checkout_session_id` is the right backstop for concurrent webhook delivery. Application-layer guard handles the common case; DB handles the race.
+- **DEC-022 decision** (admin-controlled refund) — making refund processing an admin action rather than automatic simplified 2.7 significantly. The decision doc pattern paid off: having an explicit DEC prevented scope drift.
+- **Code review cadence** — still catching real bugs: WITH CHECK gap on enrollments (security), missing idempotency key on refunds (correctness), AlertDialogAction auto-dismiss issue (UX bug), processRefund missing admin guard (security). Four genuine catches across the phase.
+- **Scope containment** — both 6.15 and 6.16 could have crept into Phase 2. They didn't. Clean ejection point.
+
+### What Didn't Work
+
+- **Deferred code review pattern is structural** — every single session started with "fix N CR items from last session." Phase 1 retro flagged this. Phase 2 didn't fix it. The overhead is real but apparently tolerable. Consider making a standing agreement: CR items either get fixed in-session or they don't block the next session's start.
+- **Dirty pgTAP DB at phase close** — 02/03/06 count failures at end of Phase 2. This is a known "run `supabase db reset` before next pgTAP work" gotcha that keeps recurring. Worth just running it at every `/its-alive` as a habit.
+- **Mixed-phase session attribution** — Sessions 67–68 straddled Phase 1 and Phase 2. Velocity math required estimation. Same issue as Phase 1. It's inherent to kicking off the next phase while wrapping up the prior one; probably just accept it and document the mixed sessions.
+
+### Code Review Debt (carry into Phase 3)
+
+Phase 2 ended with a clean bill of health (session 85). No outstanding code review items.
+
+### Forecast Update (as of 2026-04-21)
+
+**Deadline:** May 15, 2026 (24 days remaining)  
+**Remaining work:** ~138 pts across Phases 3–6
+
+| Phase | Pts remaining |
+|-------|--------------|
+| Phase 3 (Notifications + Auth) | 42 |
+| Phase 4 (Identity + Profiles) | 34 |
+| Phase 5 (Pricing + Enrollment) | 34 |
+| Phase 6 (Polish + UX) | 54 |
+| **Total** | **164** |
+
+Phase totals were corrected after retro: end-of-phase close tasks (3.14, 4.9, 5.9, 6.17) re-estimated from 2 → 5 pts each (+14 pts total) to account for full scope: @ui-reviewer, lint, test green, code review, and retrospective.
+
+| Scope | Hrs needed | Hrs/day needed | Verdict |
+|-------|-----------|----------------|---------|
+| Full scope (164 pts @ 0.22) | ~36 hrs | ~1.5 hrs/day | Achievable at current pace |
+| Full scope (164 pts @ 0.30) | ~49 hrs | ~2.0 hrs/day | Tight but feasible |
+| **Critical path** (Phase 3 core ~25 pts) | ~6 hrs | ~15 min/day | Zero risk |
+
+**Outlook significantly better than Phase 1 retro projected.** At Phase 1 close, the forecast was "needs sustained sprint pace" for full scope. At Phase 2 close, full scope is achievable at a modest ~1.25 hrs/day. The velocity trend is holding or improving.
+
+**Recommendation:** Stay on critical path (Phase 3) but full scope is no longer a stretch goal — it's a reasonable target. Watch for Phase 4.4 (admin-created students, 8 pts) as the single highest-risk task remaining.
+
+---
+
 ## Phase 1 — V1 Fixes & Gaps
 **Completed:** 2026-04-16  
 **Sessions:** 48–76 (plus mixed-phase work in 67–68)
