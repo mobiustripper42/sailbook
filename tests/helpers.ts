@@ -57,7 +57,7 @@ export async function createTestCourse(
   // Unique title so we can find the card on the student browse page
   await page.getByLabel('Title Override').fill(title);
   await page.getByLabel('Capacity').fill(String(capacity));
-  await page.getByLabel('Price ($)').fill(String(price));
+  await page.getByLabel('Price ($)', { exact: true }).fill(String(price));
 
   // Far-future date so the session never counts as past
   await page.locator('input[type="date"]').fill('2027-09-15');

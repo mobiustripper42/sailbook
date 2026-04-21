@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -33,6 +32,7 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
   const [pending, startTransition] = useTransition()
   const [optimisticStatus, setOptimisticStatus] = useState(status)
   const [error, setError] = useState<string | null>(null)
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false)
   const [refundAmount, setRefundAmount] = useState(
     payment ? (payment.amountCents / 100).toFixed(2) : '0.00'
   )
@@ -72,6 +72,7 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
     }
     const refundCents = Math.round(dollars * 100)
     const isFullRefund = payment && refundCents === payment.amountCents
+    setRefundDialogOpen(false)
     handle('cancelled', () =>
       processRefund(enrollmentId, courseId, isFullRefund ? undefined : refundCents)
     )
@@ -94,7 +95,7 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
         )}
 
         {optimisticStatus === 'cancel_requested' && payment ? (
-          <AlertDialog>
+          <AlertDialog open={refundDialogOpen} onOpenChange={setRefundDialogOpen}>
             <AlertDialogTrigger asChild>
               <Button size="sm" variant="outline" disabled={pending}>
                 Process Refund
@@ -128,11 +129,11 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleRefund} disabled={pending}>
+                <Button onClick={handleRefund} disabled={pending}>
                   {pending
                     ? <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
                     : 'Refund & Cancel'}
-                </AlertDialogAction>
+                </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

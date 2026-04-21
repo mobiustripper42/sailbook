@@ -19,6 +19,7 @@ type Profile = {
   is_active: boolean
   is_student: boolean
   is_instructor: boolean
+  is_member: boolean
 }
 
 type ExperienceCode = {
@@ -118,6 +119,19 @@ export default function ProfileEditForm({
               </option>
             ))}
           </select>
+        </div>
+      )}
+
+      {profile.is_student && (
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="is_member"
+            name="is_member"
+            defaultChecked={profile.is_member}
+            className="h-4 w-4 rounded border border-input accent-primary"
+          />
+          <Label htmlFor="is_member" className="cursor-pointer">LTSC Member (member pricing at checkout)</Label>
         </div>
       )}
 

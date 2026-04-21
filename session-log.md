@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 82 — 2026-04-20 22:00 [open]
+
 ## Session 81 — 2026-04-19 22:38–23:36 (1.00 hr)
 **Duration:** 60 min | **Points:** 5 pts (2.8 expanded to include partial refund: 3 base + 2)
 **Task:** Phase 2.8 — admin enrollment view: payment status, Stripe link, partial refund trigger

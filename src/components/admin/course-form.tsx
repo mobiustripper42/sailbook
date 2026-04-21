@@ -113,6 +113,10 @@ export default function CourseForm({ courseTypes, instructors }: Props) {
             <Label htmlFor="price">Price ($)</Label>
             <Input id="price" name="price" type="number" min={0} step="0.01" placeholder="Optional" />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="member_price">Member Price ($)</Label>
+            <Input id="member_price" name="member_price" type="number" min={0} step="0.01" placeholder="Optional" />
+          </div>
         </div>
 
         <div className="space-y-2">

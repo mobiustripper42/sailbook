@@ -30,7 +30,7 @@ export default async function StudentCourseDetailPage({
   const { data: course } = await supabase
     .from('courses')
     .select(`
-      id, title, description, capacity, price, status,
+      id, title, description, capacity, price, member_price, status,
       course_types ( name, short_code, description, certification_body ),
       instructor:profiles!courses_instructor_id_fkey ( first_name, last_name )
     `)
@@ -90,6 +90,13 @@ export default async function StudentCourseDetailPage({
     myAttendance?.map((a) => [a.session_id, a]) ?? []
   )
 
+  const { data: myProfile } = user
+    ? await supabase.from('profiles').select('is_member').eq('id', user.id).single()
+    : { data: null }
+
+  const isMember = myProfile?.is_member ?? false
+  const displayPrice = (isMember && course.member_price != null) ? course.member_price : course.price
+
   const type = course.course_types as unknown as {
     name: string
     short_code: string
@@ -142,7 +149,15 @@ export default async function StudentCourseDetailPage({
         </div>
         <div>
           <p className="text-muted-foreground">Price</p>
-          <p className="font-medium">{course.price != null ? `$${course.price}` : '—'}</p>
+          <p className="font-medium">
+            {displayPrice != null ? `$${displayPrice}` : '—'}
+            {isMember && course.member_price != null && (
+              <span className="ml-2 text-xs text-muted-foreground line-through">${course.price}</span>
+            )}
+          </p>
+          {isMember && course.member_price != null && (
+            <p className="text-xs text-primary">Member price applied</p>
+          )}
         </div>
         <div>
           <p className="text-muted-foreground">{(sessions?.length ?? 0) === 1 ? 'Session' : 'Sessions'}</p>

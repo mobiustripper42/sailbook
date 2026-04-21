@@ -6,7 +6,7 @@
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(19);
+SELECT plan(20);
 
 -- Reuse authenticate() helper (same pattern as 01/02)
 CREATE SCHEMA IF NOT EXISTS tests;
@@ -154,6 +154,17 @@ SELECT throws_ok(
   '42501',
   NULL,
   'student (sam): cannot set confirmed → cancelled directly'
+);
+
+-- Student (sam): cannot extend a payment hold while requesting cancellation.
+-- WITH CHECK requires hold_expires_at IS NULL — mutating it alongside status must be rejected.
+SELECT throws_ok(
+  $$ UPDATE public.enrollments
+     SET status = 'cancel_requested', hold_expires_at = now() + interval '1 hour'
+     WHERE id = 'e1000000-0000-0000-0000-000000000003' $$,
+  '42501',
+  NULL,
+  'student (sam): cannot extend hold while setting cancel_requested (WITH CHECK: hold_expires_at IS NULL)'
 );
 
 RESET ROLE;

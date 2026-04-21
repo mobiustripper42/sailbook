@@ -19,6 +19,7 @@ export async function createCourse(prevState: string | null, formData: FormData)
     description: (formData.get('description') as string) || null,
     capacity: Number(formData.get('capacity')) || 4,
     price: formData.get('price') ? Number(formData.get('price')) : null,
+    member_price: formData.get('member_price') ? Number(formData.get('member_price')) : null,
     notes: (formData.get('notes') as string) || null,
     created_by: user.id,
   }
@@ -69,6 +70,7 @@ export async function updateCourse(id: string, prevState: string | null, formDat
     description: (formData.get('description') as string) || null,
     capacity: Number(formData.get('capacity')) || 4,
     price: formData.get('price') ? Number(formData.get('price')) : null,
+    member_price: formData.get('member_price') ? Number(formData.get('member_price')) : null,
     notes: (formData.get('notes') as string) || null,
     updated_at: new Date().toISOString(),
   }

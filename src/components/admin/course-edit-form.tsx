@@ -81,6 +81,10 @@ export default function CourseEditForm({ course, courseTypes, instructors }: Pro
           <Label htmlFor="price">Price ($)</Label>
           <Input id="price" name="price" type="number" min={0} step="0.01" defaultValue={course.price ?? ''} />
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="member_price">Member Price ($)</Label>
+          <Input id="member_price" name="member_price" type="number" min={0} step="0.01" defaultValue={course.member_price ?? ''} />
+        </div>
       </div>
 
       <div className="space-y-2">

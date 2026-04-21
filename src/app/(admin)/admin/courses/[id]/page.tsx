@@ -80,6 +80,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         .from('payments')
         .select('enrollment_id, amount_cents, refund_amount_cents, stripe_payment_intent_id, status')
         .in('enrollment_id', enrollmentIds)
+        .in('status', ['succeeded', 'refunded'])
     : { data: [] }
 
   const paymentByEnrollment = new Map(

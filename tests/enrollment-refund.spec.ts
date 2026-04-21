@@ -54,7 +54,7 @@ test.describe('Admin refund & cancel flow', () => {
   test('payment column shows dash when no payment exists', async ({ page }) => {
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
     await page.goto(`/admin/courses/${courseId}`)
-    const row = page.getByRole('row').filter({ hasText: 'PW Student' }).first()
+    const row = page.getByRole('row').filter({ hasText: 'pw_student@ltsc.test' })
     await expect(row).toBeVisible()
     await expect(row.getByRole('cell').nth(3)).toHaveText('—')
   })
@@ -73,7 +73,7 @@ test.describe('Admin refund & cancel flow', () => {
 
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
     await page.goto(`/admin/courses/${courseId}`)
-    const row = page.getByRole('row').filter({ hasText: 'PW Student' }).first()
+    const row = page.getByRole('row').filter({ hasText: 'pw_student@ltsc.test' })
     await expect(row.getByRole('cell').nth(2)).toContainText('cancel_requested')
     await expect(row.getByRole('button', { name: 'Cancel (no refund)' })).toBeVisible()
   })
@@ -81,8 +81,11 @@ test.describe('Admin refund & cancel flow', () => {
   test('no-refund cancel transitions enrollment to cancelled', async ({ page }) => {
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
     await page.goto(`/admin/courses/${courseId}`)
-    const row = page.getByRole('row').filter({ hasText: 'PW Student' }).first()
-    await row.getByRole('button', { name: 'Cancel (no refund)' }).click()
+    // Only one "Cancel (no refund)" button exists at this point in the serial flow
+    const cancelBtn = page.getByRole('button', { name: 'Cancel (no refund)' })
+    await cancelBtn.scrollIntoViewIfNeeded()
+    await cancelBtn.click({ force: true })
+    const row = page.getByRole('row').filter({ hasText: 'pw_student@ltsc.test' })
     await expect(row.getByRole('cell').nth(2)).toContainText('cancelled', { timeout: 10000 })
     await expect(row.getByRole('button')).toHaveCount(0)
   })
@@ -117,7 +120,7 @@ test.describe('Admin refund & cancel flow', () => {
 
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
     await page.goto(`/admin/courses/${courseId}`)
-    const row = page.getByRole('row').filter({ hasText: 'PW Student2' })
+    const row = page.getByRole('row').filter({ hasText: 'pw_student2@ltsc.test' })
     await expect(row).toBeVisible()
 
     // Payment cell shows original amount and Stripe link
@@ -126,12 +129,12 @@ test.describe('Admin refund & cancel flow', () => {
     await expect(row.getByRole('button', { name: 'Process Refund' })).toBeVisible()
 
     // Open dialog and issue partial refund
-    await row.getByRole('button', { name: 'Process Refund' }).click()
+    await row.getByRole('button', { name: 'Process Refund' }).click({ force: true })
     await expect(page.getByRole('alertdialog')).toBeVisible()
     await expect(page.getByText('Original charge: $250.00')).toBeVisible()
 
     await page.getByLabel('Refund amount (USD)').fill('50.00')
-    await page.getByRole('button', { name: 'Refund & Cancel' }).click()
+    await page.getByRole('button', { name: 'Refund & Cancel' }).click({ force: true })
 
     // Enrollment flips to cancelled
     await expect(row.getByRole('cell').nth(2)).toContainText('cancelled', { timeout: 15000 })

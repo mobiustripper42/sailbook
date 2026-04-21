@@ -115,6 +115,7 @@ export type Database = {
           description: string | null
           id: string
           instructor_id: string | null
+          member_price: number | null
           notes: string | null
           price: number | null
           status: string | null
@@ -129,6 +130,7 @@ export type Database = {
           description?: string | null
           id?: string
           instructor_id?: string | null
+          member_price?: number | null
           notes?: string | null
           price?: number | null
           status?: string | null
@@ -143,6 +145,7 @@ export type Database = {
           description?: string | null
           id?: string
           instructor_id?: string | null
+          member_price?: number | null
           notes?: string | null
           price?: number | null
           status?: string | null
@@ -290,6 +293,7 @@ export type Database = {
           is_active: boolean | null
           is_admin: boolean
           is_instructor: boolean
+          is_member: boolean
           is_student: boolean
           last_name: string
           phone: string | null
@@ -308,6 +312,7 @@ export type Database = {
           is_active?: boolean | null
           is_admin?: boolean
           is_instructor?: boolean
+          is_member?: boolean
           is_student?: boolean
           last_name: string
           phone?: string | null
@@ -326,6 +331,7 @@ export type Database = {
           is_active?: boolean | null
           is_admin?: boolean
           is_instructor?: boolean
+          is_member?: boolean
           is_student?: boolean
           last_name?: string
           phone?: string | null

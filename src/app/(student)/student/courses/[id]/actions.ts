@@ -102,7 +102,7 @@ export async function createCheckoutSession(
   // Load course
   const { data: course } = await supabase
     .from('courses')
-    .select('id, title, status, capacity, price')
+    .select('id, title, status, capacity, price, member_price')
     .eq('id', courseId)
     .single()
 
@@ -159,7 +159,7 @@ export async function createCheckoutSession(
   // Get or create Stripe customer
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name, stripe_customer_id')
+    .select('id, first_name, last_name, stripe_customer_id, is_member')
     .eq('id', user.id)
     .single()
 
@@ -187,6 +187,9 @@ export async function createCheckoutSession(
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
   const holdExpiry = new Date(now.getTime() + holdMinutes * 60 * 1000)
 
+  const isMember = profile?.is_member ?? false
+  const chargePrice = (isMember && course.member_price != null) ? course.member_price : course.price
+
   // Create Stripe Checkout Session
   const checkoutSession = await stripe.checkout.sessions.create({
     customer: stripeCustomerId,
@@ -197,7 +200,7 @@ export async function createCheckoutSession(
         price_data: {
           currency: 'usd',
           product_data: { name: course.title ?? 'Course Enrollment' },
-          unit_amount: Math.round(course.price * 100), // price is in dollars, Stripe wants cents
+          unit_amount: Math.round(chargePrice * 100),
         },
         quantity: 1,
       },

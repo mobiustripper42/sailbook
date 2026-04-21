@@ -31,7 +31,7 @@ test.describe('Admin — dashboard instructor count', () => {
     await page.getByRole('option', { name: /ASA 101.*Basic Keelboat/ }).click()
     await page.getByLabel('Title Override').fill(`Dashboard Count Test ${id}`)
     await page.getByLabel('Capacity').fill('4')
-    await page.getByLabel('Price ($)').fill('250')
+    await page.getByLabel('Price ($)', { exact: true }).fill('250')
     await page.locator('input[type="date"]').fill('2027-11-15')
     await page.locator('input[type="time"]').first().fill('09:00')
     await page.locator('input[type="time"]').nth(1).fill('17:00')

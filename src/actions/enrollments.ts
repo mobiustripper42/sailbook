@@ -68,6 +68,16 @@ export async function processRefund(
 ): Promise<{ error: string | null }> {
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized.' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (!profile?.is_admin) return { error: 'Unauthorized.' }
+
   const { data: payment } = await supabase
     .from('payments')
     .select('id, stripe_payment_intent_id, amount_cents, status')
@@ -85,7 +95,7 @@ export async function processRefund(
       await stripe.refunds.create({
         payment_intent: payment.stripe_payment_intent_id,
         ...(refundAmountCents ? { amount: refundAmountCents } : {}),
-      })
+      }, { idempotencyKey: payment.id })
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Stripe refund failed.'
       return { error: msg }
@@ -100,7 +110,10 @@ export async function processRefund(
       })
       .eq('id', payment.id)
 
-    if (updateErr) return { error: updateErr.message }
+    if (updateErr) {
+      console.error('processRefund: Stripe refund succeeded but payments row update failed', updateErr)
+      return { error: updateErr.message }
+    }
   }
 
   // Cancel the enrollment and flip attendance records

@@ -10,6 +10,8 @@
  *   amountCents?: number             // defaults to 25000
  * }
  * Returns: { enrollmentId }
+ *
+ * Never deploy with NODE_ENV !== 'development' — the route is blocked by an env check.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'

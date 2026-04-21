@@ -108,7 +108,7 @@ export async function updateProfile(formData: FormData) {
     return { error: 'First name and last name are required.' }
   }
 
-  // Only admins may flip is_active; students editing their own profile cannot deactivate themselves.
+  // Only admins may flip is_active and is_member.
   const isAdmin = formData.get('is_admin_caller') === 'true'
   const updates: Record<string, unknown> = {
     first_name,
@@ -120,6 +120,7 @@ export async function updateProfile(formData: FormData) {
   }
   if (isAdmin) {
     updates.is_active = formData.get('is_active') === 'true'
+    updates.is_member = formData.get('is_member') === 'on'
   }
 
   const { error } = await supabase
