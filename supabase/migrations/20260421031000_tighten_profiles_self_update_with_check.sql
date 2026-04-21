@@ -28,7 +28,8 @@ AS $$
   );
 $$;
 
--- Explicit grant — Postgres defaults EXECUTE to PUBLIC, but be explicit for SECURITY DEFINER functions.
+-- Explicit grant required — Supabase's `authenticated` role does not inherit from PUBLIC,
+-- so Postgres's default EXECUTE-to-PUBLIC grant does not reach it.
 GRANT EXECUTE ON FUNCTION public.profile_role_flags_unchanged(uuid, boolean, boolean, boolean, boolean, boolean) TO authenticated;
 
 DROP POLICY "Users can update own profile" ON public.profiles;

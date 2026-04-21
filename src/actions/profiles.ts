@@ -124,6 +124,7 @@ export async function updateProfile(formData: FormData) {
     experience_level: experience_level === '—' ? null : experience_level,
     asa_number,
     updated_at: new Date().toISOString(),
+    // Admin-only fields — safe here because of the isAdmin early-return above.
     is_active: formData.get('is_active') === 'true',
     is_member: formData.get('is_member') === 'on',
   }
@@ -138,5 +139,5 @@ export async function updateProfile(formData: FormData) {
   revalidatePath(returnPath)
   revalidatePath('/admin/students')
   revalidatePath('/admin/instructors')
-  return { success: true }
+  return { error: null }
 }

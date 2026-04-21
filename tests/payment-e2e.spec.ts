@@ -15,7 +15,9 @@ import Stripe from 'stripe'
 import { createTestCourse, loginAs, runId } from './helpers'
 
 function stripeClient() {
-  return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-03-25.dahlia', typescript: true })
+  const key = process.env.STRIPE_SECRET_KEY
+  if (!key) throw new Error('STRIPE_SECRET_KEY missing — beforeAll skip guard should have prevented this')
+  return new Stripe(key, { apiVersion: '2026-03-25.dahlia', typescript: true })
 }
 
 test.describe('Full payment chain E2E', () => {
