@@ -3,7 +3,43 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 85 — 2026-04-21 10:16 [open]
+## Session 85 — 2026-04-21 10:16–11:34 (1.33 hrs)
+**Duration:** 1 hr 20 min | **Points:** 2 pts (2.12)
+**Task:** Phase 2.12 — design system badge + button redesign; UI reviewer fixes; close Phase 2
+
+**Completed:**
+- Imported Claude Design system bundle — dot+label badge spec, 2-variant button spec
+- `badge.tsx` fully redesigned: filled pill → dot+label, 4 variants (neutral/ok/warn/alert)
+- `attendance.ts` attendanceStatusConfig updated to new variant names
+- 22 files with badge usages swept — old variants replaced; "spots left" count → plain span
+- Enrollment status labels humanized in admin course detail
+- `button.tsx`: ghost gains `text-muted-foreground`; disabled: `opacity-35 + saturate(0.3)` filter
+- All `variant="outline"` Button usages → ghost (15 files); Confirm enrollment → default
+- `student/courses`: split full/non-full button render (`asChild+disabled` doesn't propagate to Link)
+- UI reviewer fixes: checkout `pt-12` removed, `size="sm"` on checkout cards, `text-green-600` → `text-primary`, standalone empty states use EmptyState
+- Attendance form: "Unsaved changes" span → ghost Cancel button with reset handler
+- Courses page status badge casing fixed (capitalized)
+- Code review: 5 fixes (missed outline button, full-course link bug, reset-password stray outline, missed-sessions alert→warn, advisory on excused left as neutral)
+- Session 84 deferred code review: profiles.ts admin-only comment, pgTAP +3 self-elevation tests (plan 14→17), stripeClient() non-null removed, updateProfile return type fixed (DEC-015), migration comment corrected
+- All Playwright tests passing (4 tablet flaky tests confirmed passing on re-run)
+
+**In Progress:** Nothing
+
+**Blocked:** Nothing
+
+**Next Steps:**
+- Phase 2 complete — move to Phase 3 (Notifications + Auth Hardening)
+- Phase 3 starts with 3.1 Twilio setup + 3.2 Resend setup
+- Dirty pgTAP DB (02/03/06 count failures): run `supabase db reset` before Phase 3 pgTAP work
+
+**Context:**
+- Badge variants: neutral/ok/warn/alert only — nothing uses default/secondary/destructive/outline
+- Buttons: ghost (muted, secondary actions) or default (primary CTA) — no outline in the app
+- `asChild + disabled` on Button wrapping Link doesn't disable navigation — always split render
+- warn badge (amber) = needs attention; alert (red) = error/destructive state
+- excused attendance = neutral (resolved terminal state, not needing attention)
+
+**Code Review:** All items resolved — Clean Bill of Health
 
 ## Session 84 — 2026-04-20 23:39–23:51 (0.25 hr)
 **Duration:** 15 min | **Points:** 3 pts (2.11 + 2.12 partial + CR fixes)
