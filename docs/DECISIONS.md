@@ -117,6 +117,15 @@
 **Status:** `cancel_requested` is a terminal student-facing state — students cannot self-transition out of it. Only admins can move it to `cancelled`. RLS enforces: students can only update `confirmed → cancel_requested`, not `confirmed → cancelled`.
 **Phase 6:** Add deadline-based automatic refund eligibility (e.g., full refund if cancelled ≥ 7 days before first session, none after).
 
+## DEC-023: Email split — Zoho for human mail, Resend for transactional (2026-04-22)
+**Decision:** Two separate email systems.
+1. **Human-addressable mailboxes** (`info@sailbook.live`, `andy@sailbook.live`) run on Zoho free tier, pulled into Gmail for unified inbox and branded reply. See `docs/EMAIL_SETUP.md`.
+2. **Transactional/app email** (enrollment confirmations, reminders, cancellation notices) goes through Resend with `from: info@sailbook.live`. See `docs/NOTIFICATION_SETUP.md`.
+**Why:** Each tool is built for its job. Resend is send-only for programmatic mail — wrong fit for human correspondence (no inbox, no reply handling). Zoho provides real mailboxes with proper SMTP/IMAP — wrong fit for app-scale transactional sending. Splitting them keeps each tool in its lane and gives students one branded reply destination: hitting reply on any app notification lands in the same human inbox Andy already uses.
+**Tradeoffs:** Two vendors to manage. DNS coordination required — exactly one SPF record per domain must include both senders (`v=spf1 include:zoho.com include:_spf.resend.com ~all`), while DKIM stacks cleanly via separate selectors. Resend does not need MX records; Zoho handles all inbound `@sailbook.live` mail.
+**Setup order:** Zoho first (`EMAIL_SETUP.md`), then Resend (`NOTIFICATION_SETUP.md` §3.2). Twilio has no DNS dependency and is independent.
+**Revisit if:** Zoho free tier blocks SMTP (fallbacks: Zoho Mail Lite $1/user/mo, Fastmail, or Google Workspace). Or if notification volume grows to where `noreply@` is preferable to human replies.
+
 ---
 
 ## V2 Decisions (to be resolved during build)
