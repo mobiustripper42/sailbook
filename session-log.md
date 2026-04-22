@@ -3,7 +3,36 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 88 — 2026-04-22 19:08 [open]
+## Session 88 — 2026-04-22 19:08–19:19 (0.17 hrs)
+**Duration:** 0.17 hrs | **Points:** 0 (docs-only, no plan task)
+**Task:** Align NOTIFICATION_SETUP.md with updated EMAIL_SETUP.md (Cloudflare Email Routing + Gmail, replacing Zoho)
+
+**Completed:**
+- Pulled origin/main into dev — picked up `docs/EMAIL_SETUP.md` and `docs/NOTIFICATION_SETUP.md` (Zoho→Cloudflare flip committed directly to main)
+- Updated `docs/NOTIFICATION_SETUP.md`:
+  - Banner: removed "do Zoho first" → "do EMAIL_SETUP.md (Cloudflare) first, check for existing SPF before adding Resend's"
+  - DNS section: replaced merge-with-Zoho SPF example with check-first approach; removed Zoho MX note; kept proxy/DKIM/CNAME guidance
+  - From-address recommendation: "Zoho is already hosting that mailbox" → "Cloudflare Email Routing already forwards it to Gmail, Andy responds via Send-As"
+  - Checklist footer: "do after Zoho" → "do after EMAIL_SETUP.md"; SPF note reworded
+  - Fixed one LTSC → Simply Sailing stale reference in Twilio section
+
+**In Progress:** Nothing
+**Blocked:**
+- Twilio account setup (user action)
+- Resend account setup (user action — needs API key + sailbook.live domain verification)
+- `supabase db push` pending (needs `supabase db reset` locally first)
+
+**Next Steps:** Start Phase 3 task 3.3 — notification service abstraction. Build against mock path (`NOTIFICATIONS_ENABLED=false`); no creds required yet. Lock in `from` address before writing copy (recommendation: `info@sailbook.live`).
+
+**Context:**
+- SPF: one record per domain — any new sender (Resend, Google Send-As) must be merged in, not added as a second TXT record
+- Cloudflare Email Routing virtually always adds a TXT record automatically (EMAIL_SETUP.md step 4); the NOTIFICATION_SETUP.md banner should say "adds" not "may add" (code review finding — deferred)
+- SPF example in NOTIFICATION_SETUP.md step 3 should include `_spf.google.com` for Gmail Send-As alongside `_spf.resend.com` — omission flagged by code review, worth fixing before Andy does DNS setup
+
+**Code Review:**
+- **CONSISTENCY** `NOTIFICATION_SETUP.md` line 70 — SPF example omits `_spf.google.com`; if Andy adds it later as a separate TXT he'll have duplicate SPF and broken email. Fix: `v=spf1 include:_spf.google.com include:_spf.resend.com ~all`
+- **CONSISTENCY** `NOTIFICATION_SETUP.md` line 7 — banner says Cloudflare "may add" a TXT record; EMAIL_SETUP.md says it does so automatically. Tighten to "adds."
+- **CONSISTENCY** `NOTIFICATION_SETUP.md` line 75 — "turn off orange cloud for all mail-related records" — MX records can't be proxied; scope to "DKIM and CNAME records."
 
 ## Session 87 — 2026-04-22 13:00–13:20 (0.33 hrs)
 **Duration:** 0.33 hrs | **Points:** 0
