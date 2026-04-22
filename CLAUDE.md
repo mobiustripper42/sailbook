@@ -1,7 +1,7 @@
 # SailBook — Claude Code Project Context
 
 ## What We're Building
-Scheduling, enrollment, and payment management system for Learn To Sail Cleveland (LTSC). Single school, single season.
+Scheduling, enrollment, and payment management system for Simply Sailing. Single school, single season.
 
 Replaces manual scheduling with a web app where:
 - **Admin (Andy)** manages course types, courses, sessions, enrollments, attendance, makeups, payments, refunds, and notifications

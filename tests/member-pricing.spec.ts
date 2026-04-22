@@ -36,7 +36,7 @@ test.describe('Member pricing', () => {
     await expect(page.getByText('Member price applied')).not.toBeVisible()
   })
 
-  test('admin can mark student as LTSC member', async ({ page }) => {
+  test('admin can mark student as Simply Sailing member', async ({ page }) => {
     test.setTimeout(30000)
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
     await page.goto('/admin/students')
@@ -44,7 +44,7 @@ test.describe('Member pricing', () => {
     const row = page.getByRole('row').filter({ hasText: 'PW Student' }).first()
     await row.getByRole('link', { name: 'Edit' }).click()
     await page.waitForURL(/\/admin\/students\/.*\/edit/, { timeout: 10000 })
-    await page.getByLabel('LTSC Member').check()
+    await page.getByLabel('Simply Sailing Member').check()
     await page.getByRole('button', { name: 'Save Changes' }).click()
     await page.waitForURL('/admin/students', { timeout: 10000 })
   })
@@ -67,7 +67,7 @@ test.describe('Member pricing', () => {
       const row = page.getByRole('row').filter({ hasText: 'PW Student' }).first()
       await row.getByRole('link', { name: 'Edit' }).click()
       await page.waitForURL(/\/admin\/students\/.*\/edit/, { timeout: 10000 })
-      await page.getByLabel('LTSC Member').uncheck()
+      await page.getByLabel('Simply Sailing Member').uncheck()
       await page.getByRole('button', { name: 'Save Changes' }).click()
       await page.waitForURL('/admin/students', { timeout: 10000 })
     } finally {

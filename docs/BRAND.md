@@ -4,10 +4,9 @@
 SailBook
 
 ## Tagline
-Scheduling for Learn To Sail Cleveland (internal tool — no public marketing needed yet)
+Scheduling for Simply Sailing (internal tool — no public marketing needed yet)
 
 ## Philosophy
-This school is about meeting people where they are in their sailing journey. Not assuming anything, not gatekeeping — understanding where someone is and helping them grow from there. That should feel present in every touchpoint, from first enrollment to the instructor roster.
 
 In practice this means:
 - Experience levels use human language ("Just getting started") not jargon ("Beginner")

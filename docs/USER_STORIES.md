@@ -103,7 +103,7 @@
 
 ### Profile
 - IN-8: I set my general availability on my profile so admin knows when I'm free.
-- IN-9: My name links to my LTSC website bio on student-facing pages.
+- IN-9: My name links to my Simply Sailing website bio on student-facing pages.
 
 ### Navigation
 - IN-10: If I'm also a student (dual role), I can switch to student view with a visible toggle.

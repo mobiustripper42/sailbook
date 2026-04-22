@@ -20,7 +20,7 @@
 
 ## DEC-004: course_type → course → session(s) data model
 **Decision:** Three-level hierarchy instead of Andy's flat `classes` table.
-**Why:** LTSC offers the same course type (ASA 101) in different formats — weekend intensive, evening series, etc. A course type is the template. A course is the specific offering. Sessions are the time blocks. This handles: multi-day courses, flexible scheduling patterns, Open Sailing as recurring single sessions, and instructor swaps per session.
+**Why:** Simply Sailing offers the same course type (ASA 101) in different formats — weekend intensive, evening series, etc. A course type is the template. A course is the specific offering. Sessions are the time blocks. This handles: multi-day courses, flexible scheduling patterns, Open Sailing as recurring single sessions, and instructor swaps per session.
 **Tradeoff:** More joins than a flat model. Slightly more complex admin UI for course creation.
 
 ## DEC-005: Enrollment at course level, attendance at session level
@@ -34,7 +34,7 @@
 
 ## DEC-007: Instructor on both course and session
 **Decision:** Default `instructor_id` on courses, optional override `instructor_id` on sessions.
-**Why:** Typically one instructor teaches the whole course. But LTSC wants the ability to swap instructors mid-course for specific sessions. NULL on session means use course default.
+**Why:** Typically one instructor teaches the whole course. But Simply Sailing wants the ability to swap instructors mid-course for specific sessions. NULL on session means use course default.
 **V2 note:** UI should clearly show "Using course instructor" on sessions with NULL instructor_id, not just a blank field. Andy flagged this as confusing in V1 review.
 
 ## DEC-008: No schools table (single-tenant)
@@ -113,7 +113,7 @@
 
 ## DEC-022: Student cancellation refund policy
 **Decision:** Students request cancellation; admin processes the refund manually. No automated Stripe refund from student action. Students can transition a `confirmed` enrollment to `cancel_requested` via the UI. Admin reviews the request in the enrollment view and issues the refund + final cancellation from the dashboard (Phase 2.8).
-**Why:** LTSC is a small school where Andy knows every student. Giving him control over refund decisions avoids abuse (cancelling 10 minutes before class) without requiring a policy engine. A deadline-based policy (Phase 6) can layer on later if volume demands it.
+**Why:** Simply Sailing is a small school where Andy knows every student. Giving him control over refund decisions avoids abuse (cancelling 10 minutes before class) without requiring a policy engine. A deadline-based policy (Phase 6) can layer on later if volume demands it.
 **Status:** `cancel_requested` is a terminal student-facing state — students cannot self-transition out of it. Only admins can move it to `cancelled`. RLS enforces: students can only update `confirmed → cancel_requested`, not `confirmed → cancelled`.
 **Phase 6:** Add deadline-based automatic refund eligibility (e.g., full refund if cancelled ≥ 7 days before first session, none after).
 

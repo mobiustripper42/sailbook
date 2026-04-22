@@ -130,7 +130,7 @@ export default function ProfileEditForm({
             defaultChecked={profile.is_member}
             className="h-4 w-4 rounded border border-input accent-primary"
           />
-          <Label htmlFor="is_member" className="cursor-pointer">LTSC Member (member pricing at checkout)</Label>
+          <Label htmlFor="is_member" className="cursor-pointer">Simply Sailing Member (member pricing at checkout)</Label>
         </div>
       )}
 

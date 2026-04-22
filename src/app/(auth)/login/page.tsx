@@ -31,7 +31,7 @@ export default function LoginPage() {
         </div>
         <Image
           src="/logo.png"
-          alt="Learn To Sail Cleveland"
+          alt="Simply Sailing"
           width={80}
           height={80}
           className="h-20 w-auto"

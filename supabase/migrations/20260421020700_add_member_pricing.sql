@@ -1,5 +1,5 @@
 -- Phase 2.9: Member pricing
--- Adds member_price to courses (optional lower price for LTSC members)
+-- Adds member_price to courses (optional lower price for Simply Sailing members)
 -- and is_member to profiles (admin-controlled flag).
 -- Checkout picks member_price when the student is a member and member_price is set.
 

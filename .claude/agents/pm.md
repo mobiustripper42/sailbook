@@ -38,7 +38,7 @@ Risks: [anything worth flagging, or "none"]
 ## Behavior
 
 - Be direct. If we're behind, say we're behind.
-- Don't soften bad news. The May 15 deadline is real — LTSC's season starts that day.
+- Don't soften bad news. The May 15 deadline is real — Simply Sailing's season starts that day.
 - When recommending scope cuts, reference the "Not V1" list in `docs/SPEC.md` first.
 - When updating `docs/PROJECT_PLAN.md`, mark tasks with `[x]` and add the completion date as a comment if useful.
 - When asked "what should I work on?", give one specific task — not a list. Include the task ID, what it involves, and any dependencies to be aware of.

@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SailBook V2 — Product Owner Status Report</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #1a2332;
+      background: #f4f7fa;
+      padding: 2rem 1rem;
+    }
+
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .header {
+      background: #0e7490;
+      color: #fff;
+      padding: 2.5rem 2.5rem 2rem;
+    }
+
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+    }
+
+    .header .subtitle {
+      opacity: 0.85;
+      font-size: 0.95rem;
+    }
+
+    .header .meta {
+      margin-top: 1rem;
+      display: flex;
+      gap: 2rem;
+      font-size: 0.875rem;
+    }
+
+    .header .meta span {
+      opacity: 0.8;
+    }
+
+    .header .meta strong {
+      opacity: 1;
+      display: block;
+      font-size: 1rem;
+    }
+
+    .body { padding: 2.5rem; }
+
+    h2 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #0e7490;
+      margin: 2rem 0 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 2px solid #e0f2f8;
+    }
+
+    h2:first-of-type { margin-top: 0; }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a2332;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    p { margin-bottom: 0.75rem; color: #3b4a5a; }
+
+    /* Summary cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card {
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      border: 1px solid #e0e8f0;
+    }
+
+    .card .label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6b7a8d;
+      margin-bottom: 0.25rem;
+    }
+
+    .card .value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #0e7490;
+    }
+
+    .card .sub {
+      font-size: 0.8rem;
+      color: #6b7a8d;
+      margin-top: 0.15rem;
+    }
+
+    .card.green .value { color: #16a34a; }
+    .card.amber .value { color: #d97706; }
+    .card.red .value   { color: #dc2626; }
+
+    /* Phase table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+    }
+
+    th {
+      text-align: left;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7a8d;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 2px solid #e0e8f0;
+    }
+
+    td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid #f0f4f8;
+      vertical-align: top;
+      color: #3b4a5a;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tr.phase-done td { color: #6b7a8d; }
+    tr.phase-done .phase-name { text-decoration: line-through; }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+    }
+
+    .badge-done    { background: #dcfce7; color: #16a34a; }
+    .badge-active  { background: #fff7ed; color: #d97706; }
+    .badge-next    { background: #e0f2f8; color: #0e7490; }
+    .badge-future  { background: #f0f4f8; color: #6b7a8d; }
+    .badge-cut     { background: #fef2f2; color: #dc2626; }
+
+    /* Task list */
+    .task-phase {
+      margin-bottom: 2rem;
+      border: 1px solid #e0e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .task-phase-header {
+      background: #f4f7fa;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e0e8f0;
+    }
+
+    .task-phase-header .phase-title {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: #1a2332;
+    }
+
+    .task-phase-header .phase-meta {
+      font-size: 0.8rem;
+      color: #6b7a8d;
+    }
+
+    .task-list { list-style: none; }
+
+    .task-list li {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.6rem 1.25rem;
+      border-bottom: 1px solid #f0f4f8;
+      font-size: 0.875rem;
+      align-items: flex-start;
+    }
+
+    .task-list li:last-child { border-bottom: none; }
+
+    .task-num {
+      font-weight: 700;
+      color: #6b7a8d;
+      min-width: 2rem;
+      flex-shrink: 0;
+      font-size: 0.8rem;
+      padding-top: 0.1rem;
+    }
+
+    .task-name { color: #1a2332; flex: 1; }
+    .task-name.cut { color: #9ca3af; }
+
+    .task-note {
+      font-size: 0.8rem;
+      color: #6b7a8d;
+      margin-top: 0.15rem;
+    }
+
+    .task-pts {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #6b7a8d;
+      min-width: 2.5rem;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .cut-label {
+      font-size: 0.7rem;
+      background: #fef2f2;
+      color: #dc2626;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .optional-label {
+      font-size: 0.7rem;
+      background: #f0f4f8;
+      color: #6b7a8d;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    /* Pre-launch checklist */
+    .checklist { list-style: none; margin-bottom: 1rem; }
+    .checklist li {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid #f0f4f8;
+      font-size: 0.875rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .checklist li:last-child { border-bottom: none; }
+
+    .check-box {
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid #d1d9e0;
+      border-radius: 3px;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+    }
+
+    /* Critical path callout */
+    .callout {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-left: 4px solid #d97706;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.875rem;
+      color: #92400e;
+    }
+
+    .callout strong { color: #78350f; }
+
+    .callout-green {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+      border-left-color: #16a34a;
+      color: #14532d;
+    }
+
+    .callout-green strong { color: #14532d; }
+
+    .callout-blue {
+      background: #e0f2f8;
+      border-color: #bae6fd;
+      border-left-color: #0e7490;
+      color: #0c4a6e;
+    }
+
+    .footer {
+      background: #f4f7fa;
+      padding: 1.25rem 2.5rem;
+      font-size: 0.8rem;
+      color: #6b7a8d;
+      border-top: 1px solid #e0e8f0;
+    }
+
+    @media (max-width: 600px) {
+      .cards { grid-template-columns: 1fr 1fr; }
+      .body { padding: 1.5rem; }
+      .header { padding: 1.75rem 1.5rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <h1>SailBook V2 — Status Report</h1>
+    <p class="subtitle">Simply Sailing · Product Owner Briefing</p>
+    <div class="meta">
+      <div>
+        <span>As of</span>
+        <strong>April 21, 2026</strong>
+      </div>
+      <div>
+        <span>Hard deadline</span>
+        <strong>May 15, 2026</strong>
+      </div>
+      <div>
+        <span>Days remaining</span>
+        <strong>24 days</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <h2>Where We Are</h2>
+
+    <div class="callout callout-green">
+      <strong>Phases 0, 1, and 2 are complete.</strong> The app is live at sailbook.live, takes real money via Stripe, and students can self-register, pay, request cancellations, and receive refunds. The core of what Simply Sailing needs to run the season is working.
+    </div>
+
+    <div class="cards">
+      <div class="card green">
+        <div class="label">Phases Complete</div>
+        <div class="value">3 of 7</div>
+        <div class="sub">0 · 1 · 2</div>
+      </div>
+      <div class="card">
+        <div class="label">Points Shipped</div>
+        <div class="value">~166 pts</div>
+        <div class="sub">of ~290 total (Phases 0–6)</div>
+      </div>
+      <div class="card amber">
+        <div class="label">Remaining (Ph. 3–6)</div>
+        <div class="value">~124 pts</div>
+        <div class="sub">~38 hrs at current pace</div>
+      </div>
+    </div>
+
+    <p>
+      Velocity has been <strong>0.22–0.26 hrs/point</strong> across the last two phases — meaningfully faster than the original 0.38 hr/pt planning baseline. At the current pace, Phases 3–6 represent roughly 27–32 hours of work.
+    </p>
+
+    <h2>Phase Progress Summary</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Phase</th>
+          <th>Description</th>
+          <th>Pts</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="phase-done">
+          <td>0</td>
+          <td class="phase-name">Infrastructure — local dev, pgTAP, Playwright</td>
+          <td>70</td>
+          <td><span class="badge badge-done">Done</span></td>
+        </tr>
+        <tr class="phase-done">
+          <td>1</td>
+          <td class="phase-name">V1 Fixes &amp; Gaps — bugs, profiles, UX improvements</td>
+          <td>58</td>
+          <td><span class="badge badge-done">Done</span></td>
+        </tr>
+        <tr class="phase-done">
+          <td>2</td>
+          <td class="phase-name">Payments — Stripe checkout, holds, refunds, self-cancel</td>
+          <td>40</td>
+          <td><span class="badge badge-done">Done</span></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Notifications + Auth Hardening</td>
+          <td>37</td>
+          <td><span class="badge badge-next">Up Next</span></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Identity &amp; Profiles</td>
+          <td>27</td>
+          <td><span class="badge badge-future">Queued</span></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Pricing &amp; Enrollment</td>
+          <td>29</td>
+          <td><span class="badge badge-future">Queued</span></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Polish &amp; UX</td>
+          <td>44</td>
+          <td><span class="badge badge-future">Queued</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>What's Live Now</h2>
+    <ul style="padding-left:1.25rem; margin-bottom:1rem; color:#3b4a5a; font-size:0.875rem; line-height:2;">
+      <li>Student self-registration and login</li>
+      <li>Course browse — description, schedule, spots remaining, instructor</li>
+      <li>Stripe Checkout payment — spot held on click, confirmed on payment</li>
+      <li>Enrollment holds expire automatically (unpaid spots release)</li>
+      <li>Member pricing — separate price for ASA members</li>
+      <li>Student self-cancellation — requests refund, admin processes it</li>
+      <li>Admin dashboard — courses, sessions, enrollments, attendance, cancellation requests</li>
+      <li>Admin payment view — Stripe link, refund trigger with partial refund support</li>
+      <li>Instructor views — assigned sessions, student roster with contact details</li>
+      <li>Student history ("Experience") — past enrollments and attendance record</li>
+      <li>Dark / light theme with system default</li>
+      <li>Mobile-responsive across all three roles</li>
+      <li>Password reset flow</li>
+      <li>Unsaved changes guard on all forms</li>
+    </ul>
+
+    <h2>Remaining Work — Phase by Phase</h2>
+
+    <div class="callout callout-blue">
+      <strong>Going live next week?</strong> Phase 3 (notifications + auth hardening) is the highest-value remaining phase. Email/SMS confirmations and session reminders are what make this feel like a professional booking system. Phases 4–6 are improvements — the app runs without them.
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="task-phase">
+      <div class="task-phase-header">
+        <div class="phase-title">Phase 3 — Notifications + Auth Hardening</div>
+        <div class="phase-meta">37 pts · ~8–10 hrs</div>
+      </div>
+      <ul class="task-list">
+        <li>
+          <div class="task-num">3.1</div>
+          <div>
+            <div class="task-name">Twilio setup — account, phone number, API keys</div>
+            <div class="task-note">Test mode available. Requires account creation + DNS setup.</div>
+          </div>
+          <div class="task-pts">2 pts</div>
+        </li>
+        <li>
+          <div class="task-num">3.2</div>
+          <div>
+            <div class="task-name">Resend setup — API key + domain verification for sailbook.live</div>
+            <div class="task-note">Cloudflare DNS records + info@sailbook.live sender address.</div>
+          </div>
+          <div class="task-pts">2 pts</div>
+        </li>
+        <li>
+          <div class="task-num">3.3</div>
+          <div>
+            <div class="task-name">Notification service — shared SMS + email module with mock/test mode</div>
+            <div class="task-note">Abstraction layer. NOTIFICATIONS_ENABLED=false routes to log in tests.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">3.4</div>
+          <div>
+            <div class="task-name">Enrollment notifications — SMS + email on confirmed, admin alert on new enrollment, low enrollment warning</div>
+            <div class="task-note">Andy's request: admin shouldn't need to log in to know someone signed up.</div>
+          </div>
+          <div class="task-pts">5 pts</div>
+        </li>
+        <li>
+          <div class="task-num">3.5</div>
+          <div>
+            <div class="task-name">Session cancellation notice — SMS + email to enrolled students</div>
+            <div class="task-note">Includes reason and makeup info if available.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">3.6</div>
+          <div>
+            <div class="task-name">Makeup session assignment — SMS + email to affected students</div>
+            <div class="task-note">New date/time/location in message.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">3.7</div>
+          <div>
+            <div class="task-name">Session reminders — SMS 24 hours and 1 week before each session</div>
+            <div class="task-note">Scheduled cron job. Most valuable notification for reducing no-shows.</div>
+          </div>
+          <div class="task-pts">5 pts</div>
+        </li>
+        <li>
+          <div class="task-num">3.8</div>
+          <div>
+            <div class="task-name">Admin notification preferences — checkboxes per event type × channel</div>
+            <div class="task-note">Andy controls which notifications he receives and how.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">3.9</div>
+          <div>
+            <div class="task-name">Student notification preferences — opt out of SMS, email-only option</div>
+            <div class="task-note">Profile toggle. Notification service checks before sending.</div>
+          </div>
+          <div class="task-pts">2 pts</div>
+        </li>
+        <li>
+          <div class="task-num">3.10</div>
+          <div>
+            <div class="task-name">Password strength + email verification</div>
+            <div class="task-note">Supabase Auth config + custom email template via Resend.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">3.11</div>
+          <div>
+            <div class="task-name">OAuth login — Google</div>
+            <div class="task-note">Supabase toggle + Google Cloud console. Email/password remains fallback.</div>
+          </div>
+          <div class="task-pts">2 pts</div>
+        </li>
+        <li>
+          <div class="task-num">3.12</div>
+          <div>
+            <div class="task-name">Security audit — evaluate findings, fix serious issues</div>
+            <div class="task-note">Post-payments + notifications surface area. Non-serious findings move to backlog.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">3.13</div>
+          <div>
+            <div class="task-name">README: Twilio/Resend setup instructions</div>
+          </div>
+          <div class="task-pts">1 pt</div>
+        </li>
+        <li>
+          <div class="task-num">3.14</div>
+          <div>
+            <div class="task-name">End-of-phase close — UI review, tests green, code review clean, retrospective</div>
+          </div>
+          <div class="task-pts">5 pts</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- PHASE 4 -->
+    <div class="task-phase">
+      <div class="task-phase-header">
+        <div class="phase-title">Phase 4 — Identity &amp; Profiles</div>
+        <div class="phase-meta">27 pts · ~6–8 hrs</div>
+      </div>
+      <ul class="task-list">
+        <li>
+          <div class="task-num">4.1</div>
+          <div>
+            <div class="task-name">Instructor invite link — one-time token, auto-sets instructor role</div>
+            <div class="task-note">"Generate Invite Link" button on admin instructor page.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">4.2</div>
+          <div>
+            <div class="task-name">Admin invite link — same pattern for admin role</div>
+            <div class="task-note">Reuses 4.1 infrastructure.</div>
+          </div>
+          <div class="task-pts">2 pts</div>
+        </li>
+        <li>
+          <div class="task-num">4.3</div>
+          <div>
+            <div class="task-name">Student profile expansion — classes taken, ASA number, experience level</div>
+            <div class="task-note">Profile page redesign with richer history view.</div>
+          </div>
+          <div class="task-pts">5 pts</div>
+        </li>
+        <li>
+          <div class="task-num">4.4</div>
+          <div>
+            <div class="task-name">Admin-created students (no login required)</div>
+            <div class="task-note">For students who can't or won't self-register. Architecture TBD with @architect.</div>
+          </div>
+          <div class="task-pts">8 pts</div>
+        </li>
+        <li>
+          <div class="task-num">4.5</div>
+          <div>
+            <div class="task-name"><span class="optional-label">OPTIONAL</span> Link admin-created student to a login later</div>
+            <div class="task-note">Depends on 4.4 architecture. May be as simple as "student resets password."</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">4.6</div>
+          <div>
+            <div class="task-name">Instructor session notes — text field per session, visible to all instructors + admin</div>
+            <div class="task-note">Column already exists in DB. UI-only change.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">4.7</div>
+          <div>
+            <div class="task-name">Instructor profile expansion — availability field + bio/website link</div>
+            <div class="task-note">General availability for admin assignment. Name links to Simply Sailing website bio.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">4.9</div>
+          <div>
+            <div class="task-name">End-of-phase close — UI review, tests green, code review clean, retrospective</div>
+          </div>
+          <div class="task-pts">5 pts</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- PHASE 5 -->
+    <div class="task-phase">
+      <div class="task-phase-header">
+        <div class="phase-title">Phase 5 — Pricing &amp; Enrollment</div>
+        <div class="phase-meta">29 pts · ~6–8 hrs</div>
+      </div>
+      <ul class="task-list">
+        <li>
+          <div class="task-num">5.2</div>
+          <div>
+            <div class="task-name">Open Sailing — per-session enrollment + payment ($11 hold, then pay captain day-of)</div>
+            <div class="task-note">Different enrollment model from standard courses. is_drop_in flag on course.</div>
+          </div>
+          <div class="task-pts">5 pts</div>
+        </li>
+        <li>
+          <div class="task-num">5.3</div>
+          <div>
+            <div class="task-name">Discount codes — enable Stripe promotion codes on checkout</div>
+            <div class="task-note">allow_promotion_codes: true. Admin creates codes in Stripe dashboard.</div>
+          </div>
+          <div class="task-pts">2 pts</div>
+        </li>
+        <li>
+          <div class="task-num">5.4</div>
+          <div>
+            <div class="task-name">Prerequisite flagging — warning + admin override at enrollment</div>
+            <div class="task-note">Flag, not block. "⚠️ No ASA 101 on record" with override checkbox. Student can justify exception.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">5.5</div>
+          <div>
+            <div class="task-name">Admin qualification grant ("test out") — manual ASA cert grants</div>
+            <div class="task-note">Same effect as completing a course. Satisfies prereq flags.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">5.6</div>
+          <div>
+            <div class="task-name"><span class="optional-label">PROBABLY NOT</span> Duplicate enrollment warning — same course type</div>
+            <div class="task-note">Warning on enrollment + admin flag. Scope creep risk; may not be needed in practice.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">5.7</div>
+          <div>
+            <div class="task-name">Waitlist — full course → join waitlist → notify on opening</div>
+            <div class="task-note">New table, student UI, admin visibility, notification on spot opening. Depends on Phase 3 notifications.</div>
+          </div>
+          <div class="task-pts">8 pts</div>
+        </li>
+        <li>
+          <div class="task-num">5.8</div>
+          <div>
+            <div class="task-name">Low enrollment warning — dashboard tile for courses below minimum threshold</div>
+            <div class="task-note">Same pattern as "courses without instructors." Andy's request.</div>
+          </div>
+          <div class="task-pts">2 pts</div>
+        </li>
+        <li>
+          <div class="task-num">5.9</div>
+          <div>
+            <div class="task-name">End-of-phase close — UI review, tests green, code review clean, retrospective</div>
+          </div>
+          <div class="task-pts">5 pts</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- PHASE 6 -->
+    <div class="task-phase">
+      <div class="task-phase-header">
+        <div class="phase-title">Phase 6 — Polish &amp; UX</div>
+        <div class="phase-meta">44 pts · ~10–12 hrs</div>
+      </div>
+      <ul class="task-list">
+        <li>
+          <div class="task-num">6.1</div>
+          <div>
+            <div class="task-name">Mobile responsiveness pass — admin pages</div>
+            <div class="task-note">Deferred from V1. Admin currently has a hamburger menu; full pass is the improvement.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.2</div>
+          <div>
+            <div class="task-name">Mobile responsiveness pass — instructor pages</div>
+          </div>
+          <div class="task-pts">2 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.5</div>
+          <div>
+            <div class="task-name">Accessibility audit (axe-core) — fix critical/serious violations</div>
+            <div class="task-note">WCAG 2.1 AA compliance.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.6</div>
+          <div>
+            <div class="task-name">Duplicate course — one-click copy, drop into edit</div>
+            <div class="task-note">Deferred from V1. Admin can create from scratch; this is just faster.</div>
+          </div>
+          <div class="task-pts">2 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.7</div>
+          <div>
+            <div class="task-name">Relative session badges — "Tomorrow", "This week" instead of "Upcoming"</div>
+            <div class="task-note">Nice UX, zero operational impact. Cuttable.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.8</div>
+          <div>
+            <div class="task-name">External audit — WebsiteAuditAI + Attention Insight</div>
+            <div class="task-note">10-minute external validation at phase boundary.</div>
+          </div>
+          <div class="task-pts">2 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.9</div>
+          <div>
+            <div class="task-name">Admin dashboard UX redesign</div>
+            <div class="task-note">Dashboard will have real data (payments, holds, notifications) by now — worth a proper design pass.</div>
+          </div>
+          <div class="task-pts">5 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.10</div>
+          <div>
+            <div class="task-name">Back button / breadcrumb audit — consistent navigation across all roles</div>
+            <div class="task-note">Andy's request. Audit every page, establish breadcrumb pattern, fix dead ends.</div>
+          </div>
+          <div class="task-pts">5 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.11</div>
+          <div>
+            <div class="task-name"><span class="optional-label">CUTTABLE</span> Public landing page + contact form for sailbook.live</div>
+            <div class="task-note">Currently drops straight to login. Functional, but not a great first impression.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.12</div>
+          <div>
+            <div class="task-name">Security audit (V2 final) — full surface area including payments + notifications</div>
+            <div class="task-note">Non-serious findings seed V3 backlog.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.13</div>
+          <div>
+            <div class="task-name">Date + time picker redesign</div>
+            <div class="task-note">Time picker in particular is nearly unusable. Redesign with better UX, then match date picker to it.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.14</div>
+          <div>
+            <div class="task-name">Consolidate user/student/instructor profile edit screens</div>
+            <div class="task-note">Three separate edit UIs with overlapping fields. Low priority — nice for V2.</div>
+          </div>
+          <div class="task-pts">2 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.15</div>
+          <div>
+            <div class="task-name">Admin dashboard — pending cancellation requests widget</div>
+            <div class="task-note">Surface cancel_requested enrollments as a count/list, similar to pending-enrollment alert.</div>
+          </div>
+          <div class="task-pts">3 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.16</div>
+          <div>
+            <div class="task-name">Show refund amount to student — "Refunded $X.XX" on My Courses page</div>
+            <div class="task-note">Pull from payments table. Surfaces refund status without requiring student to contact Andy.</div>
+          </div>
+          <div class="task-pts">2 pts</div>
+        </li>
+        <li>
+          <div class="task-num">6.17</div>
+          <div>
+            <div class="task-name">End-of-phase close — full V2 UI review, tests green, final retrospective</div>
+          </div>
+          <div class="task-pts">5 pts</div>
+        </li>
+      </ul>
+    </div>
+
+    <h2>Pre-Launch Checklist</h2>
+    <p style="margin-bottom:0.75rem;">Items that must be confirmed before accepting real student data and payments:</p>
+    <ul class="checklist">
+      <li><div class="check-box"></div>Vercel cron job live-fire test — enrollment hold expiration must be verified to fire in production (Hobby tier can't run sub-daily schedules; may require Vercel Pro or pg_cron)</li>
+      <li><div class="check-box"></div>Stripe webhook signing secret set in production environment variables</li>
+      <li><div class="check-box"></div>CRON_SECRET set in production environment variables</li>
+      <li><div class="check-box"></div>Twilio + Resend credentials set in production; NOTIFICATIONS_ENABLED=true</li>
+      <li><div class="check-box"></div>Database migration 20260421031000 applied to production Supabase (pending)</li>
+      <li><div class="check-box"></div>End-to-end smoke test: student registers → pays → sees enrollment → admin sees payment status</li>
+    </ul>
+
+    <h2>What's Parked for V3</h2>
+    <p style="font-size:0.875rem; color:#3b4a5a;">These ideas are logged but out of scope for the May 15 season opener:</p>
+    <ul style="padding-left:1.25rem; margin-top:0.5rem; font-size:0.875rem; color:#6b7a8d; line-height:2;">
+      <li>Proxy enrollment ("enrolling for someone else") — requires a shopping cart model</li>
+      <li>Charter module — separate booking flow, shared auth</li>
+      <li>Youth enrollment — parent/guardian co-enrollment, birth date</li>
+      <li>Student calendar view</li>
+      <li>Admin / instructor calendar views</li>
+      <li>In-app messaging (SMS covers this for now)</li>
+      <li>AI season setup agent</li>
+      <li>Admin impersonation mode ("view as student")</li>
+      <li>Multi-school / multi-tenant (future product expansion)</li>
+    </ul>
+
+  </div>
+
+  <div class="footer">
+    Generated April 21, 2026 · SailBook V2 · Simply Sailing · sailbook.live
+  </div>
+
+</div>
+</body>
+</html>

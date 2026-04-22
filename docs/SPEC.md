@@ -1,7 +1,7 @@
 # SailBook — Product Specification
 
 ## Overview
-Scheduling, enrollment, and payment management system for Learn To Sail Cleveland (LTSC). Single school, single season. Web app where admins manage courses, students self-register and pay, instructors view their assignments, and everyone gets notified when things change.
+Scheduling, enrollment, and payment management system for Simply Sailing. Single school, single season. Web app where admins manage courses, students self-register and pay, instructors view their assignments, and everyone gets notified when things change.
 
 ## Philosophy
 This school is about meeting people where they are in their sailing journey. Not assuming anything, not gatekeeping — understanding where someone is and helping them grow from there. That should feel present in every touchpoint, from first enrollment to the instructor roster.

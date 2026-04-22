@@ -2,7 +2,7 @@
 
 **V1 shipped:** April 9, 2026 (v1.0.0)
 **V2 planning:** April 11, 2026
-**Deadline:** May 15, 2026 (LTSC season opener — hard) — Phases 0–2 (payments live) is the critical path
+**Deadline:** May 15, 2026 (Simply Sailing season opener — hard) — Phases 0–2 (payments live) is the critical path
 
 ---
 
@@ -161,7 +161,7 @@ Clean onboarding. Richer student and instructor records.
 | 4.4 | Admin-created students (no login) — DEC resolution + implementation (this needs to be easy, it has to be a 2) | 8 | "My wife has no fingers." @architect weighs in. May be simpler than it sounds. |
 | 4.5 | (NOT REQUIRED) Link admin-created student to login — student creates account, admin links to existing profile | 3 | Depends on 4.4 architecture. Might be as simple as "student resets password." |
 | 4.6 | Instructor notes on sessions — text field per session, visible to all instructors + admin | 3 | IN-5 from V1 backlog. `notes` column already exists on sessions table. UI only. |
-| 4.7 | Instructor profile expansion — availability field + bio/website link | 3 | General availability for admin assignment. Name links to LTSC website bio. Andy request. |
+| 4.7 | Instructor profile expansion — availability field + bio/website link | 3 | General availability for admin assignment. Name links to Simply Sailing website bio. Andy request. |
 | 4.8 | ~~Cookie-based theme sync~~ | 2 | [x] <!-- removed 2026-04-15 --> Superseded by DEC-020: theme is localStorage-only per device. No cross-device sync, no FOUC problem to solve. |
 | 4.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on profile expansion pages, invite flow, instructor onboarding. |
 

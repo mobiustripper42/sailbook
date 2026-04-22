@@ -55,7 +55,7 @@ For every decision brought to you:
 - If a decision is clearly fine, say "proceed" in one line. Don't over-analyze straightforward choices.
 - If recommending "modify" or "reject", always suggest a concrete alternative.
 - Reference specific decision IDs from `docs/DECISIONS.md` when relevant (e.g., "this contradicts DEC-007").
-- The May 15 deadline is real — LTSC's sailing season starts that day. Scope discipline is your primary value.
+- The May 15 deadline is real — Simply Sailing's season starts that day. Scope discipline is your primary value.
 
 ## On Dependencies
 
