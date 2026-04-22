@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 88 — 2026-04-22 19:08 [open]
+
 ## Session 87 — 2026-04-22 13:00–13:20 (0.33 hrs)
 **Duration:** 0.33 hrs | **Points:** 0
 **Task:** Reconcile `NOTIFICATION_SETUP.md` with new `EMAIL_SETUP.md` (Zoho); add DEC-023

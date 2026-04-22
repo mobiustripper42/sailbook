@@ -4,7 +4,7 @@ Human-facing checklist for Phase 3 tasks 3.1 and 3.2. Walk through these before 
 
 Final env var names and `from` address get locked in 3.3. Names used here are placeholders that match what the service will likely expect.
 
-> **Do `docs/EMAIL_SETUP.md` (Zoho mailboxes for `info@` / `andy@sailbook.live`) before task 3.2.** Zoho sets the MX record and the initial SPF record for the domain. Resend then stacks on top — you'll *merge* into the existing SPF record, not create a new one. Twilio (3.1) has no DNS dependency, so do it whenever.
+> **Do `docs/EMAIL_SETUP.md` (Cloudflare Email Routing + Gmail for `info@sailbook.live`) before task 3.2.** Cloudflare Email Routing adds MX records and may add a TXT record for the domain. Resend then stacks on top — check for an existing SPF record and merge if one is present, don't create a duplicate. Twilio (3.1) has no DNS dependency, so do it whenever.
 
 ---
 
@@ -25,7 +25,7 @@ Trial is fine for building and testing 3.3–3.9. **Upgrade before go-live** (be
 ### 3. Buy a phone number
 - Console → Phone Numbers → Manage → Buy a number
 - Country: US. Capabilities: SMS (MMS optional).
-- Pick a local number — area code 216 (Cleveland) reads better to LTSC students than a random one.
+- Pick a local number — area code 216 (Cleveland) reads better to Simply Sailing students than a random one.
 - Cost: ~$1.15/mo. The trial credit covers this for now.
 
 ### 4. Grab credentials
@@ -59,18 +59,18 @@ Console → Phone Numbers → your number → "Send a test SMS" — send to your
 - Enter `sailbook.live`
 - Region: US (closest to Vercel's default edge)
 
-Resend will show you a list of DNS records to add — typically a few TXT records (SPF, DKIM) and possibly a CNAME. Resend does **not** need MX records (it's send-only; Zoho handles inbound).
+Resend will show you a list of DNS records to add — typically a few TXT records (SPF, DKIM) and possibly a CNAME. Resend does **not** need MX records (it's send-only; Cloudflare Email Routing handles inbound).
 
 ### 3. Add the DNS records in Cloudflare
-Assumes Zoho was set up first per `docs/EMAIL_SETUP.md`, so an SPF record already exists.
+Assumes `docs/EMAIL_SETUP.md` (Cloudflare Email Routing) was completed first, so MX records are already present.
 
 - Cloudflare dashboard → `sailbook.live` → DNS → Records
-- **SPF — merge, don't duplicate.** Find the existing TXT record starting with `v=spf1` (the Zoho one). Edit it to add Resend's include. Result looks like:
+- **SPF — check before adding.** Look for an existing TXT record starting with `v=spf1`. If one exists, edit it to add Resend's include value rather than creating a second record — a domain with two SPF records fails validation on most mail servers. If none exists, add Resend's as a new TXT record. Result looks like:
   ```
-  v=spf1 include:zoho.com include:_spf.resend.com ~all
+  v=spf1 include:_spf.resend.com ~all
   ```
-  (Use whatever `include:` value Resend shows you — it may differ.) A domain with two separate SPF records will fail validation on most mail servers.
-- **DKIM — add as a new record.** Resend's DKIM uses its own selector (e.g. `resend._domainkey`), so it coexists with Zoho's DKIM. Copy Resend's exact host/value.
+  (Use whatever `include:` value Resend shows you — it may differ.)
+- **DKIM — add as a new record.** Resend's DKIM uses its own selector (e.g. `resend._domainkey`). Copy Resend's exact host/value.
 - **CNAME (if Resend asks)** — add as shown.
 - **Turn off the orange cloud (proxy)** for all mail-related records — they need to resolve to the actual mail servers, not through Cloudflare.
 - TTL: Auto is fine.
@@ -91,10 +91,10 @@ RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ### 6. Decide on the `from` address — decision point
 Pick one before 3.3. Options:
 - `noreply@sailbook.live` — standard, signals "don't reply to this"
-- `info@sailbook.live` — friendlier, replies land in the Zoho/Gmail inbox set up in `EMAIL_SETUP.md` (useful if students hit reply with questions)
-- `notifications@sailbook.live` — middle ground (would need a new Zoho mailbox or alias)
+- `info@sailbook.live` — friendlier, replies route through Cloudflare Email Routing into your Gmail (useful if students hit reply with questions)
+- `notifications@sailbook.live` — middle ground (would need an additional Cloudflare routing rule)
 
-Recommendation: `info@sailbook.live` for V1. Zoho is already hosting that mailbox, replies land in Gmail, Andy can respond from the branded address — clean loop. Revisit if volume grows.
+Recommendation: `info@sailbook.live` for V1. Cloudflare Email Routing already forwards it to Gmail, Andy can respond from the branded address via Gmail's Send-As — clean loop. Revisit if volume grows.
 
 ### 7. Smoke test
 Resend dashboard → "Send test email" — send to your own address. Confirms domain verification + key + DNS all line up before 3.3.
@@ -110,10 +110,10 @@ Twilio:
 - [ ] Test SMS received
 - [ ] (Before go-live) Upgraded from trial
 
-Resend (do after Zoho / `EMAIL_SETUP.md`):
+Resend (do after `docs/EMAIL_SETUP.md`):
 - [ ] Account created
 - [ ] `sailbook.live` added as sending domain
-- [ ] SPF record *merged* (not duplicated) with Resend's include
+- [ ] SPF record added or merged — no duplicate TXT `v=spf1` records
 - [ ] Resend DKIM record added
 - [ ] Domain verified in Resend
 - [ ] API key in `.env.local`
