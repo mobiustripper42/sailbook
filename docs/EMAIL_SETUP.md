@@ -1,146 +1,154 @@
-# SailBook Email Setup — info@ and andy@sailbook.live in Gmail
+# SailBook Email Setup — info@sailbook.live via Cloudflare + Gmail
 
-Free Zoho Mail mailboxes for `info@sailbook.live` and `andy@sailbook.live`, pulled into Gmail for unified inbox and branded reply.
-
----
-
-## Part 1 — Zoho account + domain verification
-
-1. Go to **zoho.com/mail** → sign up for the free "Forever Free Plan" (5 users, 5GB each, 1 domain).
-2. Sign up using your **personal Gmail** — this becomes the Zoho admin/recovery account, separate from the mailboxes you'll create.
-3. When prompted, choose **"Sign up with a domain I already own"** → enter `sailbook.live`.
-4. Zoho gives you a **TXT record** for domain verification. Add it in your DNS provider (Cloudflare, Namecheap, Vercel DNS — wherever sailbook.live is managed).
-5. Back in Zoho, click **Verify**. May take 5–15 min for DNS to propagate.
+Free forever. Cloudflare Email Routing forwards inbound to your Gmail; Gmail's "Send mail as" lets you reply *from* `info@sailbook.live`. No Zoho, no IMAP limits, no monthly fee.
 
 ---
 
-## Part 2 — MX, SPF, DKIM records
+## Prerequisites
 
-After verification, Zoho shows the records to add. Copy exactly — values change slightly per account.
-
-### MX records (inbound mail routing)
-| Host | Priority | Value |
-|------|----------|-------|
-| @ | 10 | mx.zoho.com |
-| @ | 20 | mx2.zoho.com |
-| @ | 50 | mx3.zoho.com |
-
-### SPF record (TXT, prevents spoofing)
-| Host | Value |
-|------|-------|
-| @ | `v=spf1 include:zoho.com ~all` |
-
-### DKIM record (TXT, signs outbound mail)
-Zoho generates a unique selector + key pair. Add the TXT record they provide under the host they specify (usually `zoho._domainkey`).
-
-Wait 15–30 min for propagation. Verify all records in Zoho's admin — green checks all around before moving on.
+- `sailbook.live` DNS managed by **Cloudflare** (free Cloudflare account, domain nameservers pointed at Cloudflare). If it's not on Cloudflare yet, that's step 0 — add the domain to Cloudflare, update nameservers at your registrar, wait for activation.
+- A Gmail account you actually check (your personal one is fine).
 
 ---
 
-## Part 3 — Create mailboxes
+## Part 1 — Set up Cloudflare Email Routing
 
-In Zoho Mail Admin Console → **Users** → Add User:
-
-1. **info@sailbook.live** — strong password, save to Bitwarden
-2. **andy@sailbook.live** — strong password, save to Bitwarden
-
-Log into each once at **mail.zoho.com** to confirm they work (send a test email to your personal Gmail from each).
-
----
-
-## Part 4 — Generate Zoho app passwords (for SMTP from Gmail)
-
-Zoho's free tier requires app-specific passwords for external clients (Gmail SMTP).
-
-For **each mailbox**, log into that mailbox's Zoho account:
-
-1. Go to **accounts.zoho.com** → Security → App Passwords
-2. Generate a new app password (name it "Gmail SMTP" or similar)
-3. Copy the generated password — you won't see it again
-4. Save to Bitwarden, tagged with the mailbox it belongs to
-
-Do this twice: once logged in as info@sailbook.live, once as andy@sailbook.live.
+1. Log into **dash.cloudflare.com** → select `sailbook.live`.
+2. Left sidebar → **Email** → **Email Routing**.
+3. Click **Get started** or **Enable Email Routing**.
+4. Cloudflare will propose adding MX records and a TXT record automatically. Click **Add records and enable**.
+5. Wait a minute for DNS to propagate. The status indicator should flip to green / active.
 
 ---
 
-## Part 5 — Pull Zoho into Gmail (receive)
+## Part 2 — Add the forwarding rule
 
-In your personal Gmail:
+Still in Email Routing:
 
-1. **Settings** (gear) → **See all settings** → **Accounts and Import**
-2. Under **Check mail from other accounts** → **Add a mail account**
-3. Email address: `info@sailbook.live`
-4. Next → **Import emails from my other account (POP3)**
-5. Username: `info@sailbook.live`
-6. Password: the **Zoho app password** from Part 4 (not the mailbox login password)
-7. POP Server: `poppro.zoho.com`
-8. Port: `995`
-9. Check **Always use a secure connection (SSL)**
-10. Check **Label incoming messages** → create label `info@sailbook.live`
-11. Save
+1. Go to the **Routes** tab.
+2. Under **Custom addresses** → **Create address**:
+   - Custom address: `info`
+   - Action: **Send to an email**
+   - Destination: your Gmail address
+3. Save.
+4. Cloudflare sends a **verification email to your Gmail** — click the confirm link. Destination is now verified.
 
-Repeat for `andy@sailbook.live` with its own app password and label.
+Optional but recommended — add a **catch-all** so any typo address (info2@, contact@, hello@) still reaches you:
 
-> **Note on POP vs IMAP:** Zoho free tier supports POP3 for Gmail pull. If you'd rather use IMAP (keeps mail in sync both ways), you can set it up as a separate Gmail account instead, but POP pulls are simpler for this use case.
+- Routes tab → **Catch-all address** → enable → forward to your Gmail.
 
 ---
 
-## Part 6 — Reply from custom addresses (send)
+## Part 3 — Test inbound
 
-Still in Gmail **Settings → Accounts and Import**:
+From a different email account (phone, work email, a friend's), send a test email to `info@sailbook.live`. Should land in your Gmail within seconds.
 
-1. Under **Send mail as** → **Add another email address**
-2. Name: `SailBook` (or whatever you want recipients to see)
-3. Email: `info@sailbook.live`
-4. **Uncheck** "Treat as an alias" — this keeps replies going back to info@ instead of your personal Gmail
-5. Next → SMTP settings:
-   - SMTP Server: `smtp.zoho.com`
-   - Port: `465`
-   - Username: `info@sailbook.live`
-   - Password: the **Zoho app password** from Part 4
-   - Secured connection using **SSL**
-6. Add Account
-7. Zoho sends a verification email to info@sailbook.live — Gmail will now have pulled it (thanks to Part 5), grab the code, paste into Gmail
-8. Done — `info@sailbook.live` now appears in Gmail's "From" dropdown
-
-Repeat for `andy@sailbook.live`.
+If it doesn't arrive:
+- Check Gmail's spam folder
+- Confirm MX records are present in Cloudflare DNS settings (Email Routing auto-adds them, but verify)
+- Wait 10-15 min for full DNS propagation if you just enabled it
 
 ---
 
-## Part 7 — Set default behavior
+## Part 4 — Configure Gmail to send as info@sailbook.live
 
-In **Settings → Accounts and Import → Send mail as**:
+This is where Cloudflare's "forwarding-only" limitation gets bypassed. Gmail can send *from* any address you can prove you control.
+
+1. Gmail → **Settings** (gear icon) → **See all settings**
+2. **Accounts and Import** tab → **Send mail as** → **Add another email address**
+3. Fill in:
+   - **Name:** `SailBook` (what recipients see)
+   - **Email address:** `info@sailbook.live`
+   - **Uncheck** "Treat as an alias"
+     *(Unchecking makes replies go back to info@ instead of your personal Gmail — keeps threads on the branded address)*
+4. Click **Next Step**
+5. On the SMTP screen, use Gmail's own SMTP:
+   - **SMTP Server:** `smtp.gmail.com`
+   - **Port:** `587`
+   - **Username:** your full Gmail address
+   - **Password:** a **Gmail App Password** (see below)
+   - **Secured connection using TLS**
+6. Click **Add Account**
+
+### Getting a Gmail App Password
+
+Required because Gmail blocks "less secure app" logins now. If you have 2-Step Verification on your Google account (you should):
+
+1. Go to **myaccount.google.com/apppasswords**
+2. App name: `SailBook SMTP`
+3. Generate → copy the 16-character password
+4. Paste into the SMTP password field in step 5 above
+
+If 2-Step isn't on, enable it first at **myaccount.google.com/security** — app passwords require it.
+
+---
+
+## Part 5 — Verify the Send-As address
+
+1. Gmail will send a **verification email to info@sailbook.live**.
+2. That email gets routed through Cloudflare → lands in your Gmail.
+3. Click the link in the verification email, or copy the code and paste it into Gmail's dialog.
+4. Done. `info@sailbook.live` now appears in Gmail's "From" dropdown when composing.
+
+---
+
+## Part 6 — Set the default reply behavior
+
+Still in **Settings → Accounts and Import → Send mail as**:
 
 - **"When replying to a message"** → select **"Reply from the same address the message was sent to"**
 
-Now if someone emails `info@sailbook.live`, your reply auto-sends from that address. No manual switching.
+Now if someone emails `info@sailbook.live`, Gmail auto-replies from that address. No manual switching.
+
+---
+
+## Part 7 — Optional: label inbound info@ mail
+
+So you can tell at a glance which inbox an email hit:
+
+1. Gmail → **Settings** → **Filters and Blocked Addresses** → **Create a new filter**
+2. **To:** `info@sailbook.live`
+3. Create filter → **Apply the label** → create new label `info@sailbook.live`
+4. Save
+
+Every email forwarded from info@ now gets tagged. Search, sort, or archive by label.
 
 ---
 
 ## Verification checklist
 
-- [ ] Email sent to `info@sailbook.live` from external address lands in Gmail with `info@sailbook.live` label
-- [ ] Email sent to `andy@sailbook.live` from external address lands in Gmail with `andy@sailbook.live` label
-- [ ] Reply from Gmail to info@ test email goes out **from** `info@sailbook.live` (check sent headers, not just display name)
-- [ ] Reply from Gmail to andy@ test email goes out **from** `andy@sailbook.live`
-- [ ] Test emails don't land in spam on the recipient side (SPF/DKIM working)
+- [ ] Test email sent to `info@sailbook.live` from external address lands in Gmail
+- [ ] Gmail compose window shows `info@sailbook.live` in the "From" dropdown
+- [ ] Reply from Gmail to an info@ message goes out *from* `info@sailbook.live` (check the sent message's headers, not just display name)
+- [ ] Recipient of your reply sees `info@sailbook.live` as the sender and can reply back to it successfully
+- [ ] Test emails don't land in the recipient's spam folder
 
 ---
 
 ## Gotchas
 
-- **App passwords are mandatory.** Using the mailbox login password for SMTP will fail — Zoho blocks it.
-- **Zoho can be slow to pull via POP.** Default check interval in Gmail is ~hourly. For faster testing, hit "Check mail now" in Gmail settings.
-- **Don't send from Resend as info@ for human replies.** Resend is for transactional/app email only — different purpose. Keep human email through Zoho/Gmail, keep app notifications through Resend.
-- **If DKIM fails to verify,** double-check that the TXT record includes the full public key without line breaks. Some DNS providers silently truncate.
-- **Outbound deliverability** depends on SPF + DKIM being correct. If test emails land in spam, both records need to validate at mail-tester.com or similar.
+- **Must use Gmail App Password, not your regular Gmail password.** Regular password will fail SMTP auth silently or with a vague error.
+- **Send-As verification email can take 2-5 min** to arrive. Don't spam the "resend" button.
+- **"Treat as alias" checkbox matters.** Checked = replies go back to your Gmail. Unchecked = replies go to info@. For a branded contact inbox, leave it unchecked.
+- **Cloudflare has a 1000-routes-per-zone limit.** Irrelevant for this project (you'll use maybe 5), but worth knowing.
+- **Deliverability:** Gmail's SMTP is trusted by most providers, so outbound as `info@sailbook.live` should deliver fine. If you later run into spam issues, add a proper SPF record: `v=spf1 include:_spf.google.com ~all` as a TXT record on sailbook.live.
 
 ---
 
-## If Zoho free SMTP gets blocked
+## When to outgrow this setup
 
-Zoho occasionally restricts SMTP on truly-free accounts for abuse prevention. If Part 6 fails with auth errors despite correct app password:
+Cloudflare + Gmail Send-As is great for a small product inbox. You'd want to move to a real mailbox provider (Fastmail, Google Workspace, paid Zoho) when:
 
-- **Zoho Mail Lite** is $1/user/month — reliably unlocks SMTP, still cheap
-- **Fastmail** — $3/user/month, cleaner UI, better SMTP reliability
-- **Google Workspace** — $6/user/month, if Andy wants native Gmail-everything
+- You need a **shared mailbox** that multiple people send/receive from independently with their own login
+- You want `andy@sailbook.live`, `eric@sailbook.live` etc. as **separately managed users**
+- You need an **email archive** that lives outside anyone's personal Gmail
+- You need **calendar/contacts** tied to the domain
+- The business matures enough that client relationships demand clean infrastructure
+
+For now, info@ via Cloudflare + your Gmail is exactly right-sized.
+
+---
+
+## Adding more addresses later
+
+Want `contact@sailbook.live`, `support@sailbook.live`, or anything else? Just repeat Parts 2 + 4-6 for each. Cloudflare routes them all to your Gmail for free, and Gmail Send-As handles unlimited "From" addresses. Zero additional cost, zero additional accounts.
