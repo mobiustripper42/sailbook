@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 90 — 2026-04-23 13:26 [open]
+
 ## Session 89 — 2026-04-22 19:26–21:45 (1.83 hrs)
 **Duration:** 1.83 hrs | **Points:** 12 (4.4a: 5, 4.4b: 5, code review fixes: 2)
 **Task:** Phase 4.4a + 4.4b — admin-created students and admin-initiated enrollment with manual payment
