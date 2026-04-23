@@ -128,15 +128,28 @@
 
 ---
 
+## DEC-024: Admin-created students use passwordless auth.users rows
+**Decision:** Admin-created profiles use a service-role `auth.admin.createUser` call with `email_confirm: true` and no password. `profiles.id` always equals `auth.users.id` — the existing RLS invariant (`profiles.id = auth.uid()`) is preserved. A `NOT NULL` column `auth_source` (`'self_registered' | 'admin_created'`) discriminates the two. The student cannot log in (no password set, no credential flow triggered). Linking to a real login later means setting a password and triggering email verification on the existing auth row.
+**Why:** Free-floating UUIDs (profiles with no auth.users counterpart) would silently break the `auth.uid() = id` invariant that every RLS policy assumes. Future policy authors would need to know about the two-class distinction — a rotting assumption. The passwordless-auth-row approach preserves the invariant unconditionally. @architect reviewed and approved.
+**Tradeoff:** One extra auth.users row per admin-created student. These rows are inert — no login method, no session. The `auth_source` discriminator makes them identifiable.
+**Revisit if:** Supabase Auth changes how passwordless placeholder accounts work, or if the number of admin-created students creates noise in the auth dashboard.
+
+## DEC-025: Manual payment path bypasses Stripe entirely
+**Decision:** `payments.stripe_checkout_session_id` is nullable (already was). The UNIQUE constraint is now partial (`WHERE stripe_checkout_session_id IS NOT NULL`). A `payment_method` column (`stripe | cash | check | venmo | other`, default `stripe`) distinguishes payment origin. Admin-initiated enrollments skip `pending_payment` status entirely — the enrollment and payment rows are written as `confirmed` / `succeeded` in a single server action. The Stripe webhook and hold-expiry cron paths are unaffected; they only operate on rows with Stripe checkout session IDs.
+**Why:** Phone-in students exist. Andy needs to record cash/check payments without routing them through Stripe Checkout. No new table needed — the payments table already exists and the enrollment model already has a `confirmed` status. Two roads to `confirmed`: Stripe Checkout (automated via webhook) and admin-initiated (direct server action).
+**Note on ghost-student payment visibility:** Payment rows for admin-created students (`auth_source = 'admin_created'`) are admin-visible only until the student links a real login. The "Students read own payments" RLS policy (`student_id = auth.uid()`) cannot be satisfied without an active session. Intentional for V1.
+**Tradeoff:** Two payment paths to maintain. The manual path has no receipt email (Phase 3 notifications will add this). Partial refunds on manual payments update the DB row only — no Stripe API call.
+
 ## V2 Decisions (to be resolved during build)
 
 | ID | Decision | When | Who | Status |
 |----|----------|------|-----|--------|
+| DEC-025 | Manual payment path for admin enrollment | Phase 4, task 4.4b | @architect | Done |
+| DEC-024 | Admin-created student uses passwordless auth row | Phase 4, task 4.4a | @architect | Done |
 | DEC-022 | Student cancellation refund policy | Phase 2, task 2.7 | Andy | Done |
 | DEC-021 | Generic codes/lookup table pattern | Phase 1, task 1.7 | DEC entry | Done |
 | DEC-019 | Inactive instructor cascade behavior | Phase 1, task 1.3 | DEC entry | Done |
 | DEC-TBD | Pessimistic inventory / enrollment hold duration | Phase 2, task 2.3 | DEC + Andy | Pending |
 | DEC-TBD | Scheduled job infrastructure (Vercel Cron vs Supabase Edge Functions) | Phase 2, task 2.4 | @architect | Pending |
 | DEC-TBD | Notification settings storage (table vs JSON column) | Phase 3, task 3.8 | @architect | Pending |
-| DEC-TBD | Admin-created student architecture (profile without auth?) | Phase 4, task 4.4 | @architect | Pending |
 | DEC-TBD | Drop-in enrollment model (per-session vs per-course, flag on course) | Phase 5, task 5.2 | @architect + Andy | Pending |

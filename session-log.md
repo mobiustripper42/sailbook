@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 89 — 2026-04-22 19:26 [open]
+
 ## Session 88 — 2026-04-22 19:08–19:19 (0.17 hrs)
 **Duration:** 0.17 hrs | **Points:** 0 (docs-only, no plan task)
 **Task:** Align NOTIFICATION_SETUP.md with updated EMAIL_SETUP.md (Cloudflare Email Routing + Gmail, replacing Zoho)

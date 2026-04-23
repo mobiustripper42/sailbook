@@ -16,6 +16,7 @@ import AddSessionForm from '@/components/admin/add-session-form'
 import SessionRow from '@/components/admin/session-row'
 import CourseStatusActions from '@/components/admin/course-status-actions'
 import EnrollmentActions from '@/components/admin/enrollment-actions'
+import AdminEnrollStudentPanel from '@/components/admin/admin-enroll-student-panel'
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -46,6 +47,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     .from('profiles')
     .select('id, first_name, last_name')
     .eq('is_instructor', true)
+    .order('last_name')
+
+  const { data: allStudents } = await supabase
+    .from('profiles')
+    .select('id, first_name, last_name, email')
+    .eq('is_student', true)
+    .eq('is_active', true)
     .order('last_name')
 
   // For cancelled sessions, check how many missed students still need a makeup
@@ -172,8 +180,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex-row items-center justify-between">
           <CardTitle>Enrollments ({enrollments?.length ?? 0})</CardTitle>
+          <AdminEnrollStudentPanel
+            courseId={id}
+            coursePriceCents={course.price != null ? Math.round(course.price * 100) : null}
+            students={allStudents ?? []}
+          />
         </CardHeader>
         <CardContent className="p-0">
           {enrollments?.length === 0 ? (

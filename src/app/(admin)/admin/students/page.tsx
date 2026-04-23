@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/empty-state'
 import {
   Table,
@@ -28,8 +29,13 @@ export default async function StudentsPage() {
   return (
     <div className="">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Students</h1>
-        <p className="text-sm text-muted-foreground">{students?.length ?? 0} total</p>
+        <div>
+          <h1 className="text-2xl font-semibold">Students</h1>
+          <p className="text-sm text-muted-foreground">{students?.length ?? 0} total</p>
+        </div>
+        <Button asChild size="sm">
+          <Link href="/admin/students/new">Add Student</Link>
+        </Button>
       </div>
 
       {students?.length === 0 ? (

@@ -231,6 +231,7 @@ export type Database = {
           currency: string
           enrollment_id: string
           id: string
+          payment_method: string
           refund_amount_cents: number | null
           status: string
           stripe_checkout_session_id: string | null
@@ -244,6 +245,7 @@ export type Database = {
           currency?: string
           enrollment_id: string
           id?: string
+          payment_method?: string
           refund_amount_cents?: number | null
           status?: string
           stripe_checkout_session_id?: string | null
@@ -257,6 +259,7 @@ export type Database = {
           currency?: string
           enrollment_id?: string
           id?: string
+          payment_method?: string
           refund_amount_cents?: number | null
           status?: string
           stripe_checkout_session_id?: string | null
@@ -284,6 +287,7 @@ export type Database = {
       profiles: {
         Row: {
           asa_number: string | null
+          auth_source: string
           created_at: string | null
           email: string
           experience_level: string | null
@@ -303,6 +307,7 @@ export type Database = {
         }
         Insert: {
           asa_number?: string | null
+          auth_source?: string
           created_at?: string | null
           email: string
           experience_level?: string | null
@@ -322,6 +327,7 @@ export type Database = {
         }
         Update: {
           asa_number?: string | null
+          auth_source?: string
           created_at?: string | null
           email?: string
           experience_level?: string | null
@@ -488,6 +494,17 @@ export type Database = {
       get_student_enrollment_ids: {
         Args: { user_id: string }
         Returns: string[]
+      }
+      profile_role_flags_unchanged: {
+        Args: {
+          p_id: string
+          p_is_active: boolean
+          p_is_admin: boolean
+          p_is_instructor: boolean
+          p_is_member: boolean
+          p_is_student: boolean
+        }
+        Returns: boolean
       }
     }
     Enums: {

@@ -1,7 +1,9 @@
 'use server'
 
+import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function updateUserProfile(formData: FormData) {
   const supabase = await createClient()
@@ -140,4 +142,62 @@ export async function updateProfile(formData: FormData) {
   revalidatePath('/admin/students')
   revalidatePath('/admin/instructors')
   return { error: null }
+}
+
+export async function createAdminStudent(
+  _: unknown,
+  formData: FormData,
+): Promise<string | null> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return 'Not authenticated.'
+
+  const { data: callerProfile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (!callerProfile?.is_admin) return 'Unauthorized.'
+
+  const first_name = (formData.get('first_name') as string).trim()
+  const last_name = (formData.get('last_name') as string).trim()
+  const email = (formData.get('email') as string).trim().toLowerCase()
+  const phone = (formData.get('phone') as string)?.trim() || null
+  const experience_level = (formData.get('experience_level') as string) || null
+  const asa_number = (formData.get('asa_number') as string)?.trim() || null
+
+  if (!first_name || !last_name || !email) return 'First name, last name, and email are required.'
+
+  const adminClient = createAdminClient()
+
+  const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+    email,
+    email_confirm: true,
+    user_metadata: { first_name, last_name },
+  })
+  if (authError) return authError.message
+  if (!authData.user) return 'Failed to create user account.'
+
+  const { error: profileError } = await adminClient
+    .from('profiles')
+    .insert({
+      id: authData.user.id,
+      first_name,
+      last_name,
+      email,
+      phone,
+      experience_level: experience_level === '—' ? null : experience_level,
+      asa_number,
+      is_student: true,
+      is_active: true,
+      auth_source: 'admin_created',
+    })
+
+  if (profileError) {
+    await adminClient.auth.admin.deleteUser(authData.user.id)
+    return profileError.message
+  }
+
+  revalidatePath('/admin/students')
+  redirect('/admin/students')
 }

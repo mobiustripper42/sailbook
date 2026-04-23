@@ -158,14 +158,15 @@ Clean onboarding. Richer student and instructor records.
 | 4.1 | Instructor invite link — `invites` table, one-time token, auto-sets `is_instructor` | 3 | "Generate Invite Link" button on admin instructor page. |
 | 4.2 | Admin invite link — same pattern for admin role | 2 | Button on admin user management page. Reuses 4.1 infrastructure. |
 | 4.3 | Student profile expansion — classes taken, editable ASA number, experience level from codes table | 5 | Profile page redesign. Experience level pulls from codes table (1.7). |
-| 4.4 | Admin-created students (no login) — DEC resolution + implementation (this needs to be easy, it has to be a 2) | 8 | "My wife has no fingers." @architect weighs in. May be simpler than it sounds. |
-| 4.5 | (NOT REQUIRED) Link admin-created student to login — student creates account, admin links to existing profile | 3 | Depends on 4.4 architecture. Might be as simple as "student resets password." |
+| 4.4a | Admin-created student profiles — passwordless auth row + `auth_source` discriminator, admin "Add Student" form | 5 | DEC-024. service-role createUser (no password, email_confirm: true). auth_source col on profiles. |
+| 4.4b | Admin-initiated enrollment + manual payment — student picker on course page, enrollment → confirmed, payment_method col | 5 | DEC-025. Bypasses Stripe entirely. Partial UNIQUE on stripe_checkout_session_id. |
+| 4.5 | (NOT REQUIRED) Link admin-created student to login — student uses Forgot Password on existing email | 3 | No code needed in V1. Admin tells student to use Forgot Password with their email. |
 | 4.6 | Instructor notes on sessions — text field per session, visible to all instructors + admin | 3 | IN-5 from V1 backlog. `notes` column already exists on sessions table. UI only. |
 | 4.7 | Instructor profile expansion — availability field + bio/website link | 3 | General availability for admin assignment. Name links to Simply Sailing website bio. Andy request. |
 | 4.8 | ~~Cookie-based theme sync~~ | 2 | [x] <!-- removed 2026-04-15 --> Superseded by DEC-020: theme is localStorage-only per device. No cross-device sync, no FOUC problem to solve. |
 | 4.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on profile expansion pages, invite flow, instructor onboarding. |
 
-**Phase 4 total: 34 pts**
+**Phase 4 total: 36 pts** (updated: 4.4 split into 4.4a+4.4b = 10 pts, was 8)
 **Projected hours: ~11 hrs**
 
 **Ejection point:** Instructors get proper onboarding. Student profiles are richer. Instructor notes captured. Admin can create students for non-technical users.
