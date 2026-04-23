@@ -3,7 +3,41 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 89 — 2026-04-22 19:26 [open]
+## Session 89 — 2026-04-22 19:26–21:25 (1.5 hrs)
+**Duration:** 1.5 hrs | **Points:** 10 (4.4a: 5, 4.4b: 5)
+**Task:** Phase 4.4a + 4.4b — admin-created students and admin-initiated enrollment with manual payment
+
+**Completed:**
+- @architect reviewed and approved schema approach (DEC-024, DEC-025)
+- Migration `20260422193000_admin_created_profiles.sql` — `auth_source` column on profiles (`self_registered` | `admin_created`)
+- Migration `20260422194000_manual_payments.sql` — `payment_method` column (cash/check/venmo/stripe_manual), UNIQUE on `stripe_checkout_session_id` made partial (`WHERE NOT NULL`)
+- `createAdminStudent` action: service-role `createUser` (no password, email_confirm=true), inserts profile with `auth_source='admin_created'`, rolls back auth row on profile failure
+- `adminEnrollStudent` action: duplicate-enrollment check, enrollment→`confirmed` directly, seeds session_attendance, inserts manual payment row — no Stripe involved
+- `/admin/students/new` page + `CreateAdminStudentForm` client component
+- `AdminEnrollStudentPanel` inline toggle on course detail page (student picker, payment method, amount)
+- `supabase/tests/08_admin_students.sql` — 8 pgTAP tests: check constraints, NULL coexistence, partial UNIQUE
+- `tests/admin-students.spec.ts` — 9 passing Playwright tests (3 skipped pending Dialog component)
+- Payment method options: cash, check, venmo, stripe_manual — `other` dropped
+
+**In Progress:** Nothing
+
+**Blocked:**
+- `supabase db push` to remote pending
+- Dialog component (`npx shadcn@latest add dialog`) not installed — enrollment panel uses inline toggle instead; desktop enrollment E2E test is skipped until then
+
+**Next Steps:** Phase 3 task 3.3 — notification service abstraction. Build against mock path (`NOTIFICATIONS_ENABLED=false`); no Twilio/Resend creds required. Lock in `from` address (`info@sailbook.live`) before writing copy. Also: consider installing Dialog component early to unblock the skipped enrollment test.
+
+**Context:**
+- Admin capacity bypass is intentional — admins can enroll beyond capacity (walk-ons, comps, etc.)
+- Ghost student login flow: Andy gives student their email, student uses Forgot Password to claim account
+- `stripe_manual` payment method = Andy ran a manual Stripe charge outside the checkout flow and is recording it
+- types.ts regeneration captured the `npx supabase` install prompt as garbage lines 1–3; stripped them manually. Future gen: run with installed `supabase` CLI to avoid this (`supabase gen types typescript --local`)
+
+**Known Test Failures (pre-existing):**
+- `enrollment-refund.spec.ts:62` — `cancel_requested without payment shows Cancel (no refund) button` failing on desktop — investigate before Phase 3 close
+- `payment-e2e.spec.ts` — 2 tablet failures flagged as flaky
+
+**Code Review:** Skipped (user interrupted agent call)
 
 ## Session 88 — 2026-04-22 19:08–19:19 (0.17 hrs)
 **Duration:** 0.17 hrs | **Points:** 0 (docs-only, no plan task)
