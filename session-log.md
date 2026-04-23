@@ -3,7 +3,33 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 90 — 2026-04-23 13:26 [open]
+## Session 90 — 2026-04-23 13:26–14:11 (0.75 hrs)
+**Duration:** 0.75 hrs | **Points:** 0 (bug fixes, no plan task)
+**Task:** Pre-task housekeeping — fix pgTAP failure and Playwright payment-e2e failures before starting 4.1
+
+**Completed:**
+- `supabase db push` to remote (user action, unblocked from session 89)
+- Diagnosed pgTAP test 9 failure: `auth_source` not in `profile_role_flags_unchanged()` WITH CHECK — student could overwrite their own `auth_source`
+- Migration `20260423175424_fix_auth_source_self_update.sql`: new `profile_auth_source_unchanged(uuid, text)` SECURITY DEFINER function, ANDed into "Users can update own profile" policy WITH CHECK. pgTAP: 105/105 ✓
+- Diagnosed Playwright `payment-e2e.spec.ts` 3-viewport failure: migration `20260422194000` dropped full UNIQUE constraint on `stripe_checkout_session_id`, replaced with partial index — broke `ON CONFLICT (stripe_checkout_session_id)` in webhook upsert, silently dropped every payment row
+- Fixed webhook: `upsert({...}, { onConflict:... })` → `.insert({...})` in `src/app/api/webhooks/stripe/route.ts`
+- Discovered root cause of fix not taking effect: dev server (PID 71999) running since Apr 21, Turbopack file watcher stale — server needs `npm run dev` restart to pick up webhook change
+
+**In Progress:** Nothing half-done
+
+**Blocked:**
+- Playwright `payment-e2e.spec.ts` fix is in source but requires dev server restart to take effect — restart `npm run dev` then re-run to confirm green
+
+**Next Steps:** Task 4.1 — instructor invite link (single shared reusable link, confirmed design, plan approved). Start fresh session with `/its-alive`.
+
+**Context:**
+- Dev server Turbopack watcher goes stale after ~2 days in WSL2 — restart `npm run dev` if file edits aren't being picked up
+- Webhook payment insert is non-fatal by design — enrollment confirmation succeeds even if payment row fails; concurrent double-delivery hits the partial unique index and fails noisily but correctly
+- 4.1 design confirmed: single shared link per role (`role='instructor'` row in `invites` table), admin regenerates to invalidate old link, accept page sets `is_instructor=true` on whoever is logged in
+
+**Code Review:** 2 findings (both CLEANUP):
+1. `auth_source` throws_ok test in `08_admin_students.sql` — should live in `01_rls_profiles.sql` alongside other WITH CHECK tests (discoverability)
+2. Webhook concurrent double-delivery leaves a log noise note opportunity — idempotency gap is benign but worth a comment
 
 ## Session 89 — 2026-04-22 19:26–21:45 (1.83 hrs)
 **Duration:** 1.83 hrs | **Points:** 12 (4.4a: 5, 4.4b: 5, code review fixes: 2)
