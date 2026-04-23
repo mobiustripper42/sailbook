@@ -3,8 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 89 — 2026-04-22 19:26–21:25 (1.5 hrs)
-**Duration:** 1.5 hrs | **Points:** 10 (4.4a: 5, 4.4b: 5)
+## Session 89 — 2026-04-22 19:26–21:45 (1.83 hrs)
+**Duration:** 1.83 hrs | **Points:** 12 (4.4a: 5, 4.4b: 5, code review fixes: 2)
 **Task:** Phase 4.4a + 4.4b — admin-created students and admin-initiated enrollment with manual payment
 
 **Completed:**
@@ -18,6 +18,13 @@ Format: prepend newest entry at the top.
 - `supabase/tests/08_admin_students.sql` — 8 pgTAP tests: check constraints, NULL coexistence, partial UNIQUE
 - `tests/admin-students.spec.ts` — 9 passing Playwright tests (3 skipped pending Dialog component)
 - Payment method options: cash, check, venmo, stripe_manual — `other` dropped
+- Code review run post-commit; 7 findings fixed (commit `d3de928`):
+  - Surfaced silent errors in `adminEnrollStudent` (attendance seed + payment insert)
+  - Fixed `processRefund` for manual payments (was leaving `status=succeeded` on cancelled enrollment)
+  - Added length validation to `createAdminStudent`
+  - Moved duplicate enrollment check to `adminClient`
+  - Extracted `MANUAL_PAYMENT_METHODS` constant to `src/lib/constants.ts`
+  - Added 2 RLS behavioral tests to `08_admin_students.sql` (now 10 tests)
 
 **In Progress:** Nothing
 
@@ -37,7 +44,7 @@ Format: prepend newest entry at the top.
 - `enrollment-refund.spec.ts:62` — `cancel_requested without payment shows Cancel (no refund) button` failing on desktop — investigate before Phase 3 close
 - `payment-e2e.spec.ts` — 2 tablet failures flagged as flaky
 
-**Code Review:** Skipped (user interrupted agent call)
+**Code Review:** 7 findings, all fixed. 3 bugs (silent discards + manual refund gap), 2 security (length validation, RLS-stable duplicate check), 1 consistency (shared constant), 1 cleanup (missing RLS tests). No open items.
 
 ## Session 88 — 2026-04-22 19:08–19:19 (0.17 hrs)
 **Duration:** 0.17 hrs | **Points:** 0 (docs-only, no plan task)
