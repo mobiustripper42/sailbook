@@ -155,7 +155,7 @@ Clean onboarding. Richer student and instructor records.
 
 | # | Task | Effort | Notes |
 |---|------|--------|-------|
-| 4.1 | Instructor invite link — `invites` table, one-time token, auto-sets `is_instructor` | 3 | "Generate Invite Link" button on admin instructor page. |
+| 4.1 | ~~Instructor invite link — `invites` table, single shared reusable token per role, auto-sets `is_instructor`~~ | 3 | [x] <!-- completed 2026-04-23 --> Design diverged from "one-time token" to single shared reusable link (admin regenerates to revoke). `invites` PK on role + SECURITY DEFINER `accept_invite` RPC. 15 pgTAP + 5 Playwright tests green. Reusable for 4.2 admin invite. |
 | 4.2 | Admin invite link — same pattern for admin role | 2 | Button on admin user management page. Reuses 4.1 infrastructure. |
 | 4.3 | Student profile expansion — classes taken, editable ASA number, experience level from codes table | 5 | Profile page redesign. Experience level pulls from codes table (1.7). |
 | 4.4a | ~~Admin-created student profiles — passwordless auth row + `auth_source` discriminator, admin "Add Student" form~~ | 5 | [x] <!-- completed 2026-04-22 --> DEC-024. service-role createUser (no password, email_confirm: true). auth_source col on profiles. |

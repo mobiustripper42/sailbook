@@ -3,7 +3,41 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 91 — 2026-04-23 14:21 [open]
+## Session 91 — 2026-04-23 14:21–15:27 (1.08 hrs)
+**Duration:** 1.08 hrs | **Points:** 3 (4.1: 3)
+**Task:** Phase 4.1 — instructor invite link (admin-generated, single shared reusable URL)
+
+**Completed:**
+- Migration `20260423182537_invites_table.sql` — `invites` table (role PK, token UNIQUE, created_by, `last_accepted_by`/`last_accepted_at` audit cols), admin-only RLS, `accept_invite(role, token)` SECURITY DEFINER RPC (bumps `profiles.updated_at`; intentionally bypasses `profile_role_flags_unchanged` + `profile_auth_source_unchanged` — role promotion is the whole point, auth_source is orthogonal)
+- `src/actions/invites.ts` — `regenerateInvite(role)` (admin-gated, upsert on role PK) + `acceptInstructorInvite(token)` (RPC → `updateUser({ data })` → `refreshSession()` → redirect; the explicit refreshSession is load-bearing — without it the JWT cookie keeps the stale `user_metadata.is_instructor=false` and the proxy bounces the user off `/instructor/*`)
+- `src/components/admin/instructor-invite-panel.tsx` — client panel: current link, Copy, Regenerate (confirm dialog)
+- `src/app/(admin)/admin/instructors/page.tsx` — panel wired at top; surfaces `inviteResult.error` per code review
+- `src/app/invite/instructor/[token]/page.tsx` + `accept-form.tsx` — public accept page, auth-gated (shows Sign in / Create account buttons when unauth)
+- `src/proxy.ts` — added `PUBLIC_PREFIXES = ['/invite/']` concept; unlike `PUBLIC_ROUTES`, doesn't bounce authenticated users to their dashboard (so a logged-in admin can preview the accept URL)
+- `src/app/api/test/set-role-flag/route.ts` — dev-only `is_*` flag toggle for test cleanup; merges user_metadata via get→update so existing keys survive
+- `supabase/tests/09_invites.sql` — 15 pgTAP tests (CHECK/PK constraints, admin CRUD, instructor SELECT/UPDATE/DELETE blocked, student INSERT blocked, `accept_invite` happy + bad-token + invalid-role + unauth paths)
+- `tests/instructor-invite.spec.ts` — 3 tests, describe configured `mode: 'serial'`; generate+accept and regenerate tests desktop-only (mutate the single `invites.role='instructor'` row); invalid-token runs all viewports. 5/5 passing.
+- Applied all 6 code review findings mid-session (audit cols, `updated_at` bump, surface invite error, 2 new pgTAP tests, proxy + migration comments)
+
+**In Progress:** Nothing
+
+**Blocked:**
+- Manual QA not performed — dev server had browser-access issues after `supabase db reset`; Eric rebooting at session end, will QA at start of next session (memory: `project_task_41_qa_pending.md`)
+- `supabase db push` to remote pending
+
+**Next Steps:**
+- Session 92 opens with the 4.1 QA walkthrough surfaced from memory
+- After QA: start 4.2 (admin invite link — same pattern, 2 pts, reuses `invites` table + RPC; only new code is admin role gate + UI panel on `/admin/users`)
+
+**Context:**
+- `invites` uses `role` as PRIMARY KEY by design — single row per role means admin regenerate invalidates all outstanding links. Downside: Playwright tests can't parallelize mutating tests; `describe.configure({ mode: 'serial' })` + desktop-only gating solved it.
+- `supabase.auth.updateUser({ data })` does NOT re-issue the JWT on its own — must call `refreshSession()` after to push the new `user_metadata` into the cookie. This is the second time we've hit role-flag-in-JWT staleness; worth a DEC entry if 4.2 or another task repeats the pattern.
+- Dev login dropdown stopped responding mid-session (visible but click doesn't open). Eric will check after reboot. Not related to 4.1 — login page and DevLoginHelper were untouched. Suspect WSL2/Turbopack HMR state.
+- `CardTitle` renders as `<div>`, not a heading — Playwright `getByRole('heading', ...)` won't match; use `getByText(...)` for Card titles.
+- Unauthed accept flow currently asks the user to "sign in then return to this link" (no `?next=` param on login). Eric acknowledged as a V1-acceptable rough edge; deferred.
+
+**Code Review:** 6 findings, all fixed in-session (3 security/consistency: audit trail columns, `updated_at` bump, surface `inviteResult.error`; 3 cleanup: 2 RLS test cases, 2 explanatory comments). No open items.
+
 
 ## Session 90 — 2026-04-23 13:26–14:11 (0.75 hrs)
 **Duration:** 0.75 hrs | **Points:** 0 (bug fixes, no plan task)
