@@ -11,14 +11,26 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import InstructorActions from '@/components/admin/instructor-actions'
+import InstructorInvitePanel from '@/components/admin/instructor-invite-panel'
 
 export default async function InstructorsPage() {
   const supabase = await createClient()
-  const { data: instructors, error } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name, email, phone, is_active, created_at')
-    .eq('is_instructor', true)
-    .order('last_name')
+  const [instructorsResult, inviteResult] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, first_name, last_name, email, phone, is_active, created_at')
+      .eq('is_instructor', true)
+      .order('last_name'),
+    supabase
+      .from('invites')
+      .select('token, created_at')
+      .eq('role', 'instructor')
+      .maybeSingle(),
+  ])
+
+  const { data: instructors, error } = instructorsResult
+  const invite = inviteResult.data
+  const inviteError = inviteResult.error
 
   if (error) return <div className="text-destructive text-sm">{error.message}</div>
 
@@ -27,6 +39,14 @@ export default async function InstructorsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">Instructors</h1>
       </div>
+
+      {inviteError && (
+        <div className="text-destructive mb-4 text-sm">
+          Could not load invite link: {inviteError.message}
+        </div>
+      )}
+
+      <InstructorInvitePanel token={invite?.token ?? null} createdAt={invite?.created_at ?? null} />
 
       {instructors?.length === 0 ? (
         <EmptyState message="No instructors yet." />

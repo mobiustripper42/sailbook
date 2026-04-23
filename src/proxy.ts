@@ -2,6 +2,10 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const PUBLIC_ROUTES = ['/login', '/register', '/dev', '/forgot-password', '/reset-password']
+// PUBLIC_PREFIXES lets unauthenticated users through BUT, unlike PUBLIC_ROUTES,
+// does not bounce logged-in users off to their dashboard — an authenticated
+// user visiting an invite URL needs to see the accept page, not their home.
+const PUBLIC_PREFIXES = ['/invite/']
 
 function getPrimaryHome(meta: Record<string, unknown>): string {
   if (meta.is_admin) return '/admin/dashboard'
@@ -37,17 +41,18 @@ export async function proxy(request: NextRequest) {
   const meta = (user?.user_metadata ?? {}) as Record<string, unknown>
 
   const isPublicRoute = PUBLIC_ROUTES.includes(pathname)
+  const isPublicPrefix = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))
   const isRoot = pathname === '/'
   // API routes handle their own auth — don't redirect to login
   const isApiRoute = pathname.startsWith('/api/')
 
   // Not logged in — send to login (except public routes and API routes)
-  if (!user && !isPublicRoute && !isApiRoute) {
+  if (!user && !isPublicRoute && !isPublicPrefix && !isApiRoute) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
   // Logged in on a public route or root — send to role dashboard
-  // /dev and /reset-password are always accessible regardless of auth state
+  // /dev, /reset-password, and /invite/* are always accessible regardless of auth state
   if (user && (isPublicRoute || isRoot) && pathname !== '/dev' && pathname !== '/reset-password') {
     return NextResponse.redirect(new URL(getPrimaryHome(meta), request.url))
   }

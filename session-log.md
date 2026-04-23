@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 91 — 2026-04-23 14:21 [open]
+
 ## Session 90 — 2026-04-23 13:26–14:11 (0.75 hrs)
 **Duration:** 0.75 hrs | **Points:** 0 (bug fixes, no plan task)
 **Task:** Pre-task housekeeping — fix pgTAP failure and Playwright payment-e2e failures before starting 4.1

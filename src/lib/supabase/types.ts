@@ -224,6 +224,48 @@ export type Database = {
           },
         ]
       }
+      invites: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          last_accepted_at: string | null
+          last_accepted_by: string | null
+          role: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          last_accepted_at?: string | null
+          last_accepted_by?: string | null
+          role: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          last_accepted_at?: string | null
+          last_accepted_by?: string | null
+          role?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invites_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invites_last_accepted_by_fkey"
+            columns: ["last_accepted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_cents: number
@@ -467,6 +509,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invite: {
+        Args: { p_role: string; p_token: string }
+        Returns: boolean
+      }
       get_all_course_enrollment_counts: {
         Args: never
         Returns: {
