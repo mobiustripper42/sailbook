@@ -167,6 +167,9 @@ export async function createAdminStudent(
   const asa_number = (formData.get('asa_number') as string)?.trim() || null
 
   if (!first_name || !last_name || !email) return 'First name, last name, and email are required.'
+  if (first_name.length > 100 || last_name.length > 100) return 'Name must be 100 characters or fewer.'
+  if (phone && phone.length > 30) return 'Phone must be 30 characters or fewer.'
+  if (asa_number && asa_number.length > 20) return 'ASA number must be 20 characters or fewer.'
 
   const adminClient = createAdminClient()
 

@@ -4,6 +4,7 @@ import { useActionState, useState, useTransition } from 'react'
 import { useFormStatus } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { adminEnrollStudent } from '@/actions/enrollments'
+import { MANUAL_PAYMENT_METHODS } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -94,10 +95,11 @@ export default function AdminEnrollStudentPanel({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="cash">Cash</SelectItem>
-                <SelectItem value="check">Check</SelectItem>
-                <SelectItem value="venmo">Venmo</SelectItem>
-                <SelectItem value="stripe_manual">Stripe (manual)</SelectItem>
+                {MANUAL_PAYMENT_METHODS.map((m) => (
+                  <SelectItem key={m} value={m}>
+                    {m === 'stripe_manual' ? 'Stripe (manual)' : m.charAt(0).toUpperCase() + m.slice(1)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
+import { MANUAL_PAYMENT_METHODS } from '@/lib/constants'
 
 export async function adminEnrollStudent(
   _: unknown,
@@ -26,13 +27,17 @@ export async function adminEnrollStudent(
   const amountDollars = parseFloat(formData.get('amount') as string)
 
   if (!courseId || !studentId) return 'Course and student are required.'
-  if (!['cash', 'check', 'venmo', 'stripe_manual'].includes(paymentMethod)) return 'Invalid payment method.'
+  if (!(MANUAL_PAYMENT_METHODS as readonly string[]).includes(paymentMethod)) return 'Invalid payment method.'
   if (isNaN(amountDollars) || amountDollars < 0) return 'Invalid amount.'
 
   const amountCents = Math.round(amountDollars * 100)
 
+  // Use adminClient for all reads + writes so behavior is unconditional
+  // regardless of RLS state. The is_admin check above is the access gate.
+  const adminClient = createAdminClient()
+
   // Prevent duplicate enrollment
-  const { data: existing } = await supabase
+  const { data: existing } = await adminClient
     .from('enrollments')
     .select('id, status')
     .eq('course_id', courseId)
@@ -41,10 +46,6 @@ export async function adminEnrollStudent(
     .maybeSingle()
 
   if (existing) return 'This student is already enrolled in this course.'
-
-  // Use admin client so the insert bypasses RLS (service role).
-  // The admin RLS check above is the access gate.
-  const adminClient = createAdminClient()
 
   const { data: enrollment, error: enrollError } = await adminClient
     .from('enrollments')
@@ -65,7 +66,7 @@ export async function adminEnrollStudent(
     .eq('course_id', courseId)
 
   if (sessions && sessions.length > 0) {
-    await adminClient.from('session_attendance').upsert(
+    const { error: attendanceError } = await adminClient.from('session_attendance').upsert(
       sessions.map((s) => ({
         session_id: s.id,
         enrollment_id: enrollment.id,
@@ -73,17 +74,19 @@ export async function adminEnrollStudent(
       })),
       { onConflict: 'session_id,enrollment_id' },
     )
+    if (attendanceError) return `Enrollment created but attendance seeding failed: ${attendanceError.message}`
   }
 
   // Record the manual payment
   if (amountCents > 0) {
-    await adminClient.from('payments').insert({
+    const { error: paymentError } = await adminClient.from('payments').insert({
       enrollment_id: enrollment.id,
       student_id: studentId,
       amount_cents: amountCents,
       status: 'succeeded',
       payment_method: paymentMethod,
     })
+    if (paymentError) return `Enrollment created but payment record failed: ${paymentError.message}`
   }
 
   revalidatePath(`/admin/courses/${courseId}`)
@@ -200,6 +203,19 @@ export async function processRefund(
       console.error('processRefund: Stripe refund succeeded but payments row update failed', updateErr)
       return { error: updateErr.message }
     }
+  } else if (payment) {
+    // Manual payment (no Stripe) — mark refunded in DB before cancelling
+    const amountToRefund = refundAmountCents ?? payment.amount_cents
+    const { error: updateErr } = await supabase
+      .from('payments')
+      .update({
+        status: 'refunded',
+        refund_amount_cents: amountToRefund,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', payment.id)
+
+    if (updateErr) return { error: updateErr.message }
   }
 
   // Cancel the enrollment and flip attendance records

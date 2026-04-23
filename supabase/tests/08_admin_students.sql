@@ -11,7 +11,7 @@
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(8);
+SELECT plan(10);
 
 CREATE SCHEMA IF NOT EXISTS tests;
 
@@ -146,6 +146,39 @@ SELECT throws_ok(
   NULL,
   'payments: duplicate non-NULL stripe_checkout_session_id is blocked by partial UNIQUE index'
 );
+
+-- ============================================================
+-- RLS: ghost student cannot overwrite their own auth_source
+-- ============================================================
+
+SELECT tests.authenticate('d0000000-0000-0000-0000-000000000099', p_is_student => true);
+SET LOCAL ROLE authenticated;
+
+SELECT throws_ok(
+  $$ UPDATE public.profiles SET auth_source = 'self_registered'
+     WHERE id = 'd0000000-0000-0000-0000-000000000099' $$,
+  '42501',
+  NULL,
+  'profiles: authenticated student cannot update auth_source (blocked by self-update WITH CHECK)'
+);
+
+RESET ROLE;
+
+-- ============================================================
+-- RLS: student cannot read another student's payment
+-- ============================================================
+
+SELECT tests.authenticate('a1000000-0000-0000-0000-000000000005', p_is_student => true);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  (SELECT count(*)::int FROM public.payments
+   WHERE student_id = 'd0000000-0000-0000-0000-000000000099'),
+  0,
+  'payments: student cannot read a different student''s payment rows'
+);
+
+RESET ROLE;
 
 SELECT * FROM finish();
 ROLLBACK;
