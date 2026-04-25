@@ -3,7 +3,49 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 92 — 2026-04-24 19:34 [open]
+## Session 92 — 2026-04-24 19:34–21:01 (1.50 hrs)
+**Duration:** 1.50 hrs | **Points:** 3 (3.3: 3)
+**Task:** Phase 4.1 manual QA + Phase 3.3 notification service abstraction
+
+**Completed:**
+- 4.1 instructor invite — manual QA passed (admin generates → copy → unauth view → student accepts → role flips). Minor UX caveat acknowledged: unauth users see Sign in / Create account CTAs, not a redirect to register. V1-acceptable rough edge (already noted in session 91).
+- Phase 3.3 — notification service abstraction
+  - `src/lib/notifications/index.ts` — dispatcher: `sendSMS` / `sendEmail`, gated on `NOTIFICATIONS_ENABLED === 'true'`. Mock statically imported; real providers lazy-loaded.
+  - `src/lib/notifications/mock.ts` — in-memory buffer + console.log echo. `getMockBuffer()` / `clearMockBuffer()` for tests.
+  - `src/lib/notifications/twilio.ts` + `resend.ts` — env-guarded real senders. Both use `@ts-expect-error` on the dynamic `import('twilio'/'resend')` line so the module ships before npm install (3.1/3.2). Resend `from` baked to `SailBook <info@sailbook.live>`.
+  - `src/app/api/test/notifications/route.ts` — dev-only GET/POST/DELETE on the mock buffer; `NODE_ENV !== 'development'` gate matches existing `set-role-flag/route.ts` pattern.
+  - `tests/notifications.spec.ts` — 4 desktop tests (SMS dispatch, email dispatch, accumulate+clear, invalid channel). Serial + desktop-only because the buffer is shared module state; skip lives in `beforeEach` so non-desktop workers don't even touch the route.
+- Pre-existing lint/tsc cleanup bundled into the same commit:
+  - Unescaped `"Forgot Password"` quotes in `admin/students/new/page.tsx`
+  - Unused `Badge` import in `instructor/dashboard/page.tsx`
+  - Stripe SDK type drift in `tests/payment-e2e.spec.ts` — `WebhookTestHeaderOptions` types 6 fields as required but Stripe's own README example only passes 3; cast added with comment.
+- Commit `027dff3`
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- Eric to add `NOTIFICATIONS_ENABLED=false` + `TWILIO_*` / `RESEND_API_KEY` placeholders to `.env.local`
+- `supabase db push` to remote still pending (carried from sessions 90 + 91)
+- 4.2 admin invite link **parked + needs re-estimate.** Original spec was a 2-pt clone of the instructor invite panel. Eric's revised direction: consolidate `/admin/students` + `/admin/instructors` into a unified `/admin/users` with a role filter (Admin / Instructor / Student) and two collapsed invite panels at the top. That's a 5–8 pt task, not 2. Plan needs an update next session.
+
+**Next Steps:**
+1. Re-scope and re-estimate 4.2 → "users page consolidation + dual invite panels"
+2. Phase 3.4 — enrollment notifications. First real consumer of the 3.3 dispatcher; mock path covers everything end-to-end without Twilio/Resend creds. Includes admin alert on new enrollment + low enrollment warning per Andy's request.
+3. `supabase db push` to remote (overdue)
+
+**Context:**
+- Module-instance trap: in Next.js / Turbopack dev, static `import` and dynamic `await import()` of the same module path can resolve to **different module instances**, breaking module-level state. The dispatcher had to import `mock.ts` statically to share its buffer with the test API route. First session's draft used `await import('./mock')` and the test buffer always read empty.
+- `@ts-expect-error` is the load-bearing piece in `twilio.ts` / `resend.ts`. **Remove the directive in the same commit that does `npm install twilio` / `npm install resend` (3.1 / 3.2)**, or CI will go red.
+- Same parallel-worker shared-state pattern as 4.1: `test.describe.configure({ mode: 'serial' })` + `test.skip` in `beforeEach` (not test body — body skip runs after beforeEach, which still races).
+- Mock logger echoes full email/SMS body to dev stdout. Dev-only by design; do not adapt that pattern for the real providers.
+- For local manual testing without creds: dev server at `:3000`, hit `curl -X POST localhost:3000/api/test/notifications -H 'Content-Type: application/json' -d '{...}'`, then `curl localhost:3000/api/test/notifications` to read back.
+
+**Code Review:** Clean Bill of Health. 4 cleanup advisories, all non-blocking:
+1. POST handler doesn't try/catch `req.json()` — matches existing dev-route convention
+2. `@ts-expect-error` cleanup discipline flagged for 3.1 / 3.2
+3. Add a "dev-only — do not copy into real providers" comment on the mock logger
+4. Twilio/Resend clients re-instantiated per call; hoist to singleton if volume grows
+
 
 ## Session 91 — 2026-04-23 14:21–15:27 (1.08 hrs)
 **Duration:** 1.08 hrs | **Points:** 3 (4.1: 3)

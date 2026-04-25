@@ -129,7 +129,7 @@ Users know what's happening. Auth is production-grade.
 |---|------|--------|-------|
 | 3.1 | Twilio setup — account, phone number, API keys | 2 | Test mode available. |
 | 3.2 | Resend setup — account, API key, domain verification for sailbook.live | 2 | Cloudflare DNS records. Set up info@sailbook.live email routing. |
-| 3.3 | Notification service — shared module for SMS (Twilio) + email (Resend) with mock mode for testing | 3 | Abstraction layer. `NOTIFICATIONS_ENABLED=false` routes to log in test. |
+| 3.3 | ~~Notification service — shared module for SMS (Twilio) + email (Resend) with mock mode for testing~~ | 3 | [x] <!-- completed 2026-04-24 --> Dispatcher with `NOTIFICATIONS_ENABLED` gate. Mock buffer + dev-only test API route. Twilio/Resend lazy-imported behind `@ts-expect-error` (remove in 3.1/3.2). 4 Playwright tests. |
 | 3.4 | Enrollment notifications — SMS + email on confirmed, plus admin alert on new enrollment, plus low enrollment warning to admin | 5 | Multiple triggers through one service. Admin shouldn't have to log in to know someone signed up. Andy request. |
 | 3.5 | Session cancellation notice — SMS + email to enrolled students | 3 | Includes reason, makeup info if available. |
 | 3.6 | Makeup session assignment — SMS + email to affected students | 3 | New date/time/location in message. |
