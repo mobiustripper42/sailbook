@@ -3,7 +3,53 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 94 — 2026-04-25 09:06 [open]
+## Session 94 — 2026-04-25 09:06–15:14 (1.00 hr, in-and-out — boat day)
+**Duration:** 1.00 hr | **Points:** 5 (5.10: 5)
+**Task:** Phase 5.10 student calendar view + session 93 code review fixups + 4.2 re-scope
+
+**Completed:**
+- **Phase 5.10 — student courses calendar view (5 pts).**
+  - `src/components/student/courses-card-list.tsx` — extracted card grid + `CourseCardData` type (server-render).
+  - `src/components/student/courses-calendar.tsx` — month grid client component, prev/next/today nav, course pills colored by enrollment status (primary/accent/muted), `MAX_PILLS_PER_CELL = 3` with "+N more" overflow.
+  - `src/components/student/courses-view-switcher.tsx` — Calendar/List toggle, `localStorage` persistence (`sailbook.courses-view`), forces list at <640px via `matchMedia`.
+  - `src/app/(student)/student/courses/page.tsx` rewritten to build `CourseCardData[]` and hand both views to the switcher.
+  - `tests/student-courses-calendar.spec.ts` — 5 desktop tests (1 mobile-only test for forced-list assertion). All green.
+- **Session 93 code review fixups (3 fixes).**
+  - `templates.ts` — `esc()` HTML helper; every `${…}` in the three `emailHtml` strings wrapped. Defense in depth across `studentFirstName`, `courseTitle`, `studentEmail`, `paymentMethod`, `where` (location), and computed values like `dollars()` and `dateStr`.
+  - `actions/enrollments.ts` — `confirmEnrollment` now fires `notifyEnrollmentConfirmed`. Was the third confirmation path missed in 3.4.
+  - `triggers.ts` — threshold switched from `Math.floor(capacity * ratio)` to `enrolled / capacity >= ratio` + `capacity > 0` guard. Fixes capacity=1 (alert never fired) and capacity=3 (1/3 silently "fine").
+- **4.2 re-scope (planning, no implementation).** Re-estimated 2 → 8 pts in `PROJECT_PLAN.md`. Locked scope: unified `/admin/users` with role filter (Admin/Instructor/Student), two collapsed invite panels reusing 4.1 infra, **column sorting (not search)**, old `/admin/students` and `/admin/instructors` routes deleted (no redirects — nothing bookmarked). Phase 4 total: 36 → 42 pts.
+- **Docs updates.**
+  - `NOTIFICATION_SETUP.md` — SPF Google + Resend before/after merge example; Twilio rewritten as toll-free vs 216-local decision point with toll-free verification step + 10DLC tradeoff documented.
+- **Test fallout from calendar default.** `student-enrollment` + `cancel-enrollment` specs now seed `localStorage.sailbook.courses-view = 'list'` via `addInitScript` before `/student/courses` navigation. Also fixed pre-existing test bug in `cancel-enrollment` where the filter used `'Cancel List'` instead of the unique `runId()` title — caused strict-mode violations after multiple runs.
+- Commit `e53a48d`.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- `.env.local`: `NOTIFICATIONS_ENABLED=false` + Twilio/Resend creds (carryover sessions 91/92/93)
+- `supabase db push` to remote (carryover sessions 90/91/92/93)
+- Pre-existing `instructor-invite` failure: "admin generates link, student accepts and becomes instructor" deterministically times out on the Generate link button click. Reproduces at workers=1 in isolation. Manual QA from session 92 confirmed feature works; test-side issue. Punted per user, tracked as code review debt for Phase 4 follow-up.
+
+**Next Steps:**
+1. **Pick:** 4.2 (`/admin/users` consolidation, 8 pts) is now ready to build — scope is locked.
+2. Investigate `instructor-invite` test regression as a separate small task before 4.2.
+3. Mobile calendar UX is parked for Phase 5/6 — Andy will see clunky cards on mobile until then; documented in plan.
+4. Run full Playwright suite after fixing the instructor-invite flake, before Phase 3 close.
+5. `supabase db push` to remote (overdue 4 sessions).
+
+**Context:**
+- **Mobile-first hydration trap.** `view-switcher` server-renders calendar unconditionally; mobile clients swap to list after hydration → guaranteed flicker on first mobile load. Code review flagged a `hidden sm:block` / `sm:hidden` CSS-driven approach as cleaner. Acceptable for V1; revisit when redesigning the mobile course browser.
+- **localStorage init pattern for tests.** `await page.addInitScript(() => localStorage.setItem(...))` BEFORE `goto` is the right way to seed client preferences in fresh browser contexts. Place it before login if context is brand new (login flow already navigates).
+- **Pill rendering.** Calendar pills use `<Link>` with the same `/student/courses/[id]` href as list view buttons. Click-through is identical; no new route needed.
+- **Calendar default month** is the current month; courses with sessions in May 2026 onwards aren't visible until you click `›`. Tests that rely on text matching for specific seed courses MUST switch to list view (text in pills is in DOM but not in current-month cells unless the test navigates).
+- **Twilio toll-free verification** is now documented as a multi-day form submission. Plan accordingly when 3.1 is started — needs lead time before go-live.
+
+**Code Review:** 4 cleanups (advisory), no bugs.
+1. **cleanup** `view-switcher.tsx:22` — SSR/CSR mismatch causes mobile flicker. Suggested `hidden sm:block` CSS approach. Acceptable for V1.
+2. **cleanup** `view-switcher.tsx:36-39` — two adjacent `eslint-disable-next-line` comments. `useSyncExternalStore` would be cleaner. Not blocking.
+3. **cleanup** `triggers.ts:225` — pre-existing UTC-vs-local Date parsing pattern. Off-by-one possible at midnight in negative-UTC zones. Use `Date.UTC(y, m-1, d)` like `templates.ts:42` does. Pre-existing, not introduced here.
+4. **cleanup** `student-courses-calendar.spec.ts:20` — `waitForLoadState('networkidle')` is a known flake source. Replace with a visibility assertion.
 
 ## Session 93 — 2026-04-25 07:25–08:45 (1.33 hrs)
 **Duration:** 1.33 hrs | **Points:** 8 (3.4: 8)

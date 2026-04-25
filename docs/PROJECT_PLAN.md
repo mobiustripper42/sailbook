@@ -188,7 +188,7 @@ Flexible pricing, enrollment safety rails, and waitlist.
 | 5.7 | Waitlist — full course → join waitlist → notify on opening | 8 | New table, student UI, admin visibility, notification on spot opening. Depends on Phase 3 notifications. Andy request. |
 | 5.8 | Low enrollment warning — dashboard tile for courses below minimum threshold approaching start date | 2 | Same pattern as "courses without instructors." Meaningful only with payments live. Andy request. |
 | 5.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on waitlist UI, prerequisite warning flow, discount code display on checkout. |
-| 5.10 | Student `/student/courses` calendar view — month grid (desktop/tablet) + list fallback (mobile), click weekend → course detail | 5 | Tight scope: read-only month, courses-by-weekend, calendar/list toggle, mobile = list. With 26+ active courses on the season, the list view is unbrowsable. Andy will see this on the dev site once 2026 season is seeded. Pull forward from V3 backlog. |
+| 5.10 | ~~Student `/student/courses` calendar view — month grid (desktop/tablet) + list fallback (mobile), click weekend → course detail~~ | 5 | [x] <!-- completed 2026-04-25 --> Calendar/List toggle with localStorage persistence, month grid with prev/next/today nav, course pills colored by enrollment status (max 3 per cell + "+N more"), forced list at <640px. Mobile UX needs a better browse pattern than cards (parked for Phase 5/6). 5 desktop Playwright tests green. |
 
 **Phase 5 total: 39 pts** (was 34; +5 for 5.10)
 **Projected hours: ~14 hrs**
@@ -291,6 +291,7 @@ At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–
 |-------|-----------|------------|--------------|-----------|-------|
 | 0 — Infrastructure | 70 | ~27 | ~5.1 | 0.07 | Setup sprint; not a velocity signal (see RETROSPECTIVES.md) |
 | 1 — V1 Fixes | 58 | ~19 | ~14.9 | **0.26** | +8 polish credit (session 49); 0.23 all-in; see RETROSPECTIVES.md |
+| (5.10 early) | 5 | ~2 | 1.00 | 0.20 | Pulled forward from Phase 5; rolled into Phase 5 actuals when phase closes |
 | 2 — Payments | 38 | ~14 | — | — | |
 | 3 — Notifications | 40 | ~15 | — | — | |
 | 4 — Identity | 27 | ~10 | — | — | |
