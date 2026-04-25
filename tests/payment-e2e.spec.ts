@@ -102,11 +102,13 @@ test.describe('Full payment chain E2E', () => {
       },
     })
     const timestamp = Math.floor(Date.now() / 1000)
+    // Stripe SDK types mark scheme/signature/cryptoProvider as required, but
+    // runtime fills sane defaults — see stripe-node README example.
     const signature = stripe.webhooks.generateTestHeaderString({
       payload: webhookPayload,
       secret: process.env.STRIPE_WEBHOOK_SECRET!,
       timestamp,
-    })
+    } as Parameters<typeof stripe.webhooks.generateTestHeaderString>[0])
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
     const webhookRes = await fetch(`${baseUrl}/api/webhooks/stripe`, {

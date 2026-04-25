@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { fmtTime } from '@/lib/utils'
-import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/empty-state'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 

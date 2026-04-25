@@ -20,7 +20,7 @@ export default async function NewStudentPage() {
       </p>
       <h1 className="text-2xl font-semibold mb-1">Add Student</h1>
       <p className="text-sm text-muted-foreground mb-6">
-        Creates a student account without a password. The student can log in later using "Forgot Password" with their email.
+        Creates a student account without a password. The student can log in later using &ldquo;Forgot Password&rdquo; with their email.
       </p>
       <CreateAdminStudentForm experienceCodes={codes ?? []} />
     </div>
