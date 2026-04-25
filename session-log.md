@@ -3,7 +3,63 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 93 — 2026-04-24 21:13 [open]
+## Session 93 — 2026-04-25 07:25–08:45 (1.33 hrs)
+**Duration:** 1.33 hrs | **Points:** 8 (3.4: 8)
+**Task:** Phase 3.4 — enrollment notifications + low-enrollment cron
+
+**Completed:**
+- Re-estimated 3.4: 5 → 8 pts (+ cron route, vercel.json entry, threshold logic, two trigger paths). Phase 3 now 45 pts.
+- `src/lib/notifications/templates.ts` — three pure templates (`enrollmentConfirmation`, `adminEnrollmentAlert`, `lowEnrollmentWarning`). SMS body + email subject + email text + email HTML.
+- `src/lib/notifications/triggers.ts` — `notifyEnrollmentConfirmed(enrollmentId)` and `notifyLowEnrollmentCourses()`. Per-recipient/per-channel try/catch, errors logged & swallowed (Twilio outage cannot 500 the Stripe webhook). Caller-side idempotency only.
+- `src/app/api/cron/low-enrollment/route.ts` — same `CRON_SECRET` auth pattern as `expire-holds`. Returns `{ alerted: N }`.
+- `vercel.json` — second cron entry, daily 13:00 UTC.
+- `src/app/api/webhooks/stripe/route.ts` + `src/actions/enrollments.ts` (`adminEnrollStudent`) — call trigger after enrollment goes confirmed.
+- `src/app/api/test/enroll/route.ts` — added optional `notify: true` flag for tests.
+- `tests/enrollment-notifications.spec.ts` — 4 desktop tests (8 skipped by viewport design).
+
+**Bundled side-quests in same commit `f798f43`:**
+- Added Phase 5.10 — `/student/courses` calendar view (5 pts, tight scope) — pulled from V3 backlog. The 26-course season seed makes the list view unbrowsable.
+- `supabase/seeds/2026_season_courses.sql` — additive idempotent prod seed (NOT auto-loaded by `db reset`). 26 ASA 101 weekend courses May–Oct, 52 sessions. Verified in dev.
+- README "Database seeding" section.
+- Relaxed `tests/helpers.ts` Course Type regex to `/ASA 101/` (the season-seed upsert renamed the seeded course_type, breaking the previous regex).
+- Adjusted Session 92 duration to 0.75 hrs per Eric.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- `.env.local`: `NOTIFICATIONS_ENABLED=false` + Twilio/Resend creds (carryover)
+- `supabase db push` to remote (carryover from sessions 90/91/92)
+- 4.2 admin invite link still parked, needs re-scope to `/admin/users` consolidation
+- Full Playwright suite not run this session — Eric will run before next task
+
+**Next Steps:**
+1. **First thing next session:** apply the 3 code review bugs/cleanups (HTML escape in email templates, `confirmEnrollment` missing notify call, threshold ratio fix). Eric explicitly flagged these as "first thing next task."
+2. Run full Playwright suite (`npx playwright test`)
+3. Pick next feature: 5.10 calendar view (real student-facing UX pain) or 4.2 re-scope
+
+**Context:**
+- Pattern established for cron-driven notifications — daily 13:00 UTC slot; future cron triggers (3.7 session reminders) can copy the route + vercel.json shape directly.
+- Trigger functions never throw — they swallow internal errors and log. The contract is "best effort, never blocks the caller's primary write." Stripe webhook would 500 → retry → double-confirm if a notification could throw.
+- Mock buffer constraint from 3.3 still load-bearing: dispatcher MUST static-import `mock.ts` so the test API route and dispatcher share one module instance.
+- Seed test users have `phone: null`, so SMS dispatch correctly skips. Tests assert email-only paths until phone numbers populate.
+- Low-enrollment threshold (`14 days`, `< 50% capacity`) is a documented placeholder; real rule belongs to 5.8 (Andy decision). No cooldown column for V1 — cron sends daily while threshold met.
+- `notifyEnrollmentConfirmed` is wired into Stripe webhook + `adminEnrollStudent` (manual admin enroll). It is NOT wired into `confirmEnrollment` (admin "Confirm registered" button) — code review flagged this as a gap, queued as first thing next session.
+- Running the season seed locally renamed the seeded course type from "ASA 101 — Basic Keelboat Sailing" to "ASA 101 – Sailing Made Easy". `helpers.ts` regex relaxed; if you ever `supabase db reset`, the seed-name reverts and the test still passes.
+- Twilio toll-free numbers: faster verification + skip 10DLC monthly brand/campaign fees ($14/mo); slightly higher per-message but cheaper at SailBook volume. Worth using for 3.1.
+
+**Code Review:** 3 real findings + 3 cleanups (advisory). All open — queued as first thing next session per Eric.
+
+1. **bug** — `templates.ts:94+` HTML email templates interpolate user-supplied strings (student name, email, course title) into the HTML without escaping. Plaintext SMS/text bodies are fine. Names like `O'Brien` corrupt rendering; names with `<script>` are worse. Fix: small `escapeHtml()` helper wrapping every `${…}` in the HTML strings.
+
+2. **bug** — `confirmEnrollment` (admin "Confirm" button on `registered → confirmed`) does NOT fire `notifyEnrollmentConfirmed`. Trigger docstring says it covers all confirmation paths but I missed this third one. Fix: add `await notifyEnrollmentConfirmed(enrollmentId)` after the update in `src/actions/enrollments.ts:99-108`.
+
+3. **consistency** — `triggers.ts:219` threshold uses `Math.floor(capacity * 0.5)`, which is `0` for capacity=1 (alert never fires) and `1` for capacity=3 (1/3-full silently "fine"). ASA 101 capacity=4 isn't affected today, but worth fixing while in the file. Switch to ratio comparison: `enrolled / capacity < LOW_ENROLLMENT_RATIO`.
+
+4. **cleanup** — `triggers.ts:194+` low-enrollment cron is N+1 (sessions + enrollment count + maybe course_type per course). 26 active courses → ~52–78 round-trips daily. Fine for V1 cadence; fold into a single query when 5.8 redesigns the rule.
+
+5. **cleanup** — `triggers.ts:161,222` `daysUntilStart` math relies on UTC offset absorbing into `Math.round`. Fragile if cron schedule ever shifts toward 00:00 UTC. Compute from ISO date strings directly.
+
+6. **cleanup** — `supabase/seeds/2026_season_courses.sql:18,38` "prod-safe" framing in header is misleading while default `ADMIN_EMAIL = 'andy@ltsc.test'`. Script `RAISE EXCEPTION`s on prod (good) but the framing is wrong. Drop "prod-safe" or change default to `'CHANGE_ME@example.com'`.
 
 ## Session 92 — 2026-04-24 20:16–21:01 (0.75 hrs)
 **Duration:** 0.75 hrs | **Points:** 3 (3.3: 3)
