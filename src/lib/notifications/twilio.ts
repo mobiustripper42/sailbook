@@ -10,7 +10,6 @@ export async function sendSMS(params: SMSParams): Promise<NotificationResult> {
   }
 
   try {
-    // @ts-expect-error — twilio package added with task 3.1; remove this directive when installed.
     const twilioMod = await import('twilio')
     const client = twilioMod.default(sid, token)
     const msg = await client.messages.create({

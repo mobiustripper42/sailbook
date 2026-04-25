@@ -9,7 +9,6 @@ export async function sendEmail(params: EmailParams): Promise<NotificationResult
   }
 
   try {
-    // @ts-expect-error — resend package added with task 3.2; remove this directive when installed.
     const resendMod = await import('resend')
     const client = new resendMod.Resend(apiKey)
     const result = await client.emails.send({

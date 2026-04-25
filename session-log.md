@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 95 — 2026-04-25 15:28 [open]
+
 ## Session 94 — 2026-04-25 09:06–15:14 (1.00 hr, in-and-out — boat day)
 **Duration:** 1.00 hr | **Points:** 5 (5.10: 5)
 **Task:** Phase 5.10 student calendar view + session 93 code review fixups + 4.2 re-scope
