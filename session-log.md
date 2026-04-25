@@ -3,7 +3,46 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 95 — 2026-04-25 15:28 [open]
+## Session 95 — 2026-04-25 15:28–18:25 (0.67 hr, mostly offline — Eric configured Twilio/Resend)
+**Duration:** 0.67 hr | **Points:** 4 (3.1: 2, 3.2: 2)
+**Task:** Phase 3.1 + 3.2 install close-out + Open Sailing / bulk-edit design discussion
+
+**Completed:**
+- **Phase 3.1 + 3.2 done.** Eric configured Twilio + Resend accounts offline (real account, real number, real domain), all keys/IDs in `.env.local`. Ran `npm install twilio resend`.
+- Removed the placeholder `@ts-expect-error` directives from `src/lib/notifications/twilio.ts:13` and `src/lib/notifications/resend.ts:12` — they were load-bearing only while the npm packages were absent. Build was failing with "Unused @ts-expect-error directive" on first build of the session; the cleanup was queued explicitly in session 92's notes.
+- Commit `963b5e9`.
+
+**Design discussion (no implementation):**
+- **Open Sailing model.** Decided: 1 course per Wednesday with 1 session each (no schema change). Existing data model already supports it. Seed data needs to change. Deposit/cash pricing model stays scoped as Phase 5.2 (5 pts).
+- **Bulk price update.** New Phase 5 task (5.11, 8 pts, cuttable) — multi-select on `/admin/courses` + bulk-edit price. Single-field, narrow scope. Multi-field bulk edit is V3.
+- Both items lined up but NOT yet built — seed data change and PROJECT_PLAN.md update happen next session.
+
+**In Progress:** Nothing. Two items queued explicitly:
+- Open Sailing seed data rewrite (5 courses replacing c006, attendance/enrollment shifts, test selector update).
+- PROJECT_PLAN.md: add 5.11 bulk price update (8 pts cuttable), bump Phase 5 totals.
+
+**Blocked:**
+- `NOTIFICATIONS_ENABLED=true` flip — gated on Twilio Toll-Free Verification approval (multi-day form, see `docs/NOTIFICATION_SETUP.md`). Until then, dispatcher stays in mock mode.
+- `supabase db push` to remote (overdue 5 sessions).
+- Pre-existing instructor-invite Playwright failure (test-side, manual QA confirmed feature works).
+
+**Next Steps:**
+1. **Seed data change for Open Sailing** (small, ~30 min) — already planned out.
+2. **Add 5.11 bulk price update to PROJECT_PLAN.md.**
+3. **Then:** 4.2 `/admin/users` consolidation (8 pts, scope locked).
+4. Investigate instructor-invite test regression.
+5. Twilio `import` shape fix (see Code Review #1) — must land before `NOTIFICATIONS_ENABLED=true`.
+
+**Context:**
+- **Twilio v6 import shape is fragile.** Current code uses `twilioMod.default(sid, token)` after `await import('twilio')`. That works today via CJS/ESM interop but isn't robust. Code review recommended `const { Twilio } = await import('twilio'); new Twilio(sid, token)` (named import + constructor). Not blocking right now because `NOTIFICATIONS_ENABLED=false`, but must be fixed before any live SMS fires.
+- **Twilio is pinned to `^6.0.0`** which has zero patch releases. Code review flagged risk — `^6` will silently float across early-major breakages. Worth pinning to the exact version once it stabilizes.
+- **Resend import shape is correct** — `new resendMod.Resend(apiKey)` matches the package's named export.
+- **Open Sailing pricing reality (per Eric):** $65 night, optional $10 refundable deposit to hold spot + $50 cash to captain night-of, OR pay $65 in full. The deposit/cash split is Phase 5.2; full-price-via-Stripe path works in today's model. Seed will use $65 flat for now.
+- **Bulk-edit reality:** 26 ASA 101 + ~20 Open Sailing nights = a lot of hand-edits if prices change mid-season. Bulk price update covers the high-frequency pain; multi-field bulk edit is overkill for V2.
+
+**Code Review:** 1 bug (queued, non-blocking), 1 cleanup.
+1. **bug** `twilio.ts:14` — `twilioMod.default(sid, token)` leans on CJS/ESM interop. Switch to `const { Twilio } = await import('twilio'); new Twilio(sid, token)`. **Must fix before NOTIFICATIONS_ENABLED=true.**
+2. **cleanup** `package.json` — `twilio ^6.0.0` floats across early-major patches. Pin to the exact version (`6.0.0` or whatever resolved) until v6 settles.
 
 ## Session 94 — 2026-04-25 09:06–15:14 (1.00 hr, in-and-out — boat day)
 **Duration:** 1.00 hr | **Points:** 5 (5.10: 5)
