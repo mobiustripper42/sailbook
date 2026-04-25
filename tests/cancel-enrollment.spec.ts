@@ -41,13 +41,16 @@ test.describe('Student cancellation request', () => {
     test.skip(test.info().project.name !== 'desktop')
     test.setTimeout(90000)
 
-    const { courseId } = await createEnrolledCourse(browser, {
-      title: `Cancel List ${runId()}`,
-    })
+    const title = `Cancel List ${runId()}`
+    const { courseId } = await createEnrolledCourse(browser, { title })
 
     const studentCtx = await browser.newContext()
     const studentPage = await studentCtx.newPage()
     try {
+      // Force list view — the calendar pill doesn't surface the status badge.
+      await studentPage.addInitScript(() => {
+        try { localStorage.setItem('sailbook.courses-view', 'list') } catch {}
+      })
       await loginAs(studentPage, 'pw_student@ltsc.test', '/student/dashboard')
 
       // Request cancellation via the detail page
@@ -56,9 +59,10 @@ test.describe('Student cancellation request', () => {
       await studentPage.getByRole('button', { name: 'Yes, request cancellation' }).click()
       await expect(studentPage.getByText('Cancellation Requested')).toBeVisible({ timeout: 10000 })
 
-      // Check the courses list badge
+      // Check the courses list badge — filter by full unique title so we don't
+      // collide with leftover "Cancel List …" courses from prior runs.
       await studentPage.goto('/student/courses')
-      const courseCard = studentPage.locator('[data-testid="course-card"]').filter({ hasText: 'Cancel List' })
+      const courseCard = studentPage.locator('[data-testid="course-card"]').filter({ hasText: title })
       await expect(courseCard.getByText('Cancellation Requested')).toBeVisible()
     } finally {
       await studentCtx.close()

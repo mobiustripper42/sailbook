@@ -216,8 +216,11 @@ export async function notifyLowEnrollmentCourses(): Promise<number> {
     }
 
     const enrolled = enrolledCount ?? 0
-    const threshold = Math.floor(course.capacity * LOW_ENROLLMENT_RATIO)
-    if (enrolled >= threshold) continue
+    // Ratio comparison, not Math.floor(capacity * ratio) — at capacity=1
+    // floor was 0 (alert never fires) and at capacity=3 floor was 1 (1/3
+    // full silently "fine"). 0/0 capacity courses are treated as not low.
+    if (course.capacity <= 0) continue
+    if (enrolled / course.capacity >= LOW_ENROLLMENT_RATIO) continue
 
     const start = new Date(firstSession.date)
     const daysUntilStart = Math.max(

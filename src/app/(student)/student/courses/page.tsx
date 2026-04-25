@@ -1,37 +1,10 @@
 export const dynamic = 'force-dynamic'
 
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { Badge } from '@/components/ui/badge'
-import { EmptyState } from '@/components/empty-state'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-
-function formatDateRange(dates: string[]): string {
-  if (dates.length === 0) return 'No sessions scheduled'
-  const sorted = [...dates].sort()
-  const fmt = (d: string) =>
-    new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  if (sorted.length === 1) return fmt(sorted[0])
-  return `${fmt(sorted[0])} – ${fmt(sorted[sorted.length - 1])}`
-}
-
-function enrollmentStatusLabel(status: string): string {
-  if (status === 'registered') return 'Pending confirmation'
-  if (status === 'confirmed') return 'Enrolled'
-  if (status === 'cancelled') return 'Cancelled'
-  if (status === 'completed') return 'Completed'
-  if (status === 'cancel_requested') return 'Cancellation Requested'
-  return status
-}
+import { CoursesCardList, type CourseCardData } from '@/components/student/courses-card-list'
+import { CoursesCalendar } from '@/components/student/courses-calendar'
+import { CoursesViewSwitcher } from '@/components/student/courses-view-switcher'
 
 export default async function CourseBrowsePage() {
   const supabase = await createClient()
@@ -83,90 +56,38 @@ export default async function CourseBrowsePage() {
     myEnrollments?.map(({ course_id, status }: { course_id: string; status: string }) => [course_id, status]) ?? []
   )
 
+  const cardData: CourseCardData[] = visibleCourses.map((c) => {
+    const type = c.course_types as unknown as { name: string; short_code: string; description: string | null } | null
+    const instructor = c.instructor as unknown as { first_name: string; last_name: string } | null
+    const sessions = (c.sessions as unknown as { date: string }[]) ?? []
+    const activeEnrollments = countMap.get(c.id) ?? 0
+    const spotsRemaining = c.capacity - activeEnrollments
+    return {
+      id: c.id,
+      title: c.title,
+      typeName: type?.name ?? null,
+      typeShortCode: type?.short_code ?? null,
+      typeDescription: type?.description ?? null,
+      instructorName: instructor ? `${instructor.first_name} ${instructor.last_name}` : null,
+      capacity: c.capacity,
+      price: c.price,
+      sessionDates: sessions.map((s) => s.date),
+      myStatus: enrollmentMap.get(c.id) ?? null,
+      spotsRemaining,
+      isFull: spotsRemaining <= 0,
+    }
+  })
+
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-semibold">Available Courses</h1>
       </div>
 
-      {visibleCourses.length === 0 ? (
-        <EmptyState message="No courses are available right now. Check back soon." />
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleCourses.map((c) => {
-            const type = c.course_types as unknown as { name: string; short_code: string; description: string | null } | null
-            const instructor = c.instructor as unknown as { first_name: string; last_name: string } | null
-            const sessions = (c.sessions as unknown as { date: string }[]) ?? []
-
-            const activeEnrollments = countMap.get(c.id) ?? 0
-            const spotsRemaining = c.capacity - activeEnrollments
-            const isFull = spotsRemaining <= 0
-            const myStatus = enrollmentMap.get(c.id)
-            const isEnrolled = myStatus !== undefined
-
-            return (
-              <Card key={c.id} size="sm" className="flex flex-col" data-testid="course-card">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-base leading-snug">
-                      {c.title ?? type?.name ?? '—'}
-                    </CardTitle>
-                    {isEnrolled ? (
-                      <Badge variant={myStatus === 'confirmed' ? 'ok' : myStatus === 'cancel_requested' ? 'warn' : 'neutral'} className="shrink-0">
-                        {enrollmentStatusLabel(myStatus!)}
-                      </Badge>
-                    ) : isFull ? (
-                      <Badge variant="neutral" className="shrink-0">Full</Badge>
-                    ) : (
-                      <span className="text-xs text-muted-foreground shrink-0">
-                        {spotsRemaining} spot{spotsRemaining !== 1 ? 's' : ''} left
-                      </span>
-                    )}
-                  </div>
-                  {c.title && type?.name && (
-                    <CardDescription>{type.name}</CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent className="flex-1 space-y-2 text-sm">
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>{sessions.length === 1 ? 'Date' : 'Dates'}</span>
-                    <span className="text-foreground font-medium">
-                      {formatDateRange(sessions.map((s) => s.date))}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Sessions</span>
-                    <span className="text-foreground">{sessions.length}</span>
-                  </div>
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Instructor</span>
-                    <span className="text-foreground">
-                      {instructor ? `${instructor.first_name} ${instructor.last_name}` : '—'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Price</span>
-                    <span className="text-foreground font-medium">
-                      {c.price != null ? `$${c.price}` : '—'}
-                    </span>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  {!isEnrolled && isFull ? (
-                    <Button className="w-full" disabled>Course Full</Button>
-                  ) : (
-                    <Button asChild className="w-full">
-                      <Link href={`/student/courses/${c.id}`}>
-                        {isEnrolled ? 'View' : 'View & Enroll'}
-                      </Link>
-                    </Button>
-                  )}
-                </CardFooter>
-              </Card>
-            )
-          })}
-        </div>
-      )}
+      <CoursesViewSwitcher
+        calendar={<CoursesCalendar courses={cardData} />}
+        list={<CoursesCardList courses={cardData} />}
+      />
     </div>
   )
 }

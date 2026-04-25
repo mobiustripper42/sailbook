@@ -156,7 +156,7 @@ Clean onboarding. Richer student and instructor records.
 | # | Task | Effort | Notes |
 |---|------|--------|-------|
 | 4.1 | ~~Instructor invite link — `invites` table, single shared reusable token per role, auto-sets `is_instructor`~~ | 3 | [x] <!-- completed 2026-04-23 --> Design diverged from "one-time token" to single shared reusable link (admin regenerates to revoke). `invites` PK on role + SECURITY DEFINER `accept_invite` RPC. 15 pgTAP + 5 Playwright tests green. Reusable for 4.2 admin invite. |
-| 4.2 | Admin invite link — same pattern for admin role | 2 | Button on admin user management page. Reuses 4.1 infrastructure. |
+| 4.2 | `/admin/users` consolidation — unified users page with role filter (Admin / Instructor / Student), two collapsed invite panels (admin + instructor), column sorting, replaces `/admin/students` + `/admin/instructors` | 8 | Re-scoped from 2 → 8 pts (session 94). Old `/admin/students` + `/admin/instructors` routes deleted (no redirects — nothing bookmarked). Column sorting over search. Reuses 4.1 invite infrastructure. |
 | 4.3 | Student profile expansion — classes taken, editable ASA number, experience level from codes table | 5 | Profile page redesign. Experience level pulls from codes table (1.7). |
 | 4.4a | ~~Admin-created student profiles — passwordless auth row + `auth_source` discriminator, admin "Add Student" form~~ | 5 | [x] <!-- completed 2026-04-22 --> DEC-024. service-role createUser (no password, email_confirm: true). auth_source col on profiles. |
 | 4.4b | ~~Admin-initiated enrollment + manual payment — student picker on course page, enrollment → confirmed, payment_method col~~ | 5 | [x] <!-- completed 2026-04-22 --> DEC-025. Bypasses Stripe entirely. Partial UNIQUE on stripe_checkout_session_id. payment_method: cash/check/venmo/stripe_manual. |
@@ -166,7 +166,7 @@ Clean onboarding. Richer student and instructor records.
 | 4.8 | ~~Cookie-based theme sync~~ | 2 | [x] <!-- removed 2026-04-15 --> Superseded by DEC-020: theme is localStorage-only per device. No cross-device sync, no FOUC problem to solve. |
 | 4.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on profile expansion pages, invite flow, instructor onboarding. |
 
-**Phase 4 total: 36 pts** (updated: 4.4 split into 4.4a+4.4b = 10 pts, was 8)
+**Phase 4 total: 42 pts** (updated session 94: 4.2 re-estimated 2 → 8 pts; 4.4 was split into 4.4a+4.4b = 10 pts)
 **Projected hours: ~11 hrs**
 
 **Ejection point:** Instructors get proper onboarding. Student profiles are richer. Instructor notes captured. Admin can create students for non-technical users.

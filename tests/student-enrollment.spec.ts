@@ -6,6 +6,11 @@ import { loginAs, runId, createTestCourse } from './helpers';
 test.describe('Student — browse courses', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'pw_student@ltsc.test', '/student/dashboard');
+    // Force list view — the calendar is the default on desktop/tablet but
+    // these tests assert against list-view UI (cards, badges, full titles).
+    await page.addInitScript(() => {
+      try { localStorage.setItem('sailbook.courses-view', 'list') } catch {}
+    });
   });
 
   test('shows active seed courses on browse page', async ({ page }) => {
@@ -175,6 +180,9 @@ test.describe('Student — capacity enforcement', () => {
     const jordanCtx = await browser.newContext();
     try {
       const jordanPage = await jordanCtx.newPage();
+      await jordanPage.addInitScript(() => {
+        try { localStorage.setItem('sailbook.courses-view', 'list') } catch {}
+      });
       await loginAs(jordanPage, 'jordan@ltsc.test', '/student/dashboard');
       await jordanPage.goto('/student/courses');
       const card = jordanPage.locator('[data-slot="card"]').filter({ hasText: title });

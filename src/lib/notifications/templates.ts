@@ -62,6 +62,20 @@ function dollars(n: number | null): string {
   return `$${n.toFixed(2)}`
 }
 
+// Escape user-supplied strings before they land in an email HTML body.
+// Names like O'Brien render fine without this; anything containing &, <, >,
+// or quotes will not. Defense in depth — every `${…}` in an emailHtml string
+// goes through this.
+function esc(s: string | number | null | undefined): string {
+  if (s === null || s === undefined) return ''
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 export function enrollmentConfirmation(data: EnrollmentConfirmationData): Rendered {
   const dateStr = formatDate(data.firstSessionDate)
   const timeStr = formatTime(data.firstSessionStart)
@@ -91,12 +105,12 @@ export function enrollmentConfirmation(data: EnrollmentConfirmationData): Render
   const emailText = lines.join('\n')
 
   const emailHtml = `
-<p>Hi ${data.studentFirstName},</p>
-<p>You're enrolled in <strong>${data.courseTitle}</strong>.</p>
+<p>Hi ${esc(data.studentFirstName)},</p>
+<p>You're enrolled in <strong>${esc(data.courseTitle)}</strong>.</p>
 <p>
-  <strong>First session:</strong> ${when}<br>
-  <strong>Location:</strong> ${where}
-  ${data.amountDollars !== null ? `<br><strong>Amount:</strong> ${dollars(data.amountDollars)}` : ''}
+  <strong>First session:</strong> ${esc(when)}<br>
+  <strong>Location:</strong> ${esc(where)}
+  ${data.amountDollars !== null ? `<br><strong>Amount:</strong> ${esc(dollars(data.amountDollars))}` : ''}
 </p>
 <p><a href="https://sailbook.live/student/courses">View your schedule</a></p>
 <p>— Simply Sailing</p>`.trim()
@@ -124,11 +138,11 @@ export function adminEnrollmentAlert(data: AdminEnrollmentAlertData): Rendered {
   ].join('\n')
 
   const emailHtml = `
-<p><strong>${data.studentFullName}</strong> just enrolled.</p>
+<p><strong>${esc(data.studentFullName)}</strong> just enrolled.</p>
 <p>
-  <strong>Course:</strong> ${data.courseTitle}<br>
-  <strong>Email:</strong> ${data.studentEmail}<br>
-  <strong>Payment:</strong> ${data.paymentMethod} (${amount})
+  <strong>Course:</strong> ${esc(data.courseTitle)}<br>
+  <strong>Email:</strong> ${esc(data.studentEmail)}<br>
+  <strong>Payment:</strong> ${esc(data.paymentMethod)} (${esc(amount)})
 </p>
 <p><a href="https://sailbook.live/admin/courses">Admin view</a></p>`.trim()
 
@@ -154,10 +168,10 @@ export function lowEnrollmentWarning(data: LowEnrollmentWarningData): Rendered {
   ].join('\n')
 
   const emailHtml = `
-<p><strong>${data.courseTitle}</strong> is below half capacity with the start date approaching.</p>
+<p><strong>${esc(data.courseTitle)}</strong> is below half capacity with the start date approaching.</p>
 <p>
-  <strong>Start date:</strong> ${dateStr} (${data.daysUntilStart} days out)<br>
-  <strong>Enrolled:</strong> ${data.enrolledCount} of ${data.capacity}
+  <strong>Start date:</strong> ${esc(dateStr)} (${esc(data.daysUntilStart)} days out)<br>
+  <strong>Enrolled:</strong> ${esc(data.enrolledCount)} of ${esc(data.capacity)}
 </p>
 <p><a href="https://sailbook.live/admin/courses">Admin view</a></p>`.trim()
 

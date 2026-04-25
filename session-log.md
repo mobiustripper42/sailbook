@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 94 — 2026-04-25 09:06 [open]
+
 ## Session 93 — 2026-04-25 07:25–08:45 (1.33 hrs)
 **Duration:** 1.33 hrs | **Points:** 8 (3.4: 8)
 **Task:** Phase 3.4 — enrollment notifications + low-enrollment cron

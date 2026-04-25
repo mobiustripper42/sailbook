@@ -22,11 +22,26 @@ Twilio starts you on a trial account: free credit (~$15), one free trial number,
 
 Trial is fine for building and testing 3.3–3.9. **Upgrade before go-live** (before 3.14 / Phase 3 close). Upgrade is a one-click "Upgrade" button in the console — adds a payment method, drops the prefix, removes the verified-recipient restriction.
 
-### 3. Buy a phone number
-- Console → Phone Numbers → Manage → Buy a number
-- Country: US. Capabilities: SMS (MMS optional).
-- Pick a local number — area code 216 (Cleveland) reads better to Simply Sailing students than a random one.
-- Cost: ~$1.15/mo. The trial credit covers this for now.
+### 3. Buy a phone number — decision point: toll-free vs local
+
+Two viable paths. Pick one for V1; nothing stops you from buying a second number later.
+
+**Toll-free (recommended for V1):**
+- Console → Phone Numbers → Manage → Buy a number → check the **Toll-Free** box
+- Country: US. Capabilities: SMS.
+- Prefix will be 833/844/855/866/877/888 — not local, but skips A2P 10DLC entirely (no $14/mo brand + campaign fees).
+- Cost: ~$2/mo for the number. Per-message rate is slightly higher than 10DLC, but at SailBook's volume the avoided 10DLC fees more than cover it.
+- **Verification required before sending at volume.** Console → Messaging → Regulatory Compliance → Toll-Free Verification. One-time form: business name, website, use case, sample message bodies, opt-in description. Approval takes a few business days. Unverified toll-free numbers can send small volumes for testing but get rate-limited and may be filtered.
+- Tradeoff: no local-area familiarity. Some students may not recognize the number on first text. Acceptable cost for skipping 10DLC overhead in V1.
+
+**Local 216 (Cleveland) — alternative:**
+- Console → Phone Numbers → Manage → Buy a number → leave **Local** selected
+- Area code 216 reads better to Simply Sailing students than a random one.
+- Cost: ~$1.15/mo for the number.
+- Requires A2P 10DLC registration before sending business messages reliably: Brand registration ($4 one-time) + Campaign registration (~$10/mo). Total carrier fees ~$14/mo on top of usage.
+- Pick this path later if local presence matters more than the monthly fee — easy to add a second number once volume justifies it.
+
+Either way, the trial credit covers the first month of number rental.
 
 ### 4. Grab credentials
 From Console home (twilio.com/console):
@@ -65,9 +80,15 @@ Resend will show you a list of DNS records to add — typically a few TXT record
 Assumes `docs/EMAIL_SETUP.md` (Cloudflare Email Routing) was completed first, so MX records are already present.
 
 - Cloudflare dashboard → `sailbook.live` → DNS → Records
-- **SPF — check before adding.** Look for an existing TXT record starting with `v=spf1`. If one exists, edit it to add Resend's include value rather than creating a second record — a domain with two SPF records fails validation on most mail servers. If none exists, add Resend's as a new TXT record. Result looks like:
+- **SPF — check before adding.** Look for an existing TXT record starting with `v=spf1`. If one exists, edit it to add Resend's include value rather than creating a second record — a domain with two SPF records fails validation on most mail servers. If none exists, add Resend's as a new TXT record.
+
+  Cloudflare Email Routing leaves a Google SPF record in place if Gmail is the destination. Merge Resend into it:
   ```
-  v=spf1 include:_spf.resend.com ~all
+  # Before (Google only)
+  v=spf1 include:_spf.google.com ~all
+
+  # After (Google + Resend)
+  v=spf1 include:_spf.google.com include:_spf.resend.com ~all
   ```
   (Use whatever `include:` value Resend shows you — it may differ.)
 - **DKIM — add as a new record.** Resend's DKIM uses its own selector (e.g. `resend._domainkey`). Copy Resend's exact host/value.
@@ -105,7 +126,8 @@ Resend dashboard → "Send test email" — send to your own address. Confirms do
 
 Twilio:
 - [ ] Account created
-- [ ] Phone number purchased (216 area code)
+- [ ] Phone number purchased (toll-free for V1, or 216 local + 10DLC if going local)
+- [ ] Toll-Free Verification submitted (if toll-free) — approval takes a few business days
 - [ ] Credentials in `.env.local`
 - [ ] Test SMS received
 - [ ] (Before go-live) Upgraded from trial

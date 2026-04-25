@@ -103,6 +103,9 @@ export async function confirmEnrollment(enrollmentId: string, courseId: string) 
     .update({ status: 'confirmed', updated_at: new Date().toISOString() })
     .eq('id', enrollmentId)
   if (error) return { error: error.message }
+
+  await notifyEnrollmentConfirmed(enrollmentId)
+
   revalidatePath(`/admin/courses/${courseId}`)
   return { error: null }
 }
