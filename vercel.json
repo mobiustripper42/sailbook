@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/expire-holds",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/low-enrollment",
+      "schedule": "0 13 * * *"
     }
   ]
 }

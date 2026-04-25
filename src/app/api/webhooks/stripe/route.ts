@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { notifyEnrollmentConfirmed } from '@/lib/notifications/triggers'
 import type Stripe from 'stripe'
 
 export async function POST(req: NextRequest) {
@@ -108,6 +109,10 @@ export async function POST(req: NextRequest) {
       console.error('Webhook: failed to create attendance records:', attendanceErr.message)
     }
   }
+
+  // Fire-and-await: trigger swallows its own errors, so a notification
+  // failure can't 500 the webhook (Stripe would then retry the whole flow).
+  await notifyEnrollmentConfirmed(enrollment.id)
 
   return NextResponse.json({ received: true })
 }

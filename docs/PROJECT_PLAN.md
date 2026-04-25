@@ -130,7 +130,7 @@ Users know what's happening. Auth is production-grade.
 | 3.1 | Twilio setup — account, phone number, API keys | 2 | Test mode available. |
 | 3.2 | Resend setup — account, API key, domain verification for sailbook.live | 2 | Cloudflare DNS records. Set up info@sailbook.live email routing. |
 | 3.3 | ~~Notification service — shared module for SMS (Twilio) + email (Resend) with mock mode for testing~~ | 3 | [x] <!-- completed 2026-04-24 --> Dispatcher with `NOTIFICATIONS_ENABLED` gate. Mock buffer + dev-only test API route. Twilio/Resend lazy-imported behind `@ts-expect-error` (remove in 3.1/3.2). 4 Playwright tests. |
-| 3.4 | Enrollment notifications — SMS + email on confirmed, plus admin alert on new enrollment, plus low enrollment warning to admin | 5 | Multiple triggers through one service. Admin shouldn't have to log in to know someone signed up. Andy request. |
+| 3.4 | Enrollment notifications — SMS + email on confirmed, plus admin alert on new enrollment, plus low enrollment warning to admin | 8 | Re-estimated from 5 → 8 in session 93: scope includes new cron route + vercel.json entry + threshold logic + both Stripe webhook and admin-enroll trigger paths. Admin shouldn't have to log in to know someone signed up. Andy request. |
 | 3.5 | Session cancellation notice — SMS + email to enrolled students | 3 | Includes reason, makeup info if available. |
 | 3.6 | Makeup session assignment — SMS + email to affected students | 3 | New date/time/location in message. |
 | 3.7 | Session reminder — SMS 24 hours and 1 week before session start | 5 | Scheduled job (cron). DEC: Vercel Cron vs Supabase Edge Function. |
@@ -142,7 +142,7 @@ Users know what's happening. Auth is production-grade.
 | 3.13 | README: Twilio/Resend setup instructions — keys, sender config | 1 | Document Twilio phone number, Resend API key, domain verification, and sender config for new devs. |
 | 3.14 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on notification preference UI, new auth flows (email verify, OAuth). |
 
-**Phase 3 total: 42 pts**
+**Phase 3 total: 45 pts** (was 42; +3 for 3.4 re-estimate)
 **Projected hours: ~16 hrs**
 
 **Ejection point:** Students get confirmations, cancellation notices, and reminders. Auth is solid with email verification and OAuth. Security audited. The school runs without phone calls.
@@ -188,9 +188,10 @@ Flexible pricing, enrollment safety rails, and waitlist.
 | 5.7 | Waitlist — full course → join waitlist → notify on opening | 8 | New table, student UI, admin visibility, notification on spot opening. Depends on Phase 3 notifications. Andy request. |
 | 5.8 | Low enrollment warning — dashboard tile for courses below minimum threshold approaching start date | 2 | Same pattern as "courses without instructors." Meaningful only with payments live. Andy request. |
 | 5.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on waitlist UI, prerequisite warning flow, discount code display on checkout. |
+| 5.10 | Student `/student/courses` calendar view — month grid (desktop/tablet) + list fallback (mobile), click weekend → course detail | 5 | Tight scope: read-only month, courses-by-weekend, calendar/list toggle, mobile = list. With 26+ active courses on the season, the list view is unbrowsable. Andy will see this on the dev site once 2026 season is seeded. Pull forward from V3 backlog. |
 
-**Phase 5 total: 34 pts**
-**Projected hours: ~12 hrs**
+**Phase 5 total: 39 pts** (was 34; +5 for 5.10)
+**Projected hours: ~14 hrs**
 
 **Ejection point:** Pricing is flexible. Enrollment has safety rails. Prerequisite and waitlist systems exist. Low enrollment flagged early.
 
@@ -272,12 +273,12 @@ Transforms the app from scheduling into a learning management tool.
 | 0 — Infrastructure | 70 | ~27 hrs | Dev environment ready |
 | 1 — V1 Fixes | 51 | ~19 hrs | V1 is solid |
 | 2 — Payments | 38 | ~14 hrs | App makes money |
-| 3 — Notifications + Auth | 37 | ~14 hrs | Users stay informed, auth hardened, security audited |
+| 3 — Notifications + Auth | 40 | ~15 hrs | Users stay informed, auth hardened, security audited |
 | 4 — Identity | 27 | ~10 hrs | Onboarding is clean |
-| 5 — Pricing | 29 | ~11 hrs | Flexible pricing, waitlist, prereqs |
+| 5 — Pricing | 34 | ~13 hrs | Flexible pricing, waitlist, prereqs, student calendar view |
 | 6 — Polish | 44 | ~17 hrs | Professional, accessible, navigable, security verified |
 | 7 — Skills | 40–60 | ~15–23 hrs | Learning management |
-| **Total (0–6)** | **290** | **~110 hrs** | |
+| **Total (0–6)** | **298** | **~113 hrs** | |
 
 At V1 velocity (0.38 hrs/pt): ~110 hours for Phases 0–6.
 At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–2 (critical path to payments).
@@ -291,11 +292,11 @@ At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–
 | 0 — Infrastructure | 70 | ~27 | ~5.1 | 0.07 | Setup sprint; not a velocity signal (see RETROSPECTIVES.md) |
 | 1 — V1 Fixes | 58 | ~19 | ~14.9 | **0.26** | +8 polish credit (session 49); 0.23 all-in; see RETROSPECTIVES.md |
 | 2 — Payments | 38 | ~14 | — | — | |
-| 3 — Notifications | 37 | ~14 | — | — | |
+| 3 — Notifications | 40 | ~15 | — | — | |
 | 4 — Identity | 27 | ~10 | — | — | |
-| 5 — Pricing | 29 | ~11 | — | — | |
+| 5 — Pricing | 34 | ~13 | — | — | |
 | 6 — Polish | 44 | ~17 | — | — | |
-| **Total** | **290** | **~110** | — | — | Planning baseline: 0.26–0.35 hrs/pt (Phase 1 pace to conservative) |
+| **Total** | **298** | **~113** | — | — | Planning baseline: 0.26–0.35 hrs/pt (Phase 1 pace to conservative) |
 
 ---
 

@@ -63,6 +63,43 @@ Use any future expiry date and any 3-digit CVC.
 
 ---
 
+## Database Seeding
+
+Two distinct seeding paths — don't confuse them.
+
+### `supabase/seed.sql` — test data for local dev
+
+Auto-runs on `supabase db reset`. Contains demo users (Andy, Mike, Lisa, etc.), Playwright test users (`pw_admin`, `pw_student`, …), and seed courses. **Never** run against prod.
+
+### `supabase/seeds/*.sql` — manual additive seeds (prod-safe)
+
+Idempotent scripts you run by hand. Not auto-loaded — won't run on `db reset`, won't run on deploy.
+
+Currently:
+
+| File | Purpose |
+|------|---------|
+| `supabase/seeds/2026_season_courses.sql` | ASA 101 weekend courses, May–Oct 2026 (26 courses, 52 sessions). |
+
+**Run against local dev** (no Postgres client install needed):
+```bash
+docker exec -i supabase_db_sailbook psql -U postgres -d postgres < supabase/seeds/2026_season_courses.sql
+```
+
+Or with `psql` installed (`sudo apt install postgresql-client`):
+```bash
+psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -f supabase/seeds/2026_season_courses.sql
+```
+
+**Run against prod:** edit `ADMIN_EMAIL` at the top of the script to a real admin profile email, then:
+```bash
+psql "<prod connection string>" -f supabase/seeds/2026_season_courses.sql
+```
+
+Look for `NOTICE: 2026 season seed: N course(s) inserted, M already existed (skipped)` at the end. Re-running is safe — `inserted=0, skipped=N` means everything's already there.
+
+---
+
 ## Running Tests
 
 ```bash

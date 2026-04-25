@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { MANUAL_PAYMENT_METHODS } from '@/lib/constants'
+import { notifyEnrollmentConfirmed } from '@/lib/notifications/triggers'
 
 export async function adminEnrollStudent(
   _: unknown,
@@ -88,6 +89,8 @@ export async function adminEnrollStudent(
     })
     if (paymentError) return `Enrollment created but payment record failed: ${paymentError.message}`
   }
+
+  await notifyEnrollmentConfirmed(enrollment.id)
 
   revalidatePath(`/admin/courses/${courseId}`)
   return null

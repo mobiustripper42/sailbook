@@ -3,20 +3,24 @@
  * Gated behind NODE_ENV !== 'development'. Never deploy with NODE_ENV=development.
  *
  * POST /api/test/enroll
- * Body: { courseId: string; studentEmail: string }
+ * Body: { courseId: string; studentEmail: string; notify?: boolean }
+ *   - notify: when true, fires notifyEnrollmentConfirmed after the upsert
+ *     (used by enrollment-notifications.spec.ts to exercise the trigger)
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/types'
+import { notifyEnrollmentConfirmed } from '@/lib/notifications/triggers'
 
 export async function POST(req: NextRequest) {
   if (process.env.NODE_ENV !== 'development') {
     return NextResponse.json({ error: 'Not available' }, { status: 403 })
   }
 
-  const { courseId, studentEmail } = await req.json() as {
+  const { courseId, studentEmail, notify } = await req.json() as {
     courseId: string
     studentEmail: string
+    notify?: boolean
   }
 
   if (!courseId || !studentEmail) {
@@ -80,6 +84,10 @@ export async function POST(req: NextRequest) {
         { onConflict: 'session_id,enrollment_id' }
       )
     if (attendanceErr) return NextResponse.json({ error: attendanceErr.message }, { status: 500 })
+  }
+
+  if (notify) {
+    await notifyEnrollmentConfirmed(enrollmentId)
   }
 
   return NextResponse.json({ enrollmentId })
