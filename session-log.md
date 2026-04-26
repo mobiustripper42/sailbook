@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 96 — 2026-04-25 18:48 [open]
+
 ## Session 95 — 2026-04-25 15:28–18:25 (0.67 hr, mostly offline — Eric configured Twilio/Resend)
 **Duration:** 0.67 hr | **Points:** 4 (3.1: 2, 3.2: 2)
 **Task:** Phase 3.1 + 3.2 install close-out + Open Sailing / bulk-edit design discussion

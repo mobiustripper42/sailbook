@@ -10,8 +10,10 @@ export async function sendSMS(params: SMSParams): Promise<NotificationResult> {
   }
 
   try {
-    const twilioMod = await import('twilio')
-    const client = twilioMod.default(sid, token)
+    // Named import + constructor — avoids leaning on CJS/ESM default-interop
+    // (`twilioMod.default(...)` works today but is fragile across bundlers).
+    const { Twilio } = await import('twilio')
+    const client = new Twilio(sid, token)
     const msg = await client.messages.create({
       body: params.body,
       from,

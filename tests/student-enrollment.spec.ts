@@ -17,7 +17,7 @@ test.describe('Student — browse courses', () => {
     await page.goto('/student/courses');
     await expect(page.getByText('ASA 101 — Weekend Intensive (May)')).toBeVisible();
     await expect(page.getByText('ASA 101 — Evening Series (May)')).toBeVisible();
-    await expect(page.getByText('Open Sailing — July Wednesdays')).toBeVisible();
+    await expect(page.getByText('Open Sailing — Jul 1', { exact: true })).toBeVisible();
   });
 
   test('draft and completed courses are not shown', async ({ page }) => {

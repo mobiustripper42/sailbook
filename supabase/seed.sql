@@ -155,18 +155,21 @@ INSERT INTO auth.identities (id, user_id, provider_id, identity_data, provider, 
   ('f1000000-0000-0000-0000-000000000003','f1000000-0000-0000-0000-000000000003','pw_student@ltsc.test',   '{"sub":"f1000000-0000-0000-0000-000000000003","email":"pw_student@ltsc.test"}',   'email',now(),now(),now()),
   ('f1000000-0000-0000-0000-000000000004','f1000000-0000-0000-0000-000000000004','pw_student2@ltsc.test',  '{"sub":"f1000000-0000-0000-0000-000000000004","email":"pw_student2@ltsc.test"}',  'email',now(),now(),now());
 
-INSERT INTO public.profiles (id, email, first_name, last_name, is_admin, is_instructor, is_student, experience_level, asa_number, theme_preference) VALUES
-  ('a1000000-0000-0000-0000-000000000001', 'andy@ltsc.test',         'Andy',   'Kaminski',   true,  false, false, null,           null,     'dark'),
-  ('a1000000-0000-0000-0000-000000000002', 'mike@ltsc.test',         'Mike',   'Theriault',  false, true,  false, null,           null,     'dark'),
-  ('a1000000-0000-0000-0000-000000000003', 'lisa@ltsc.test',         'Lisa',   'Chen',       false, true,  false, null,           null,     'dark'),
-  ('a1000000-0000-0000-0000-000000000004', 'chris@ltsc.test',        'Chris',  'Marino',     false, true,  true,  'intermediate', null,     'dark'),
-  ('a1000000-0000-0000-0000-000000000005', 'sam@ltsc.test',          'Sam',    'Davies',     false, false, true,  'beginner',     '101234', 'dark'),
-  ('a1000000-0000-0000-0000-000000000006', 'alex@ltsc.test',         'Alex',   'Rivera',     false, false, true,  'beginner',     null,     'dark'),
-  ('a1000000-0000-0000-0000-000000000007', 'jordan@ltsc.test',       'Jordan', 'Park',       false, false, true,  null,           null,     'dark'),
-  ('f1000000-0000-0000-0000-000000000001', 'pw_admin@ltsc.test',     'PW',     'Admin',      true,  false, false, null,           null,     'dark'),
-  ('f1000000-0000-0000-0000-000000000002', 'pw_instructor@ltsc.test','PW',     'Instructor', false, true,  false, null,           null,     'dark'),
-  ('f1000000-0000-0000-0000-000000000003', 'pw_student@ltsc.test',   'PW',     'Student',    false, false, true,  null,           null,     'dark'),
-  ('f1000000-0000-0000-0000-000000000004', 'pw_student2@ltsc.test',  'PW',     'Student2',   false, false, true,  null,           null,     'dark');
+-- All seed users share Eric's phone number — every notification triggered in
+-- dev fires an SMS to him, which is the smoke test built into the seed data.
+-- Replace with per-user numbers if you ever need to tell who got the SMS.
+INSERT INTO public.profiles (id, email, first_name, last_name, phone, is_admin, is_instructor, is_student, experience_level, asa_number, theme_preference) VALUES
+  ('a1000000-0000-0000-0000-000000000001', 'andy@ltsc.test',         'Andy',   'Kaminski',   '+14403631199', true,  false, false, null,           null,     'dark'),
+  ('a1000000-0000-0000-0000-000000000002', 'mike@ltsc.test',         'Mike',   'Theriault',  '+14403631199', false, true,  false, null,           null,     'dark'),
+  ('a1000000-0000-0000-0000-000000000003', 'lisa@ltsc.test',         'Lisa',   'Chen',       '+14403631199', false, true,  false, null,           null,     'dark'),
+  ('a1000000-0000-0000-0000-000000000004', 'chris@ltsc.test',        'Chris',  'Marino',     '+14403631199', false, true,  true,  'intermediate', null,     'dark'),
+  ('a1000000-0000-0000-0000-000000000005', 'sam@ltsc.test',          'Sam',    'Davies',     '+14403631199', false, false, true,  'beginner',     '101234', 'dark'),
+  ('a1000000-0000-0000-0000-000000000006', 'alex@ltsc.test',         'Alex',   'Rivera',     '+14403631199', false, false, true,  'beginner',     null,     'dark'),
+  ('a1000000-0000-0000-0000-000000000007', 'jordan@ltsc.test',       'Jordan', 'Park',       '+14403631199', false, false, true,  null,           null,     'dark'),
+  ('f1000000-0000-0000-0000-000000000001', 'pw_admin@ltsc.test',     'PW',     'Admin',      '+14403631199', true,  false, false, null,           null,     'dark'),
+  ('f1000000-0000-0000-0000-000000000002', 'pw_instructor@ltsc.test','PW',     'Instructor', '+14403631199', false, true,  false, null,           null,     'dark'),
+  ('f1000000-0000-0000-0000-000000000003', 'pw_student@ltsc.test',   'PW',     'Student',    '+14403631199', false, false, true,  null,           null,     'dark'),
+  ('f1000000-0000-0000-0000-000000000004', 'pw_student2@ltsc.test',  'PW',     'Student2',   '+14403631199', false, false, true,  null,           null,     'dark');
 
 -- ============================================================
 -- CODES (lookup/dropdown values)
@@ -255,12 +258,37 @@ INSERT INTO public.courses (id, course_type_id, instructor_id, title, capacity, 
    6, 150.00, 'draft', 'Placeholder for summer dinghy program.',
    'a1000000-0000-0000-0000-000000000001'),
 
-  -- Open Sailing July — active, Mike, Chris enrolled as student (dual-role demo)
+  -- Open Sailing — one course per Wednesday (drop-in model, single session each).
+  -- Mike instructs all five. Chris is enrolled as a student in the Jul 1 course (dual-role demo).
   ('c1000000-0000-0000-0000-000000000006',
    'b1000000-0000-0000-0000-000000000004',
    'a1000000-0000-0000-0000-000000000002',
-   'Open Sailing — July Wednesdays',
-   8, null, 'active', null,
+   'Open Sailing — Jul 1',
+   8, 65.00, 'active', null,
+   'a1000000-0000-0000-0000-000000000001'),
+  ('c1000000-0000-0000-0000-000000000007',
+   'b1000000-0000-0000-0000-000000000004',
+   'a1000000-0000-0000-0000-000000000002',
+   'Open Sailing — Jul 8',
+   8, 65.00, 'active', null,
+   'a1000000-0000-0000-0000-000000000001'),
+  ('c1000000-0000-0000-0000-000000000008',
+   'b1000000-0000-0000-0000-000000000004',
+   'a1000000-0000-0000-0000-000000000002',
+   'Open Sailing — Jul 15',
+   8, 65.00, 'active', null,
+   'a1000000-0000-0000-0000-000000000001'),
+  ('c1000000-0000-0000-0000-000000000009',
+   'b1000000-0000-0000-0000-000000000004',
+   'a1000000-0000-0000-0000-000000000002',
+   'Open Sailing — Jul 22',
+   8, 65.00, 'active', null,
+   'a1000000-0000-0000-0000-000000000001'),
+  ('c1000000-0000-0000-0000-000000000010',
+   'b1000000-0000-0000-0000-000000000004',
+   'a1000000-0000-0000-0000-000000000002',
+   'Open Sailing — Jul 29',
+   8, 65.00, 'active', null,
    'a1000000-0000-0000-0000-000000000001');
 
 -- ============================================================
@@ -288,12 +316,12 @@ INSERT INTO public.sessions (id, course_id, date, start_time, end_time, location
   -- Dinghy Sailing for Adults (c005) — draft, one session planned
   ('d1000000-0000-0000-0000-000000000009', 'c1000000-0000-0000-0000-000000000005', '2026-06-06', '10:00', '14:00', null, 'scheduled'),
 
-  -- Open Sailing July (c006) — 5 Wednesday evenings
+  -- Open Sailing — one session per course (c006–c010), each its own Wednesday evening
   ('d1000000-0000-0000-0000-000000000010', 'c1000000-0000-0000-0000-000000000006', '2026-07-01', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000011', 'c1000000-0000-0000-0000-000000000006', '2026-07-08', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000012', 'c1000000-0000-0000-0000-000000000006', '2026-07-15', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000013', 'c1000000-0000-0000-0000-000000000006', '2026-07-22', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000014', 'c1000000-0000-0000-0000-000000000006', '2026-07-29', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled');
+  ('d1000000-0000-0000-0000-000000000011', 'c1000000-0000-0000-0000-000000000007', '2026-07-08', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000012', 'c1000000-0000-0000-0000-000000000008', '2026-07-15', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000013', 'c1000000-0000-0000-0000-000000000009', '2026-07-22', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000014', 'c1000000-0000-0000-0000-000000000010', '2026-07-29', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled');
 
 -- ============================================================
 -- ENROLLMENTS
@@ -316,7 +344,7 @@ INSERT INTO public.enrollments (id, course_id, student_id, status) VALUES
   -- Jordan in ASA 101 April (completed course) — completed
   ('e1000000-0000-0000-0000-000000000005', 'c1000000-0000-0000-0000-000000000004', 'a1000000-0000-0000-0000-000000000007', 'completed'),
 
-  -- Chris in Open Sailing July — registered (dual-role demo: Chris is also a student)
+  -- Chris in Open Sailing — Jul 1 — registered (dual-role demo: Chris is also a student)
   ('e1000000-0000-0000-0000-000000000006', 'c1000000-0000-0000-0000-000000000006', 'a1000000-0000-0000-0000-000000000004', 'registered');
 
 -- ============================================================
@@ -347,21 +375,17 @@ INSERT INTO public.session_attendance (session_id, enrollment_id, status) VALUES
   ('d1000000-0000-0000-0000-000000000007', 'e1000000-0000-0000-0000-000000000005', 'attended'),
   ('d1000000-0000-0000-0000-000000000008', 'e1000000-0000-0000-0000-000000000005', 'missed'),
 
-  -- Chris in Open Sailing July (e006) — all 5 sessions expected
-  ('d1000000-0000-0000-0000-000000000010', 'e1000000-0000-0000-0000-000000000006', 'expected'),
-  ('d1000000-0000-0000-0000-000000000011', 'e1000000-0000-0000-0000-000000000006', 'expected'),
-  ('d1000000-0000-0000-0000-000000000012', 'e1000000-0000-0000-0000-000000000006', 'expected'),
-  ('d1000000-0000-0000-0000-000000000013', 'e1000000-0000-0000-0000-000000000006', 'expected'),
-  ('d1000000-0000-0000-0000-000000000014', 'e1000000-0000-0000-0000-000000000006', 'expected');
+  -- Chris in Open Sailing Jul 1 (e006) — single session expected
+  ('d1000000-0000-0000-0000-000000000010', 'e1000000-0000-0000-0000-000000000006', 'expected');
 
 -- ============================================================
 -- QUICK REFERENCE
 -- ============================================================
 -- Logins (all password: qwert12345)
 --   andy@ltsc.test          → admin
---   mike@ltsc.test          → instructor (ASA 101 Weekend + April + Open Sailing July)
+--   mike@ltsc.test          → instructor (ASA 101 Weekend + April + all 5 Open Sailing weeks)
 --   lisa@ltsc.test          → instructor (Dinghy draft, unassigned otherwise)
---   chris@ltsc.test         → instructor + student (teaches Evening Series, enrolled in Open Sailing)
+--   chris@ltsc.test         → instructor + student (teaches Evening Series, enrolled in Open Sailing — Jul 1)
 --   sam@ltsc.test           → student (confirmed in Weekend May + Evening May, completed April)
 --   alex@ltsc.test          → student (pending/registered in Weekend May — shows in admin alert)
 --   jordan@ltsc.test        → student (no current enrollments — use for live demo enrollment)

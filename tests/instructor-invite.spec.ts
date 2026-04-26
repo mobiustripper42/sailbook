@@ -46,8 +46,11 @@ test.describe('Instructor invite link', () => {
       const initialText =
         (await adminPage.getByTestId('invite-url').textContent().catch(() => null))?.trim() ?? null
 
-      // Regenerate — confirm dialog pops up; accept it
-      adminPage.once('dialog', (d) => d.accept())
+      // Regenerate — confirm dialog pops up; accept it.
+      // `.on` (not `.once`) — the page may emit multiple dialogs over the
+      // life of the test, and a stray earlier dialog consuming the one-shot
+      // handler caused this click to hang waiting on an unhandled confirm.
+      adminPage.on('dialog', (d) => d.accept())
       await adminPage
         .getByRole('button', { name: /Generate link|Regenerate link/ })
         .click()
@@ -120,14 +123,15 @@ test.describe('Instructor invite link', () => {
       await loginAs(adminPage, ADMIN_EMAIL, '/admin/dashboard')
       await adminPage.goto('/admin/instructors')
 
+      // Single durable handler accepts every confirm dialog this test fires.
+      adminPage.on('dialog', (d) => d.accept())
+
       // Generate once
-      adminPage.once('dialog', (d) => d.accept())
       await adminPage.getByRole('button', { name: /Generate link|Regenerate link/ }).click()
       await expect(adminPage.getByTestId('invite-url')).toContainText('/invite/instructor/')
       oldUrl = (await adminPage.getByTestId('invite-url').textContent())?.trim() ?? ''
 
       // Regenerate again
-      adminPage.once('dialog', (d) => d.accept())
       await adminPage.getByRole('button', { name: 'Regenerate link' }).click()
       // Wait for the URL to actually change
       await expect

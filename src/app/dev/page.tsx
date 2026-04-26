@@ -219,7 +219,7 @@ export default function DevPage() {
 
             <WalkthroughPart number={2} title="Accessing the Student View" account="chris@ltsc.test">
               <Step n={1}>While logged in as Chris, navigate directly to <strong>/student/dashboard</strong>.</Step>
-              <Step n={2}>Chris is enrolled in <strong>Open Sailing July</strong> as a student — it appears here.</Step>
+              <Step n={2}>Chris is enrolled in <strong>Open Sailing — Jul 1</strong> as a student — it appears here.</Step>
               <Step n={3}>Go to <strong>Browse Courses</strong> — the Open Sailing card shows Chris&apos;s <em>Enrolled</em> badge.</Step>
               <Step n={4}>This reflects a real scenario: an instructor taking a course outside their teaching role.</Step>
             </WalkthroughPart>

@@ -189,9 +189,10 @@ Flexible pricing, enrollment safety rails, and waitlist.
 | 5.8 | Low enrollment warning — dashboard tile for courses below minimum threshold approaching start date | 2 | Same pattern as "courses without instructors." Meaningful only with payments live. Andy request. |
 | 5.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on waitlist UI, prerequisite warning flow, discount code display on checkout. |
 | 5.10 | ~~Student `/student/courses` calendar view — month grid (desktop/tablet) + list fallback (mobile), click weekend → course detail~~ | 5 | [x] <!-- completed 2026-04-25 --> Calendar/List toggle with localStorage persistence, month grid with prev/next/today nav, course pills colored by enrollment status (max 3 per cell + "+N more"), forced list at <640px. Mobile UX needs a better browse pattern than cards (parked for Phase 5/6). 5 desktop Playwright tests green. |
+| 5.11 | Bulk price update — multi-select on `/admin/courses` + apply a new price to all selected courses in one action | 8 | Single-field bulk edit, narrow scope by design. **Cuttable.** With 26 ASA 101 + 5 Open Sailing nights in the season, mid-season price changes are otherwise a lot of hand-edits. Multi-field bulk edit is V3. |
 
-**Phase 5 total: 39 pts** (was 34; +5 for 5.10)
-**Projected hours: ~14 hrs**
+**Phase 5 total: 47 pts** (was 39; +8 for 5.11)
+**Projected hours: ~17 hrs**
 
 **Ejection point:** Pricing is flexible. Enrollment has safety rails. Prerequisite and waitlist systems exist. Low enrollment flagged early.
 
@@ -275,7 +276,7 @@ Transforms the app from scheduling into a learning management tool.
 | 2 — Payments | 38 | ~14 hrs | App makes money |
 | 3 — Notifications + Auth | 40 | ~15 hrs | Users stay informed, auth hardened, security audited |
 | 4 — Identity | 27 | ~10 hrs | Onboarding is clean |
-| 5 — Pricing | 34 | ~13 hrs | Flexible pricing, waitlist, prereqs, student calendar view |
+| 5 — Pricing | 47 | ~18 hrs | Flexible pricing, waitlist, prereqs, student calendar view, bulk price update |
 | 6 — Polish | 44 | ~17 hrs | Professional, accessible, navigable, security verified |
 | 7 — Skills | 40–60 | ~15–23 hrs | Learning management |
 | **Total (0–6)** | **298** | **~113 hrs** | |
@@ -295,7 +296,7 @@ At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–
 | 2 — Payments | 38 | ~14 | — | — | |
 | 3 — Notifications | 40 | ~15 | — | — | |
 | 4 — Identity | 27 | ~10 | — | — | |
-| 5 — Pricing | 34 | ~13 | — | — | |
+| 5 — Pricing | 47 | ~18 | — | — | |
 | 6 — Polish | 44 | ~17 | — | — | |
 | **Total** | **298** | **~113** | — | — | Planning baseline: 0.26–0.35 hrs/pt (Phase 1 pace to conservative) |
 
@@ -319,6 +320,7 @@ Ordered by least impact to cut:
 - **6.9** — Admin dashboard redesign. Functional beats pretty.
 - **5.6** — Duplicate enrollment warning. Edge case. Costs a few refunds at worst.
 - **5.3** — Discount codes. Manual pricing adjustments work short-term.
+- **5.11** — Bulk price update. Hand-edit each course if cut; only painful when prices change mid-season.
 - **6.1/6.2** — Mobile admin/instructor pass. Hamburger menu is the V1 stopgap.
 - **4.4/4.5** — Admin-created students. Workaround: admin creates account on student's behalf.
 
