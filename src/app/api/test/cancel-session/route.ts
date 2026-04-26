@@ -4,7 +4,7 @@
  * trigger. Mirrors the `cancelSession` server action's side effects so tests
  * can drive it without going through the admin UI form.
  *
- * Gated behind NODE_ENV !== 'development'. Never deploy with NODE_ENV=development.
+ * Gated behind devOnly() — local dev only, refused on Vercel deployments.
  *
  * POST /api/test/cancel-session
  * Body: { sessionId: string; cancelReason?: string; notify?: boolean }
@@ -13,11 +13,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/types'
 import { notifySessionCancelled } from '@/lib/notifications/triggers'
+import { devOnly } from '@/lib/dev-only'
 
 export async function POST(req: NextRequest) {
-  if (process.env.NODE_ENV !== 'development') {
-    return NextResponse.json({ error: 'Not available' }, { status: 403 })
-  }
+  const blocked = devOnly()
+  if (blocked) return blocked
 
   const { sessionId, cancelReason, notify } = (await req.json()) as {
     sessionId: string

@@ -49,6 +49,15 @@ export type MakeupAssignmentData = {
   makeupSessionLocation: string | null
 }
 
+export type SessionReminderData = {
+  studentFirstName: string
+  courseTitle: string
+  sessionDate: string | null
+  sessionStart: string | null
+  sessionLocation: string | null
+  leadTimeLabel: string             // "tomorrow" or "in 1 week" — drives wording
+}
+
 export type Rendered = {
   smsBody: string
   emailSubject: string
@@ -211,9 +220,11 @@ export function sessionCancellation(data: SessionCancellationData): Rendered {
   const reasonClause = data.cancelReason ? ` Reason: ${data.cancelReason}.` : ''
 
   // Same STOP disclosure rationale as enrollmentConfirmation.
+  // "on {when} ({where})" avoids the awkward "at {time} at {location}" double-at
+  // that "on {when} at {where}" produces when `when` already ends with a time.
   const smsBody =
     `SailBook: Hi ${data.studentFirstName}, your ${data.courseTitle} session ` +
-    `on ${when} at ${where} has been cancelled.${reasonClause} ` +
+    `on ${when} (${where}) has been cancelled.${reasonClause} ` +
     `Your schedule: sailbook.live/student/courses. Reply STOP to opt out.`
 
   const emailSubject = `Cancelled: ${data.courseTitle} session on ${dateStr}`
@@ -284,6 +295,48 @@ export function makeupAssignment(data: MakeupAssignmentData): Rendered {
 <p>
   <strong>Makeup session:</strong> ${esc(makeupWhen)}<br>
   <strong>Location:</strong> ${esc(makeupWhere)}
+</p>
+<p><a href="https://sailbook.live/student/courses">View your schedule</a></p>
+<p>— Simply Sailing</p>`.trim()
+
+  return { smsBody, emailSubject, emailText, emailHtml }
+}
+
+export function sessionReminder(data: SessionReminderData): Rendered {
+  const dateStr = formatDate(data.sessionDate)
+  const timeStr = formatTime(data.sessionStart)
+  const when = data.sessionDate ? `${dateStr}${timeStr ? ` at ${timeStr}` : ''}` : 'TBD'
+  const where = data.sessionLocation ?? 'TBD'
+
+  // Same STOP disclosure rationale as enrollmentConfirmation.
+  // "on {when} ({where})" — same formatting choice as sessionCancellation
+  // to avoid the "at {time} at {location}" double-at issue.
+  const smsBody =
+    `SailBook reminder: Hi ${data.studentFirstName}, your ${data.courseTitle} session ` +
+    `is ${data.leadTimeLabel} on ${when} (${where}). ` +
+    `Schedule: sailbook.live/student/courses. Reply STOP to opt out.`
+
+  const emailSubject = `Reminder: ${data.courseTitle} ${data.leadTimeLabel}`
+
+  const emailText = [
+    `Hi ${data.studentFirstName},`,
+    ``,
+    `Reminder — your ${data.courseTitle} session is ${data.leadTimeLabel}.`,
+    ``,
+    `Session: ${when}`,
+    `Location: ${where}`,
+    ``,
+    `View your schedule: https://sailbook.live/student/courses`,
+    ``,
+    `— Simply Sailing`,
+  ].join('\n')
+
+  const emailHtml = `
+<p>Hi ${esc(data.studentFirstName)},</p>
+<p>Reminder — your <strong>${esc(data.courseTitle)}</strong> session is ${esc(data.leadTimeLabel)}.</p>
+<p>
+  <strong>Session:</strong> ${esc(when)}<br>
+  <strong>Location:</strong> ${esc(where)}
 </p>
 <p><a href="https://sailbook.live/student/courses">View your schedule</a></p>
 <p>— Simply Sailing</p>`.trim()

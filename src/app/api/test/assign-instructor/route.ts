@@ -1,6 +1,6 @@
 /**
  * DEV/TEST ONLY — assigns an instructor to a course by email.
- * Gated behind NODE_ENV !== 'development'. Never deploy with NODE_ENV=development.
+ * Gated behind devOnly() — local dev only, refused on Vercel deployments.
  *
  * POST /api/test/assign-instructor
  * Body: { courseId: string; instructorEmail: string }
@@ -8,11 +8,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/types'
+import { devOnly } from '@/lib/dev-only'
 
 export async function POST(req: NextRequest) {
-  if (process.env.NODE_ENV !== 'development') {
-    return NextResponse.json({ error: 'Not available' }, { status: 403 })
-  }
+  const blocked = devOnly()
+  if (blocked) return blocked
 
   const { courseId, instructorEmail } = await req.json() as {
     courseId: string

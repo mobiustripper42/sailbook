@@ -1,6 +1,6 @@
 /**
  * DEV/TEST ONLY — toggles a role flag on a profile by email.
- * Gated behind NODE_ENV !== 'development'. Never deploy with NODE_ENV=development.
+ * Gated behind devOnly() — local dev only, refused on Vercel deployments.
  *
  * POST /api/test/set-role-flag
  * Body: { email: string; flag: 'is_admin'|'is_instructor'|'is_student'; value: boolean }
@@ -8,14 +8,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/types'
+import { devOnly } from '@/lib/dev-only'
 
 const ALLOWED_FLAGS = ['is_admin', 'is_instructor', 'is_student'] as const
 type Flag = (typeof ALLOWED_FLAGS)[number]
 
 export async function POST(req: NextRequest) {
-  if (process.env.NODE_ENV !== 'development') {
-    return NextResponse.json({ error: 'Not available' }, { status: 403 })
-  }
+  const blocked = devOnly()
+  if (blocked) return blocked
 
   const { email, flag, value } = (await req.json()) as {
     email: string

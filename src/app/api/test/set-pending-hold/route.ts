@@ -10,11 +10,11 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { devOnly } from '@/lib/dev-only'
 
 export async function POST(req: NextRequest) {
-  if (process.env.NODE_ENV !== 'development') {
-    return NextResponse.json({ error: 'Not available' }, { status: 403 })
-  }
+  const blocked = devOnly()
+  if (blocked) return blocked
 
   const { courseId, studentEmail, expired = false, checkoutSessionId = 'cs_test_placeholder' } = await req.json() as {
     courseId: string

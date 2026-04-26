@@ -16,6 +16,7 @@ import {
   lowEnrollmentWarning,
   makeupAssignment,
   sessionCancellation,
+  sessionReminder,
 } from './templates'
 
 // 5.8 will refine this. Tuned conservatively for V1 — better to skip a real
@@ -279,27 +280,29 @@ export async function notifyMakeupAssigned(makeupSessionId: string): Promise<voi
   }
   if (!links || links.length === 0) return
 
-  const courseResult = await admin
-    .from('courses')
-    .select('title, course_type_id')
-    .eq('id', makeupSession.course_id)
-    .maybeSingle()
-  const courseTitle = await resolveCourseTitle(admin, courseResult.data)
-
-  // Fetch the student profiles for the affected enrollments
+  // Course lookup and enrollment fan-out are independent — run in parallel.
   const enrollmentIds = links.map((l) => l.enrollment_id)
-  const { data: enrollments, error: enrollErr } = await admin
-    .from('enrollments')
-    .select(`
-      id,
-      student:profiles!enrollments_student_id_fkey ( first_name, email, phone )
-    `)
-    .in('id', enrollmentIds)
+  const [courseResult, enrollmentsResult] = await Promise.all([
+    admin
+      .from('courses')
+      .select('title, course_type_id')
+      .eq('id', makeupSession.course_id)
+      .maybeSingle(),
+    admin
+      .from('enrollments')
+      .select(`
+        id,
+        student:profiles!enrollments_student_id_fkey ( first_name, email, phone )
+      `)
+      .in('id', enrollmentIds),
+  ])
 
-  if (enrollErr) {
-    console.error('[notifications] makeup enrollment lookup failed:', enrollErr.message)
+  if (enrollmentsResult.error) {
+    console.error('[notifications] makeup enrollment lookup failed:', enrollmentsResult.error.message)
     return
   }
+  const enrollments = enrollmentsResult.data
+  const courseTitle = await resolveCourseTitle(admin, courseResult.data)
 
   // Index original-session date by enrollment_id for the per-student template
   const originalDateByEnrollment = new Map<string, string | null>()
@@ -441,6 +444,130 @@ export async function notifyLowEnrollmentCourses(): Promise<number> {
   }
 
   return alertedCount
+}
+
+// Reminder lead times — fired by the daily session-reminders cron.
+// Each entry: days-out from "today", and the human label inserted into the
+// template. To add a new lead time, just add an entry; trigger will pick it up.
+const SESSION_REMINDER_LEAD_TIMES: { daysOut: number; label: string }[] = [
+  { daysOut: 7, label: 'in 1 week' },
+  { daysOut: 1, label: 'tomorrow' },
+]
+
+// UTC-safe day offset to avoid local-timezone slop when the cron runs at
+// different UTC times throughout the year.
+function isoDateOffset(reference: Date, daysOut: number): string {
+  const d = new Date(Date.UTC(
+    reference.getUTCFullYear(),
+    reference.getUTCMonth(),
+    reference.getUTCDate() + daysOut,
+  ))
+  return d.toISOString().slice(0, 10)
+}
+
+/**
+ * Cron-driven scan: scheduled sessions whose date is exactly N days out
+ * (per SESSION_REMINDER_LEAD_TIMES) get a reminder fired to every student
+ * with `expected` attendance on that session.
+ *
+ * Called daily. Idempotency comes from the exact-date filter: each session
+ * fires reminders exactly once per lead-time slot. If the cron skips a day
+ * (Vercel hiccup), reminders for that day are missed — we don't catch up.
+ *
+ * Caller may pass a `referenceDate` to simulate "today" for testing.
+ *
+ * Returns the number of (session × lead-time) pairs that fired at least one
+ * notification, for the cron route response payload.
+ */
+export async function notifyUpcomingSessionReminders(
+  referenceDate?: Date,
+): Promise<number> {
+  const admin = createAdminClient()
+  const today = referenceDate ?? new Date()
+
+  // Build target date strings for every lead-time slot
+  const targets = SESSION_REMINDER_LEAD_TIMES.map((lt) => ({
+    label: lt.label,
+    isoDate: isoDateOffset(today, lt.daysOut),
+  }))
+  const targetDates = targets.map((t) => t.isoDate)
+
+  // Pull all scheduled sessions on any target date
+  const { data: sessions, error: sessionsErr } = await admin
+    .from('sessions')
+    .select('id, course_id, date, start_time, location, status')
+    .in('date', targetDates)
+    .eq('status', 'scheduled')
+
+  if (sessionsErr) {
+    console.error('[notifications] reminder session lookup failed:', sessionsErr.message)
+    return 0
+  }
+  if (!sessions || sessions.length === 0) return 0
+
+  let firedCount = 0
+
+  for (const session of sessions) {
+    const slot = targets.find((t) => t.isoDate === session.date)
+    if (!slot) continue
+
+    // Pull all 'expected' attendance for this session, with student profile
+    // and course title in the same round trip.
+    const [attendanceResult, courseResult] = await Promise.all([
+      admin
+        .from('session_attendance')
+        .select(`
+          enrollment_id,
+          enrollments!inner (
+            id,
+            student:profiles!enrollments_student_id_fkey ( first_name, email, phone )
+          )
+        `)
+        .eq('session_id', session.id)
+        .eq('status', 'expected'),
+      admin
+        .from('courses')
+        .select('title, course_type_id')
+        .eq('id', session.course_id)
+        .maybeSingle(),
+    ])
+
+    if (attendanceResult.error) {
+      console.error('[notifications] reminder attendance lookup failed for session', session.id, attendanceResult.error.message)
+      continue
+    }
+    const attendance = attendanceResult.data ?? []
+    if (attendance.length === 0) continue
+
+    const courseTitle = await resolveCourseTitle(admin, courseResult.data)
+
+    await Promise.all(
+      attendance.flatMap((a) => {
+        const enrollment = a.enrollments as unknown as {
+          student: { first_name: string; email: string; phone: string | null } | null
+        } | null
+        const student = enrollment?.student
+        if (!student) return []
+
+        const rendered = sessionReminder({
+          studentFirstName: student.first_name,
+          courseTitle,
+          sessionDate: session.date,
+          sessionStart: session.start_time,
+          sessionLocation: session.location,
+          leadTimeLabel: slot.label,
+        })
+        return [
+          trySMS(student.phone, rendered.smsBody),
+          tryEmail(student.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml),
+        ]
+      }),
+    )
+
+    firedCount++
+  }
+
+  return firedCount
 }
 
 // Course.title is optional; fall back to course_type.name when blank

@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/low-enrollment",
       "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/session-reminders",
+      "schedule": "0 14 * * *"
     }
   ]
 }
