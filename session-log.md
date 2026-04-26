@@ -31,9 +31,11 @@ Format: prepend newest entry at the top.
    - Add `Reply STOP to opt out.` to student SMS template body in `templates.ts` (`enrollmentConfirmation()` only — don't touch admin templates). No backend change — Twilio handles STOP automatically.
    - Add SMS consent disclosure on `/register` near phone field: *"Phone number is used for enrollment confirmations and session reminders. Standard message rates apply. Reply STOP to opt out."*
    - **Fix pgTAP test breakage from the Open Sailing seed rewrite** (3 files, real assertion mismatches — see Code Review #1-3 below). Without this, next `supabase test db` run will fail.
-2. Run full Playwright suite + `supabase test db` (Eric punted both for this session).
-3. Then: 4.2 (`/admin/users` consolidation, 8 pts).
-4. `supabase db push` to remote (overdue).
+   - **Why first:** items 1+2 are required content for the Twilio Toll-Free Verification submission. Eric needs them landed before he can submit the TFV form, which then runs on a multi-day external clock.
+2. **Then 3.5 — Session cancellation notice (SMS + email, 3 pts).** Phase 3 builds in parallel with the Twilio TFV approval window. 4.2 punted — pick it back up after Phase 3 has a few more tasks closed.
+3. Run full Playwright suite + `supabase test db` (punted from session 96).
+4. Smoke test punted explicitly — re-evaluate the day Resend domain + Twilio TFV both verify. Don't chase external verification clocks mid-session.
+5. `supabase db push` to remote (overdue).
 
 **Context:**
 - **`.once('dialog', ...)` is a Playwright trap.** Use `.on(...)` for click flows that may emit multiple dialogs over a test's life (or hoist `.once` above the very first interaction that could trigger any modal). This was the one-line fix for an issue that's been failing across multiple sessions.
