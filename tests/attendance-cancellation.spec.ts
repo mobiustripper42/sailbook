@@ -76,7 +76,7 @@ test.describe('Student — attendance history page', () => {
     await page.goto('/student/attendance');
 
     // Card for the April course Jordan was enrolled in
-    const card = page.locator('[data-slot="card"]').filter({ hasText: 'ASA 101 — Weekend (April)' });
+    const card = page.locator('[data-slot="card"]').filter({ hasText: 'ASA 101 - Weekend (April)' });
     await expect(card).toBeVisible();
 
     // Header chip: "1 needs makeup"

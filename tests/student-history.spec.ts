@@ -20,8 +20,8 @@ test.describe('Student — Experience page', () => {
     await page.goto('/student/history');
     await expect(page.getByRole('heading', { name: 'Experience' })).toBeVisible();
     // Sam has 3 seed enrollments — expect at least one course card
-    await expect(page.getByText('ASA 101 — Weekend Intensive (May)')).toBeVisible();
-    await expect(page.getByText('ASA 101 — Weekend (April)')).toBeVisible();
+    await expect(page.getByText('ASA 101 - Weekend Intensive (May)')).toBeVisible();
+    await expect(page.getByText('ASA 101 - Weekend (April)')).toBeVisible();
   });
 
   test('Experience page shows enrollment status badges', async ({ page }) => {
@@ -63,8 +63,8 @@ test.describe('Admin — Student view', () => {
   test('admin student view shows course history', async ({ page }) => {
     await page.goto(`/admin/students/${SAM_ID}`);
     await expect(page.getByText('Course History')).toBeVisible();
-    await expect(page.getByText('ASA 101 — Weekend Intensive (May)')).toBeVisible();
-    await expect(page.getByText('ASA 101 — Weekend (April)')).toBeVisible();
+    await expect(page.getByText('ASA 101 - Weekend Intensive (May)')).toBeVisible();
+    await expect(page.getByText('ASA 101 - Weekend (April)')).toBeVisible();
   });
 
   test('admin student view has Edit link', async ({ page }) => {
@@ -104,8 +104,8 @@ test.describe('Instructor — student link from roster', () => {
     await expect(page.getByRole('heading', { name: 'Sam Davies' })).toBeVisible();
     await expect(page.getByText('Course History')).toBeVisible();
     // Sam has enrollments across multiple courses — all visible to instructor
-    await expect(page.getByText('ASA 101 — Weekend Intensive (May)')).toBeVisible();
-    await expect(page.getByText('ASA 101 — Weekend (April)')).toBeVisible();
+    await expect(page.getByText('ASA 101 - Weekend Intensive (May)')).toBeVisible();
+    await expect(page.getByText('ASA 101 - Weekend (April)')).toBeVisible();
   });
 
   test('instructor student view back link returns to dashboard', async ({ page }) => {

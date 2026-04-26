@@ -93,7 +93,7 @@ export default function CourseForm({ courseTypes, instructors }: Props) {
 
         <div className="space-y-2">
           <Label htmlFor="title">Title Override <span className="text-muted-foreground">(optional)</span></Label>
-          <Input id="title" name="title" placeholder={selectedType?.name ?? 'e.g. ASA 101 — Weekend Intensive'} />
+          <Input id="title" name="title" placeholder={selectedType?.name ?? 'e.g. ASA 101 - Weekend Intensive'} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">

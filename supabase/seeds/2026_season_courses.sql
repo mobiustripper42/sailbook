@@ -18,7 +18,7 @@ BEGIN;
 -- 1. Course type — ASA 101
 INSERT INTO public.course_types (name, short_code, certification_body, description, max_students)
 VALUES (
-  'ASA 101 – Sailing Made Easy',
+  'ASA 101 - Sailing Made Easy',
   'ASA101',
   'American Sailing',
   'Learn to skipper a 20'' – 27'' sloop-rigged keelboat by day, in light to moderate winds and sea conditions. Learn basic sailing terminology, parts and functions, helm commands, basic sail trim, points of sail, buoyage, seamanship and safety including basic navigation rules to avoid collisions and hazards. 2 days.',
@@ -71,10 +71,10 @@ BEGIN
   LOOP
     v_sun := v_sat + 1;
 
-    -- Title format: "ASA 101 — May 2–3, 2026"  (en dash; same month assumed)
-    v_title := 'ASA 101 — '
+    -- Title format: "ASA 101 - May 2-3, 2026" (hyphens; GSM-7 safe for SMS)
+    v_title := 'ASA 101 - '
             || to_char(v_sat, 'FMMon FMDD')
-            || '–'
+            || '-'
             || to_char(v_sun, 'FMDD')
             || ', '
             || to_char(v_sat, 'YYYY');

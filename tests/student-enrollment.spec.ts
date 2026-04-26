@@ -15,9 +15,9 @@ test.describe('Student — browse courses', () => {
 
   test('shows active seed courses on browse page', async ({ page }) => {
     await page.goto('/student/courses');
-    await expect(page.getByText('ASA 101 — Weekend Intensive (May)')).toBeVisible();
-    await expect(page.getByText('ASA 101 — Evening Series (May)')).toBeVisible();
-    await expect(page.getByText('Open Sailing — Jul 1', { exact: true })).toBeVisible();
+    await expect(page.getByText('ASA 101 - Weekend Intensive (May)')).toBeVisible();
+    await expect(page.getByText('ASA 101 - Evening Series (May)')).toBeVisible();
+    await expect(page.getByText('Open Sailing - Jul 1', { exact: true })).toBeVisible();
   });
 
   test('draft and completed courses are not shown', async ({ page }) => {
@@ -25,7 +25,7 @@ test.describe('Student — browse courses', () => {
     // c005 is draft status — must not appear
     await expect(page.getByText('Dinghy Sailing for Adults')).not.toBeVisible();
     // c004 is completed status — must not appear
-    await expect(page.getByText('ASA 101 — Weekend (April)')).not.toBeVisible();
+    await expect(page.getByText('ASA 101 - Weekend (April)')).not.toBeVisible();
   });
 
   test('course cards display spots remaining badges', async ({ page }) => {
@@ -34,7 +34,7 @@ test.describe('Student — browse courses', () => {
     // Only confirmed enrollments count → 1 confirmed → 3 spots left.
     // pw_student has no seed enrollment on c001.
     // Scope to this card — c002 also has 1 confirmed enrollment (same badge text).
-    const c001Card = page.locator('[data-slot="card"]').filter({ hasText: 'ASA 101 — Weekend Intensive (May)' });
+    const c001Card = page.locator('[data-slot="card"]').filter({ hasText: 'ASA 101 - Weekend Intensive (May)' });
     await expect(c001Card.getByText('3 spots left')).toBeVisible();
   });
 

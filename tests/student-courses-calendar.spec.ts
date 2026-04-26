@@ -24,7 +24,7 @@ test.describe('Student courses — view switcher', () => {
     await expect(page.getByTestId('courses-view-content')).toHaveAttribute('data-active-view', 'list');
 
     // List view: at least one card from seed data
-    await expect(page.getByText('ASA 101 — Weekend Intensive (May)')).toBeVisible();
+    await expect(page.getByText('ASA 101 - Weekend Intensive (May)')).toBeVisible();
   });
 
   test('desktop: calendar shown by default, toggle visible', async ({ page }) => {

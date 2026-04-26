@@ -36,8 +36,8 @@ test.describe('Admin — course type creation', () => {
 
   test('course type list shows existing seed types', async ({ page }) => {
     await page.goto('/admin/course-types');
-    await expect(page.getByText('ASA 101 — Basic Keelboat Sailing')).toBeVisible();
-    await expect(page.getByText('ASA 103 — Basic Coastal Cruising')).toBeVisible();
+    await expect(page.getByText('ASA 101 - Basic Keelboat Sailing')).toBeVisible();
+    await expect(page.getByText('ASA 103 - Basic Coastal Cruising')).toBeVisible();
   });
 });
 
