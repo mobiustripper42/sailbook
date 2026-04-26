@@ -3,7 +3,49 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 97 — 2026-04-25 20:45 [open]
+## Session 97 — 2026-04-25 20:45–21:38 (0.92 hrs, triage session)
+**Duration:** 0.92 hrs | **Points:** 0 (triage pins — pre-3.5 prep, not plan-table tasks)
+**Task:** Phase 3 triage pins (STOP language, register consent, pgTAP fixes)
+
+**Completed:**
+- **STOP disclosure on `enrollmentConfirmation()` SMS template** (`src/lib/notifications/templates.ts`). Body now ends with `Reply STOP to opt out.`. Comment notes Twilio handles inbound STOP/HELP/UNSUBSCRIBE keywords automatically — no backend wiring needed. Admin templates intentionally skipped (operators, not consumer recipients).
+- **SMS consent disclosure on `/register`** (`src/app/(auth)/register/register-form.tsx:61`). Small `text-xs text-muted-foreground` paragraph under the phone input: "Used for enrollment confirmations and session reminders. Standard message rates apply. Reply STOP to opt out." Aligns with what Twilio toll-free verification reviewer will look for.
+- **pgTAP test drift from session 96 seed rewrite** — fixed across two files:
+  - `supabase/tests/02_rls_courses.sql` — admin/instructor course count 6→10, student course count 5→9, seed-reference comment block rewritten to reflect five Open Sailing courses (c006-c010).
+  - `supabase/tests/03_rls_enrollments.sql` — attendance count 17→13 in three places (admin, mike, chris views), seed-reference comment rewritten to note e006 has 1 attendance row (Open Sailing is single-session per-course).
+  - **All 120 pgTAP tests green.**
+- **Instructor-invite test retry config** (`tests/instructor-invite.spec.ts`). Added `retries: 2` to the describe block. Comment notes the chronic Playwright flake (target-page-closed during click under suite load, cold-compile races on fresh dev server) and points at session 92 manual QA confirming the feature works. Will escalate to `test.fixme()` if retries stop catching it.
+- **Full Playwright suite run** (Eric, in user mode): 348 passed, 4 failed, 144 skipped, 8 did-not-run. The 4 failures are tracked below.
+- Commit `94f1409`.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- **Smoke tests on hold.** Resend domain re-verification still in flight, Twilio TFV pending Eric's form submission (which the triage pins now unblock).
+- `supabase db push` to remote (overdue 7 sessions).
+
+**Test failures from the full suite — pinned for next session:**
+1. **`tests/notifications.spec.ts:24`** — SMS dispatch routes to mock and appears in buffer. **Cause:** Eric flipped `NOTIFICATIONS_ENABLED=true` in `.env.local` mid-day. Dev server inherits at startup. Test API route uses the dispatcher, which now routes to real Twilio instead of mock buffer. Buffer stays empty → fail. **Fix already applied:** Eric flipped `.env.local` back to `false`. Dev server needs a restart next session to pick it up. After restart, tests should pass.
+2. **`tests/enrollment-notifications.spec.ts:17`** — confirmed enrollment fires student email and admin email per admin. **Same root cause as #1.** Same fix (restart dev server with `NOTIFICATIONS_ENABLED=false`).
+3. **`tests/checkout.spec.ts:16`** — Register & Pay redirects to Stripe checkout. **Likely cause:** notify trigger on enrollment was hitting real Twilio/Resend on test-env credentials, slow-failing under load. Same fix likely resolves it. Verify after restart.
+4. **`tests/instructor-invite.spec.ts:30`** — admin generates link. **Chronic flake.** This commit added `retries: 2`. If still fails after retries, escalate to `test.fixme()`.
+
+**Next Steps (in order):**
+1. **First thing next session:** restart dev server (it's running with stale `NOTIFICATIONS_ENABLED=true`) and re-run the full Playwright suite to confirm failures #1-#3 are gone. If #4 still fails after retries, escalate to `test.fixme()`.
+2. **Then 3.5 — Session cancellation notice (3 pts).** Phase 3 keeps moving while Twilio TFV runs its multi-day external clock.
+3. After 3.5, optionally address the 3 advisory cleanups from code review (em-dash → hyphen in seed titles, drop `text-muted-foreground` on register consent line, fix stale pgTAP comment at `02_rls_courses.sql:168`).
+4. `supabase db push` to remote (overdue).
+
+**Context:**
+- **`.env.local` flip is dev-server-side, not test-runner-side.** Playwright reads `.env.local` for the test runner's process, but the actual notification dispatch happens in the dev server's process. Dev server inherits its env at `npm run dev` startup. Tests that depend on dispatcher-routes-to-mock require `NOTIFICATIONS_ENABLED=false` in the dev server's env, which means a restart after any flip.
+- **Playwright `retries: 2` + `mode: 'serial'` is safe.** Code review confirmed: retries only re-run the failed test, not the whole serial chain. Dependent later tests still skip on failure (won't be retried). Good combo for the instructor-invite flake pattern.
+- **The 26 ASA 101 + 5 Open Sailing course titles all use em-dash (—).** This forces UCS-2 SMS encoding (70/67 chars per segment) instead of GSM-7 (160/153). With the new `Reply STOP` line, typical SMS body is ~210 chars = 3 UCS-2 segments instead of 2 GSM-7. ~50% cost bump. Code review flagged as advisory cleanup — replace em-dash with ` - ` (hyphen-space-hyphen-space) in seed titles when convenient.
+- **The pgTAP test at `02_rls_courses.sql:168` has a stale comment** (says "c001,c002,c003,c006 = 11 sessions" but should say "c006-c010"). Math is correct, comment is misleading. Trivial cleanup.
+
+**Code Review:** 3 advisory cleanups, no bugs.
+1. **consistency** `02_rls_courses.sql:168` — Comment lists `c001,c002,c003,c006` for the student-sees-11-active-sessions assertion but should list `c001,c002,c003,c006-c010`. Math correct; comment misleading.
+2. **cleanup** `templates.ts:90` — Em-dash in `data.courseTitle` (from seed) forces UCS-2 encoding. Adding `Reply STOP to opt out.` pushes typical body to 3 segments instead of 2. ~50% cost bump on the highest-volume template. Fix at the seed level (em-dash → hyphen) when convenient.
+3. **cleanup** `register-form.tsx:61` — `text-muted-foreground` may be borderline-low-contrast for a Twilio TFV reviewer in dark mode. Consider dropping the class so the line inherits body color (still `text-xs`, still visually subordinate to the input).
 
 ## Session 96 — 2026-04-25 18:48–20:26 (1.67 hrs, maintenance/cleanup session)
 **Duration:** 1.67 hrs | **Points:** 0 (no plan-task slots — Twilio fix, test fix, seed rewrite, plan update)
