@@ -3,6 +3,63 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 99 — 2026-04-26 07:42–08:32 (0.83 hrs)
+**Duration:** 0.83 hrs | **Points:** 5 (3.7: 5)
+**Task:** Phase 3.7 — Session reminders + 3 carryover cleanups from session 98 code review
+
+**Completed:**
+- **Phase 3.7 — Session reminders (5 pts).**
+  - `src/lib/notifications/templates.ts` — `sessionReminder()` template + `SessionReminderData` type. Single template parameterized by `leadTimeLabel` ("tomorrow" or "in 1 week").
+  - `src/lib/notifications/triggers.ts` — `notifyUpcomingSessionReminders(referenceDate?: Date)`. Lead-time table at top of file (`SESSION_REMINDER_LEAD_TIMES = [{daysOut: 7, label: "in 1 week"}, {daysOut: 1, label: "tomorrow"}]`). UTC-safe date math via `isoDateOffset()`. Idempotency from exact-date filter — each session fires reminders exactly once per slot. Optional `referenceDate` lets tests simulate "today".
+  - `src/app/api/cron/session-reminders/route.ts` — daily cron route, mirrors `expire-holds` and `low-enrollment`. CRON_SECRET auth, returns `{ fired: N }`.
+  - `vercel.json` — third cron entry, daily at 14:00 UTC.
+  - `src/app/api/test/run-session-reminders/route.ts` — dev-only test route.
+  - `tests/session-reminders.spec.ts` — 5 desktop tests (7-day fires, 24-hour fires, off-target dates skip, cancelled sessions skip, cron route smoke). All green.
+- **Carryover cleanups from session 98 code review.**
+  - `sessionCancellation` SMS body: `on {date} at {time} at {location}` → `on {when} ({where})` to avoid the awkward double "at" (also matches new `sessionReminder` formatting).
+  - `notifyMakeupAssigned`: `courseResult` + `enrollments` lookups parallelized via `Promise.all` (matches `notifyEnrollmentConfirmed` pattern).
+  - New `src/lib/dev-only.ts` helper exporting `devOnly()`. Refactored all 8 `/api/test/*` routes to use it. Now blocks on `NODE_ENV !== 'development' || VERCEL_ENV` — defense in depth against a misconfigured Vercel deploy exposing service-role writes.
+- **Vercel plugin queued for next-session cleanup** (Eric will disable it via `/plugins`). Currently injecting ~5k tokens of skill descriptions on session start; trims fast-burn context budget.
+- **Manual cron test commands documented** for all 3 crons (expire-holds, low-enrollment, session-reminders).
+- Commit `00c0d56`.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- `supabase db push` to remote — still uncertain if today's seed/migration changes are reflected.
+- Smoke testing 3.7 cron live (Eric is doing this immediately after session close).
+
+**Test failures from full suite:** Eric ran the full suite and confirmed everything passed.
+
+**Next Steps (in order):**
+1. **Manual smoke tests (Eric will do these post-close):**
+   - 3.4 enrollment notification — already verified live, re-confirm
+   - 3.5 cancellation notice — admin cancels a session with enrolled students → expect SMS+email per student
+   - 3.6 makeup assignment — admin creates a makeup → SMS+email per affected student
+   - 3.7 session reminder — `curl -X POST /api/test/run-session-reminders -d '{"referenceDate":"2026-05-02"}'` against a real seed enrollment to fire a 1-week reminder
+2. **Vercel plugin disable** (next session start). Eric to run `/plugins` and disable. Should reduce session-start context by ~5k tokens.
+3. **Phase 3 mode shift** — next phase 3 task is **3.8 Admin notification preferences (3 pts).** No more triggers/templates from here on; this is settings/UI work. DEC needed: settings table vs JSON column on profiles.
+4. **Optional cleanups (advisory, not blocking):**
+   - `sessionReminder` SMS body is ~217 chars = 2 Twilio segments. Trimming "Schedule: sailbook.live/student/courses." would land it back at 1 segment. ~50% per-reminder cost reduction. Tradeoff: less helpful body. Reminders are highest-volume of all triggers (per-student × per-session × 2 lead times) so the math favors trim.
+   - Stale doc comment in `enroll/route.ts:3` still says "Gated behind NODE_ENV !== 'development'" — now uses `devOnly()`. One-line fix.
+   - `isoDateOffset` could use a one-line comment that `Date.UTC` overflow normalization is the load-bearing detail.
+5. `supabase db push` to remote.
+
+**Context:**
+- **Notification trigger pattern is now well-established across 4 implementations** (3.4, 3.5, 3.6, 3.7). Each: dedicated template (pure function, STOP disclosure on student-facing only), dedicated trigger (`notifyXyz()` with admin-client + per-channel try/catch + per-recipient fan-out), wired into the action that just performed the side effect, plus a dev-only `/api/test/*` route mirroring the action for testability. Phase 3.8 onwards departs from this pattern.
+- **Cron pattern is now established across 3 implementations** (expire-holds, low-enrollment, session-reminders). Each: GET route with `CRON_SECRET` Bearer auth, returns `{ count: N }`, vercel.json entry. Add new ones by copying any of the three.
+- **Mock buffer is shared module-level state across all notification tests.** Cross-file Playwright parallelism races it — must run with `--workers=1` for reliable group runs. Within-file is fine via `mode: 'serial'`.
+- **`devOnly()` blocks if `VERCEL_ENV` is set** (any Vercel env: dev/preview/production) AND if `NODE_ENV !== 'development'`. Both conditions matter — a misconfigured `NODE_ENV=development` deploy still gets blocked by the `VERCEL_ENV` check.
+- **Test data persists across serial Playwright tests in the same file.** Reminder tests had to scope assertions by course title because earlier tests' courses lived through to later tests. Worth the same hardening in future tests that read shared state.
+- **SMS encoding still GSM-7 across the board** post-em-dash cleanup. New `sessionReminder` lands at 2 segments; everything else 1 segment. Trim flagged in optional cleanups.
+
+**Code Review:** 4 cleanups, 1 doc-comment fix, 1 SMS-cost flag. No bugs.
+1. **cleanup** `templates.ts:314` — `sessionReminder` SMS body ~217 chars = 2 Twilio segments. Trim "Schedule: sailbook.live/student/courses." for ~50% per-reminder cost reduction. Tradeoff: less helpful body. Worth doing because reminders are highest-volume trigger type.
+2. **cleanup** `triggers.ts:459` — Add a one-line comment that `Date.UTC` overflow normalization is the load-bearing detail in `isoDateOffset`.
+3. **cleanup** `triggers.ts:546` — `as unknown as { ... }` cast on `enrollments!inner` join. Third copy of the same types-debt pattern (MEMORY: `project_types_debt`). Cleanup gets slightly bigger when `supabase gen types` runs pre-V2.
+4. **cleanup** `enroll/route.ts:3` — stale doc comment still says "Gated behind NODE_ENV !== 'development'" — now uses `devOnly()`.
+5. **consistency** `dev-only.ts` — design is right. Pure function, no module-level side effects, returns `NextResponse | null` for early-return idiom.
+
 ## Session 98 — 2026-04-25 21:49 → 2026-04-26 07:28 wall clock (1.50 hrs active — overnight gap)
 **Duration:** 1.50 hrs | **Points:** 6 (3.5: 3, 3.6: 3)
 **Task:** Phase 3.5 + 3.6 — session cancellation + makeup notifications + pending-payment UX cleanup
