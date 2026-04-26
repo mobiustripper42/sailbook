@@ -3,6 +3,65 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 98 — 2026-04-25 21:49 → 2026-04-26 07:28 wall clock (1.50 hrs active — overnight gap)
+**Duration:** 1.50 hrs | **Points:** 6 (3.5: 3, 3.6: 3)
+**Task:** Phase 3.5 + 3.6 — session cancellation + makeup notifications + pending-payment UX cleanup
+
+**Completed:**
+- **Phase 3.5 — Session cancellation notice (3 pts).**
+  - `src/lib/notifications/templates.ts` — `sessionCancellation()` template + `SessionCancellationData` type. SMS body, email subject/text/html, optional cancel reason, "Reply STOP to opt out."
+  - `src/lib/notifications/triggers.ts` — `notifySessionCancelled(sessionId)`. Identifies affected students by reading `session_attendance` rows that just flipped `expected → missed`. No admin alert (admin did the cancelling).
+  - `src/actions/sessions.ts` — `cancelSession` calls trigger after the attendance flip, before `revalidatePath`.
+  - `src/app/api/test/cancel-session/route.ts` — new dev-only test route mirroring side effects.
+  - `tests/session-cancellation-notice.spec.ts` — 3 desktop tests (with-reason, without-reason, notify-off). All green.
+- **Phase 3.6 — Makeup assignment notice (3 pts).**
+  - `src/lib/notifications/templates.ts` — `makeupAssignment()` template. Mentions both the original missed session date AND the new makeup date/time/location.
+  - `src/lib/notifications/triggers.ts` — `notifyMakeupAssigned(makeupSessionId)`. Identifies affected students by reading `session_attendance.makeup_session_id` links via FK embed (`sessions!session_attendance_session_id_fkey ( date )` confirmed by code review).
+  - `src/actions/sessions.ts` — `createMakeupSession` calls trigger after the link update, only when missed records were linked.
+  - `src/app/api/test/create-makeup-session/route.ts` — new dev-only test route.
+  - `tests/makeup-assignment-notice.spec.ts` — 3 desktop tests. All green.
+- **Pending-payment UX cleanups (uncovered during 3.4 smoke test).**
+  - `enrollmentStatusLabel` returns `"Payment Pending"` instead of raw `"pending_payment"` on the browse-list badge.
+  - Badge variant for `pending_payment` is now `warn` (yellow) — signals action needed.
+  - New `isEffectivelyEnrolled(status, holdExpiresAt)` helper in `courses-card-list.tsx`: pending_payment with expired hold = treated as not-enrolled. Removes the inconsistency where the browse list said "Payment Pending" but detail page said "Register & Pay".
+  - `my-courses` page query pulls `hold_expires_at` and filters expired-hold pending_payment rows out before render.
+  - Browse page passes `hold_expires_at` through to `CourseCardData`.
+- **3.4 smoke-tested live** — Stripe webhook (CLI listening) → `notifyEnrollmentConfirmed` → real Twilio SMS + real Resend email both delivered to Eric's phone. Phase 3.4 is done-done, not just mock-done.
+- Commit `7a490db`.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- `supabase db push` to remote — stale state on remote vs. local. Eric pushed earlier today but unclear if today's seed/migration changes are reflected.
+- Locally: `/api/cron/expire-holds` doesn't auto-run, so pending_payment records sit until manually triggered. The cron-expired-hold UX cleanups in this commit decouple display from cron, but the underlying records still need a manual sweep in dev.
+
+**Test failures from full suite:** Eric punted the full suite to start of next session.
+
+**Next Steps (in order, pinned by Eric):**
+1. **Run full Playwright suite** at the start of next session (carryover, was punted tonight).
+2. **Manual smoke tests** for 3.4, 3.5, 3.6 — Eric explicitly asked for a reminder. Real-provider verification of each notification path:
+   - 3.4: pay & register flow → enrollment confirmation SMS+email arrives (already verified once; re-verify in batch).
+   - 3.5: admin cancels a session with enrolled students → cancellation SMS+email per student.
+   - 3.6: admin creates a makeup for that cancelled session → makeup SMS+email per affected student.
+3. **3.7 — Session reminders (5 pts).** Cron-scheduled SMS+email 1 week and 24 hours before session start. Same pattern as the low-enrollment cron route + new template + new trigger.
+4. Optional code-review cleanups before phase close (none blocking):
+   - SMS copy: `sessionCancellation` body has "...session on {date} at {time} at {location}..." — double "at" reads awkwardly. Switch to `on {when} ({where})` or split sentences.
+   - `notifyMakeupAssigned`: parallelize the courseResult + enrollments lookup in `Promise.all` (matches pattern in `notifyEnrollmentConfirmed`).
+   - Defense-in-depth on dev test routes: also gate by `VERCEL_ENV` or require `x-test-token` header in case `NODE_ENV` is misconfigured.
+
+**Context:**
+- **The cron not running locally** is now annotated in the data-display layer instead of the data layer. UX gracefully handles stale pending_payment via the `isEffectivelyEnrolled` helper. The actual record cleanup still happens via the cron in prod — locally the records sit but display correctly.
+- **Manual smoke-test path established.** Stripe CLI listening (`stripe listen --forward-to localhost:3000/api/webhooks/stripe`) bridges Stripe → localhost webhook. Without the CLI, paying through the hosted page leaves enrollments stuck in pending_payment because the `checkout.session.completed` webhook never reaches the dev server. Re-run `stripe listen` and update `STRIPE_WEBHOOK_SECRET` in `.env.local` if the CLI session restarts.
+- **Trigger tests must reset DB before running.** Manual smoke tests leave pending_payment + Stripe customer state behind. Affected counts in tests like `student-enrollment.spec.ts:31` (spots-remaining) drift if the DB has leftover real-paid enrollments. Run `supabase db reset` before the full suite.
+- **Notification trigger pattern is now well-established across 3 implementations** (3.4, 3.5, 3.6). Each: dedicated template (pure function), dedicated trigger (`notifyXyz(id)` with admin-client + per-channel try/catch + per-recipient fan-out), wired into the action that just performed the side effect, plus a dev-only `/api/test/*` route mirroring the action for testability. 3.7 should follow the same shape.
+- **SMS encoding:** new templates land at 2 GSM-7 segments (cancellation 259 chars, makeup 218 chars). Em-dash → hyphen cleanup from earlier today held — no UCS-2 regression.
+
+**Code Review:** 1 copy nit, 2 cleanup notes, 1 security suggestion. No bugs.
+1. **consistency** `templates.ts` — `sessionCancellation` SMS body reads "session on {date} at {time} at {location}". The double "at" is awkward. Fix to `on {when} ({where})` or split sentences.
+2. **cleanup** `triggers.ts:212-236, 311-333` — `as unknown as { ... }` casts on embedded relations. Same Supabase types-debt pattern from MEMORY (`project_types_debt`). Track for V2 cleanup.
+3. **cleanup** `triggers.ts:281, 287` — `notifyMakeupAssigned`'s `courseResult` + `enrollments` lookups are independent. Wrap in `Promise.all` for a small latency win (matches `notifyEnrollmentConfirmed` pattern).
+4. **security** Dev test routes (`/api/test/cancel-session`, `/api/test/create-makeup-session`) only gate on `NODE_ENV !== 'development'`. Belt-and-suspenders: also require a header secret or refuse if `VERCEL_ENV` is set.
+
 ## Session 97 — 2026-04-25 20:45–21:38 (0.92 hrs, triage session)
 **Duration:** 0.92 hrs | **Points:** 0 (triage pins — pre-3.5 prep, not plan-table tasks)
 **Task:** Phase 3 triage pins (STOP language, register consent, pgTAP fixes)
