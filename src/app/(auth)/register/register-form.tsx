@@ -58,6 +58,9 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
             <Input id="phone" name="phone" type="tel" autoComplete="tel" />
+            <p className="text-xs text-muted-foreground">
+              Used for enrollment confirmations and session reminders. Standard message rates apply. Reply STOP to opt out.
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="experienceLevel">Sailing experience</Label>

@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 97 — 2026-04-25 20:45 [open]
+
 ## Session 96 — 2026-04-25 18:48–20:26 (1.67 hrs, maintenance/cleanup session)
 **Duration:** 1.67 hrs | **Points:** 0 (no plan-task slots — Twilio fix, test fix, seed rewrite, plan update)
 **Task:** Twilio import fix + instructor-invite test fix + Open Sailing seed model + 5.11 plan add

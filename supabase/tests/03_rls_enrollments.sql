@@ -38,15 +38,15 @@ $$;
 --                e004 (sam  → c004, completed)
 --                e005 (jordan → c004, completed)
 --                e006 (chris → c006, registered)
---   Session attendance: 17 total rows
+--   Session attendance: 13 total rows
 --     e001 (sam/c001):    d001,d002         → 2 rows
 --     e002 (alex/c001):   d001,d002         → 2 rows
 --     e003 (sam/c002):    d003-d006         → 4 rows
 --     e004 (sam/c004):    d007,d008         → 2 rows
 --     e005 (jordan/c004): d007,d008         → 2 rows
---     e006 (chris/c006):  d010-d014         → 5 rows
---   Mike: all 6 enrollments, all 17 attendance records
---   Chris: all 6 enrollments, all 17 attendance records
+--     e006 (chris/c006):  d010              → 1 row (Open Sailing is per-course, single session)
+--   Mike: all 6 enrollments, all 13 attendance records
+--   Chris: all 6 enrollments, all 13 attendance records
 -- ============================================================
 
 -- ============================================================
@@ -214,14 +214,14 @@ SELECT is(
 
 RESET ROLE;
 
--- Admin: sees all 17 attendance records
+-- Admin: sees all 13 attendance records
 SELECT tests.authenticate('a1000000-0000-0000-0000-000000000001', p_is_admin => true);
 SET LOCAL ROLE authenticated;
 
 SELECT is(
   (SELECT count(*)::int FROM public.session_attendance),
-  17,
-  'admin: sees all 17 attendance records'
+  13,
+  'admin: sees all 13 attendance records'
 );
 
 RESET ROLE;
@@ -246,26 +246,26 @@ SELECT is(
 
 RESET ROLE;
 
--- Instructor (mike): sees all 17 attendance records
+-- Instructor (mike): sees all 13 attendance records
 SELECT tests.authenticate('a1000000-0000-0000-0000-000000000002', p_is_instructor => true);
 SET LOCAL ROLE authenticated;
 
 SELECT is(
   (SELECT count(*)::int FROM public.session_attendance),
-  17,
-  'instructor (mike): sees all 17 attendance records'
+  13,
+  'instructor (mike): sees all 13 attendance records'
 );
 
 RESET ROLE;
 
--- Instructor (chris): sees all 17 attendance records
+-- Instructor (chris): sees all 13 attendance records
 SELECT tests.authenticate('a1000000-0000-0000-0000-000000000004', p_is_instructor => true);
 SET LOCAL ROLE authenticated;
 
 SELECT is(
   (SELECT count(*)::int FROM public.session_attendance),
-  17,
-  'instructor (chris): sees all 17 attendance records'
+  13,
+  'instructor (chris): sees all 13 attendance records'
 );
 
 RESET ROLE;

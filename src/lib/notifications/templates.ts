@@ -82,9 +82,14 @@ export function enrollmentConfirmation(data: EnrollmentConfirmationData): Render
   const when = data.firstSessionDate ? `${dateStr}${timeStr ? ` at ${timeStr}` : ''}` : 'TBD'
   const where = data.firstSessionLocation ?? 'TBD'
 
+  // Twilio handles inbound STOP/HELP/UNSUBSCRIBE keywords automatically — no
+  // backend wiring needed. Disclosure is present so toll-free / 10DLC carrier
+  // filters see compliant opt-out language. Admin templates skip this on
+  // purpose (admins are operators, not consumer recipients).
   const smsBody =
     `SailBook: Hi ${data.studentFirstName}, you're enrolled in ${data.courseTitle}. ` +
-    `First session: ${when}, ${where}. See your schedule at sailbook.live/student/courses.`
+    `First session: ${when}, ${where}. See your schedule at sailbook.live/student/courses. ` +
+    `Reply STOP to opt out.`
 
   const emailSubject = `Enrolled: ${data.courseTitle}`
 

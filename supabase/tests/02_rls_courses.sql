@@ -39,11 +39,12 @@ $$;
 --            c003 (ASA103 June, active, no instructor)
 --            c004 (ASA101 April, completed, Mike)
 --            c005 (Dinghy, draft, Lisa)
---            c006 (Open Sailing July, active, Mike)
+--            c006-c010 (Open Sailing Jul 1/8/15/22/29, all active, all Mike)
 --   Sessions: d001-d002 (c001), d003-d006 (c002), d007-d008 (c004),
---             d009 (c005 draft), d010-d014 (c006) = 14 total
+--             d009 (c005 draft), d010 (c006), d011 (c007),
+--             d012 (c008), d013 (c009), d014 (c010) = 14 total
 --   Sam enrolled: c001 (confirmed), c002 (confirmed), c004 (completed)
---   Mike assigned: c001, c004, c006
+--   Mike assigned: c001, c004, c006-c010 (7 courses)
 --   Lisa assigned: c005
 -- ============================================================
 
@@ -90,14 +91,14 @@ RESET ROLE;
 -- COURSES
 -- ============================================================
 
--- Admin: sees all 6 courses (any status)
+-- Admin: sees all 10 courses (any status)
 SELECT tests.authenticate('a1000000-0000-0000-0000-000000000001', p_is_admin => true);
 SET LOCAL ROLE authenticated;
 
 SELECT is(
   (SELECT count(*)::int FROM public.courses),
-  6,
-  'admin: sees all 6 courses regardless of status'
+  10,
+  'admin: sees all 10 courses regardless of status'
 );
 
 UPDATE public.courses SET notes = 'admin edit test'
@@ -111,15 +112,15 @@ SELECT is(
 
 RESET ROLE;
 
--- Student (sam): sees active courses (c001,c002,c003,c006) + enrolled completed (c004) = 5
+-- Student (sam): sees active courses (c001,c002,c003,c006-c010 = 8) + enrolled completed (c004) = 9
 -- Does NOT see draft c005 (not active, not enrolled)
 SELECT tests.authenticate('a1000000-0000-0000-0000-000000000005', p_is_student => true);
 SET LOCAL ROLE authenticated;
 
 SELECT is(
   (SELECT count(*)::int FROM public.courses),
-  5,
-  'student: sees 5 courses (4 active + enrolled completed c004, not draft c005)'
+  9,
+  'student: sees 9 courses (8 active + enrolled completed c004, not draft c005)'
 );
 
 SELECT is(
@@ -130,14 +131,14 @@ SELECT is(
 
 RESET ROLE;
 
--- Instructor (mike): sees all 6 courses
+-- Instructor (mike): sees all 10 courses
 SELECT tests.authenticate('a1000000-0000-0000-0000-000000000002', p_is_instructor => true);
 SET LOCAL ROLE authenticated;
 
 SELECT is(
   (SELECT count(*)::int FROM public.courses),
-  6,
-  'instructor (mike): sees all 6 courses'
+  10,
+  'instructor (mike): sees all 10 courses'
 );
 
 SELECT is(

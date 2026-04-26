@@ -23,7 +23,11 @@ async function resetInstructorFlag(request: import('@playwright/test').APIReques
 // so the mutating tests (1, 3) are further scoped to desktop only. Test 2
 // (invalid token) is safe on all viewports — it reads a token that never
 // exists in the DB.
-test.describe.configure({ mode: 'serial' })
+// `retries: 2` — the admin-generates-link test has a chronic Playwright flake
+// (target page closed during click under suite load, cold-compile races on
+// fresh Next dev server). Manual QA confirmed feature works in session 92.
+// Escalate to `test.fixme()` if retries stop catching it.
+test.describe.configure({ mode: 'serial', retries: 2 })
 
 test.describe('Instructor invite link', () => {
 
