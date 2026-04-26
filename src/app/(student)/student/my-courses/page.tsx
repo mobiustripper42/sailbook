@@ -11,7 +11,7 @@ export default async function MyCoursesPage() {
   const { data: enrollments, error } = await supabase
     .from('enrollments')
     .select(`
-      id, status,
+      id, status, hold_expires_at,
       courses (
         id, title, price,
         course_types ( name, short_code ),
@@ -34,7 +34,17 @@ export default async function MyCoursesPage() {
     sessions: { id: string; date: string; start_time: string; end_time: string; location: string | null }[]
   }
 
-  const courses = (enrollments ?? []).map((e) => {
+  const now = new Date()
+  // Filter out pending_payment with expired hold — those are stale records
+  // waiting on the daily expire-holds cron sweep. From the student's perspective
+  // the enrollment is gone (no spot held); showing it would lie about state.
+  const filtered = (enrollments ?? []).filter((e) => {
+    if (e.status !== 'pending_payment') return true
+    if (!e.hold_expires_at) return false
+    return new Date(e.hold_expires_at) > now
+  })
+
+  const courses = filtered.map((e) => {
     const course = e.courses as unknown as RawCourse | null
     const sessions = (course?.sessions ?? []).sort((a, b) => a.date.localeCompare(b.date))
     const lastSessionDate = sessions.length > 0 ? sessions[sessions.length - 1].date : null

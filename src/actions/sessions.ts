@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { notifyMakeupAssigned, notifySessionCancelled } from '@/lib/notifications/triggers'
 
 export async function addSession(courseId: string, prevState: string | null, formData: FormData) {
   const supabase = await createClient()
@@ -65,6 +66,11 @@ export async function cancelSession(sessionId: string, courseId: string, cancelR
     .update({ status: 'missed', updated_at: new Date().toISOString() })
     .eq('session_id', sessionId)
     .eq('status', 'expected')
+
+  // Best-effort notify after the attendance flip. Trigger reads 'missed' rows
+  // to identify the affected cohort, so this MUST run after the update above.
+  // Errors are logged inside the trigger; never propagate.
+  await notifySessionCancelled(sessionId)
 
   revalidatePath(`/admin/courses/${courseId}`)
   if (attendanceError) return { error: `Session cancelled but attendance update failed: ${attendanceError.message}` }
@@ -136,6 +142,11 @@ export async function createMakeupSession(
       .in('id', missedIds)
 
     if (linkError) return `Makeup created but failed to link original records: ${linkError.message}`
+
+    // Best-effort notify after the link update. Trigger reads makeup_session_id
+    // to identify affected students, so this MUST run after the update above.
+    // Skipped when no missed records were linked (no one to notify).
+    await notifyMakeupAssigned(newSession.id)
   }
 
   revalidatePath(`/admin/courses/${courseId}`)

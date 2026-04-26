@@ -14,6 +14,8 @@ import {
   adminEnrollmentAlert,
   enrollmentConfirmation,
   lowEnrollmentWarning,
+  makeupAssignment,
+  sessionCancellation,
 } from './templates'
 
 // 5.8 will refine this. Tuned conservatively for V1 — better to skip a real
@@ -141,6 +143,193 @@ export async function notifyEnrollmentConfirmed(enrollmentId: string): Promise<v
       trySMS(a.phone, adminRendered.smsBody),
       tryEmail(a.email, adminRendered.emailSubject, adminRendered.emailText, adminRendered.emailHtml),
     ]),
+  )
+}
+
+/**
+ * Fired when an admin cancels a session (status → 'cancelled'). Notifies
+ * every student whose attendance record on this session was 'expected'
+ * before the cancel — those are the ones who were planning to be there.
+ *
+ * Filtering by attendance.status = 'missed' AFTER the cancelSession call
+ * (which flips 'expected' → 'missed') lets us identify the affected
+ * cohort without needing to capture state before the update.
+ *
+ * No admin alert (the admin is the one cancelling — they already know).
+ *
+ * Returns nothing. Errors are logged and swallowed so the caller's
+ * cancelSession write is never blocked by a notification failure.
+ */
+export async function notifySessionCancelled(sessionId: string): Promise<void> {
+  const admin = createAdminClient()
+
+  const { data: session, error: sessionErr } = await admin
+    .from('sessions')
+    .select('id, course_id, date, start_time, location, cancel_reason')
+    .eq('id', sessionId)
+    .maybeSingle()
+
+  if (sessionErr || !session) {
+    console.error('[notifications] session lookup failed:', sessionErr?.message ?? 'not found')
+    return
+  }
+
+  const [courseResult, attendanceResult] = await Promise.all([
+    admin
+      .from('courses')
+      .select('title, course_type_id')
+      .eq('id', session.course_id)
+      .maybeSingle(),
+    // After cancelSession, 'expected' → 'missed' on this session. Pull every
+    // missed row that has no makeup yet to identify affected students. A
+    // pre-existing 'missed' (someone who had already missed before the
+    // cancel) would be a no-op duplicate notify; acceptable rarity for V1.
+    admin
+      .from('session_attendance')
+      .select('enrollment_id')
+      .eq('session_id', sessionId)
+      .eq('status', 'missed')
+      .is('makeup_session_id', null),
+  ])
+
+  const courseTitle = await resolveCourseTitle(admin, courseResult.data)
+
+  const enrollmentIds = (attendanceResult.data ?? []).map((r) => r.enrollment_id)
+  if (enrollmentIds.length === 0) return
+
+  // Fetch enrollment → student profile fanout
+  const { data: enrollments, error: enrollErr } = await admin
+    .from('enrollments')
+    .select(`
+      id,
+      student:profiles!enrollments_student_id_fkey ( first_name, email, phone )
+    `)
+    .in('id', enrollmentIds)
+
+  if (enrollErr) {
+    console.error('[notifications] enrollment lookup failed:', enrollErr.message)
+    return
+  }
+
+  await Promise.all(
+    (enrollments ?? []).flatMap((e) => {
+      const student = e.student as unknown as {
+        first_name: string
+        email: string
+        phone: string | null
+      } | null
+      if (!student) return []
+
+      const rendered = sessionCancellation({
+        studentFirstName: student.first_name,
+        courseTitle,
+        sessionDate: session.date,
+        sessionStart: session.start_time,
+        sessionLocation: session.location,
+        cancelReason: session.cancel_reason,
+      })
+      return [
+        trySMS(student.phone, rendered.smsBody),
+        tryEmail(student.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml),
+      ]
+    }),
+  )
+}
+
+/**
+ * Fired when a makeup session is created for a previously-cancelled session.
+ * Notifies every student whose `session_attendance.makeup_session_id` was
+ * just linked to the new makeup. Caller (createMakeupSession) must run this
+ * AFTER the makeup_session_id link update.
+ *
+ * No admin alert (admin scheduled the makeup).
+ *
+ * Returns nothing. Errors are logged and swallowed so the caller's primary
+ * write (the makeup itself) is never blocked by a notification failure.
+ */
+export async function notifyMakeupAssigned(makeupSessionId: string): Promise<void> {
+  const admin = createAdminClient()
+
+  const { data: makeupSession, error: makeupErr } = await admin
+    .from('sessions')
+    .select('id, course_id, date, start_time, location')
+    .eq('id', makeupSessionId)
+    .maybeSingle()
+
+  if (makeupErr || !makeupSession) {
+    console.error('[notifications] makeup session lookup failed:', makeupErr?.message ?? 'not found')
+    return
+  }
+
+  // Find every attendance row linked to this makeup. Each row's session_id
+  // is the original (cancelled) session — keep it for the email's "you missed"
+  // line. A student linked twice (e.g., manual re-link) becomes a duplicate
+  // notify; acceptable rarity for V1.
+  const { data: links, error: linksErr } = await admin
+    .from('session_attendance')
+    .select(`
+      enrollment_id,
+      original_session:sessions!session_attendance_session_id_fkey ( date )
+    `)
+    .eq('makeup_session_id', makeupSessionId)
+
+  if (linksErr) {
+    console.error('[notifications] makeup link lookup failed:', linksErr.message)
+    return
+  }
+  if (!links || links.length === 0) return
+
+  const courseResult = await admin
+    .from('courses')
+    .select('title, course_type_id')
+    .eq('id', makeupSession.course_id)
+    .maybeSingle()
+  const courseTitle = await resolveCourseTitle(admin, courseResult.data)
+
+  // Fetch the student profiles for the affected enrollments
+  const enrollmentIds = links.map((l) => l.enrollment_id)
+  const { data: enrollments, error: enrollErr } = await admin
+    .from('enrollments')
+    .select(`
+      id,
+      student:profiles!enrollments_student_id_fkey ( first_name, email, phone )
+    `)
+    .in('id', enrollmentIds)
+
+  if (enrollErr) {
+    console.error('[notifications] makeup enrollment lookup failed:', enrollErr.message)
+    return
+  }
+
+  // Index original-session date by enrollment_id for the per-student template
+  const originalDateByEnrollment = new Map<string, string | null>()
+  for (const l of links) {
+    const orig = l.original_session as unknown as { date: string } | null
+    originalDateByEnrollment.set(l.enrollment_id, orig?.date ?? null)
+  }
+
+  await Promise.all(
+    (enrollments ?? []).flatMap((e) => {
+      const student = e.student as unknown as {
+        first_name: string
+        email: string
+        phone: string | null
+      } | null
+      if (!student) return []
+
+      const rendered = makeupAssignment({
+        studentFirstName: student.first_name,
+        courseTitle,
+        originalSessionDate: originalDateByEnrollment.get(e.id) ?? null,
+        makeupSessionDate: makeupSession.date,
+        makeupSessionStart: makeupSession.start_time,
+        makeupSessionLocation: makeupSession.location,
+      })
+      return [
+        trySMS(student.phone, rendered.smsBody),
+        tryEmail(student.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml),
+      ]
+    }),
   )
 }
 
