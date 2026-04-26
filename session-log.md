@@ -3,7 +3,53 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 96 — 2026-04-25 18:48 [open]
+## Session 96 — 2026-04-25 18:48–20:26 (1.67 hrs, maintenance/cleanup session)
+**Duration:** 1.67 hrs | **Points:** 0 (no plan-task slots — Twilio fix, test fix, seed rewrite, plan update)
+**Task:** Twilio import fix + instructor-invite test fix + Open Sailing seed model + 5.11 plan add
+
+**Completed:**
+- **Twilio import shape fix.** `src/lib/notifications/twilio.ts` — switched from `twilioMod.default(sid, token)` (CJS/ESM-interop fragile) to `const { Twilio } = await import('twilio'); new Twilio(sid, token)`. Promoted to urgent because Eric flipped `NOTIFICATIONS_ENABLED=true` in `.env.local` mid-session — any real SMS attempt would have thrown without this fix. **Code review confirmed pattern is correct for `twilio` v6.**
+- **Instructor-invite Playwright test fix (was the pre-existing failure).** `tests/instructor-invite.spec.ts` — `.once('dialog', d => d.accept())` → `.on('dialog', d => d.accept())` in two places. Theory: a stray earlier dialog event consumed the one-shot handler so the actual confirm() popup went unhandled and Playwright auto-dismissed the modal, making the click hang for 30s. All 3 tests in the file now green across viewports, twice in a row.
+  - Briefly appeared still-broken after `supabase db reset` (cold-compile flake — Next.js takes ~15-30s to compile a route on first hit; test's 30s click was racing). Stable once routes warmed.
+- **Open Sailing seed model rewrite.** `supabase/seed.sql`:
+  - One course with 5 sessions (`c006`) → five courses with one session each (`c006`-`c010`, Jul 1/8/15/22/29). Each independently enrollable, matching drop-in / per-night model. Mike instructs all five. Chris (dual-role student) enrolled in c006 (Jul 1) for the demo.
+  - $65 flat price for now (deposit/cash split is Phase 5.2).
+  - **All seed users now share `+14403631199`** (a non-primary number Eric explicitly designated as disposable). Every dev-fired notification SMSes him — smoke test built into the seed.
+  - `tests/student-enrollment.spec.ts:20` — selector updated to `'Open Sailing — Jul 1'` with `{ exact: true }` to avoid matching "Jul 15".
+  - `src/app/dev/page.tsx:222` — walkthrough text updated.
+- **PROJECT_PLAN.md — 5.11 added.** Bulk price update on `/admin/courses` (8 pts, cuttable). Phase 5 now 47 pts.
+- Commit `6ec2a82`.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- **Smoke tests on hold.** Eric registered the wrong domain with Resend earlier — re-verifying now (in progress). Twilio toll-free verification also still pending the business-verification form. Both gate any real-provider end-to-end test.
+- `supabase db push` to remote (overdue 6 sessions).
+
+**Next Steps (in order):**
+1. **First thing next session — three small fixes pinned by Eric/code review:**
+   - Add `Reply STOP to opt out.` to student SMS template body in `templates.ts` (`enrollmentConfirmation()` only — don't touch admin templates). No backend change — Twilio handles STOP automatically.
+   - Add SMS consent disclosure on `/register` near phone field: *"Phone number is used for enrollment confirmations and session reminders. Standard message rates apply. Reply STOP to opt out."*
+   - **Fix pgTAP test breakage from the Open Sailing seed rewrite** (3 files, real assertion mismatches — see Code Review #1-3 below). Without this, next `supabase test db` run will fail.
+2. Run full Playwright suite + `supabase test db` (Eric punted both for this session).
+3. Then: 4.2 (`/admin/users` consolidation, 8 pts).
+4. `supabase db push` to remote (overdue).
+
+**Context:**
+- **`.once('dialog', ...)` is a Playwright trap.** Use `.on(...)` for click flows that may emit multiple dialogs over a test's life (or hoist `.once` above the very first interaction that could trigger any modal). This was the one-line fix for an issue that's been failing across multiple sessions.
+- **All seed users share Eric's disposable mobile.** Intentional for SMS smoke testing during dev. Means any `NODE_ENV=test`-style run with `NOTIFICATIONS_ENABLED=true` against this seed will send live SMS. No env guard exists today; don't run Playwright with `NOTIFICATIONS_ENABLED=true` in `.env.local` until that guard exists or you'll fire real SMS to that number.
+- **Dev server inherits its `.env.local` snapshot at startup.** Env flips need a server restart to take effect. Confirmed today: dispatcher routed to mock mode even after Eric flipped `NOTIFICATIONS_ENABLED=true` because the dev server was already running. Restart picked it up cleanly.
+- **Twilio toll-free verification needs a public proof-of-consent URL.** Eric is filling that form. Recommended path: a public Google Doc explaining the opt-in flow, linked in the form. The actual `/register` consent line can land in parallel.
+- **Maintenance sessions count as 0 plan points.** Velocity tracking for this session is intentionally unrecorded — none of the work mapped to a plan-table slot. The actual hours still happened.
+
+**Code Review:** 3 real bugs (pgTAP test drift from seed rewrite — must fix before next `supabase test db`), 1 advisory cleanup, 1 consistency note (dismissed by Eric — phone is disposable), 1 future-Phase-3 prerequisite.
+
+1. **bug** `supabase/tests/03_rls_enrollments.sql` — Header comment claims `e006: d010-d014 → 5 rows`. After seed rewrite, e006 has 1 attendance row. Total attendance went from 17 to 13. Any `count(*)` against `session_attendance` will fail.
+2. **bug** `supabase/tests/02_rls_courses.sql` — Counts assume 6 courses / 14 sessions. New seed has 10 courses, 14 sessions. Active-courses-for-student count was (c001/c002/c003/c006)=4; now (c001/c002/c003/c006-c010)=8 active + c004 enrolled = 9. Assertions at lines ~121, 138, 174 will break.
+3. **bug** `supabase/tests/05_cascade.sql` — Mike previously taught c001/c004/c006 (3 courses). Now teaches c001/c004/c006-c010 (7 courses). Cascade assertions tied to instructor counts will fail.
+4. **cleanup** `tests/instructor-invite.spec.ts:50` — `.on('dialog', ...)` is registered after `loginAs` + `goto`. Fine because nothing on those triggers a dialog. Reviewer suggests hoisting earlier for symmetry with line 126. Optional.
+5. **consistency** ~~Real PII in seed.~~ Dismissed — Eric confirmed `+14403631199` is a disposable number, not his primary. Will revisit when/if a primary number lands in seed.
+6. **security/future** Phase 3 prerequisite: `profiles` should have a `sms_opt_in_at` column (or equivalent) for Twilio toll-free A2P opt-in proof on file. Pin for 3.10 (auth hardening) or earlier — relevant to the consent disclosure work pinned for next session.
 
 ## Session 95 — 2026-04-25 15:28–18:25 (0.67 hr, mostly offline — Eric configured Twilio/Resend)
 **Duration:** 0.67 hr | **Points:** 4 (3.1: 2, 3.2: 2)
