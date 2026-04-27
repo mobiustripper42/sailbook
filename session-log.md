@@ -60,8 +60,41 @@ Format: prepend newest entry at the top.
 
 RLS unchanged — existing self-update policy on `profiles` covers the new column writes. Test API route correctly gated behind `devOnly()`.
 
-## Session 101 — 2026-04-26 20:03 [open]
-**Task:** Phase 7 — Remote Dev Environment (Hetzner Cloud setup). Runs in parallel with Eric's session 100.
+## Session 101 — 2026-04-26 20:03 → 2026-04-27 00:30 (~4.5 hrs, exact time TBD)
+**Duration:** ~4.5 hrs | **Points:** 18 (7.1: 3, 7.2: 3, 7.3: 3, 7.4: 5, 7.5: 2, 7.6: 2)
+**Task:** Phase 7 — Remote Dev Environment. Move dev off the laptop onto a Hetzner Cloud box accessed over Tailscale, edited via VS Code Remote-SSH.
+
+**Completed:**
+- **7.1 — Hetzner provisioning.** `hcloud` CLI installed to `~/.local/bin`, ed25519 key `~/.ssh/sailbook_hetzner` generated, project `sailbook` + R/W token configured (token in `~/.config/hcloud/cli.toml`, mode 600, gitignored). SSH key registered as `sailbook-laptop`. Cloud Firewall `sailbook-dev-fw` created with SSH-from-anywhere + ICMP. Server provisioned at `5.161.209.160` after CPX41 turned out to be retired across all locations — landed on **ccx23** (4 dCPU / 16 GB / 160 GB SSD / Ashburn / Ubuntu 24.04, $40/mo). Took 3 placement attempts; Hetzner's "Available: yes" lies during capacity crunches.
+- **7.2 — Server hardening + Tailscale.** `scripts/hetzner-bootstrap.sh` (idempotent, two-pass): apt upgrade, sudo user `eric` (passwordless, key-only), 4 GB swap (swappiness=10), ufw default-deny + OpenSSH, fail2ban sshd jail, unattended-upgrades, Tailscale install. Pass 2 (`TAILSCALE_UP=1`) hardens sshd via `/etc/ssh/sshd_config.d/99-sailbook-hardening.conf` (root login + password auth disabled). Hetzner Cloud Firewall stripped to ICMP only — **public port 22 closed**, only the tailnet routes in. Box reachable as `100.118.147.49` / `sailbook-dev` on tailnet.
+- **7.3 — Dev tooling.** `scripts/hetzner-dev-tooling.sh` (idempotent): fnm + Node 22.22.2, Docker CE 29.4.1 + Compose 5.1.3 (eric in `docker` group, no sudo needed), Supabase CLI 2.90.0 (matches laptop), gh 2.91.0, Playwright system deps + all 5 browsers (chromium, chromium-headless-shell, firefox, webkit, ffmpeg). Critical fix: symlinks `node`/`npm`/`npx`/`corepack`/`supabase` into `/usr/local/bin` so non-interactive SSH (`ssh host 'cmd'`) finds them — Ubuntu's `.bashrc` early-returns for non-interactive shells, and SSH cmd-exec doesn't source `.profile` either.
+- **7.4 — Repo bring-up.** `gh auth login` interactively, repo cloned, `.env.local` scp'd over the tailnet, `supabase start` (15 containers, ~3 min cold), `npm install`, `npx playwright install`. **9/9 tests passed** on `tests/codes.spec.ts`, full pgTAP suite green. Dev URL forwarded to Windows browser through VS Code Remote-SSH later in 7.5.
+- **7.5 — VS Code Remote-SSH.** SSH config block added to WSL `~/.ssh/config`. Walked Eric through Windows-side setup: Tailscale for Windows install + tailnet join, Remote-SSH extension, `sailbook_hetzner` key copied to `C:\Users\eric\.ssh\` with `icacls` permissions tightened, host block in `C:\Users\eric\.ssh\config`. Notepad's "save as .txt" gotcha bit; `Move-Item config.txt config -Force` fixed it. End-to-end loop closed: VS Code on Windows edits files on Hetzner over Tailscale, port 3000 auto-forwarded, browser hits Next dev served from Ashburn.
+- **7.6 — Document.** `docs/HETZNER_DEV.md` (architecture / daily workflow / pause-stop / first-time-from-new-device / rebuild-from-scratch / troubleshooting). `scripts/hetzner-provision.sh` wraps the initial hcloud calls with retry on placement failure. `scripts/firewall-locked.json` is the post-bootstrap firewall rule set. README pointer added.
+
+**In Progress:** None.
+
+**Blocked:** None.
+
+**Next Steps:**
+1. Resume Phase 3.10 (password strength + email verification) on the new remote box. Now unblocked since Resend is live.
+2. Carry forward from session 102: investigate 3.5/3.6/3.7 SMS smoke-test failure (Twilio logs).
+3. Carry forward from session 102: cross-file Playwright test isolation hardening (~5–8 pts, Phase 6 task).
+4. **`hcloud server poweroff sailbook-dev`** if walking away for >24 hrs to halve the compute bill while preserving the box.
+5. Update PROJECT_PLAN.md Velocity Tracking table with Phase 7 actuals next time the plan gets a refresh (Phase 7 not on the critical V1 path so the table didn't get a row, but actuals are: 18 pts / ~4.5 hrs / 0.25 hrs/pt).
+
+**Context:**
+- **CPX41 is retired everywhere.** Hetzner's listing showed pricing on `cpx41` but `Available: no` in every region. The new generation (`cpx42`) is EU-only. For US, the working 16 GB option is `ccx23` (dedicated vCPU, $40/mo, 160 GB). We had to retry 3x to get capacity even after switching off CPX41.
+- **Local Supabase publishable keys are deterministic.** `supabase status -o env` shows the same `sb_publishable_*` and `eyJ...` ANON/SERVICE_ROLE keys on the laptop and the new Hetzner box — `.env.local` Just Works once copied. Earlier confusion came from a sloppy diff that compared two ANON-prefixed lines from the laptop's file.
+- **Non-interactive SSH doesn't source shell init files.** `ssh host 'cmd'` runs with `/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin` — neither `.bashrc` (interactive guard returns early) nor `.profile` (login-only) is read. The fix is symlinks into `/usr/local/bin`. Same trap will bite VS Code Remote-SSH bootstrap (it runs commands non-interactively to install its server bits).
+- **Tailscale SSH is the auth backstop.** With `tailscale up --ssh`, the box accepts SSH from any tailnet member without keys. When Eric's Windows SSH config was busted (empty `config`, content in `config.txt`), `ssh sailbook-dev hostname` still worked from PowerShell — Tailscale identity was doing the auth. Worth knowing: if you ever brick the SSH key/config story, you can still get in via Tailscale.
+- **Hetzner placement reliability is mediocre.** "Available: yes" in `hcloud server-type describe` ≠ guaranteed placement. Both `ccx23` in `ash` and `hil` failed back-to-back during the same minute. `scripts/hetzner-provision.sh` now retries 3x with 30s sleep. For initial provisioning, advise picking a non-peak window.
+- **Ubuntu 24.04 base image is missing `unzip`.** fnm's installer needs it. `scripts/hetzner-dev-tooling.sh` step 0 now apt-installs unzip + git + build-essential + pkg-config.
+- **Notepad on Windows saves with `.txt` by default** even when you typed `config` as the filename (it appends an extension based on the file type). `Get-ChildItem $HOME\.ssh\` reveals it; `Move-Item` fixes it. Worth a one-liner in HETZNER_DEV.md troubleshooting.
+- **Cost reality.** Server is hourly-billed ($0.064/hr ≈ $46/mo at full uptime; "$40/mo" is the listed monthly cap). Leaving it running 24/7 = $40/mo. Powering off when away = ~$20/mo. Deleting the server entirely while keeping the SSH key + firewall = $0 until next provision.
+- **Plan renumbering.** Old "Phase 7: Skills & Tracking" pushed to Phase 8 to make room. Summary table updated.
+
+**Code Review:** Skipped — infra/docs only, no app code touched. Two scripts (`hetzner-bootstrap.sh`, `hetzner-dev-tooling.sh`, `hetzner-provision.sh`) are idempotent and were exercised end-to-end during the session.
 
 ## Session 100 — 2026-04-26 19:09–20:13 (1.08 hrs)
 **Duration:** 1.08 hrs | **Points:** 3 (3.8: 3)

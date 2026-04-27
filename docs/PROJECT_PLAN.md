@@ -229,7 +229,30 @@ Design quality, accessibility, navigation, convenience features.
 
 ---
 
-## Phase 7: Skills & Tracking (future — scope TBD)
+## Phase 7: Remote Dev Environment ✅
+
+Move dev off the laptop onto a Hetzner Cloud server, accessed over Tailscale, edited via VS Code Remote-SSH. Frees the laptop, gives a stable always-on dev box, lets long-running tasks (Playwright, Supabase) keep running across reboots.
+
+| Task | Description | Pts | Status |
+|------|-------------|-----|--------|
+| 7.1 | Hetzner provisioning — API token, `hcloud` CLI, SSH key, Cloud Firewall, server in Ashburn | 3 | ✅ |
+| 7.2 | Server hardening + Tailscale — non-root sudo user, ufw, fail2ban, swap, unattended-upgrades, Tailscale joined, public SSH closed | 3 | ✅ |
+| 7.3 | Dev tooling — fnm + Node 22, Docker + Compose, Supabase CLI, gh, Playwright system deps + browsers | 3 | ✅ |
+| 7.4 | Repo bring-up — gh auth, clone, `.env.local` synced, `supabase start`, `npm install`, full pgTAP + Playwright pass on remote | 5 | ✅ |
+| 7.5 | VS Code Remote-SSH — Windows-side SSH config, Tailscale for Windows, port forward 3000, edit→save→hot-reload loop | 2 | ✅ |
+| 7.6 | Document — `docs/HETZNER_DEV.md`, `scripts/hetzner-provision.sh`, `scripts/hetzner-bootstrap.sh`, `scripts/hetzner-dev-tooling.sh`, README pointer | 2 | ✅ |
+
+**Phase 7 total: 18 pts. Server is `ccx23` (4 dCPU / 16 GB / 160 GB) in `ash` at $40/mo.**
+
+**Outcomes:**
+- CPX41 was retired across all locations; landed on ccx23 ($6/mo cheaper than CPX41 was, dedicated vCPU vs shared).
+- Local Supabase publishable keys are deterministic across machines (same `.env.local` Just Works).
+- Non-interactive SSH doesn't source `.bashrc` — `node`/`supabase` are symlinked into `/usr/local/bin` so plain `ssh host 'cmd'` finds them.
+- Tailscale SSH (`tailscale up --ssh`) is the auth backstop: even if the SSH config is busted, tailnet identity gets you in.
+
+---
+
+## Phase 8: Skills & Tracking (future — scope TBD)
 
 Transforms the app from scheduling into a learning management tool.
 
@@ -242,7 +265,7 @@ Transforms the app from scheduling into a learning management tool.
 - Automated experience level progression based on completed skills
 - Advanced analytics/reporting
 
-**Phase 7: estimated 40–60 pts. Break down when Phase 6 is complete.**
+**Phase 8: estimated 40–60 pts. Break down when Phase 6 is complete.**
 
 ---
 
@@ -278,7 +301,8 @@ Transforms the app from scheduling into a learning management tool.
 | 4 — Identity | 27 | ~10 hrs | Onboarding is clean |
 | 5 — Pricing | 47 | ~18 hrs | Flexible pricing, waitlist, prereqs, student calendar view, bulk price update |
 | 6 — Polish | 44 | ~17 hrs | Professional, accessible, navigable, security verified |
-| 7 — Skills | 40–60 | ~15–23 hrs | Learning management |
+| 7 — Remote Dev Env ✅ | 18 | ~7 hrs | Stable dev box, edit anywhere |
+| 8 — Skills | 40–60 | ~15–23 hrs | Learning management |
 | **Total (0–6)** | **298** | **~113 hrs** | |
 
 At V1 velocity (0.38 hrs/pt): ~110 hours for Phases 0–6.

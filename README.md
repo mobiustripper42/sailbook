@@ -21,6 +21,10 @@ Open [http://localhost:3000](http://localhost:3000).
 3. Open WSL terminal
 4. `cd ~/sailbook && supabase start && npm run dev`
 
+### Remote dev (Hetzner)
+
+The full dev stack also runs on a Hetzner Cloud server accessed via Tailscale + VS Code Remote-SSH. See [`docs/HETZNER_DEV.md`](docs/HETZNER_DEV.md).
+
 ---
 
 ## Stripe Setup
