@@ -80,7 +80,7 @@ RLS unchanged — existing self-update policy on `profiles` covers the new colum
 1. Resume Phase 3.10 (password strength + email verification) on the new remote box. Now unblocked since Resend is live.
 2. Carry forward from session 102: investigate 3.5/3.6/3.7 SMS smoke-test failure (Twilio logs).
 3. Carry forward from session 102: cross-file Playwright test isolation hardening (~5–8 pts, Phase 6 task).
-4. **`hcloud server poweroff sailbook-dev`** if walking away for >24 hrs to halve the compute bill while preserving the box.
+4. **Snapshot + delete the server** when stepping away for weeks (`hcloud server create-image --type snapshot ...` then `hcloud server delete`). Hetzner bills hourly whether on or off — `poweroff` does NOT save money, my earlier suggestion was wrong. Snapshot-and-delete drops the cost from $40/mo running to ~$2/mo (snapshot only); restore is ~5 min.
 5. Update PROJECT_PLAN.md Velocity Tracking table with Phase 7 actuals next time the plan gets a refresh (Phase 7 not on the critical V1 path so the table didn't get a row, but actuals are: 18 pts / ~4.5 hrs / 0.25 hrs/pt).
 
 **Context:**

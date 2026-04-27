@@ -29,16 +29,35 @@ End of session: just close the VS Code window. Server keeps running.
 
 ## Pausing / stopping the server
 
-`sailbook-dev` is billed hourly. Three options:
+Hetzner bills hourly **whether the server is running or powered off** — a stopped server still reserves disk + IP, so `poweroff` does not save money. The only ways to stop paying:
+
+| Option | Cost | Restore time | Loses |
+|---|---|---|---|
+| Leave running | $40/mo | n/a | nothing |
+| Delete | $0 | ~20 min (re-provision + bootstrap + tooling + repo) | everything on the box |
+| **Snapshot + delete** | ~$2/mo (snapshot of 160 GB) | ~5 min (create from snapshot) | public IP changes (Tailscale handles this) |
+
+Snapshot-and-delete is the right move when stepping away for weeks:
 
 ```bash
-# From WSL — server stays provisioned, you stop paying for compute
-hcloud server poweroff sailbook-dev    # ~50% off while powered off
-hcloud server poweron sailbook-dev
+# Create the snapshot (server can stay running; quiesce DB first if mid-work)
+hcloud server create-image --type snapshot \
+  --description "sailbook-dev pre-pause $(date +%F)" sailbook-dev
 
-# Nuke and pave (also frees the IP)
+# Verify and capture the snapshot ID
+hcloud image list --type snapshot
+
+# Delete the server
 hcloud server delete sailbook-dev
+
+# Later, restore from the snapshot:
+hcloud server create --name sailbook-dev --type ccx23 --location ash \
+  --image <snapshot-id> --ssh-key sailbook-laptop --firewall sailbook-dev-fw
 ```
+
+The restore creates a new public IPv4 (Tailscale handles routing transparently — `sailbook-dev` MagicDNS still resolves). If you've hard-coded the public IP anywhere outside Tailscale, that'll need to be updated.
+
+Snapshots cost ~$0.012/GB/month — about $2/mo for the 160 GB disk. Periodically prune old snapshots: `hcloud image delete <snapshot-id>`.
 
 ## First-time access from a new device
 
