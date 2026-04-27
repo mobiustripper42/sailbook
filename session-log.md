@@ -3,6 +3,52 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 101 — 2026-04-26 20:03 [open]
+**Task:** Phase 7 — Remote Dev Environment (Hetzner Cloud setup). Runs in parallel with Eric's session 100.
+
+## Session 100 — 2026-04-26 19:09–20:13 (1.08 hrs)
+**Duration:** 1.08 hrs | **Points:** 3 (3.8: 3)
+**Task:** Phase 3.8 — Admin notification preferences (settings/UI shift away from triggers)
+
+**Completed:**
+- **Phase 3.8 — Admin notification preferences (3 pts).**
+  - Migration `20260426232739_admin_notification_preferences.sql` — `notification_preferences jsonb` column on profiles, default NULL, comment documents the shape.
+  - `src/lib/notifications/preferences.ts` — `ADMIN_NOTIFICATION_EVENTS` const (`admin_enrollment_alert`, `admin_low_enrollment`), `isAdminChannelEnabled()` (defensive: any non-bool / non-object / null / undefined → enabled), `normalizeAdminPreferences()` for form initial state.
+  - `src/lib/notifications/triggers.ts` — admin fan-outs in `notifyEnrollmentConfirmed` and `notifyLowEnrollmentCourses` now read each admin's `notification_preferences` and gate per-channel sends. Profile selects extended to include the column.
+  - `src/actions/notification-preferences.ts` — `updateAdminNotificationPreferences` server action, admin-only check + own-row write only. DEC-015 form-action shape (`Promise<string | null>`).
+  - `src/app/(admin)/admin/notification-preferences/page.tsx` + `src/components/admin/notification-preferences-form.tsx` — server page + client form, four checkboxes (2 events × 2 channels).
+  - Sidebar nav links added in `admin-nav.tsx` + `admin-mobile-nav-drawer.tsx`.
+  - DEC-026 in `docs/DECISIONS.md` — JSONB on profiles over a separate table; resolved the TBD row.
+  - `tests/admin-notification-preferences.spec.ts` — 4 desktop tests (page loads with defaults, save + reload persistence, non-admin redirect, sidebar link). All green.
+- Commit `45714b9`.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- `NOTIFICATIONS_ENABLED=true` for ongoing smoke testing → dispatcher-firing Playwright tests are paused for "a few sessions" per Eric. Will surface as test debt in the meantime.
+- Twilio Toll-Free Verification still pending submission/approval.
+- Parallel CC running session 101 (Phase 7 — Hetzner remote dev environment). Independent from 3.8 scope; worked around at commit time by staging files explicitly instead of `git add -A`.
+
+**Next Steps:**
+1. **3.9 — Student notification preferences (2 pts).** Reuses the same `notification_preferences` column on profiles. Spec calls for "opt out of SMS, email-only option" — simpler shape than admin (single global toggle vs per-event matrix). 3.9 is the natural next bite; DEC-026's "preferences will reuse the same column" claim gets exercised here.
+2. Eric to finish smoke testing 3.4–3.8 with `NOTIFICATIONS_ENABLED=true` and a single test number. Confirm preferences toggles actually suppress channels in real Twilio/Resend output.
+3. Code review test-debt follow-up: when notification env settles, add (a) unit tests for `isAdminChannelEnabled` covering the realistic JSON shapes, and (b) a triggers-level test asserting `mockBuffer` respects per-recipient prefs.
+4. Form-action return-shape inconsistency: `updateAdminNotificationPreferences` returns `Promise<string | null>` (DEC-015 form-action shape), while existing `updateStudentProfile` returns `Promise<{ error: string | null }>`. Pick a winner before 3.9 reuses this column and forks the pattern further. Recommendation: standardize on `string | null` for form actions (matches DEC-015 explicitly).
+5. `supabase db push` to remote (still overdue, but Eric did push earlier today — confirm whether the migration landed on remote).
+
+**Context:**
+- **Pattern shift in Phase 3.** Sessions 92–99 were notification-trigger work — every task was "new template + new trigger function + wire into action + test route". 3.8 is the first task that operates on the dispatcher itself rather than adding to it. 3.9 will follow the same pattern: read prefs in the recipient fan-out, gate channels.
+- **JSONB-on-profiles design (DEC-026).** Null/missing keys mean enabled. This preserves historical behavior for any profile predating the column. The defensive helper (`isAdminChannelEnabled`) is the load-bearing piece — accidentally muting an admin is worse than accidentally sending, so any malformed value defaults to enabled. The OPPOSITE direction would be a bug.
+- **Parallel CC commit hygiene.** When two CC sessions are running in the same working tree, `/kill-this`'s default `git add -A` would cross-contaminate. Stage explicit file paths to keep commits scoped to the current session's task. Both sessions can write to `session-log.md` (each prepends its open marker — order is whatever wins the race).
+- **Types regen gotcha.** `npx supabase gen types typescript --local > types.ts` includes npm warnings from stderr if the supabase CLI isn't already installed. Add `2>/dev/null` to the redirect, or the file gets corrupted with `npm warn exec ...` lines that break tsc.
+- **Dispatcher gating is the load-bearing logic.** UI tests pass; dispatcher behavior is currently only manual-smoke confirmed. Acceptable risk for V1, flagged as test debt in next steps.
+
+**Code Review:** 4 cleanups, 0 bugs. RLS check confirmed the existing self-update policy covers the new column (DEC-026 claim holds).
+1. **consistency** Form-action return-shape inconsistency between `updateAdminNotificationPreferences` (`string | null`) and `updateStudentProfile` (`{ error: string | null }`). Standardize before 3.9 forks further.
+2. **cleanup** Add a one-line comment in `preferences.ts:38` that "default to enabled on any non-bool" is intentional (corrupted JSON wins by sending, not by muting).
+3. **cleanup** Action validates FormData correctly — only iterates known events, drops extras. No change needed.
+4. **cleanup** Test debt — dispatcher gating not automated. Add unit tests for `isAdminChannelEnabled` + triggers-level test once `NOTIFICATIONS_ENABLED` settles.
+
 ## Session 99 — 2026-04-26 07:42–08:32 (0.83 hrs)
 **Duration:** 0.83 hrs | **Points:** 5 (3.7: 5)
 **Task:** Phase 3.7 — Session reminders + 3 carryover cleanups from session 98 code review
