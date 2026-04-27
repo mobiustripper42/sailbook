@@ -10,7 +10,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendEmail, sendSMS } from './index'
-import { isAdminChannelEnabled } from './preferences'
+import { isAdminChannelEnabled, isStudentChannelEnabled } from './preferences'
 import {
   adminEnrollmentAlert,
   enrollmentConfirmation,
@@ -74,7 +74,7 @@ export async function notifyEnrollmentConfirmed(enrollmentId: string): Promise<v
   const [studentResult, courseResult, sessionResult, paymentResult, adminsResult] = await Promise.all([
     admin
       .from('profiles')
-      .select('first_name, last_name, email, phone')
+      .select('first_name, last_name, email, phone, notification_preferences')
       .eq('id', enrollment.student_id)
       .maybeSingle(),
     admin
@@ -117,7 +117,8 @@ export async function notifyEnrollmentConfirmed(enrollmentId: string): Promise<v
   const amountDollars = payment ? payment.amount_cents / 100 : null
   const paymentMethod = payment?.payment_method ?? 'stripe'
 
-  // Student
+  // Student. Channel gated by the student's own notification_preferences
+  // (3.9). Default = enabled.
   const studentRendered = enrollmentConfirmation({
     studentFirstName: student.first_name,
     courseTitle,
@@ -126,10 +127,15 @@ export async function notifyEnrollmentConfirmed(enrollmentId: string): Promise<v
     firstSessionLocation: session?.location ?? null,
     amountDollars,
   })
-  await Promise.all([
-    trySMS(student.phone, studentRendered.smsBody),
-    tryEmail(student.email, studentRendered.emailSubject, studentRendered.emailText, studentRendered.emailHtml),
-  ])
+  const studentPrefs = student.notification_preferences
+  const studentSends: Promise<void>[] = []
+  if (isStudentChannelEnabled(studentPrefs, 'sms')) {
+    studentSends.push(trySMS(student.phone, studentRendered.smsBody))
+  }
+  if (isStudentChannelEnabled(studentPrefs, 'email')) {
+    studentSends.push(tryEmail(student.email, studentRendered.emailSubject, studentRendered.emailText, studentRendered.emailHtml))
+  }
+  await Promise.all(studentSends)
 
   // Admins (fan-out — each independent). Each channel is gated by the
   // recipient's own notification_preferences (3.8). Default = enabled.
@@ -212,7 +218,7 @@ export async function notifySessionCancelled(sessionId: string): Promise<void> {
     .from('enrollments')
     .select(`
       id,
-      student:profiles!enrollments_student_id_fkey ( first_name, email, phone )
+      student:profiles!enrollments_student_id_fkey ( first_name, email, phone, notification_preferences )
     `)
     .in('id', enrollmentIds)
 
@@ -227,6 +233,7 @@ export async function notifySessionCancelled(sessionId: string): Promise<void> {
         first_name: string
         email: string
         phone: string | null
+        notification_preferences: unknown
       } | null
       if (!student) return []
 
@@ -238,10 +245,15 @@ export async function notifySessionCancelled(sessionId: string): Promise<void> {
         sessionLocation: session.location,
         cancelReason: session.cancel_reason,
       })
-      return [
-        trySMS(student.phone, rendered.smsBody),
-        tryEmail(student.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml),
-      ]
+      const prefs = student.notification_preferences
+      const sends: Promise<void>[] = []
+      if (isStudentChannelEnabled(prefs, 'sms')) {
+        sends.push(trySMS(student.phone, rendered.smsBody))
+      }
+      if (isStudentChannelEnabled(prefs, 'email')) {
+        sends.push(tryEmail(student.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml))
+      }
+      return sends
     }),
   )
 }
@@ -301,7 +313,7 @@ export async function notifyMakeupAssigned(makeupSessionId: string): Promise<voi
       .from('enrollments')
       .select(`
         id,
-        student:profiles!enrollments_student_id_fkey ( first_name, email, phone )
+        student:profiles!enrollments_student_id_fkey ( first_name, email, phone, notification_preferences )
       `)
       .in('id', enrollmentIds),
   ])
@@ -326,6 +338,7 @@ export async function notifyMakeupAssigned(makeupSessionId: string): Promise<voi
         first_name: string
         email: string
         phone: string | null
+        notification_preferences: unknown
       } | null
       if (!student) return []
 
@@ -337,10 +350,15 @@ export async function notifyMakeupAssigned(makeupSessionId: string): Promise<voi
         makeupSessionStart: makeupSession.start_time,
         makeupSessionLocation: makeupSession.location,
       })
-      return [
-        trySMS(student.phone, rendered.smsBody),
-        tryEmail(student.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml),
-      ]
+      const prefs = student.notification_preferences
+      const sends: Promise<void>[] = []
+      if (isStudentChannelEnabled(prefs, 'sms')) {
+        sends.push(trySMS(student.phone, rendered.smsBody))
+      }
+      if (isStudentChannelEnabled(prefs, 'email')) {
+        sends.push(tryEmail(student.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml))
+      }
+      return sends
     }),
   )
 }
@@ -536,7 +554,7 @@ export async function notifyUpcomingSessionReminders(
           enrollment_id,
           enrollments!inner (
             id,
-            student:profiles!enrollments_student_id_fkey ( first_name, email, phone )
+            student:profiles!enrollments_student_id_fkey ( first_name, email, phone, notification_preferences )
           )
         `)
         .eq('session_id', session.id)
@@ -560,7 +578,12 @@ export async function notifyUpcomingSessionReminders(
     await Promise.all(
       attendance.flatMap((a) => {
         const enrollment = a.enrollments as unknown as {
-          student: { first_name: string; email: string; phone: string | null } | null
+          student: {
+            first_name: string
+            email: string
+            phone: string | null
+            notification_preferences: unknown
+          } | null
         } | null
         const student = enrollment?.student
         if (!student) return []
@@ -573,10 +596,15 @@ export async function notifyUpcomingSessionReminders(
           sessionLocation: session.location,
           leadTimeLabel: slot.label,
         })
-        return [
-          trySMS(student.phone, rendered.smsBody),
-          tryEmail(student.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml),
-        ]
+        const prefs = student.notification_preferences
+        const sends: Promise<void>[] = []
+        if (isStudentChannelEnabled(prefs, 'sms')) {
+          sends.push(trySMS(student.phone, rendered.smsBody))
+        }
+        if (isStudentChannelEnabled(prefs, 'email')) {
+          sends.push(tryEmail(student.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml))
+        }
+        return sends
       }),
     )
 

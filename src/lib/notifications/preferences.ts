@@ -1,11 +1,13 @@
-// 3.8 — Admin notification preferences.
+// 3.8/3.9 — Admin and student notification preferences.
 //
-// Per-admin channel toggles stored as a JSONB column on profiles. Read at
-// per-recipient fan-out time inside the trigger functions.
+// Per-recipient channel toggles stored as a JSONB column on profiles. Read
+// at per-recipient fan-out time inside the trigger functions.
 //
 // Default is "all enabled" — null/undefined/missing keys are treated as
-// permission. This preserves the historical behavior for any admin who
-// hasn't visited the preferences page.
+// permission. This is intentional: accidentally muting a recipient is worse
+// than accidentally sending. Corrupted JSONB defaults to "send" too.
+// Existing recipients who never visit the preferences page keep getting
+// everything they were getting before.
 
 export const ADMIN_NOTIFICATION_EVENTS = [
   'admin_enrollment_alert',
@@ -60,4 +62,50 @@ export function normalizeAdminPreferences(
     }
   }
   return out
+}
+
+// ─── 3.9 — Student global channel preferences ──────────────────────────────
+//
+// Students get a single global toggle per channel rather than the admin's
+// per-event matrix. Spec calls for SMS opt-out / email-only — applied
+// uniformly across enrollment confirmations, cancellation notices, makeup
+// assignments, and session reminders.
+
+export const STUDENT_GLOBAL_KEY = 'student_global'
+
+export type StudentNotificationPreferences = {
+  [STUDENT_GLOBAL_KEY]?: {
+    sms?: boolean
+    email?: boolean
+  }
+}
+
+/**
+ * Returns true if the channel is enabled for student-facing notifications.
+ * Same defensive defaults as the admin helper — any non-boolean / missing
+ * value falls through to true.
+ */
+export function isStudentChannelEnabled(
+  prefs: unknown,
+  channel: NotificationChannel,
+): boolean {
+  if (!prefs || typeof prefs !== 'object') return true
+  const block = (prefs as Record<string, unknown>)[STUDENT_GLOBAL_KEY]
+  if (!block || typeof block !== 'object') return true
+  const channelPref = (block as Record<string, unknown>)[channel]
+  if (typeof channelPref !== 'boolean') return true
+  return channelPref
+}
+
+/**
+ * Normalizes the student block to a deterministic { sms, email } shape for
+ * the form's initial checkbox state.
+ */
+export function normalizeStudentPreferences(
+  prefs: unknown,
+): { sms: boolean; email: boolean } {
+  return {
+    sms: isStudentChannelEnabled(prefs, 'sms'),
+    email: isStudentChannelEnabled(prefs, 'email'),
+  }
 }
