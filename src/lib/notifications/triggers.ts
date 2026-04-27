@@ -10,6 +10,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendEmail, sendSMS } from './index'
+import { isAdminChannelEnabled } from './preferences'
 import {
   adminEnrollmentAlert,
   enrollmentConfirmation,
@@ -98,7 +99,7 @@ export async function notifyEnrollmentConfirmed(enrollmentId: string): Promise<v
       .maybeSingle(),
     admin
       .from('profiles')
-      .select('first_name, last_name, email, phone')
+      .select('first_name, last_name, email, phone, notification_preferences')
       .eq('is_admin', true)
       .eq('is_active', true),
   ])
@@ -130,7 +131,8 @@ export async function notifyEnrollmentConfirmed(enrollmentId: string): Promise<v
     tryEmail(student.email, studentRendered.emailSubject, studentRendered.emailText, studentRendered.emailHtml),
   ])
 
-  // Admins (fan-out — each independent)
+  // Admins (fan-out — each independent). Each channel is gated by the
+  // recipient's own notification_preferences (3.8). Default = enabled.
   const admins = adminsResult.data ?? []
   const adminRendered = adminEnrollmentAlert({
     studentFullName: `${student.first_name} ${student.last_name}`.trim(),
@@ -140,10 +142,17 @@ export async function notifyEnrollmentConfirmed(enrollmentId: string): Promise<v
     amountDollars,
   })
   await Promise.all(
-    admins.flatMap((a) => [
-      trySMS(a.phone, adminRendered.smsBody),
-      tryEmail(a.email, adminRendered.emailSubject, adminRendered.emailText, adminRendered.emailHtml),
-    ]),
+    admins.flatMap((a) => {
+      const prefs = a.notification_preferences
+      const sends: Promise<void>[] = []
+      if (isAdminChannelEnabled(prefs, 'admin_enrollment_alert', 'sms')) {
+        sends.push(trySMS(a.phone, adminRendered.smsBody))
+      }
+      if (isAdminChannelEnabled(prefs, 'admin_enrollment_alert', 'email')) {
+        sends.push(tryEmail(a.email, adminRendered.emailSubject, adminRendered.emailText, adminRendered.emailHtml))
+      }
+      return sends
+    }),
   )
 }
 
@@ -371,7 +380,7 @@ export async function notifyLowEnrollmentCourses(): Promise<number> {
 
   const { data: admins, error: adminsErr } = await admin
     .from('profiles')
-    .select('email, phone')
+    .select('email, phone, notification_preferences')
     .eq('is_admin', true)
     .eq('is_active', true)
 
@@ -434,10 +443,17 @@ export async function notifyLowEnrollmentCourses(): Promise<number> {
     })
 
     await Promise.all(
-      admins.flatMap((a) => [
-        trySMS(a.phone, rendered.smsBody),
-        tryEmail(a.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml),
-      ]),
+      admins.flatMap((a) => {
+        const prefs = a.notification_preferences
+        const sends: Promise<void>[] = []
+        if (isAdminChannelEnabled(prefs, 'admin_low_enrollment', 'sms')) {
+          sends.push(trySMS(a.phone, rendered.smsBody))
+        }
+        if (isAdminChannelEnabled(prefs, 'admin_low_enrollment', 'email')) {
+          sends.push(tryEmail(a.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml))
+        }
+        return sends
+      }),
     )
 
     alertedCount++

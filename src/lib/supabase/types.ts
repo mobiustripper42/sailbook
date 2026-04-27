@@ -342,6 +342,7 @@ export type Database = {
           is_member: boolean
           is_student: boolean
           last_name: string
+          notification_preferences: Json | null
           phone: string | null
           stripe_customer_id: string | null
           theme_preference: string
@@ -362,6 +363,7 @@ export type Database = {
           is_member?: boolean
           is_student?: boolean
           last_name: string
+          notification_preferences?: Json | null
           phone?: string | null
           stripe_customer_id?: string | null
           theme_preference?: string
@@ -382,6 +384,7 @@ export type Database = {
           is_member?: boolean
           is_student?: boolean
           last_name?: string
+          notification_preferences?: Json | null
           phone?: string | null
           stripe_customer_id?: string | null
           theme_preference?: string
@@ -540,6 +543,10 @@ export type Database = {
       get_student_enrollment_ids: {
         Args: { user_id: string }
         Returns: string[]
+      }
+      profile_auth_source_unchanged: {
+        Args: { p_auth_source: string; p_id: string }
+        Returns: boolean
       }
       profile_role_flags_unchanged: {
         Args: {

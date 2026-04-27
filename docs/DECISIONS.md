@@ -140,6 +140,12 @@
 **Note on ghost-student payment visibility:** Payment rows for admin-created students (`auth_source = 'admin_created'`) are admin-visible only until the student links a real login. The "Students read own payments" RLS policy (`student_id = auth.uid()`) cannot be satisfied without an active session. Intentional for V1.
 **Tradeoff:** Two payment paths to maintain. The manual path has no receipt email (Phase 3 notifications will add this). Partial refunds on manual payments update the DB row only — no Stripe API call.
 
+## DEC-026: Notification preferences stored as JSONB on profiles (2026-04-26)
+**Decision:** Per-recipient notification channel toggles live in a `notification_preferences jsonb` column on `profiles`. Shape: `{ [eventType]: { sms?: boolean, email?: boolean } }`. Null/missing keys mean the channel is enabled — admins who never visit the preferences page keep getting everything.
+**Why:** The data is read at per-recipient fan-out time inside each trigger, which already reads the recipient's profile row — no extra queries, no joins, no new RLS surface. Admin count is small (1–3 in V1) and there is no need to filter or query by preference. A separate `notification_preferences` table would add migration work, RLS policies, and join cost for zero practical benefit at this scale. Future event types extend the JSON shape additively — no schema migration. The 3.9 student preferences (opt out of SMS, email-only) will reuse the same column.
+**Tradeoffs:** No DB-level shape validation — the app must defend against malformed values. The dispatcher helper `isAdminChannelEnabled()` validates defensively (typeof checks, null/undefined → enabled) so a bad JSON value can never throw or default to "disabled" silently. Querying "which admins have SMS enabled for X" is awkward (would need a JSON path expression), but no current or planned feature needs that.
+**Revisit if:** preferences need to be queryable (e.g., bulk admin reporting), shape grows beyond ~5 events × multiple channels, or a third role (instructor) wants distinct preferences with overlapping events.
+
 ## V2 Decisions (to be resolved during build)
 
 | ID | Decision | When | Who | Status |
@@ -151,5 +157,5 @@
 | DEC-019 | Inactive instructor cascade behavior | Phase 1, task 1.3 | DEC entry | Done |
 | DEC-TBD | Pessimistic inventory / enrollment hold duration | Phase 2, task 2.3 | DEC + Andy | Pending |
 | DEC-TBD | Scheduled job infrastructure (Vercel Cron vs Supabase Edge Functions) | Phase 2, task 2.4 | @architect | Pending |
-| DEC-TBD | Notification settings storage (table vs JSON column) | Phase 3, task 3.8 | @architect | Pending |
+| DEC-026 | Notification settings storage (JSONB on profiles) | Phase 3, task 3.8 | @architect | Done |
 | DEC-TBD | Drop-in enrollment model (per-session vs per-course, flag on course) | Phase 5, task 5.2 | @architect + Andy | Pending |
