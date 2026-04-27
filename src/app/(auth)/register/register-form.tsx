@@ -95,8 +95,11 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
               type="password"
               required
               autoComplete="new-password"
-              minLength={8}
+              minLength={12}
             />
+            <p className="text-xs text-muted-foreground">
+              At least 12 characters, with upper case, lower case, and a digit.
+            </p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-3 pt-4">

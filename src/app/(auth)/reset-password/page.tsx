@@ -94,9 +94,12 @@ export default function ResetPasswordPage() {
               name="password"
               type="password"
               required
-              minLength={6}
+              minLength={12}
               autoComplete="new-password"
             />
+            <p className="text-xs text-muted-foreground">
+              At least 12 characters, with upper case, lower case, and a digit.
+            </p>
           </div>
         </CardContent>
         <CardFooter className="pt-4">

@@ -43,7 +43,7 @@ test.describe('codes table — experience levels in admin student edit', () => {
     // Log in as admin
     await page.goto('/login')
     await page.fill('input[name="email"]', 'andy@ltsc.test')
-    await page.fill('input[name="password"]', 'qwert12345')
+    await page.fill('input[name="password"]', 'Sailbook12345')
     await page.click('button[type="submit"]')
     await page.waitForURL('/admin/dashboard')
 

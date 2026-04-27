@@ -1,6 +1,6 @@
 # SailBook — QA Test Cases
 
-Manual test cases by task. Prerequisites unless noted: seed data loaded, logged in as admin (andy@ltsc.test / qwert12345).
+Manual test cases by task. Prerequisites unless noted: seed data loaded, logged in as admin (andy@ltsc.test / Sailbook12345).
 
 ---
 
@@ -329,7 +329,7 @@ RESET request.jwt.claims;
 
 ### 4.1 — Instructor dashboard
 
-**Prerequisites:** Seed data loaded. Two instructor logins: dave@ltsc.test (courses c001, c004, c005, c006) and sarah@ltsc.test (course c002). Password: qwert12345.
+**Prerequisites:** Seed data loaded. Two instructor logins: dave@ltsc.test (courses c001, c004, c005, c006) and sarah@ltsc.test (course c002). Password: Sailbook12345.
 
 **Dave's dashboard (dave@ltsc.test)**
 - [X ] Log in as dave@ltsc.test → redirects to `/instructor/dashboard`
@@ -381,7 +381,7 @@ RESET request.jwt.claims;
 
 ### 4.2 — Session roster view
 
-**Prerequisites:** Seed data loaded. Instructor logins: sarah@ltsc.test (c002) and dave@ltsc.test (c001). Password: qwert12345.
+**Prerequisites:** Seed data loaded. Instructor logins: sarah@ltsc.test (c002) and dave@ltsc.test (c001). Password: Sailbook12345.
 
 **Navigate from dashboard (Sarah → c002 session d004)**
 - [X ] Log in as sarah@ltsc.test → dashboard shows 3 upcoming sessions
@@ -427,7 +427,7 @@ RESET request.jwt.claims;
 
 ### 4.3 — Identify makeup students in roster
 
-**Prerequisites:** Seed data loaded (Carol's d003 attendance has `makeup_session_id = d004`). Login: sarah@ltsc.test / qwert12345.
+**Prerequisites:** Seed data loaded (Carol's d003 attendance has `makeup_session_id = d004`). Login: sarah@ltsc.test / Sailbook12345.
 
 **Makeup badge on roster (Sarah → d004)**
 - [X ] Log in as sarah@ltsc.test → dashboard → click "Roster →" on May 13 session (d004)
@@ -653,7 +653,7 @@ RESET request.jwt.claims;
 
 ### 5.17 — RLS fix: student INSERT/UPDATE on session_attendance
 
-**Prerequisites:** Run `docs/migrations/010_rls_student_attendance_write.sql` in Supabase SQL Editor. Clean seed data loaded (reseed after migration). Login credentials: password `qwert12345` for all test accounts.
+**Prerequisites:** Run `docs/migrations/010_rls_student_attendance_write.sql` in Supabase SQL Editor. Clean seed data loaded (reseed after migration). Login credentials: password `Sailbook12345` for all test accounts.
 
 **What changed:** Added `FOR INSERT` and `FOR UPDATE` RLS policies for students on `session_attendance`. Students can only write rows where `enrollment_id` belongs to them, and only to `status = 'expected'`. Before this migration, the enrollment flow silently failed — the enrollment row was created but all attendance records were dropped by RLS.
 
@@ -815,7 +815,7 @@ RESET request.jwt.claims;
 
 ### 5.2 — Instructor swap on individual sessions
 
-**Prerequisites:** Seed data loaded (includes session-level override: d002 assigned to Sarah, d001 is course default). Login: andy@ltsc.test / qwert12345.
+**Prerequisites:** Seed data loaded (includes session-level override: d002 assigned to Sarah, d001 is course default). Login: andy@ltsc.test / Sailbook12345.
 
 **Seed state to know:**
 - c001 (ASA 101 Weekend Intensive): course instructor = Dave
@@ -956,7 +956,7 @@ ORDER BY s.date;
 
 ### 5.3 — Error handling: form validation, API errors, empty states
 
-**Prerequisites:** Seed data loaded. Login: andy@ltsc.test / qwert12345 for admin tests; dan@ltsc.test for student empty-state tests.
+**Prerequisites:** Seed data loaded. Login: andy@ltsc.test / Sailbook12345 for admin tests; dan@ltsc.test for student empty-state tests.
 
 ---
 
@@ -1060,7 +1060,7 @@ All changes are UI-layer (error classes, empty state text, form validation messa
 
 ### 5.18 — Admin dashboard: pending confirmation count + overflow notice
 
-**Prerequisites:** Seed data loaded. Login: andy@ltsc.test / qwert12345.
+**Prerequisites:** Seed data loaded. Login: andy@ltsc.test / Sailbook12345.
 
 **Seed state to know:**
 - 4 pending enrollments with `status = 'registered'`: e001 (Alice→c001), e003 (Bob→c002), e004 (Sarah→c002), e005 (Carol→c002)
@@ -1289,7 +1289,7 @@ WHERE e.student_id = 'a0000000-0000-0000-0000-000000000005'
 
 ### 5.4 — Loading states and optimistic UI
 
-**Prerequisites:** Seed data loaded. Login: andy@ltsc.test / qwert12345.
+**Prerequisites:** Seed data loaded. Login: andy@ltsc.test / Sailbook12345.
 
 **How to test optimistic updates:** Open DevTools → Network tab → set throttle to "Slow 3G". UI should update instantly on click; server confirmation arrives ~2 seconds later. To test revert behavior, go offline (Network → Offline) before clicking.
 

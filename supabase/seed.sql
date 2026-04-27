@@ -3,7 +3,7 @@ SET search_path TO public;
 -- SailBook Seed Data
 -- Demo data for local development + Playwright test users.
 -- Runs automatically on `supabase db reset`.
--- All users share password: qwert12345
+-- All users share password: Sailbook12345
 --
 -- DEMO USERS (for walkthrough / manual testing)
 --   andy@ltsc.test    — admin
@@ -36,7 +36,7 @@ INSERT INTO auth.users (
   ('a1000000-0000-0000-0000-000000000001',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'andy@ltsc.test',
-   extensions.crypt('qwert12345', extensions.gen_salt('bf')), now(),
+   extensions.crypt('Sailbook12345', extensions.gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Andy","last_name":"Kaminski","is_admin":true,"is_instructor":false,"is_student":false}',
@@ -46,7 +46,7 @@ INSERT INTO auth.users (
   ('a1000000-0000-0000-0000-000000000002',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'mike@ltsc.test',
-   extensions.crypt('qwert12345', extensions.gen_salt('bf')), now(),
+   extensions.crypt('Sailbook12345', extensions.gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Mike","last_name":"Theriault","is_admin":false,"is_instructor":true,"is_student":false}',
@@ -56,7 +56,7 @@ INSERT INTO auth.users (
   ('a1000000-0000-0000-0000-000000000003',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'lisa@ltsc.test',
-   extensions.crypt('qwert12345', extensions.gen_salt('bf')), now(),
+   extensions.crypt('Sailbook12345', extensions.gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Lisa","last_name":"Chen","is_admin":false,"is_instructor":true,"is_student":false}',
@@ -66,7 +66,7 @@ INSERT INTO auth.users (
   ('a1000000-0000-0000-0000-000000000004',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'chris@ltsc.test',
-   extensions.crypt('qwert12345', extensions.gen_salt('bf')), now(),
+   extensions.crypt('Sailbook12345', extensions.gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Chris","last_name":"Marino","is_admin":false,"is_instructor":true,"is_student":true}',
@@ -76,7 +76,7 @@ INSERT INTO auth.users (
   ('a1000000-0000-0000-0000-000000000005',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'sam@ltsc.test',
-   extensions.crypt('qwert12345', extensions.gen_salt('bf')), now(),
+   extensions.crypt('Sailbook12345', extensions.gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Sam","last_name":"Davies","is_admin":false,"is_instructor":false,"is_student":true}',
@@ -86,7 +86,7 @@ INSERT INTO auth.users (
   ('a1000000-0000-0000-0000-000000000006',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'alex@ltsc.test',
-   extensions.crypt('qwert12345', extensions.gen_salt('bf')), now(),
+   extensions.crypt('Sailbook12345', extensions.gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Alex","last_name":"Rivera","is_admin":false,"is_instructor":false,"is_student":true}',
@@ -96,7 +96,7 @@ INSERT INTO auth.users (
   ('a1000000-0000-0000-0000-000000000007',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'jordan@ltsc.test',
-   extensions.crypt('qwert12345', extensions.gen_salt('bf')), now(),
+   extensions.crypt('Sailbook12345', extensions.gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"Jordan","last_name":"Park","is_admin":false,"is_instructor":false,"is_student":true}',
@@ -106,7 +106,7 @@ INSERT INTO auth.users (
   ('f1000000-0000-0000-0000-000000000001',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'pw_admin@ltsc.test',
-   extensions.crypt('qwert12345', extensions.gen_salt('bf')), now(),
+   extensions.crypt('Sailbook12345', extensions.gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"PW","last_name":"Admin","is_admin":true,"is_instructor":false,"is_student":false}',
@@ -116,7 +116,7 @@ INSERT INTO auth.users (
   ('f1000000-0000-0000-0000-000000000002',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'pw_instructor@ltsc.test',
-   extensions.crypt('qwert12345', extensions.gen_salt('bf')), now(),
+   extensions.crypt('Sailbook12345', extensions.gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"PW","last_name":"Instructor","is_admin":false,"is_instructor":true,"is_student":false}',
@@ -126,7 +126,7 @@ INSERT INTO auth.users (
   ('f1000000-0000-0000-0000-000000000003',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'pw_student@ltsc.test',
-   extensions.crypt('qwert12345', extensions.gen_salt('bf')), now(),
+   extensions.crypt('Sailbook12345', extensions.gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"PW","last_name":"Student","is_admin":false,"is_instructor":false,"is_student":true}',
@@ -136,7 +136,7 @@ INSERT INTO auth.users (
   ('f1000000-0000-0000-0000-000000000004',
    '00000000-0000-0000-0000-000000000000',
    'authenticated', 'authenticated', 'pw_student2@ltsc.test',
-   extensions.crypt('qwert12345', extensions.gen_salt('bf')), now(),
+   extensions.crypt('Sailbook12345', extensions.gen_salt('bf')), now(),
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"PW","last_name":"Student2","is_admin":false,"is_instructor":false,"is_student":true}',
@@ -381,7 +381,7 @@ INSERT INTO public.session_attendance (session_id, enrollment_id, status) VALUES
 -- ============================================================
 -- QUICK REFERENCE
 -- ============================================================
--- Logins (all password: qwert12345)
+-- Logins (all password: Sailbook12345)
 --   andy@ltsc.test          → admin
 --   mike@ltsc.test          → instructor (ASA 101 Weekend + April + all 5 Open Sailing weeks)
 --   lisa@ltsc.test          → instructor (Dinghy draft, unassigned otherwise)

@@ -18,7 +18,7 @@ const SEED_USERS = [
   { label: 'Jordan Park (student, unenrolled)', email: 'jordan@ltsc.test' },
 ]
 
-const DEV_PASSWORD = 'qwert12345'
+const DEV_PASSWORD = 'Sailbook12345'
 
 export default function DevLoginHelper() {
   if (process.env.NEXT_PUBLIC_DEV_MODE !== 'true') return null

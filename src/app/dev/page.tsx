@@ -22,7 +22,7 @@ export default function DevPage() {
           </div>
           <p className="text-muted-foreground mt-1 text-xs">
             Demo seed: <code className="bg-muted px-1.5 py-0.5 rounded font-mono">docs/demo-seed.sql</code>
-            &nbsp;· Password for all accounts: <code className="bg-muted px-1.5 py-0.5 rounded font-mono">qwert12345</code><CopyButton text="qwert12345" />
+            &nbsp;· Password for all accounts: <code className="bg-muted px-1.5 py-0.5 rounded font-mono">Sailbook12345</code><CopyButton text="Sailbook12345" />
           </p>
         </div>
 

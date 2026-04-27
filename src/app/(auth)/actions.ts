@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 
 export async function login(_: unknown, formData: FormData) {
@@ -30,18 +31,25 @@ export async function register(_: unknown, formData: FormData) {
   const experienceLevel = (formData.get('experienceLevel') as string) || null
   const instructorNotes = (formData.get('instructorNotes') as string)?.trim() || null
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: { is_admin: false, is_instructor: false, is_student: true, first_name: firstName, last_name: lastName },
+      emailRedirectTo: `${siteUrl}/auth/callback?next=/student/dashboard`,
     },
   })
 
   if (error) return { error: error.message }
 
+  // With email confirmations enabled, signUp does not create a session, so the
+  // user has no auth context to satisfy RLS on the profiles insert. Use the
+  // service-role client (same pattern as admin-created students).
   if (data.user) {
-    const { error: profileError } = await supabase.from('profiles').insert({
+    const adminClient = createAdminClient()
+    const { error: profileError } = await adminClient.from('profiles').insert({
       id: data.user.id,
       email,
       first_name: firstName,
@@ -57,7 +65,7 @@ export async function register(_: unknown, formData: FormData) {
     if (profileError) return { error: 'Account created but profile setup failed.' }
   }
 
-  redirect('/')
+  redirect(`/register/check-email?email=${encodeURIComponent(email)}`)
 }
 
 export async function signOut() {

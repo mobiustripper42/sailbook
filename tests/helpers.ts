@@ -2,7 +2,7 @@ import type { Page, Browser } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 /** Shared password for all test users (admin, instructor, student, demo users). */
-export const PASSWORD = 'qwert12345';
+export const PASSWORD = 'Sailbook12345';
 
 /**
  * Log in as any test user and wait for the post-login redirect.

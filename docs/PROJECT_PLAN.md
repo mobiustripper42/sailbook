@@ -403,4 +403,9 @@ Before go-live (real data, real students):
 - [ ] `CRON_SECRET` set in prod env vars (or remove if not needed)
 - [ ] Twilio / Resend credentials set and `NOTIFICATIONS_ENABLED=true`
 - [ ] `supabase db push` applied to prod Supabase project
-- [ ] Smoke test: student registers → pays → sees enrollment → admin sees payment status
+- [ ] **Auth: enable email confirmations** in Supabase Dashboard → Authentication → Providers → Email → "Confirm email" on. (config.toml does not sync auth panel settings to remote.)
+- [ ] **Auth: custom SMTP (Resend) configured** in Dashboard → Authentication → SMTP Settings: host `smtp.resend.com`, port `587`, user `resend`, pass = Resend API key, sender `info@sailbook.live`, sender name `SailBook`. Send the dashboard test email to verify.
+- [ ] **Auth: confirmation email template uploaded** in Dashboard → Authentication → Email Templates → "Confirm signup". Subject: "Confirm your SailBook account". Body matches `supabase/templates/confirmation.html`. The `{{ .ConfirmationURL }}` token must be preserved.
+- [ ] **Auth: password policy set** in Dashboard → Authentication → Policies: minimum length 12, requirements `lower_upper_letters_digits`. Match `supabase/config.toml`.
+- [ ] **Auth: Site URL + Redirect URLs** in Dashboard → Authentication → URL Configuration: Site URL = `https://sailbook.live`, Redirect URLs include `https://sailbook.live/auth/callback`.
+- [ ] Smoke test: student registers → confirms email → pays → sees enrollment → admin sees payment status
