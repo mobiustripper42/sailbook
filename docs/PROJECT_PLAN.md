@@ -204,6 +204,7 @@ Design quality, accessibility, navigation, convenience features.
 
 | # | Task | Effort | Notes |
 |---|------|--------|-------|
+| 6.0 | Theme tune for LTSC-owner demo + backup palette | 2 | **Do first — Andy's reaction risk.** LTSC's current site (learntosailcleveland.com) is a generic WooCommerce theme: deep navy header (~`#22366A`), powdery sky-blue CTAs (~`#5DA9CC`), default purple "Proceed to checkout", no real brand polish. Risk: Andy looks at SailBook in dark mode + Mira blue and says "the colors are wrong." **Defuse, don't match.** Three layers: (1) **shift Mira's `--primary`** in `src/app/globals.css` from `oklch(0.5 0.134 242)` ~one notch toward navy (`oklch(0.36 0.10 252)` ish) so the header glance triggers subconscious "blue, like our site" pattern match — single-variable change, deviates from "use Mira as-is" so flag in DECISIONS if it sticks; (2) **demo in light mode** by toggling the demo account profile preference (no code change); (3) **stash `src/app/globals.ltsc.css`** with a faithful LTSC palette (navy #22366A header, powder blue #5DA9CC buttons) — don't import it, swap in via one-line layout.tsx edit only if Andy explicitly says colors are wrong. Reference screenshots saved during session 101. |
 | 6.1 | Mobile responsiveness pass — admin pages | 3 | Deferred from V1 (5.23). |
 | 6.2 | Mobile responsiveness pass — instructor pages | 2 | Deferred from V1 (5.24). |
 | 6.3 | ~~Full @ui-reviewer design review — all roles, all pages, three viewports~~ | 5 | [x] <!-- completed 2026-04-15 --> 8 pages audited across 3 viewports. Scored 7.75/10. S1 nav token, S3 warning color, layout padding, rounded-xl, stat card sizing, heading weights all fixed. |
@@ -222,7 +223,7 @@ Design quality, accessibility, navigation, convenience features.
 | 6.16 | Show refund amount to student — display refund details on student My Courses and course detail pages when enrollment is cancelled with a refund on record | 2 | Pull from payments table (refund_amount_cents). Show "Refunded $X.XX" badge or line alongside cancelled status. |
 | 6.17 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Full V2 surface area. Final retrospective before handoff. |
 
-**Phase 6 total: 54 pts**
+**Phase 6 total: 56 pts** (was 54; +2 for 6.0 theme tune)
 **Projected hours: ~19 hrs**
 
 **Ejection point:** The app looks and feels professional. Accessible. Navigable. Polished. Security verified.
