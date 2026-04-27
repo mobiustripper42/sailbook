@@ -3,6 +3,63 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 102 — 2026-04-26 20:31–21:46 (1.25 hrs)
+**Duration:** 1.25 hrs | **Points:** 2 (3.9: 2)
+**Task:** Phase 3.9 — Student notification preferences + DEC-015 migration of updateStudentProfile
+
+**Completed:**
+- **DEC-015 pre-work migration of `updateStudentProfile`.**
+  - `src/actions/profiles.ts` — return type changed from `Promise<{ error: string | null }>` → `Promise<string | null>` (DEC-015 form-action shape). The lone outlier among student-side form actions; resolved before 3.9 forks the pattern further.
+  - `src/components/student/student-account-form.tsx` — reads state directly. "Profile updated." success banner preserved via a transient `pending → idle && state === null` flag. All 4 `instructor-notes.spec.ts` tests still pass against the new shape.
+- **Phase 3.9 — Student notification preferences (2 pts).**
+  - `src/lib/notifications/preferences.ts` — `STUDENT_GLOBAL_KEY`, `isStudentChannelEnabled(prefs, channel)`, `normalizeStudentPreferences(prefs)`. Same defensive defaults as admin helper (any non-bool / null / missing → enabled).
+  - `src/lib/notifications/triggers.ts` — all 4 student fan-outs gated per-channel: `notifyEnrollmentConfirmed`, `notifySessionCancelled`, `notifyMakeupAssigned`, `notifyUpcomingSessionReminders`. Profile selects extended.
+  - `src/actions/notification-preferences.ts` — new `updateStudentNotificationPreferences` (DEC-015 shape). **Both admin and student actions now MERGE with existing JSONB instead of replacing**, fixing a latent dual-role bug where saving one role's prefs would erase the other's. New `readExistingPrefs` helper.
+  - `src/components/student/notification-preferences-section.tsx` — client form, two checkboxes (SMS / email), same transient success pattern.
+  - `src/app/(student)/student/account/page.tsx` — loads `notification_preferences`, mounts new section below the profile form.
+  - `src/app/api/test/set-notification-prefs/route.ts` — dev-only test API behind `devOnly()`. Lets dispatcher gating tests set arbitrary prefs without UI navigation.
+- **Tests** — `tests/student-notification-preferences.spec.ts`. 5 desktop tests: section renders, save+reload persist, SMS-off → email only, email-off → SMS only, both-off → no student notifications. **First automated coverage of the channel-suppression dispatcher path** — possible because Eric flipped `NOTIFICATIONS_ENABLED=false` for this session.
+- **Full-suite triage** of 4 failures Eric ran into:
+  - `enrollment-hold:115` cron expires holds — flake (3/3 pass isolated). Parallel-load.
+  - `enrollment-notifications:17` 3.4 — flake (3/3 pass isolated). Mock buffer cross-spec contention.
+  - `instructor-notes:26` update name — flake (3/3 pass isolated). `pw_student` profile contention.
+  - `member-pricing:52` strikethrough — flake (passes when full file runs serial). Inter-test dependency on `is_member` flag set in prior test of the same describe; cross-spec parallel writes to `pw_student.is_member` race against it.
+  - **All four are pre-existing test-isolation issues, not regressions from today.** Captured in next steps as a Phase 6 hardening task.
+- Commit `ef82ac6`.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- 3.5/3.6/3.7 SMS production smoke test failure — Eric reported: 3.4 SMS+email worked, 3.5/3.6/3.7 email worked but SMS did not. Punted to next session per Eric. Possible causes: Twilio toll-free unverified rate limit, content filter on body (URLs / STOP disclosure), template-specific encoding. Need to check Twilio logs with the actual rejected message SIDs.
+- Twilio Toll-Free Verification still pending submission/approval.
+- Parallel CC running session 101 (Phase 7 — Hetzner remote dev). Independent.
+
+**Next Steps:**
+1. **Investigate 3.5/3.6/3.7 SMS smoke-test failure (Eric's first thing).** Pull Twilio logs for the failed message SIDs from this evening's smoke-test run to see actual rejection reason. Hypotheses to check first: (a) toll-free unverified content filter on URL or "STOP" string, (b) GSM-7 vs UCS-2 segment encoding, (c) per-recipient throttle. 3.4 worked, so account/number basics are fine — it's content-shape specific.
+2. **Cross-file Playwright test isolation hardening (Phase 6 task, ~5–8 pts).** Tests collide on shared seed users (`pw_student` mostly) and the module-level mock buffer. Recommended fixes: (a) mock-buffer specs should scope assertions by `runId()` substrings so cross-spec dirtying doesn't cause false positives; (b) `is_member`-mutating tests should use a dedicated alt user (e.g. `pw_student2`); (c) `member-pricing.spec.ts` afterAll should verify reset; (d) consider a per-test transactional fixture if the pattern keeps biting. **Race tests will keep coming up as more concurrent-write features ship — worth investing.**
+3. Code review cleanup: `updateProfile` + `updateUserProfile` in `src/actions/profiles.ts` still use `{ error }` shape — DEC-015 cleanup task, ~1 pt. Slot before any admin-form change.
+4. Code review cleanup: `useTransientSuccess(pending, state)` hook to dedupe the pending-transition pattern now duplicated across 3 forms (admin notif, student profile, student notif). ~1 pt.
+5. **3.10 — Password strength + email verification (3 pts).** Now unblocked since Resend is live (Eric did Phase 3.2 in session 95+) and `NOTIFICATIONS_ENABLED` is back to false-for-tests. Custom email template via Resend, Supabase Auth password requirements config.
+6. `supabase db push` to remote — confirm `20260426232739_admin_notification_preferences.sql` is on remote (Eric pushed at start of session 100; this session's 3.9 reuses the existing column so no new migration needed).
+
+**Context:**
+- **Latent dual-role JSONB-clobber bug fixed in session 102.** Admin AND student actions both wrote `notification_preferences` by replacing the whole object. Profiles can be `is_admin && is_student` (1.13 dual-role pattern). Saving one role's prefs would silently erase the other's. New shallow-merge pattern via `readExistingPrefs` keeps both intact. Read-modify-write race window exists in theory; acceptable for V1 single-user single-form.
+- **Shallow merge depth is load-bearing.** Top-level keys (`admin_enrollment_alert`, `admin_low_enrollment`, `student_global`) are disjoint, so `{ ...existing, ...newBlock }` replaces only the changed block. If a future event nests deeper, the merge silently wipes — comment in the code calls this out.
+- **Transient-success pattern.** `useState + useRef + useEffect` to flip a `hasSubmitted` flag on the `pending → idle` transition, then derive `showSuccess` from `hasSubmitted && state === null && !pending`. Survives Strict Mode double-renders (refs persist, effect fires on falling edge). Now duplicated across 3 forms; ripe for extraction into a `useTransientSuccess` hook (next-steps #4).
+- **Dispatcher gating tests are flaky against `NOTIFICATIONS_ENABLED=true`.** They use `notify=true` against `/api/test/enroll` — would fire real Twilio/Resend. Tests should add `test.skip(process.env.NOTIFICATIONS_ENABLED === 'true', 'requires mock buffer')` at the top of each gating test (code review flagged; not addressed this session).
+- **Cross-spec parallel race patterns are accumulating.** Mock buffer + shared seed user state are concurrent-write hotspots. Workers=4 surfaces the races. Symptom: tests pass in isolation, fail intermittently in full suite. As notifications/preferences/etc. add more shared mutation, this bites harder. Earmarked as a real Phase 6 task (~5–8 pts).
+- **Filter SMS test entries by template-specific phrase, not just title.** Student SMS template uses "you're enrolled in {title}"; admin SMS uses "{name} enrolled in {title}". Both contain the title — filtering on `title + "you're enrolled"` disambiguates student vs admin entries in the mock buffer. Discovered while debugging the first-run dispatcher test failure.
+
+**Code Review:** 6 cleanups, 0 bugs. The dual-role JSONB merge fix is the real win.
+1. **cleanup** `notification-preferences.ts:17` — `readExistingPrefs` uses `any` for the supabase client param. Adds to existing `project_types_debt` MEMORY. Type as `Awaited<ReturnType<typeof createClient>>` or extract a shared alias.
+2. **cleanup** Shallow-merge depth is intentional; comment in code recommends documenting that top-level key disjointness is the load-bearing assumption.
+3. **cleanup** `updateProfile` + `updateUserProfile` still on old shape; file a DEC-015 cleanup ticket. (Captured in next steps #3.)
+4. **consistency** Read-modify-write race window noted; acceptable for V1, document the assumption in the code.
+5. **cleanup** Extract `useTransientSuccess(pending, state)` hook now that 3 forms duplicate the pattern. (Captured in next steps #4.)
+6. **consistency** Add `test.skip(process.env.NOTIFICATIONS_ENABLED === 'true')` guard to dispatcher gating tests so a stray env flip doesn't fire real Twilio/Resend.
+
+RLS unchanged — existing self-update policy on `profiles` covers the new column writes. Test API route correctly gated behind `devOnly()`.
+
 ## Session 101 — 2026-04-26 20:03 [open]
 **Task:** Phase 7 — Remote Dev Environment (Hetzner Cloud setup). Runs in parallel with Eric's session 100.
 
