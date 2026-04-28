@@ -138,11 +138,12 @@ Users know what's happening. Auth is production-grade.
 | 3.9 | ~~Student notification preferences — opt out of SMS, email-only option~~ | 2 | [x] <!-- completed 2026-04-26 --> Two checkboxes (SMS / email) on `/student/account`, reuses 3.8's `notification_preferences` JSONB column with `student_global` key. All 4 student fan-outs in `triggers.ts` gated. Both admin + student actions now merge with existing JSONB (dual-role bug fix). Bundled DEC-015 migration of `updateStudentProfile`. 5 desktop tests green incl. dispatcher gating. |
 | 3.10 | ~~Password strength + email verification~~ | 3 | [x] <!-- completed 2026-04-27 --> Min length 12, `lower_upper_letters_digits`. `enable_confirmations = true`. New `/auth/callback` route + `/register/check-email` landing. Branded confirmation template at `supabase/templates/confirmation.html`. Register action uses `adminClient` for profile insert (no session post-signUp with confirmations on). Seed password rotated to `Sailbook12345`. 5 desktop tests green. **Manual smoke test deferred to next session.** |
 | 3.11 | OAuth login — Google | 2 | Supabase toggle + Google Cloud console. Email/password remains fallback. |
-| 3.12 | Security audit — run @security-agent, evaluate findings, fix serious issues | 3 | Post-auth-hardening + payments-live audit. Non-serious findings move to backlog. |
+| 3.12 | ~~Security audit — run @security-agent, evaluate findings, fix serious issues~~ | 3 | [x] <!-- completed 2026-04-28 --> /security-review skill against Phase 3 surface (auth, notifications, test routes, RLS migration, cron, email template). Zero qualifying findings at >80% confidence. Excluded items (length cap on `instructor_notes`, backslash in `auth/callback` `next`, `listUsers` page truncation in dev-only test route, JSONB shape validation absence) noted but excluded by review rules. |
 | 3.13 | README: Twilio/Resend setup instructions — keys, sender config | 1 | Document Twilio phone number, Resend API key, domain verification, and sender config for new devs. |
-| 3.14 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on notification preference UI, new auth flows (email verify, OAuth). |
+| 3.14 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on notification preference UI, new auth flows (email verify, OAuth). **Phase 3 polish backlog (register form especially needs work):** (a) `noValidate` on auth forms (register/login/forgot/reset) to remove the unstyleable HTML5 popover; (b) form blanks all fields on validation failure — preserve user-typed values via `useActionState` returning the form data alongside the error; (c) Supabase's raw policy error text ("Password should contain at least one character of each: abcdefghijklmnopqrstuvwxyz, ABCDEFGHIJKLMNOPQRSTUVWXYZ, 0123456789.") is awful — translate to friendly copy ("Password must include uppercase, lowercase, and a digit"); (d) overall register flow UX review — error placement, field grouping, password feedback. |
+| 3.15 | Logged-in password change — "Change password" form on student/admin/instructor account pages | 3 | Currently no in-app way for an authenticated user to change their password — they have to sign out and use Forgot Password. Form: current + new + confirm. Verify current via `signInWithPassword` (re-auth check), then `updateUser({ password })`. Optionally flip `secure_password_change = true` in config.toml so Supabase enforces re-auth itself. Shared component reused across role account pages. |
 
-**Phase 3 total: 45 pts** (was 42; +3 for 3.4 re-estimate)
+**Phase 3 total: 48 pts** (was 45; +3 for 3.15)
 **Projected hours: ~16 hrs**
 
 **Ejection point:** Students get confirmations, cancellation notices, and reminders. Auth is solid with email verification and OAuth. Security audited. The school runs without phone calls.
@@ -298,10 +299,10 @@ Transforms the app from scheduling into a learning management tool.
 | 0 — Infrastructure | 70 | ~27 hrs | Dev environment ready |
 | 1 — V1 Fixes | 51 | ~19 hrs | V1 is solid |
 | 2 — Payments | 38 | ~14 hrs | App makes money |
-| 3 — Notifications + Auth | 40 | ~15 hrs | Users stay informed, auth hardened, security audited |
+| 3 — Notifications + Auth | 48 | ~18 hrs | Users stay informed, auth hardened, security audited |
 | 4 — Identity | 27 | ~10 hrs | Onboarding is clean |
 | 5 — Pricing | 47 | ~18 hrs | Flexible pricing, waitlist, prereqs, student calendar view, bulk price update |
-| 6 — Polish | 44 | ~17 hrs | Professional, accessible, navigable, security verified |
+| 6 — Polish | 54 | ~17 hrs | Professional, accessible, navigable, security verified |
 | 7 — Remote Dev Env ✅ | 18 | ~7 hrs | Stable dev box, edit anywhere |
 | 8 — Skills | 40–60 | ~15–23 hrs | Learning management |
 | **Total (0–6)** | **298** | **~113 hrs** | |
@@ -319,10 +320,10 @@ At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–
 | 1 — V1 Fixes | 58 | ~19 | ~14.9 | **0.26** | +8 polish credit (session 49); 0.23 all-in; see RETROSPECTIVES.md |
 | (5.10 early) | 5 | ~2 | 1.00 | 0.20 | Pulled forward from Phase 5; rolled into Phase 5 actuals when phase closes |
 | 2 — Payments | 38 | ~14 | — | — | |
-| 3 — Notifications | 40 | ~15 | — | — | |
+| 3 — Notifications | 48 | ~18 | — | — | |
 | 4 — Identity | 27 | ~10 | — | — | |
 | 5 — Pricing | 47 | ~18 | — | — | |
-| 6 — Polish | 44 | ~17 | — | — | |
+| 6 — Polish | 54 | ~17 | — | — | |
 | **Total** | **298** | **~113** | — | — | Planning baseline: 0.26–0.35 hrs/pt (Phase 1 pace to conservative) |
 
 ---
