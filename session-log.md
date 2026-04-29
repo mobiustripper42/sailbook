@@ -3,8 +3,10 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 105 — 2026-04-29 04:37–12:35 (8.00 hrs)
-**Duration:** 8.00 hrs | **Points:** 4 (3.13: 1, 3.15: 3)
+## Session 106 — 2026-04-29 15:45 [open]
+
+## Session 105 — 2026-04-29 04:37–12:35 (2.00 hrs active; long wall-clock window with parallel work)
+**Duration:** 2.00 hrs | **Points:** 4 (3.13: 1, 3.15: 3)
 **Task:** Phase 3.13 (Twilio/Resend README) + Phase 3.15 (logged-in password change) + session 104 carryovers (open-redirect Host fix, safeNextPath extraction). Parallel thread: mobile/Tailscale access fix.
 
 **Completed:**

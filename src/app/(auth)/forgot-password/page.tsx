@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
           Enter your email and we&apos;ll send a reset link.
         </CardDescription>
       </CardHeader>
-      <form action={action}>
+      <form action={action} noValidate>
         <CardContent className="space-y-4">
           {state?.error && (
             <p className="text-sm text-destructive">{state.error}</p>

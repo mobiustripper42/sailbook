@@ -49,9 +49,9 @@ test.describe('Admin: create student', () => {
 })
 
 test.describe('Admin: enroll student in course', () => {
-  test.skip(({ browserName }) => true, 'Enrollment panel is desktop-only — skip until Dialog component added')
+  test.skip(() => true, 'Enrollment panel is desktop-only — skip until Dialog component added')
 
-  test('admin can enroll a student via the course page panel', async ({ page, browser }) => {
+  test('admin can enroll a student via the course page panel', async ({ page }) => {
     test.setTimeout(90000)
 
     // Create a course with capacity

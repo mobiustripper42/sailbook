@@ -1,11 +1,12 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Card,
   CardContent,
@@ -16,6 +17,7 @@ import {
 } from '@/components/ui/card'
 import { register } from '../actions'
 import { safeNextPath } from '@/lib/auth/safe-next'
+import { PASSWORD_MIN_LENGTH, PASSWORD_RULES_HELP } from '@/lib/auth/password-rules'
 import GoogleSignInButton from '@/components/auth/google-sign-in-button'
 
 type ExperienceCode = {
@@ -28,6 +30,17 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
   const [state, action, pending] = useActionState(register, null)
   const searchParams = useSearchParams()
   const next = safeNextPath(searchParams.get('next')) ?? undefined
+
+  // Controlled inputs preserve user-typed values across server-action
+  // re-renders when the action returns an error. Password is intentionally
+  // uncontrolled — re-typing on rejection is fine and avoids holding a
+  // failed credential in component state.
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [experienceLevel, setExperienceLevel] = useState('')
+  const [instructorNotes, setInstructorNotes] = useState('')
 
   return (
     <Card className="w-full max-w-sm">
@@ -43,7 +56,7 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
           <div className="h-px flex-1 bg-border" />
         </div>
       </CardContent>
-      <form action={action}>
+      <form action={action} noValidate>
         {next ? <input type="hidden" name="next" value={next} /> : null}
         <CardContent className="space-y-4">
           {state?.error && (
@@ -52,11 +65,23 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="firstName">First name</Label>
-              <Input id="firstName" name="firstName" required />
+              <Input
+                id="firstName"
+                name="firstName"
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName">Last name</Label>
-              <Input id="lastName" name="lastName" required />
+              <Input
+                id="lastName"
+                name="lastName"
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
             </div>
           </div>
           <div className="space-y-2">
@@ -67,13 +92,22 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
               type="email"
               required
               autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
-            <Input id="phone" name="phone" type="tel" autoComplete="tel" />
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              autoComplete="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
             <p className="text-xs text-muted-foreground">
-              Used for enrollment confirmations and session reminders. Standard message rates apply. Reply STOP to opt out.
+              For confirmations and reminders. Reply STOP to opt out.
             </p>
           </div>
           <div className="space-y-2">
@@ -81,7 +115,9 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
             <select
               id="experienceLevel"
               name="experienceLevel"
-              className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              value={experienceLevel}
+              onChange={(e) => setExperienceLevel(e.target.value)}
+              className="flex h-9 w-full rounded-xs border border-input bg-background text-foreground px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <option value="">Select experience level</option>
               {experienceCodes.map((code) => (
@@ -93,12 +129,14 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
           </div>
           <div className="space-y-2">
             <Label htmlFor="instructorNotes">Anything you want an instructor to know? <span className="text-muted-foreground font-normal">(optional)</span></Label>
-            <textarea
+            <Textarea
               id="instructorNotes"
               name="instructorNotes"
               rows={3}
-              className="flex w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+              value={instructorNotes}
+              onChange={(e) => setInstructorNotes(e.target.value)}
               placeholder="Prior sailing experience, medical conditions, seasickness, etc."
+              className="resize-none"
             />
           </div>
           <div className="space-y-2">
@@ -109,11 +147,9 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
               type="password"
               required
               autoComplete="new-password"
-              minLength={12}
+              minLength={PASSWORD_MIN_LENGTH}
             />
-            <p className="text-xs text-muted-foreground">
-              At least 12 characters, with upper case, lower case, and a digit.
-            </p>
+            <p className="text-xs text-muted-foreground">{PASSWORD_RULES_HELP}</p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-3 pt-4">

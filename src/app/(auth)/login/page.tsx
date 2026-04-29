@@ -60,7 +60,7 @@ function LoginPageContent() {
           <div className="h-px flex-1 bg-border" />
         </div>
       </CardContent>
-      <form action={action}>
+      <form action={action} noValidate>
         {next ? <input type="hidden" name="next" value={next} /> : null}
         <CardContent className="space-y-4">
           {state?.error && (

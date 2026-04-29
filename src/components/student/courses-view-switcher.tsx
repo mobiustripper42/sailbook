@@ -35,7 +35,6 @@ export function CoursesViewSwitcher({
     const saved = window.localStorage.getItem(STORAGE_KEY)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (saved === 'calendar' || saved === 'list') setView(saved)
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHydrated(true)
 
     return () => mq.removeEventListener('change', update)

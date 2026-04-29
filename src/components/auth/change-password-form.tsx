@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { changePassword } from '@/app/(auth)/actions'
+import { PASSWORD_MIN_LENGTH, PASSWORD_RULES_HELP } from '@/lib/auth/password-rules'
 
 export default function ChangePasswordForm() {
   const [state, action, pending] = useActionState(changePassword, null)
@@ -33,7 +34,7 @@ export default function ChangePasswordForm() {
   }, [showSuccess])
 
   return (
-    <form ref={formRef} action={action} className="space-y-5 max-w-md">
+    <form ref={formRef} action={action} className="space-y-5 max-w-md" noValidate>
       {state && <p className="text-sm text-destructive">{state}</p>}
       {showSuccess && <p className="text-sm text-primary">Password updated.</p>}
 
@@ -55,12 +56,10 @@ export default function ChangePasswordForm() {
           name="new_password"
           type="password"
           required
-          minLength={12}
+          minLength={PASSWORD_MIN_LENGTH}
           autoComplete="new-password"
         />
-        <p className="text-xs text-muted-foreground">
-          At least 12 characters, with upper case, lower case, and a digit.
-        </p>
+        <p className="text-xs text-muted-foreground">{PASSWORD_RULES_HELP}</p>
       </div>
 
       <div className="space-y-2">
@@ -70,7 +69,7 @@ export default function ChangePasswordForm() {
           name="confirm_password"
           type="password"
           required
-          minLength={12}
+          minLength={PASSWORD_MIN_LENGTH}
           autoComplete="new-password"
         />
       </div>
