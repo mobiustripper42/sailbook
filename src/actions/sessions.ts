@@ -191,6 +191,25 @@ export async function updateSessionInstructor(
   return { error: null }
 }
 
+export async function updateSessionNotes(
+  sessionId: string,
+  _prevState: string | null,
+  formData: FormData
+): Promise<string | null> {
+  const supabase = await createClient()
+  const notes = (formData.get('notes') as string) ?? ''
+
+  const { data, error } = await supabase.rpc('update_session_notes', {
+    p_session_id: sessionId,
+    p_notes: notes,
+  })
+  if (error) return error.message
+  if (data) return data
+
+  revalidatePath(`/instructor/sessions/${sessionId}`)
+  return null
+}
+
 export async function deleteSession(sessionId: string, courseId: string) {
   const supabase = await createClient()
   const { error } = await supabase.from('sessions').delete().eq('id', sessionId)

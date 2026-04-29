@@ -559,6 +559,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_session_notes: {
+        Args: { p_notes: string; p_session_id: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
