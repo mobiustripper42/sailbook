@@ -166,8 +166,9 @@ Clean onboarding. Richer student and instructor records.
 | 4.7 | Instructor profile expansion — availability field + bio/website link | 3 | General availability for admin assignment. Name links to Simply Sailing website bio. Andy request. |
 | 4.8 | ~~Cookie-based theme sync~~ | 2 | [x] <!-- removed 2026-04-15 --> Superseded by DEC-020: theme is localStorage-only per device. No cross-device sync, no FOUC problem to solve. |
 | 4.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on profile expansion pages, invite flow, instructor onboarding. |
+| 4.10 | Recreate `.claude/agents/ui-reviewer.md` (lost in Phase 7 migration) | 1 | Model on existing `architect.md` / `code-review.md` files. Pull brand rules from BRAND.md (Mira/Sky/Mist, Nunito Sans, xs radius, dark-mode-default, mobile@375px). 12-point review checklist + scored output format. Stand-in prompt used in 3.14 close is a usable starting point. Do before 4.9. |
 
-**Phase 4 total: 42 pts** (updated session 94: 4.2 re-estimated 2 → 8 pts; 4.4 was split into 4.4a+4.4b = 10 pts)
+**Phase 4 total: 43 pts** (updated session 106: +1 for 4.10 ui-reviewer recreation)
 **Projected hours: ~11 hrs**
 
 **Ejection point:** Instructors get proper onboarding. Student profiles are richer. Instructor notes captured. Admin can create students for non-technical users.

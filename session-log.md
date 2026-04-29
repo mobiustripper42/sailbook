@@ -3,7 +3,62 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 106 — 2026-04-29 15:45 [open]
+## Session 106 — 2026-04-29 15:45–16:45 (1.00 hr)
+**Duration:** 1.00 hr | **Points:** 5 (3.14: 5)
+**Task:** Phase 3.14 — End-of-phase close. All 4 polish items, UI reviewer pass, retro, lint cleanup, suite + code review. Plus a regression catch in pgTAP that had silently shipped two commits ago.
+
+**Completed:**
+- **Full Playwright suite** at session start: 404/612 passed, 207 skipped (by design), 1 cross-file flake (`tests/cancel-enrollment.spec.ts:5` — passes in isolation, same pattern as the carryover test-isolation hardening task).
+- **pgTAP suite**: 120/120 green after a regression fix. `08_admin_students.sql` tests 1, 3, 9 had been failing since 3.11 (the `handle_new_user` trigger) but pgTAP wasn't run during 3.11 / 3.13 / 3.14 — slipped through. Trigger inserts a baseline profile before the test's explicit INSERT could land. Fixed by switching the test to UPSERT, mirroring the production `createStudent` flow. Eric caught this when running `supabase test db` near end of session.
+- **Code review of `e212ee1`** (deferred from session 105 — Anthropic quota wall) — re-ran cleanly, 9 advisory items. One bug: helper text claimed password complexity that server didn't enforce. Tied directly into polish item (c).
+- **Polish (a) — `noValidate` on auth forms.** All 5: login, register, forgot, reset, change-password. Removes the unstyleable HTML5 popover; server errors land in the destructive paragraph.
+- **Polish (b) — preserve form values on validation failure.** Register form converted to controlled inputs (firstName, lastName, email, phone, experienceLevel, instructorNotes — all `useState`). Password intentionally uncontrolled.
+- **Polish (c) — friendly password-policy error copy + server-side complexity check.** New `src/lib/auth/password-rules.ts`:
+  - `PASSWORD_MIN_LENGTH = 12`, `PASSWORD_RULES_HELP` (extracted from 3 duplicated forms).
+  - `validatePassword(password)` mirrors the Supabase policy server-side (length + lower/upper/digit regex). Returns null or a friendly error.
+  - `friendlyPasswordError(supabaseMessage)` translates Supabase's verbose policy errors ("Password should contain at least one character of each: abcdefghijklmnopqrstuvwxyz...") into our copy. Falls back to the original on no match.
+  - Wired into `register`, `updatePassword` (recovery), `changePassword` — all three. Closes the helper-text-vs-server mismatch the code review flagged.
+- **Polish (d) — register UX review** covered by (a)+(b)+(c).
+- **UI reviewer stand-in** (general-purpose agent — `~/.claude/agents/ui-reviewer.md` was lost in Phase 7 migration, never committed to git). 3 fix-soon items applied:
+  - Register `<select>` + `<textarea>` `rounded-md` → `rounded-xs` (matches xs theme radius). `<textarea>` swapped for shadcn `<Textarea>`.
+  - Reset-password "Link expired" CTA: `variant="ghost"` → default (primary CTA hierarchy consistency).
+  - Phone helper text trimmed: 3 sentences → 1.
+- **Lint cleanup (3 pre-existing warnings).** `courses-view-switcher.tsx` — moved `eslint-disable-next-line` from `setHydrated` (false-positive suppression) to `setView` (the actual triggering call). `admin-students.spec.ts` — dropped unused `browserName` and `browser` parameters from a skipped test. **Lint now actually clean.**
+- **Phase 3 retrospective written** in `docs/RETROSPECTIVES.md`. 48 pts / 18.0 hrs / **0.38 hrs/pt** — on V1 baseline, slower than Phase 2 due to many small tasks plus 3.11 OAuth scope-creep. Velocity table in PROJECT_PLAN.md updated. Forecast for V2: behind plan unless velocity recovers to Phase 2 pace; cuttable list (~22 pts) is a release valve.
+- **4.10 added to plan** (1 pt) — recreate `.claude/agents/ui-reviewer.md` from BRAND.md + retro context. To be done before 4.9. Phase 4 total 42 → 43.
+- Test comment fix at `tests/auth-email-verification.spec.ts:25-26` (stale "Supabase rejects" comment after the new server-side mirror) — caught in code review of `984f72a`.
+- Build green. tsc clean. Lint clean. pgTAP 120/120. Auth Playwright stack 35/35 desktop after polish.
+- Commits: `984f72a` (3.14 close — polish + retro + UI fixes + lint cleanup).
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification still pending (carryover from session 102).
+
+**Next Steps:**
+1. **Phase 4 kickoff.** Pick from 4.2 (admin/users consolidation, 8 pts), 4.3 (student profile expansion, 5 pts), 4.6 (instructor notes on sessions, 3 pts), 4.7 (instructor profile expansion, 3 pts), or 4.10 (ui-reviewer recreation, 1 pt).
+2. **4.10 recreate `.claude/agents/ui-reviewer.md`** before 4.9 close. Model on `architect.md` / `code-review.md`. Pull brand rules from BRAND.md (Mira/Sky/Mist, Nunito Sans, xs radius, dark-mode-default, mobile@375px). 12-point review checklist + scored output. The stand-in prompt I used in 3.14 is a workable starting point.
+3. **Eric is thinking about how test cadence works in `/kill-this`.** pgTAP regression slipped through because only the full Playwright suite is gated, not pgTAP. Open question — Eric is mulling whether `supabase test db` should be added to /kill-this, or whether pgTAP becomes a phase-close gate, or some other shape. Don't act unilaterally.
+4. **Pre-existing 4.x bug carryover from session 104:** invited instructors get bounced from `/instructor/dashboard` until JWT refresh — `accept_invite` writes role flag to public.profiles but not auth.users.raw_user_meta_data; proxy reads from JWT meta. Fix: have accept_invite also UPDATE auth.users.raw_user_meta_data + force a session refresh client-side. Natural fit during 4.2 admin/users work.
+5. **Carryovers still open:** SMS smoke-test investigation (Twilio logs), cross-file Playwright test isolation hardening (~5–8 pts in Phase 6), DEC-015 cleanup of remaining `updateProfile` / `updateUserProfile`, `useTransientSuccess` hook extraction (now 4 forms).
+6. **Manual smoke of 3.10 + 3.11** still deferred. Register a fresh email user (Mailpit confirmation), then a fresh Google OAuth user, verify both end up with proper profiles.
+
+**Context:**
+- **`validatePassword` is the single source of truth for our password policy.** Length + lower + upper + digit. Mirrors Supabase config.toml (`minimum_password_length = 12`, `password_requirements = lower_upper_letters_digits`). If config.toml changes, update this file too. Both the function and `friendlyPasswordError` have header comments calling out the duplication for future-you.
+- **Defense-in-depth pattern for password validation:** client `minLength` (HTML5) → server `validatePassword` (our regex) → Supabase Auth (their enforcement). Three layers; client and server agree, Supabase as backstop. `friendlyPasswordError` translates Supabase's verbose copy to ours when Supabase actually trips.
+- **The `@ui-reviewer` agent was never committed to git.** It lived only in `~/.claude/agents/` (user-level) and got wiped in the Phase 7 dev-box move. Same risk applies to anything else that lives in user-level agent / skill / memory dirs — the new SailBook skills survived because Eric explicitly moved them into `.claude/skills/` (per session 101). Anything still at user level is a single-machine accident waiting to happen. Worth a sweep of `~/.claude/agents/` for surviving SailBook-specific specs and committing them.
+- **Phase 3 done, Phase 4 starts cleanly.** No mid-phase carryover this time — every 3.x task is checked. The pre-existing invited-instructor bug surfaced in 3.11 is filed as a 4.x carryover (next-step #4) but is genuinely Phase 4 territory (touches the invite flow).
+- **Velocity reality check:** Phase 3 came in at 0.38 hrs/pt, on the V1 baseline. Forecast at this pace is ~47 hrs of remaining Phase 4–6 work in 16 days. At 8 hrs/week sustainable that's 5.8 weeks — over budget by ~3.5 weeks. Three options: cut tasks (cuttable list covers 22 pts), recover Phase-2 pace (0.22 hrs/pt → 27 hrs → fits), or extend the deadline. Re-baseline at Phase 4 close (per the retro's recommendation).
+- **pgTAP testing-cadence gap.** The /kill-this skill gates `npm run build` and asks about full Playwright suite, but doesn't run pgTAP. Trigger and RLS-touching commits in 3.11 / 3.13 / 3.14 silently regressed `08_admin_students.sql` until Eric ran `supabase test db` manually. Eric is thinking about the right shape for this — flagged in next-steps #3.
+
+**Code Review:** 8 advisory items, 0 blocking. (Findings via @code-review against `984f72a`, plus pgTAP regression caught manually.)
+1. **bug** (fixed this session) `supabase/tests/08_admin_students.sql` — pgTAP regression introduced silently in 3.11 trigger work. Tests 1, 3, 9 failed because the new `handle_new_user` trigger inserts a baseline profile before the test's explicit INSERT could land. Fixed by switching the test's INSERT → UPSERT (mirrors production `createStudent` flow). pgTAP 120/120 now green.
+2. **cleanup** (fixed this session) `tests/auth-email-verification.spec.ts:25-26` — stale comment "Server returns Supabase's policy error verbatim" no longer accurate. Updated to reflect the validatePassword mirror.
+3. **cleanup** Mixed-shape returns across `actions.ts` are intentional per DEC-015 (form vs. button). Worth noting but no fix.
+4. **cleanup** `password-rules.ts:40` regex coverage adequate for current policy (`lower_upper_letters_digits`). Future `_symbols` expansion will need a third branch. Future-self problem.
+5. **cleanup** Magic string `'lower_upper_letters_digits'` in config.toml ↔ regex set in password-rules.ts can drift. Header comments document the link; leave for now.
+6. **cleanup** Native `<select>` styling is browser lottery regardless of radius. Real fix is shadcn `<Select>`; flagged for future polish. Not urgent.
+7. **cleanup** Hydration concern in register-form was unfounded — `useState('')` defaults match SSR HTML. Verified safe.
+8. **cleanup** `noValidate` cascade — no tests rely on HTML5 validity assertions. Safe.
 
 ## Session 105 — 2026-04-29 04:37–12:35 (2.00 hrs active; long wall-clock window with parallel work)
 **Duration:** 2.00 hrs | **Points:** 4 (3.13: 1, 3.15: 3)

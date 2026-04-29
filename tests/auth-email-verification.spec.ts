@@ -18,12 +18,12 @@ test.describe('3.10 — password strength + email verification', () => {
     await page.getByLabel('First name').fill('Pat')
     await page.getByLabel('Last name').fill('Test')
     await page.getByLabel('Email').fill(email)
-    // 14 chars (passes minLength) but no uppercase — Supabase policy rejects.
+    // 14 chars (passes minLength) but no uppercase — server-side
+    // validatePassword() rejects before ever calling Supabase.
     await page.getByLabel('Password').fill('alllowercase12')
     await page.getByRole('button', { name: 'Create account' }).click()
 
-    // Server returns Supabase's policy error verbatim, rendered in the
-    // destructive-styled paragraph above the form fields.
+    // Error rendered in the destructive-styled paragraph above the form.
     const errorMsg = page.locator('p.text-destructive')
     await expect(errorMsg).toBeVisible({ timeout: 10000 })
     await expect(errorMsg).toHaveText(/password/i)
