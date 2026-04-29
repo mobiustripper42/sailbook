@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,6 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { register } from '../actions'
+import GoogleSignInButton from '@/components/auth/google-sign-in-button'
 
 type ExperienceCode = {
   value: string
@@ -23,6 +25,9 @@ type ExperienceCode = {
 
 export default function RegisterForm({ experienceCodes }: { experienceCodes: ExperienceCode[] }) {
   const [state, action, pending] = useActionState(register, null)
+  const searchParams = useSearchParams()
+  const nextParam = searchParams.get('next')
+  const next = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : undefined
 
   return (
     <Card className="w-full max-w-sm">
@@ -30,7 +35,16 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
         <CardTitle>Create account</CardTitle>
         <CardDescription>Sign up for SailBook</CardDescription>
       </CardHeader>
+      <CardContent className="space-y-4 pb-0">
+        <GoogleSignInButton next={next} />
+        <div className="flex items-center gap-3 py-1">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs text-muted-foreground">or</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+      </CardContent>
       <form action={action}>
+        {next ? <input type="hidden" name="next" value={next} /> : null}
         <CardContent className="space-y-4">
           {state?.error && (
             <p className="text-sm text-destructive">{state.error}</p>

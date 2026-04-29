@@ -1,7 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 
 export async function login(_: unknown, formData: FormData) {
@@ -13,6 +12,11 @@ export async function login(_: unknown, formData: FormData) {
   })
 
   if (error) return { error: error.message }
+
+  const nextRaw = (formData.get('next') as string) || ''
+  if (nextRaw.startsWith('/') && !nextRaw.startsWith('//')) {
+    redirect(nextRaw)
+  }
 
   const meta = (data.user?.user_metadata ?? {}) as Record<string, unknown>
   if (meta.is_admin) redirect('/admin/dashboard')
@@ -27,45 +31,62 @@ export async function register(_: unknown, formData: FormData) {
   const password = formData.get('password') as string
   const firstName = formData.get('firstName') as string
   const lastName = formData.get('lastName') as string
-  const phone = (formData.get('phone') as string) || null
-  const experienceLevel = (formData.get('experienceLevel') as string) || null
-  const instructorNotes = (formData.get('instructorNotes') as string)?.trim() || null
+  const phone = (formData.get('phone') as string)?.trim() || ''
+  const experienceLevel = (formData.get('experienceLevel') as string) || ''
+  const instructorNotes = (formData.get('instructorNotes') as string)?.trim() || ''
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
-  const { data, error } = await supabase.auth.signUp({
+  const nextRaw = (formData.get('next') as string) || ''
+  const next =
+    nextRaw.startsWith('/') && !nextRaw.startsWith('//') ? nextRaw : '/student/dashboard'
+
+  // All profile fields ride on raw_user_meta_data. The handle_new_user trigger
+  // (migration 20260429020252) reads them and inserts the profile row.
+  const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { is_admin: false, is_instructor: false, is_student: true, first_name: firstName, last_name: lastName },
-      emailRedirectTo: `${siteUrl}/auth/callback?next=/student/dashboard`,
+      data: {
+        is_admin: false,
+        is_instructor: false,
+        is_student: true,
+        first_name: firstName,
+        last_name: lastName,
+        phone,
+        experience_level: experienceLevel,
+        instructor_notes: instructorNotes,
+      },
+      emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   })
 
   if (error) return { error: error.message }
 
-  // With email confirmations enabled, signUp does not create a session, so the
-  // user has no auth context to satisfy RLS on the profiles insert. Use the
-  // service-role client (same pattern as admin-created students).
-  if (data.user) {
-    const adminClient = createAdminClient()
-    const { error: profileError } = await adminClient.from('profiles').insert({
-      id: data.user.id,
-      email,
-      first_name: firstName,
-      last_name: lastName,
-      phone,
-      is_admin: false,
-      is_instructor: false,
-      is_student: true,
-      experience_level: experienceLevel,
-      instructor_notes: instructorNotes,
-    })
-
-    if (profileError) return { error: 'Account created but profile setup failed.' }
-  }
-
   redirect(`/register/check-email?email=${encodeURIComponent(email)}`)
+}
+
+export async function signInWithGoogle(_: unknown, formData: FormData) {
+  const supabase = await createClient()
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+
+  // Caller can pass ?next=/foo to send the user somewhere after sign-in
+  // (e.g. the invite-acceptance page). Default to the student dashboard.
+  const nextRaw = (formData.get('next') as string) || '/student/dashboard'
+  const next =
+    nextRaw.startsWith('/') && !nextRaw.startsWith('//') ? nextRaw : '/student/dashboard'
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`,
+    },
+  })
+
+  if (error) return { error: error.message }
+  if (!data.url) return { error: 'Could not start Google sign-in.' }
+
+  redirect(data.url)
 }
 
 export async function signOut() {

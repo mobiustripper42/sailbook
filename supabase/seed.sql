@@ -158,6 +158,9 @@ INSERT INTO auth.identities (id, user_id, provider_id, identity_data, provider, 
 -- All seed users share Eric's phone number — every notification triggered in
 -- dev fires an SMS to him, which is the smoke test built into the seed data.
 -- Replace with per-user numbers if you ever need to tell who got the SMS.
+-- The handle_new_user trigger has already inserted basic profile rows for
+-- every auth.users seed row above. Upsert to overwrite with the rich seed data
+-- (phone, role flags, theme_preference, etc.).
 INSERT INTO public.profiles (id, email, first_name, last_name, phone, is_admin, is_instructor, is_student, experience_level, asa_number, theme_preference) VALUES
   ('a1000000-0000-0000-0000-000000000001', 'andy@ltsc.test',         'Andy',   'Kaminski',   '+14403631199', true,  false, false, null,           null,     'dark'),
   ('a1000000-0000-0000-0000-000000000002', 'mike@ltsc.test',         'Mike',   'Theriault',  '+14403631199', false, true,  false, null,           null,     'dark'),
@@ -169,7 +172,18 @@ INSERT INTO public.profiles (id, email, first_name, last_name, phone, is_admin, 
   ('f1000000-0000-0000-0000-000000000001', 'pw_admin@ltsc.test',     'PW',     'Admin',      '+14403631199', true,  false, false, null,           null,     'dark'),
   ('f1000000-0000-0000-0000-000000000002', 'pw_instructor@ltsc.test','PW',     'Instructor', '+14403631199', false, true,  false, null,           null,     'dark'),
   ('f1000000-0000-0000-0000-000000000003', 'pw_student@ltsc.test',   'PW',     'Student',    '+14403631199', false, false, true,  null,           null,     'dark'),
-  ('f1000000-0000-0000-0000-000000000004', 'pw_student2@ltsc.test',  'PW',     'Student2',   '+14403631199', false, false, true,  null,           null,     'dark');
+  ('f1000000-0000-0000-0000-000000000004', 'pw_student2@ltsc.test',  'PW',     'Student2',   '+14403631199', false, false, true,  null,           null,     'dark')
+ON CONFLICT (id) DO UPDATE SET
+  email             = EXCLUDED.email,
+  first_name        = EXCLUDED.first_name,
+  last_name         = EXCLUDED.last_name,
+  phone             = EXCLUDED.phone,
+  is_admin          = EXCLUDED.is_admin,
+  is_instructor     = EXCLUDED.is_instructor,
+  is_student        = EXCLUDED.is_student,
+  experience_level  = EXCLUDED.experience_level,
+  asa_number        = EXCLUDED.asa_number,
+  theme_preference  = EXCLUDED.theme_preference;
 
 -- ============================================================
 -- CODES (lookup/dropdown values)

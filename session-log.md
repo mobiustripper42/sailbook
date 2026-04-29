@@ -4,6 +4,8 @@ Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
 ## Session 104 — 2026-04-28 14:58 [open]
+**[PAUSED 15:30]** Working on: Phase 3.12 Security audit (complete, zero findings) + plan housekeeping. Left off at: 3.15 (logged-in password change, 3 pts) added to plan; 3.12 marked done; 3.11 OAuth deferred to end of Phase 3 per Eric. Smoke test of 3.10 was passing per Eric. Next: pick a Phase 3 task — 3.15 password change, 3.13 README docs (Twilio/Resend setup, 1 pt), or 3.11 OAuth (2 pts, requires Google Cloud Console clicks Eric still needs to do). Eric's stated preference: OAuth at the very end of Phase 3.
+**[RESUMED 2026-04-29 01:25 UTC]**
 
 ## Session 103 — 2026-04-27 10:51–11:39 (0.83 hrs)
 **Duration:** 0.83 hrs | **Points:** 3 (3.10: 3)

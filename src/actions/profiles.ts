@@ -178,9 +178,12 @@ export async function createAdminStudent(
   if (authError) return authError.message
   if (!authData.user) return 'Failed to create user account.'
 
+  // The handle_new_user trigger has already inserted a basic profile (Phase
+  // 3.11). Upsert to add the admin-only fields (asa_number, auth_source) and
+  // overwrite any defaults the trigger filled in.
   const { error: profileError } = await adminClient
     .from('profiles')
-    .insert({
+    .upsert({
       id: authData.user.id,
       first_name,
       last_name,

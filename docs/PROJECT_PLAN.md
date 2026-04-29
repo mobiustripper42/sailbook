@@ -410,4 +410,5 @@ Before go-live (real data, real students):
 - [ ] **Auth: confirmation email template uploaded** in Dashboard → Authentication → Email Templates → "Confirm signup". Subject: "Confirm your SailBook account". Body matches `supabase/templates/confirmation.html`. The `{{ .ConfirmationURL }}` token must be preserved.
 - [ ] **Auth: password policy set** in Dashboard → Authentication → Policies: minimum length 12, requirements `lower_upper_letters_digits`. Match `supabase/config.toml`.
 - [ ] **Auth: Site URL + Redirect URLs** in Dashboard → Authentication → URL Configuration: Site URL = `https://sailbook.live`, Redirect URLs include `https://sailbook.live/auth/callback`.
+- [ ] **Auth: Google OAuth provider** in Dashboard → Authentication → Providers → Google: enable, paste Client ID + Client Secret. In Google Cloud Console, add `https://<prod-supabase-ref>.supabase.co/auth/v1/callback` to Authorized redirect URIs and `https://sailbook.live` to Authorized JavaScript origins.
 - [ ] Smoke test: student registers → confirms email → pays → sees enrollment → admin sees payment status
