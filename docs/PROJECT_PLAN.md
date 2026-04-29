@@ -223,9 +223,10 @@ Design quality, accessibility, navigation, convenience features.
 | 6.15 | Admin dashboard — pending cancellation requests widget | 3 | Surface `cancel_requested` enrollments as a count/list on the admin dashboard, similar to the existing pending-enrollment alert. Links to the enrollment detail. |
 | 6.16 | Show refund amount to student — display refund details on student My Courses and course detail pages when enrollment is cancelled with a refund on record | 2 | Pull from payments table (refund_amount_cents). Show "Refunded $X.XX" badge or line alongside cancelled status. |
 | 6.17 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Full V2 surface area. Final retrospective before handoff. |
+| 6.18 | CI + iOS testing — GitHub Actions runs Playwright on PRs to main, add iPhone WebKit project (CI-only) | 5 | Triggered by Apr 29 mobile bug (missing viewport meta, broke all dropdowns on Android) — desktop tests didn't catch it. Scope: GH Actions workflow with Supabase service container, env secrets, full Playwright run on PR + push to main; add a 4th `iphone` project to `playwright.config.ts` gated to CI (`process.env.CI`); tag the layout/touch-sensitive specs (auth, dropdowns, calendar, payment) so iPhone project only runs those. Decision still open: skip iOS in CI entirely vs full WebKit run vs tagged subset — defer until task starts. Until then, no automated iOS coverage; manual phone test before each demo. |
 
-**Phase 6 total: 56 pts** (was 54; +2 for 6.0 theme tune)
-**Projected hours: ~19 hrs**
+**Phase 6 total: 61 pts** (was 56; +5 for 6.18 CI + iOS testing)
+**Projected hours: ~21 hrs**
 
 **Ejection point:** The app looks and feels professional. Accessible. Navigable. Polished. Security verified.
 

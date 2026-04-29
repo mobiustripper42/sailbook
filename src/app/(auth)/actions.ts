@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { safeNextPath } from '@/lib/auth/safe-next'
 import { redirect } from 'next/navigation'
 
 export async function login(_: unknown, formData: FormData) {
@@ -13,10 +14,8 @@ export async function login(_: unknown, formData: FormData) {
 
   if (error) return { error: error.message }
 
-  const nextRaw = (formData.get('next') as string) || ''
-  if (nextRaw.startsWith('/') && !nextRaw.startsWith('//')) {
-    redirect(nextRaw)
-  }
+  const safeNext = safeNextPath(formData.get('next') as string | null)
+  if (safeNext) redirect(safeNext)
 
   const meta = (data.user?.user_metadata ?? {}) as Record<string, unknown>
   if (meta.is_admin) redirect('/admin/dashboard')
@@ -37,9 +36,7 @@ export async function register(_: unknown, formData: FormData) {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
-  const nextRaw = (formData.get('next') as string) || ''
-  const next =
-    nextRaw.startsWith('/') && !nextRaw.startsWith('//') ? nextRaw : '/student/dashboard'
+  const next = safeNextPath(formData.get('next') as string | null) ?? '/student/dashboard'
 
   // All profile fields ride on raw_user_meta_data. The handle_new_user trigger
   // (migration 20260429020252) reads them and inserts the profile row.
@@ -72,9 +69,7 @@ export async function signInWithGoogle(_: unknown, formData: FormData) {
 
   // Caller can pass ?next=/foo to send the user somewhere after sign-in
   // (e.g. the invite-acceptance page). Default to the student dashboard.
-  const nextRaw = (formData.get('next') as string) || '/student/dashboard'
-  const next =
-    nextRaw.startsWith('/') && !nextRaw.startsWith('//') ? nextRaw : '/student/dashboard'
+  const next = safeNextPath(formData.get('next') as string | null) ?? '/student/dashboard'
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -122,4 +117,40 @@ export async function updatePassword(_: unknown, formData: FormData) {
   if (meta.is_admin) redirect('/admin/dashboard')
   if (meta.is_instructor) redirect('/instructor/dashboard')
   redirect('/student/dashboard')
+}
+
+// Logged-in password change. Distinct from updatePassword (recovery flow):
+// re-authenticates the current user with their current password before
+// allowing the change. DEC-015 form-action shape: string | null.
+export async function changePassword(_: unknown, formData: FormData): Promise<string | null> {
+  const currentPassword = (formData.get('current_password') as string) ?? ''
+  const newPassword = (formData.get('new_password') as string) ?? ''
+  const confirmPassword = (formData.get('confirm_password') as string) ?? ''
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return 'All fields are required.'
+  }
+  if (newPassword !== confirmPassword) {
+    return 'New password and confirmation do not match.'
+  }
+  if (newPassword.length < 12) {
+    return 'Password must be at least 12 characters.'
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user?.email) return 'You are not signed in.'
+
+  // Re-auth check: signInWithPassword fails if the current password is wrong.
+  // On success it rotates the session — same user, fresh tokens.
+  const { error: reauthError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  })
+  if (reauthError) return 'Current password is incorrect.'
+
+  const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
+  if (updateError) return updateError.message
+
+  return null
 }

@@ -27,6 +27,51 @@ forwarded port.
 
 End of session: just close the VS Code window. Server keeps running.
 
+## Mobile access (Termius + tmux)
+
+When SSH'ing into the box from a phone (Termius), two things matter: keeping a shell alive across flaky connections, and not getting blocked by Tailscale SSH.
+
+### Tailscale SSH conflicts with Termius
+
+Earlier we ran `sudo tailscale up --ssh` on the host, which enables Tailscale's own SSH interceptor. That works fine for VS Code Remote-SSH from a device signed in to the tailnet, but **Termius (which uses standard SSH key auth) hangs or fails to authenticate** against a host that has Tailscale SSH on. Disable it on the host:
+
+```bash
+sudo tailscale set --ssh=false
+```
+
+Standard OpenSSH on port 22 over the tailnet keeps working — VS Code Remote-SSH and `ssh sailbook-dev` both use the SSH key in `~/.ssh/sailbook_hetzner` and don't need Tailscale's interceptor. Re-enable with `sudo tailscale set --ssh=true` only if you specifically want Tailscale-identity auth.
+
+### tmux for connection resilience
+
+Mobile SSH connections drop constantly (network changes, screen lock, app switch). Run work inside a tmux session so a dropped connection doesn't kill what you were doing.
+
+```bash
+tmux new -s work        # create a new session named "work"
+tmux a                  # attach to the most recent session
+tmux a -t work          # attach to a specific session
+tmux ls                 # list sessions
+# Inside tmux:
+#   Ctrl-b d            detach (session keeps running)
+#   Ctrl-b c            new window
+#   Ctrl-b n / p        next / previous window
+#   Ctrl-b [            enter copy/scroll mode (q to exit)
+```
+
+When Termius drops, just reconnect and `tmux a` — picks up exactly where you left off.
+
+### Scrolling in tmux on Termius
+
+By default tmux swallows the terminal's native scrollback, so two-finger swipe in Termius does nothing. Two fixes — both already configured in `~/.tmux.conf` on the box:
+
+```
+set -g mouse on
+set -g history-limit 10000
+```
+
+With `mouse on`, two-finger swipe in Termius enters copy mode automatically and scrolls the tmux scrollback. Tap or press `q` to drop back to live. If you'd rather not enable mouse mode globally, `Ctrl-b [` then PgUp / arrow keys works without it.
+
+If `~/.tmux.conf` ever goes missing (fresh box, snapshot restore from before this was added), recreate it with the two lines above and run `tmux source-file ~/.tmux.conf` from inside any session.
+
 ## Pausing / stopping the server
 
 Hetzner bills hourly **whether the server is running or powered off** — a stopped server still reserves disk + IP, so `poweroff` does not save money. The only ways to stop paying:
@@ -104,7 +149,7 @@ ssh root@<new-ip> 'bash /root/hetzner-bootstrap.sh eric'
 
 # 3. Auth Tailscale interactively (browser auth)
 ssh -i ~/.ssh/sailbook_hetzner eric@<new-ip>
-sudo tailscale up --ssh
+sudo tailscale up         # do NOT pass --ssh — it breaks Termius (see Mobile access section)
 exit
 
 # 4. Lock down sshd + close public port 22
@@ -136,3 +181,4 @@ ssh eric@sailbook-dev 'cd sailbook && supabase start && npm install && npx playw
 - **`node` / `supabase` not found over plain SSH**: non-interactive SSH doesn't source `.bashrc`. The tooling script symlinks these into `/usr/local/bin`. If missing, re-run `scripts/hetzner-dev-tooling.sh`.
 - **Next dev server can't read env vars**: Next reads `.env.local` at startup. After scp'ing or editing the file, Ctrl+C and re-run `npm run dev`.
 - **Public SSH still open**: check `hcloud firewall describe sailbook-dev-fw` — should only show ICMP. If port 22 is listed, run `hcloud firewall replace-rules sailbook-dev-fw` with the locked rules.
+- **All `onClick` handlers dead on phone, but native `<select>`, links, and form-submit work**: hydration is failing because Next's dev-origin check is rejecting requests from your phone's hostname. Add the hostname/IP to `allowedDevOrigins` and `experimental.serverActions.allowedOrigins` in `next.config.ts`, then **restart `npm run dev`** (config changes do not HMR). Symptom is sneaky: HTML renders fine, browser-native interactions work, only React event handlers are dead — easy to misdiagnose as a Radix or component bug. The Tailscale hostname `sailbook-dev` and the Tailscale IP (`100.118.147.49`) are already in the list; any new device or rename needs to be added.

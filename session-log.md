@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 105 — 2026-04-29 04:37 [open]
+
 ## Session 104 — 2026-04-28 14:58 → 2026-04-29 04:05 (3.25 hrs across two sittings)
 **Duration:** 3.25 hrs (sitting 1: 14:58–15:30 = 0.5 hrs · sitting 2: 01:25–04:05 = 2.75 hrs) | **Points:** 5 (3.12: 3, 3.11: 2 [scored 2 — see Estimation Note])
 **Task:** Phase 3.12 Security audit + Phase 3.11 OAuth login (Google) + handle_new_user trigger

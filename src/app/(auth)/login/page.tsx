@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { login } from "../actions";
+import { safeNextPath } from "@/lib/auth/safe-next";
 import GoogleSignInButton from "@/components/auth/google-sign-in-button";
 import DevLoginHelper from "@/components/dev-login-helper";
 
@@ -32,8 +33,7 @@ function LoginPageContent() {
   const [state, action, pending] = useActionState(login, null);
   const [email, setEmail] = useState("");
   const searchParams = useSearchParams();
-  const nextParam = searchParams.get("next");
-  const next = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : undefined;
+  const next = safeNextPath(searchParams.get("next")) ?? undefined;
 
   return (
     <div className="flex flex-col items-center w-full max-w-sm">

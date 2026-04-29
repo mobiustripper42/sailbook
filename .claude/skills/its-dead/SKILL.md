@@ -1,7 +1,7 @@
 ---
 name: its-dead
-description: Second half of the SailBook end-of-session shutdown. Calculates session time and effort points, writes the approved session log entry, updates the project plan, commits the log, and runs the PM agent for next task recommendation. Run after /kill-this once the draft looks good. Optional args: natural-language time adjustments, e.g. "/its-dead subtract 30 minutes for time away from desk".
-tools: Read, Edit, Write, Bash, Glob, Grep, Agent
+description: Second half of the SailBook end-of-session shutdown. Calculates session time and effort points, writes the approved session log entry, updates the project plan, then commits and pushes. Run after /kill-this once the draft looks good. Optional args: natural-language time adjustments, e.g. "/its-dead subtract 30 minutes for time away from desk".
+tools: Read, Edit, Write, Bash, Glob, Grep
 ---
 
 You are executing the second half of the SailBook end-of-session shutdown. The user has reviewed and approved the session log draft from /kill-this.
@@ -30,14 +30,15 @@ Mark any tasks completed this session that aren't already checked `[x]`. Add `<!
 
 ## Step 3 — Commit and push the log
 
+Pull first to avoid a rebase saga from any out-of-band remote commits, then commit and push:
+
 ```
+git pull --rebase
 git add session-log.md docs/PROJECT_PLAN.md
 git commit -m "Update session log and plan for session N"
 git push
 ```
 
-## Step 4 — PM agent
+If `git pull --rebase` reports conflicts (rare — only if someone else edited the same lines in session-log.md or PROJECT_PLAN.md), surface them to the user before continuing.
 
-Run the `pm` subagent to assess current project status and recommend the best next task — highest-value unblocked task given timeline, dependencies, and remaining scope. Not just the first unchecked box.
-
-Report the recommendation to the user.
+That's it. Confirm the push SHA so the user knows it's safe to log off. Do NOT run the PM agent here — `/its-alive` runs it at the start of the next session, which is when the recommendation actually gets used.

@@ -96,15 +96,24 @@ export default function MobileNavDrawer({ name, isInstructor }: { name: string; 
           {isInstructor && (
             <RoleToggle href="/instructor/dashboard" label="Switch to Instructor View" />
           )}
-          <div className="flex items-center justify-between mt-1">
-            <form action={signOut}>
-              <button
-                type="submit"
+          <div className="flex items-end justify-between mt-1">
+            <div className="flex flex-col gap-0.5">
+              <Link
+                href="/account/password"
+                onClick={() => setOpen(false)}
                 className="text-xs text-muted-foreground hover:text-foreground"
               >
-                Sign out
-              </button>
-            </form>
+                Change password
+              </Link>
+              <form action={signOut}>
+                <button
+                  type="submit"
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Sign out
+                </button>
+              </form>
+            </div>
             <ThemeToggle />
           </div>
         </div>

@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { register } from '../actions'
+import { safeNextPath } from '@/lib/auth/safe-next'
 import GoogleSignInButton from '@/components/auth/google-sign-in-button'
 
 type ExperienceCode = {
@@ -26,8 +27,7 @@ type ExperienceCode = {
 export default function RegisterForm({ experienceCodes }: { experienceCodes: ExperienceCode[] }) {
   const [state, action, pending] = useActionState(register, null)
   const searchParams = useSearchParams()
-  const nextParam = searchParams.get('next')
-  const next = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : undefined
+  const next = safeNextPath(searchParams.get('next')) ?? undefined
 
   return (
     <Card className="w-full max-w-sm">

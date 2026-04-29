@@ -110,7 +110,7 @@ test.describe('Full payment chain E2E', () => {
       timestamp,
     } as Parameters<typeof stripe.webhooks.generateTestHeaderString>[0])
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+    const baseUrl = 'http://localhost:3000'
     const webhookRes = await fetch(`${baseUrl}/api/webhooks/stripe`, {
       method: 'POST',
       headers: {
