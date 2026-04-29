@@ -3,7 +3,64 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 105 — 2026-04-29 04:37 [open]
+## Session 105 — 2026-04-29 04:37–12:35 (8.00 hrs)
+**Duration:** 8.00 hrs | **Points:** 4 (3.13: 1, 3.15: 3)
+**Task:** Phase 3.13 (Twilio/Resend README) + Phase 3.15 (logged-in password change) + session 104 carryovers (open-redirect Host fix, safeNextPath extraction). Parallel thread: mobile/Tailscale access fix.
+
+**Completed:**
+- **3.13 — Twilio/Resend README (1 pt).** `README.md` gains three sections: Twilio Setup (env vars, Toll-Free Verification gate explained as the carrier-path blocker that silently filters traffic until verified), Resend Setup (env var, sailbook.live domain verification flow, FROM_DEFAULT location in code, note that Supabase Auth emails go through SMTP not this code path), and a unified Notifications gating section (`NOTIFICATIONS_ENABLED`, mock buffer at `/api/test/notifications`, no-op behavior when keys are missing).
+- **3.15 — Logged-in password change (3 pts).** New `/account/password` route, role-agnostic, accessible to any authenticated user.
+  - `src/app/(auth)/actions.ts` — new `changePassword` action. DEC-015 shape (`Promise<string | null>`). Validates fields present, new === confirm, length ≥ 12. Re-authenticates via `signInWithPassword(user.email, current)` before calling `updateUser({ password: new })`. Forwards Supabase's password-policy error verbatim.
+  - `src/components/auth/change-password-form.tsx` — three-field client form (current / new / confirm). Reuses the established transient-success effect pattern (DEC-015 + ref + pending → idle transition). Auto-clears all three fields via `formRef.reset()` on success transition.
+  - `src/app/account/password/page.tsx` — server page, redirects unauthenticated to `/login?next=/account/password`. Computes role-aware "Back to dashboard" link from user_metadata.
+  - "Change password" link added to all 3 desktop sidebars + 3 mobile drawers in the existing user/sign-out footer block.
+  - `tests/auth-password-change.spec.ts` — 5 desktop tests: signed-out redirect, happy path (change → sign out → sign in with new), old-password-rejected-after-change, wrong current password, mismatched new+confirm.
+- **3.12 carryovers (next-step #2 + #7 from session 104):**
+  - `src/app/auth/callback/route.ts` — **Host header allow-list.** Only localhost / 127.0.0.1 (any port) and the canonical `NEXT_PUBLIC_SITE_URL` host are honored; spoofed Host falls back to `NEXT_PUBLIC_SITE_URL` instead of becoming an open-redirect surface. **NOTE:** dev server on this box has been observed to serve cached old `/auth/callback` code (same as session 104). The fix is on disk; will go live on next dev-server restart.
+  - `src/lib/auth/safe-next.ts` — extracted `safeNextPath()` helper. Applied at all 6 redirect-guard sites (login/register actions, signInWithGoogle, login + register pages, callback). **Closes the backslash bypass** (/\evil.com → browser parses as //evil.com) flagged in session 103 code review #4.
+- **Test fix:** `tests/payment-e2e.spec.ts:113` was hitting `NEXT_PUBLIC_SITE_URL` for the webhook POST, but on the Hetzner box that points at a laptop-side forwarded port (`:55934`) the test runner can't reach. Hard-coded `localhost:3000`. The 3 failures in the full-suite run earlier were all this same root cause across viewports.
+- **Parallel thread (different session, bundled into the same commit):**
+  - `next.config.ts` — added `sailbook-dev` + `100.118.147.49` to `allowedDevOrigins` and `serverActions.allowedOrigins`. Phone clicks were dead because hydration silently failed when Next blocked dev assets from the Tailscale origin. Native `<select>` worked because no React event handler. Diagnostic shortcut in memory now: native vs Radix A/B test on phone → if native works and Radix doesn't, check `next.config.ts` allowlists.
+  - `src/app/layout.tsx` — viewport meta export added (was missing entirely; would have caused subtle Android touch-coordinate / scaling issues even after the allowlist fix).
+  - `~/.tmux.conf` (off-repo, on Hetzner box) — `mouse on` + `history-limit 10000` so Termius two-finger swipe scrolls tmux scrollback.
+  - `docs/HETZNER_DEV.md` — Mobile access (Termius + tmux) section, troubleshooting entry for the `allowedDevOrigins` hydration-failure symptom, `tailscale up` correction (no `--ssh` flag — that breaks Termius mobile auth).
+  - `docs/PROJECT_PLAN.md` — new task **6.18 — CI + iOS testing (5 pts)**. Triggered by today's bug class: desktop tests didn't catch a phone-only failure. Phase 6 total 56 → 61 pts.
+  - Memory: 3 new entries in `hetzner_box_quirks.md` — allowedDevOrigins requirement, Tailscale-SSH/Termius conflict, tmux config.
+- **Targeted runs (all green this session):**
+  - `auth-password-change.spec.ts`: 5/5 desktop
+  - `auth.spec.ts` + `auth-oauth.spec.ts` + `auth-email-verification.spec.ts` + `codes.spec.ts`: 69/69
+  - `payment-e2e.spec.ts` + `auth-oauth.spec.ts` + `auth-email-verification.spec.ts`: 33/33 (post-fix re-run)
+- **Full suite at session start:** 388 passed / 3 failed (the payment-e2e bug, root-caused and fixed mid-session). **Not re-run after fix** — deferred to 3.14 phase close.
+- Build green. tsc clean. Lint clean (3 pre-existing warnings, none from this work).
+- Commit `e212ee1`. 22 files, +546 / -82.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- Twilio Toll-Free Verification still pending (carryover from session 102).
+
+**Next Steps:**
+1. **Re-run full Playwright suite** — not done after the post-suite changes; should be the first thing in 3.14 phase close.
+2. **Restart the dev server before browser-testing /auth/callback** — it has been serving cached old code on this box. The Host allow-list and safeNextPath changes land on next restart.
+3. **Code review the 3.13/3.15/carryover commit (`e212ee1`).** /kill-this ran the @code-review agent against HEAD but it returned with an Anthropic-side quota message ("You're out of extra usage · resets 3:20pm UTC") and no findings surfaced. Re-run the review at session 106 start.
+4. **3.14 — Phase 3 close (5 pts).** End-of-phase @ui-reviewer pass, lint clean (the 3 pre-existing warnings should be cleaned up), all tests green, all code review resolved, retrospective, archive session log. Polish backlog already in the plan row: noValidate on auth forms, preserve form values on validation failure, friendly password-policy error copy, register-flow UX review.
+5. **Carryovers from session 104, still open:**
+   - Manual smoke of email/password registration (~5 min)
+   - Manual smoke of fresh Google OAuth (~5 min)
+   - File pre-existing 4.x bug: invited instructors bounced from `/instructor/dashboard` until JWT refresh (`accept_invite` writes role flag to profiles, not auth metadata)
+   - Role-flag spoof surface in `register()` (defense-in-depth, hardening task)
+   - Code review cleanup: extract `PASSWORD_RULES_HELP` constant — duplicated yet again in `change-password-form.tsx` (3.10 code review #2 still open).
+6. **Carryovers from session 102:** SMS smoke-test investigation, cross-file Playwright isolation hardening, DEC-015 cleanup of remaining `updateProfile` / `updateUserProfile`, `useTransientSuccess` hook extraction (now 4 forms duplicate it).
+
+**Context:**
+- **`changePassword` re-auth pattern.** `signInWithPassword(user.email, current)` is the verification step. On success it rotates the session — same user, fresh tokens — and we then call `updateUser({ password })` against that fresh session. Wrong current password fails the re-auth step and we return early before the password update. This is simpler and gives clearer error messages than flipping `secure_password_change = true` in `config.toml` (which gates `updateUser` on session age — UX-heavy).
+- **`safeNextPath` rejects four shapes:** null/empty/non-string, no leading `/`, protocol-relative (`//evil.com`), and backslash-prefixed (`/\evil.com` — browsers parse `\` as `/`). The 5th case (URL-parsing-based same-origin check) is more robust but unnecessary at our threat model — all 4 prefix-string rejections are deterministic and fast.
+- **`/auth/callback` Host allow-list logic.** `hostHeader === siteHost || /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(hostHeader)`. In production sailbook.live → Host matches siteHost → use Host (so `x-forwarded-proto` from Vercel/CloudFlare wins for https). In dev on Hetzner, Host is `localhost:3000` (Playwright) or `localhost:55934` (Eric's VS Code Remote-SSH tunnel) — both match the localhost regex. Anything else → fall back to `NEXT_PUBLIC_SITE_URL`.
+- **Mobile diagnostic from parallel thread.** "Phone clicks dead but native HTML works" → check `next.config.ts` `allowedDevOrigins` first. The signature: hydration silently fails (no console error) when dev assets are blocked, leaving server-rendered HTML and native elements working but every React `onClick` dead. Burned an hour chasing Radix Select fixes before realizing this. Saved as memory.
+- **8-hour wall-clock duration spans both threads.** Parallel session was working concurrently for much of this window; "8 hours of effort" overstates Eric's active dev time on this thread. 4 pts of plan-table tasks completed; the open-redirect + safeNextPath carryovers (~2 pts of real work) and the parallel-thread mobile fix (~3-5 pts of real work) are not in the plan table and don't tally. Velocity for this session will look bad as a result — flag for the retrospective at 3.14.
+- **Repo git config still missing on Hetzner box.** Used the same one-off `mobiustripper42 / mobius5kcrypto@gmail.com` flags as session 103. Phase 7 dev-tooling script is the right place to fix this — open follow-up.
+
+**Code Review:** Deferred to next session per Eric's call. The /kill-this @code-review agent run completed but returned an Anthropic-side quota message ("You're out of extra usage · resets 3:20pm UTC") with no findings; the actual review of `e212ee1` is queued as next-step #3.
 
 ## Session 104 — 2026-04-28 14:58 → 2026-04-29 04:05 (3.25 hrs across two sittings)
 **Duration:** 3.25 hrs (sitting 1: 14:58–15:30 = 0.5 hrs · sitting 2: 01:25–04:05 = 2.75 hrs) | **Points:** 5 (3.12: 3, 3.11: 2 [scored 2 — see Estimation Note])
