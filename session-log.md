@@ -3,7 +3,66 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 107 — 2026-04-29 16:53 [open]
+## Session 107 — 2026-04-29 16:53–22:20 (2.42 hrs; subtract 3 hrs interruptions from 5.45 hr wall clock)
+**Duration:** 2.42 hrs | **Points:** 4 (4.10: 1, 4.6: 3)
+**Task:** Phase 4 kickoff — 4.10 (recreate ui-reviewer agent) + 4.6 (instructor session notes / IN-5).
+
+**⚠ ERIC ASKED ME TO HOLD HIM TO THIS:** all of session 107's work needs a close human review later. Don't let this entry get archived without that pass. The code review (below) found one real bug worth attending to before launch.
+
+**Completed:**
+- **4.10 — `.claude/agents/ui-reviewer.md` recreated (1 pt).** 12-point checklist with pass/fix-soon/blocker scoring. Brand rules pulled directly from BRAND.md (Mira/Sky/Mist, Nunito Sans, xs radius, dark-mode-default, mobile@375px). Modeled on `architect.md` / `code-review.md` structure. **Committed to `.claude/agents/` in the repo this time** so it survives box moves (the prior version lived only in `~/.claude/agents/` and was wiped in the Phase 7 dev-box migration).
+- **4.6 — Instructor notes on sessions / IN-5 (3 pts).**
+  - `supabase/migrations/20260429170000_session_notes_rpc.sql` — new SECURITY DEFINER RPC `update_session_notes(p_session_id uuid, p_notes text) returns text`. Returns NULL on success, error string on failure. Authorizes admin via JWT user_metadata, OR assigned instructor via `get_instructor_session_ids` (covers both course-level and session-level / DEC-007 override). 2000-char cap. `nullif(trim(p_notes), '')` so empty/whitespace clears the column.
+  - **Why an RPC, not a column-scoped UPDATE policy:** instructors have SELECT-only on sessions per baseline RLS. Rather than open UPDATE more broadly, route writes through a SECURITY DEFINER RPC that touches only the `notes` column. Same pattern as `update_my_profile` / `profile_role_flags_unchanged`.
+  - `src/actions/sessions.ts` — new `updateSessionNotes` action. DEC-015 form shape (returns `string | null`). Returns the RPC's text return as the inline error.
+  - `src/components/instructor/session-notes-form.tsx` — controlled textarea, 2000-char counter ("N characters remaining"), useActionState, transient-success effect using the established `prevPending` ref → `hasSubmitted` → `showSuccess` pattern (canonical version: `change-password-form.tsx`).
+  - `src/app/(instructor)/instructor/sessions/[id]/page.tsx` — added `notes` to the session select; rendered a Card with the form below the Roster card.
+  - `supabase/tests/10_session_notes_rpc.sql` — 8 pgTAP cases: admin write, owning instructor write, other instructor blocked, student blocked, length cap.
+  - `tests/instructor-views.spec.ts` — 3 new desktop-only tests appended: write+reload, counter decrement, admin reads notes on attendance page.
+- **Type regen friction noted.** `npx supabase gen types --local` writes the CLI's "new version available" stderr message into stdout when redirected, polluting `types.ts`. Workaround: redirect stderr to /dev/null. Not memory-worthy on its own (CLI bug, will go away with an upgrade) but flagging here.
+- **Dev server restart needed mid-session** to clear cached old code (same Hetzner-box symptom session 105 documented). After restart the new page rendered correctly.
+- **Hetzner git config still missing.** Used the same one-off `mobiustripper42 / mobius5kcrypto@gmail.com` flags as session 103 / 105. Phase 7 dev-tooling task is still the right place for the long-term fix.
+- pgTAP **128/128** green (was 120/120 — added 8 cases). Lint clean. tsc clean. Build clean.
+- Targeted Playwright: `instructor-views.spec.ts` 12/12 desktop (15 mobile/tablet skipped by design).
+- **Full Playwright suite NOT run this session** (Eric's call) — should be re-run before 4.9 close, same shape as session 105 → 106 carryover.
+- Commit `f2962bf` (4.10 + 4.6 bundled).
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification still pending (carryover from session 102).
+
+**Next Steps:**
+1. **Eric must close-review session 107's work.** All of 4.10 + 4.6 — the agent definition AND the RPC + form. He flagged this explicitly during the session. **Do not let this drop.**
+2. **Fix the DEC-007 substitute-instructor page bug** flagged in code review #1. `src/app/(instructor)/instructor/sessions/[id]/page.tsx:66` does `if (course.instructor_id !== user.id) redirect(...)`, which contradicts the RPC's session-level override authorization. A substitute instructor assigned only at the session level can write notes via the RPC but can't reach the form to do so — they're redirected first. Fix: replace the line with a check against `get_instructor_session_ids(user.id)` or `course.instructor_id === user.id || session.instructor_id === user.id`. Small change. Should land before launch since substitute-instructor is a real Andy workflow.
+3. **Add pgTAP coverage for the session-level override path** (code review #2). Every "owning instructor" case in `10_session_notes_rpc.sql` uses Mike, who owns at the course level. Need a case where `sessions.instructor_id` is set to someone who is NOT `courses.instructor_id`, asserting that user can write. Untested DEC-007 branch will silently regress otherwise.
+4. **Phase 4 remaining tasks:** 4.2 (admin/users consolidation, 8 pts), 4.3 (student profile expansion, 5 pts), 4.7 (instructor profile expansion — Eric still thinking through scope, hold off), 4.9 (phase close, 5 pts).
+5. **Carryovers from session 106 still open:**
+   - Pre-existing 4.x bug: invited instructors bounced from `/instructor/dashboard` until JWT refresh (`accept_invite` writes role flag to `public.profiles` but not `auth.users.raw_user_meta_data`). Natural fit during 4.2.
+   - pgTAP testing-cadence question for `/kill-this` — Eric is still mulling the right shape.
+   - Manual smoke of 3.10 + 3.11 still deferred.
+   - SMS smoke-test investigation, cross-file Playwright isolation hardening, DEC-015 cleanup, `useTransientSuccess` hook extraction (now **5 forms** duplicate it — code review #6 calls this out specifically; with #5 it's hook-extraction time).
+6. **Cleanups from this session's code review (advisory):**
+   - `revalidatePath` in `updateSessionNotes` only invalidates the instructor view; admin attendance page may show stale notes until natural revalidation. Add `revalidatePath('/admin/courses/[id]/sessions/[sessionId]/attendance', 'page')` or accept staleness.
+   - Empty/whitespace-only save silently clears notes; form still shows "Notes saved." Either drop `trim` or trim client-side. Edge case but loses data.
+   - 4 small pgTAP coverage gaps: unauthenticated, missing session, whitespace-clear behavior, exact-2000-char boundary.
+
+**Context:**
+- **The RPC is the only write path for instructors on sessions.** Baseline RLS gives instructors SELECT only. Future "instructor edits session" features (date/time/location/etc.) face the same choice: open UPDATE with a column-scoped policy, or add another RPC. The latter has been the consistent SailBook pattern. Don't open UPDATE without thinking it through.
+- **`get_instructor_session_ids` is the right authorization helper for instructor-on-session checks** (covers both course-level and session-level / DEC-007 override). The page at `instructor/sessions/[id]/page.tsx:66` does NOT use it — it bypasses with a direct `course.instructor_id` check. That's the bug in next-step #2. Anywhere else in the instructor surface that does its own ownership check rather than calling the helper is suspect.
+- **Transient-success pattern is now in 5 forms** (register-form, student-account-form, change-password-form, notification-preferences-section + this one). Code review flagged it as the threshold. `src/lib/hooks/use-transient-success.ts` is the right next move — small, low-risk, kills duplication.
+- **`npx supabase gen types --local`'s stderr leaks into types.ts** when piped without `2>/dev/null`. The CLI's "new version available" notice corrupts the file. Use `npx supabase gen types typescript --local 2>/dev/null > src/lib/supabase/types.ts`.
+- **CardTitle renders as `<div>`, not a heading element.** `getByRole('heading', { name: '...' })` won't match it reliably. The existing Roster test happens to pass anyway (mechanism unclear — possibly Playwright's accessible-name heuristics on `font-heading` class). For new tests, use `getByText('...', { exact: true })` instead — that's what worked here.
+- **Dev server on Hetzner caches old route handlers.** Same as session 105's `/auth/callback` symptom. After significant page changes, restart the dev server before browser-testing or Playwright will see the old code.
+
+**Code Review:** 7 advisory items, 1 real bug. (@code-review against `f2962bf`.)
+1. **bug** `src/app/(instructor)/instructor/sessions/[id]/page.tsx:66` — page redirects substitute instructors who own at session level only (DEC-007). Page check contradicts RPC authorization. Fix in next-step #2.
+2. **security** `supabase/tests/10_session_notes_rpc.sql` — no coverage for session-level instructor override path. Untested DEC-007 branch.
+3. **cleanup** `10_session_notes_rpc.sql` — 4 missing edge cases: unauthenticated, missing session, whitespace-clear, exact-2000-char boundary.
+4. **consistency** `20260429170000_session_notes_rpc.sql:44` — `nullif(trim(p_notes), '')` silently clears notes on whitespace-only input; form still shows "Notes saved." Same risk against the makeup-session literal in `createMakeupSession`.
+5. **cleanup** `src/actions/sessions.ts:209` — `revalidatePath` only invalidates the instructor view, not the admin attendance page.
+6. **cleanup** `src/components/instructor/session-notes-form.tsx:23-31` — fifth duplication of the transient-success pattern. Hook extraction time.
+7. **cleanup** `tests/instructor-views.spec.ts:201-265` — new tests are desktop-only; new Card not verified at 375px.
+8. **ui-reviewer.md** — frontmatter and structure match the other agents. Clean.
 
 ## Session 106 — 2026-04-29 15:45–16:45 (1.00 hr)
 **Duration:** 1.00 hr | **Points:** 5 (3.14: 5)

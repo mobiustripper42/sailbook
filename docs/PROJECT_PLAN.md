@@ -323,7 +323,7 @@ At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–
 | (5.10 early) | 5 | ~2 | 1.00 | 0.20 | Pulled forward from Phase 5; rolled into Phase 5 actuals when phase closes |
 | 2 — Payments | 38 | ~14 | — | — | |
 | 3 — Notifications | 48 | ~18 | ~18.0 | **0.38** | On baseline; many small tasks + 3.11 OAuth scope-creep ate the headroom. See RETROSPECTIVES.md |
-| 4 — Identity | 27 | ~10 | — | — | |
+| 4 — Identity | 43 | ~11 | — | — | |
 | 5 — Pricing | 47 | ~18 | — | — | |
 | 6 — Polish | 54 | ~17 | — | — | |
 | **Total** | **298** | **~113** | — | — | Planning baseline: 0.26–0.35 hrs/pt (Phase 1 pace to conservative) |
