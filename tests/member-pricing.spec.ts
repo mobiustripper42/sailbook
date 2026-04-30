@@ -39,14 +39,14 @@ test.describe('Member pricing', () => {
   test('admin can mark student as Simply Sailing member', async ({ page }) => {
     test.setTimeout(30000)
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
-    await page.goto('/admin/students')
+    await page.goto('/admin/users')
     // Find the row containing "PW Student" and click its Edit link
     const row = page.getByRole('row').filter({ hasText: 'PW Student' }).first()
     await row.getByRole('link', { name: 'Edit' }).click()
     await page.waitForURL(/\/admin\/students\/.*\/edit/, { timeout: 10000 })
     await page.getByLabel('Simply Sailing Member').check()
     await page.getByRole('button', { name: 'Save Changes' }).click()
-    await page.waitForURL('/admin/students', { timeout: 10000 })
+    await page.waitForURL('/admin/users', { timeout: 10000 })
   })
 
   test('member student sees member price with strikethrough', async ({ page }) => {
@@ -63,13 +63,13 @@ test.describe('Member pricing', () => {
     const page = await ctx.newPage()
     try {
       await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
-      await page.goto('/admin/students')
+      await page.goto('/admin/users')
       const row = page.getByRole('row').filter({ hasText: 'PW Student' }).first()
       await row.getByRole('link', { name: 'Edit' }).click()
       await page.waitForURL(/\/admin\/students\/.*\/edit/, { timeout: 10000 })
       await page.getByLabel('Simply Sailing Member').uncheck()
       await page.getByRole('button', { name: 'Save Changes' }).click()
-      await page.waitForURL('/admin/students', { timeout: 10000 })
+      await page.waitForURL('/admin/users', { timeout: 10000 })
     } finally {
       await ctx.close()
     }

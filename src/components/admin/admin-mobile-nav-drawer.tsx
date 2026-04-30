@@ -11,8 +11,6 @@ const links = [
   { href: '/admin/dashboard', label: 'Dashboard' },
   { href: '/admin/courses', label: 'Courses' },
   { href: '/admin/course-types', label: 'Course Types' },
-  { href: '/admin/instructors', label: 'Instructors' },
-  { href: '/admin/students', label: 'Students' },
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/missed-sessions', label: 'Missed Sessions' },
   { href: '/admin/notification-preferences', label: 'Notifications' },

@@ -48,9 +48,9 @@ test.describe('Admin — Student view', () => {
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard');
   });
 
-  test('students list shows View link for each student', async ({ page }) => {
-    await page.goto('/admin/students');
-    // There should be at least one View link
+  test('users list shows View link for each student', async ({ page }) => {
+    await page.goto('/admin/users');
+    // There should be at least one View link (only student rows expose it)
     await expect(page.getByRole('link', { name: 'View' }).first()).toBeVisible();
   });
 
@@ -74,11 +74,11 @@ test.describe('Admin — Student view', () => {
     await expect(editLink).toHaveAttribute('href', `/admin/students/${SAM_ID}/edit`);
   });
 
-  test('admin student view breadcrumb links back to Students', async ({ page }) => {
+  test('admin student view breadcrumb links back to Users', async ({ page }) => {
     await page.goto(`/admin/students/${SAM_ID}`);
-    await page.getByRole('main').getByRole('link', { name: 'Students' }).click();
-    await page.waitForURL('/admin/students');
-    await expect(page.getByRole('heading', { name: 'Students' })).toBeVisible();
+    await page.getByRole('main').getByRole('link', { name: 'Users' }).click();
+    await page.waitForURL('/admin/users');
+    await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
   });
 });
 

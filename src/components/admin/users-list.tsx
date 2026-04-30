@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import InstructorActions from '@/components/admin/instructor-actions'
 import { cn } from '@/lib/utils'
 
 type User = {
@@ -134,37 +135,55 @@ export default function UsersList({ users }: { users: User[] }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sorted.map((u) => (
-                <TableRow key={u.id}>
-                  <TableCell className="font-medium">
-                    {u.first_name} {u.last_name}
-                  </TableCell>
-                  <TableCell>{u.email}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-1 flex-wrap">
-                      {u.is_admin && <Badge variant="ok">Admin</Badge>}
-                      {u.is_instructor && <Badge variant="neutral">Instructor</Badge>}
-                      {u.is_student && <Badge variant="neutral">Student</Badge>}
-                      {!u.is_admin && !u.is_instructor && !u.is_student && (
-                        <span className="text-sm text-muted-foreground">—</span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={u.is_active ? 'ok' : 'neutral'}>
-                      {u.is_active ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Link
-                      href={`/admin/users/${u.id}/edit`}
-                      className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2"
-                    >
-                      Edit
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {sorted.map((u) => {
+                const editHref = u.is_student
+                  ? `/admin/students/${u.id}/edit`
+                  : `/admin/users/${u.id}/edit`
+                return (
+                  <TableRow key={u.id}>
+                    <TableCell className="font-medium">
+                      {u.first_name} {u.last_name}
+                    </TableCell>
+                    <TableCell>{u.email}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 flex-wrap">
+                        {u.is_admin && <Badge variant="ok">Admin</Badge>}
+                        {u.is_instructor && <Badge variant="neutral">Instructor</Badge>}
+                        {u.is_student && <Badge variant="neutral">Student</Badge>}
+                        {!u.is_admin && !u.is_instructor && !u.is_student && (
+                          <span className="text-sm text-muted-foreground">—</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={u.is_active ? 'ok' : 'neutral'}>
+                        {u.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        {u.is_student && (
+                          <Link
+                            href={`/admin/students/${u.id}`}
+                            className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2"
+                          >
+                            View
+                          </Link>
+                        )}
+                        <Link
+                          href={editHref}
+                          className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2"
+                        >
+                          Edit
+                        </Link>
+                        {u.is_instructor && (
+                          <InstructorActions id={u.id} isActive={u.is_active} />
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         </div>

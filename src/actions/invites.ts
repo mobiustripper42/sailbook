@@ -32,7 +32,6 @@ export async function regenerateInvite(role: InviteRole) {
     )
   if (error) return { error: error.message }
 
-  revalidatePath('/admin/instructors')
   revalidatePath('/admin/users')
   return { error: null }
 }

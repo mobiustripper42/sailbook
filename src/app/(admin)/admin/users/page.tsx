@@ -1,4 +1,6 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { Button } from '@/components/ui/button'
 import UsersList from '@/components/admin/users-list'
 import InvitePanel from '@/components/admin/invite-panel'
 
@@ -25,8 +27,13 @@ export default async function UsersPage() {
   return (
     <div className="">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Users</h1>
-        <p className="text-sm text-muted-foreground">{users?.length ?? 0} total</p>
+        <div>
+          <h1 className="text-2xl font-semibold">Users</h1>
+          <p className="text-sm text-muted-foreground">{users?.length ?? 0} total</p>
+        </div>
+        <Button asChild size="sm">
+          <Link href="/admin/students/new">Add Student</Link>
+        </Button>
       </div>
 
       {invitesResult.error && (

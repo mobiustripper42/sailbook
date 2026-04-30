@@ -11,16 +11,6 @@ test.describe('ASA number — admin', () => {
     await loginAs(page, 'andy@ltsc.test', '/admin/dashboard');
   });
 
-  test('admin student list has ASA # column header', async ({ page }) => {
-    await page.goto('/admin/students');
-    await expect(page.getByRole('columnheader', { name: 'ASA #' })).toBeVisible();
-  });
-
-  test('admin student list shows seed ASA number', async ({ page }) => {
-    await page.goto('/admin/students');
-    await expect(page.getByText(SAM_ASA)).toBeVisible();
-  });
-
   test('admin can edit ASA number on student edit form', async ({ page }) => {
     await page.goto(`/admin/students/${SAM_ID}/edit`);
     const input = page.getByLabel('ASA Number');
