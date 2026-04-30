@@ -56,6 +56,37 @@ export default function CourseTypeForm({ courseType }: Props) {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="minimum_enrollment">Minimum Enrollment</Label>
+          <Input
+            id="minimum_enrollment"
+            name="minimum_enrollment"
+            type="number"
+            min={0}
+            defaultValue={courseType?.minimum_enrollment ?? ''}
+            placeholder="Leave blank to skip"
+          />
+          <p className="text-xs text-muted-foreground">
+            Below this, the course is flagged on the dashboard and admins receive a daily alert.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="low_enrollment_lead_days">Low Enrollment Lead Days</Label>
+          <Input
+            id="low_enrollment_lead_days"
+            name="low_enrollment_lead_days"
+            type="number"
+            min={0}
+            required
+            defaultValue={courseType?.low_enrollment_lead_days ?? 14}
+          />
+          <p className="text-xs text-muted-foreground">
+            How far ahead of the first session to start flagging.
+          </p>
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
         <Textarea id="description" name="description" rows={3} defaultValue={courseType?.description ?? ''} />

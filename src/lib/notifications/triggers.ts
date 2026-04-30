@@ -9,6 +9,7 @@
 // before calling). No notified_at column.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { findLowEnrollmentCourses } from '@/lib/low-enrollment'
 import { sendEmail, sendSMS } from './index'
 import { isAdminChannelEnabled, isStudentChannelEnabled } from './preferences'
 import {
@@ -19,11 +20,6 @@ import {
   sessionCancellation,
   sessionReminder,
 } from './templates'
-
-// 5.8 will refine this. Tuned conservatively for V1 — better to skip a real
-// alert than to spam Andy daily.
-const LOW_ENROLLMENT_DAYS_OUT = 14
-const LOW_ENROLLMENT_RATIO = 0.5
 
 type AdminClient = ReturnType<typeof createAdminClient>
 
@@ -364,37 +360,23 @@ export async function notifyMakeupAssigned(makeupSessionId: string): Promise<voi
 }
 
 /**
- * Cron-driven scan: courses whose first session is within
- * LOW_ENROLLMENT_DAYS_OUT and whose confirmed enrollment count is below
- * LOW_ENROLLMENT_RATIO of capacity get a daily warning to all admins.
+ * Cron-driven scan: courses whose first upcoming session is within their
+ * course type's `low_enrollment_lead_days` window AND whose confirmed
+ * enrollment count is below the course type's `minimum_enrollment` threshold
+ * get a daily warning to all admins.
+ *
+ * Course types with `minimum_enrollment IS NULL` opt out entirely.
  *
  * No "already alerted" cooldown for V1 — the cron runs daily and will repeat
- * while the condition holds. 5.8 may add a cooldown column if it's noisy.
+ * while the condition holds. Add a cooldown column if it gets noisy.
  *
- * Returns the number of courses that triggered an alert (for the cron route
- * response payload).
+ * Returns the number of courses that triggered an alert.
  */
 export async function notifyLowEnrollmentCourses(): Promise<number> {
   const admin = createAdminClient()
 
-  const today = new Date()
-  const horizon = new Date(today.getTime() + LOW_ENROLLMENT_DAYS_OUT * 24 * 60 * 60 * 1000)
-  const todayISO = today.toISOString().slice(0, 10)
-  const horizonISO = horizon.toISOString().slice(0, 10)
-
-  // Active courses with at least one upcoming session inside the window.
-  // Pull more than we need and filter in JS — keeps the SQL simple and the
-  // window boundary readable.
-  const { data: courses, error: coursesErr } = await admin
-    .from('courses')
-    .select('id, title, capacity, course_type_id')
-    .eq('status', 'active')
-
-  if (coursesErr) {
-    console.error('[notifications] low-enrollment course lookup failed:', coursesErr.message)
-    return 0
-  }
-  if (!courses || courses.length === 0) return 0
+  const lowCourses = await findLowEnrollmentCourses(admin)
+  if (lowCourses.length === 0) return 0
 
   const { data: admins, error: adminsErr } = await admin
     .from('profiles')
@@ -410,43 +392,7 @@ export async function notifyLowEnrollmentCourses(): Promise<number> {
 
   let alertedCount = 0
 
-  for (const course of courses) {
-    const { data: firstSession } = await admin
-      .from('sessions')
-      .select('date')
-      .eq('course_id', course.id)
-      .gte('date', todayISO)
-      .lte('date', horizonISO)
-      .order('date', { ascending: true })
-      .limit(1)
-      .maybeSingle()
-
-    if (!firstSession) continue
-
-    const { count: enrolledCount, error: countErr } = await admin
-      .from('enrollments')
-      .select('id', { count: 'exact', head: true })
-      .eq('course_id', course.id)
-      .eq('status', 'confirmed')
-
-    if (countErr) {
-      console.error('[notifications] enrollment count failed for course', course.id, countErr.message)
-      continue
-    }
-
-    const enrolled = enrolledCount ?? 0
-    // Ratio comparison, not Math.floor(capacity * ratio) — at capacity=1
-    // floor was 0 (alert never fires) and at capacity=3 floor was 1 (1/3
-    // full silently "fine"). 0/0 capacity courses are treated as not low.
-    if (course.capacity <= 0) continue
-    if (enrolled / course.capacity >= LOW_ENROLLMENT_RATIO) continue
-
-    const start = new Date(firstSession.date)
-    const daysUntilStart = Math.max(
-      0,
-      Math.round((start.getTime() - today.getTime()) / (24 * 60 * 60 * 1000)),
-    )
-
+  for (const course of lowCourses) {
     const courseTitle = await resolveCourseTitle(admin, {
       title: course.title,
       course_type_id: course.course_type_id,
@@ -454,9 +400,9 @@ export async function notifyLowEnrollmentCourses(): Promise<number> {
 
     const rendered = lowEnrollmentWarning({
       courseTitle,
-      firstSessionDate: firstSession.date,
-      daysUntilStart,
-      enrolledCount: enrolled,
+      firstSessionDate: course.firstSessionDate,
+      daysUntilStart: course.daysUntilStart,
+      enrolledCount: course.enrolled,
       capacity: course.capacity,
     })
 

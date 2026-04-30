@@ -43,7 +43,7 @@ export default async function InstructorSessionRosterPage({
   const { data: session } = await supabase
     .from('sessions')
     .select(`
-      id, date, start_time, end_time, location, status, notes,
+      id, date, start_time, end_time, location, status, notes, instructor_id,
       courses!inner (
         id, title, capacity, instructor_id,
         course_types ( name )
@@ -62,8 +62,11 @@ export default async function InstructorSessionRosterPage({
     course_types: { name: string } | null
   }
 
-  // Verify this instructor owns the course
-  if (course.instructor_id !== user.id) redirect('/instructor/dashboard')
+  // DEC-007: an instructor may be assigned at the course level OR at the session
+  // level (substitute). Either path authorizes access to the session view.
+  if (course.instructor_id !== user.id && session.instructor_id !== user.id) {
+    redirect('/instructor/dashboard')
+  }
 
   // Fetch enrollments with student profiles
   const { data: enrollments } = await supabase

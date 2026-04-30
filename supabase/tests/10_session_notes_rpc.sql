@@ -3,7 +3,7 @@
 -- All other paths must return an error string and leave the row untouched.
 
 BEGIN;
-SELECT plan(8);
+SELECT plan(11);
 
 -- Reuse authenticate() helper from 01_rls_profiles.sql.
 -- If running this file standalone, recreate it here.
@@ -134,6 +134,50 @@ SELECT is(
   ),
   'Notes must be 2000 characters or fewer.',
   'oversize input: returns length error'
+);
+
+RESET ROLE;
+
+-- ─── DEC-007 override: session-level instructor authorization ─────────────────
+-- Make pw_instructor the session-level instructor on a session whose course is
+-- owned by mike. pw_instructor is NOT the course-level owner, so this exercises
+-- the override branch of get_instructor_session_ids.
+
+UPDATE public.sessions
+   SET instructor_id = 'f1000000-0000-0000-0000-000000000002'
+ WHERE id = 'd1000000-0000-0000-0000-000000000001';
+
+SELECT tests.authenticate(
+  'f1000000-0000-0000-0000-000000000002',
+  p_is_instructor => true
+);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  public.update_session_notes('d1000000-0000-0000-0000-000000000001', 'sub wrote this'),
+  NULL,
+  'session-level instructor (DEC-007 override): returns NULL on success'
+);
+
+RESET ROLE;
+SELECT is(
+  (SELECT notes FROM public.sessions WHERE id = 'd1000000-0000-0000-0000-000000000001'),
+  'sub wrote this',
+  'session-level instructor: notes column was updated'
+);
+
+-- And mike (still the course-level owner) is also still authorized — the
+-- override adds an authorized instructor, it doesn't replace the course-level one.
+SELECT tests.authenticate(
+  'a1000000-0000-0000-0000-000000000002',
+  p_is_instructor => true
+);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  public.update_session_notes('d1000000-0000-0000-0000-000000000001', 'mike still authorized'),
+  NULL,
+  'course-level instructor: still authorized when session-level override is set'
 );
 
 RESET ROLE;

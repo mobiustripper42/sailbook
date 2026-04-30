@@ -74,8 +74,10 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean | null
+          low_enrollment_lead_days: number
           max_students: number | null
           min_hours: number | null
+          minimum_enrollment: number | null
           name: string
           short_code: string
           updated_at: string | null
@@ -86,8 +88,10 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          low_enrollment_lead_days?: number
           max_students?: number | null
           min_hours?: number | null
+          minimum_enrollment?: number | null
           name: string
           short_code: string
           updated_at?: string | null
@@ -98,8 +102,10 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          low_enrollment_lead_days?: number
           max_students?: number | null
           min_hours?: number | null
+          minimum_enrollment?: number | null
           name?: string
           short_code?: string
           updated_at?: string | null

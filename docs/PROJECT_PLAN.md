@@ -167,8 +167,9 @@ Clean onboarding. Richer student and instructor records.
 | 4.8 | ~~Cookie-based theme sync~~ | 2 | [x] <!-- removed 2026-04-15 --> Superseded by DEC-020: theme is localStorage-only per device. No cross-device sync, no FOUC problem to solve. |
 | 4.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on profile expansion pages, invite flow, instructor onboarding. |
 | 4.10 | ~~Recreate `.claude/agents/ui-reviewer.md` (lost in Phase 7 migration)~~ | 1 | [x] <!-- completed 2026-04-29 --> Modeled on `architect.md` / `code-review.md`. Brand rules pulled from BRAND.md (Mira/Sky/Mist, Nunito Sans, xs radius, dark-mode-default, mobile@375px). 12-point review checklist with pass/fix-soon/blocker scoring. Committed to `.claude/agents/` so it survives box moves this time. |
+| 4.11 | Substitute-instructor page bug fix + DEC-007 pgTAP coverage | 2 | Session 107 cleanup. (a) `src/app/(instructor)/instructor/sessions/[id]/page.tsx:66` redirected substitute instructors assigned only at the session level — page check contradicted the `update_session_notes` RPC's authorization. (b) `10_session_notes_rpc.sql` had no coverage for the session-level override path. Both touch DEC-007. |
 
-**Phase 4 total: 43 pts** (updated session 106: +1 for 4.10 ui-reviewer recreation)
+**Phase 4 total: 45 pts** (session 108: +2 for 4.11 substitute-instructor bug + DEC-007 pgTAP coverage)
 **Projected hours: ~11 hrs**
 
 **Ejection point:** Instructors get proper onboarding. Student profiles are richer. Instructor notes captured. Admin can create students for non-technical users.
@@ -188,12 +189,12 @@ Flexible pricing, enrollment safety rails, and waitlist.
 | 5.5 | Admin qualification grant ("test out") — `qualifications` table, manual ASA cert grants | 3 | Same effect as completing a course. Satisfies prereq flags. |
 | 5.6 | (probalby will not happen) Duplicate enrollment in same course type — warn student + flag for admin | 3 | ⚠️ Scope creep risk. Keep tight: warning on enrollment + admin dashboard flag. No auto-clear. |
 | 5.7 | Waitlist — full course → join waitlist → notify on opening | 8 | New table, student UI, admin visibility, notification on spot opening. Depends on Phase 3 notifications. Andy request. |
-| 5.8 | Low enrollment warning — dashboard tile for courses below minimum threshold approaching start date | 2 | Same pattern as "courses without instructors." Meaningful only with payments live. Andy request. |
+| 5.8 | ~~Low enrollment warning — dashboard tile for courses below minimum threshold approaching start date~~ | 5 | [x] <!-- completed 2026-04-29 --> Re-scoped from 2 → 5 (session 108): the existing 3.4 cron alert was using hardcoded `LOW_ENROLLMENT_RATIO = 0.5` and `LOW_ENROLLMENT_DAYS_OUT = 14`. 5.8 replaces both with `course_types.minimum_enrollment` (NULL = opt out) + `course_types.low_enrollment_lead_days` (default 14). Single source of truth: shared `findLowEnrollmentCourses` helper in `src/lib/low-enrollment.ts` powers both the daily cron alert AND the new admin dashboard tile. Threshold semantics changed from ratio to absolute. Course-type form gains both fields with helper text. Dashboard stat row now `grid-cols-2 lg:grid-cols-3`. 2 desktop Playwright tests; existing 7 dashboard/notification tests still green. |
 | 5.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on waitlist UI, prerequisite warning flow, discount code display on checkout. |
 | 5.10 | ~~Student `/student/courses` calendar view — month grid (desktop/tablet) + list fallback (mobile), click weekend → course detail~~ | 5 | [x] <!-- completed 2026-04-25 --> Calendar/List toggle with localStorage persistence, month grid with prev/next/today nav, course pills colored by enrollment status (max 3 per cell + "+N more"), forced list at <640px. Mobile UX needs a better browse pattern than cards (parked for Phase 5/6). 5 desktop Playwright tests green. |
 | 5.11 | Bulk price update — multi-select on `/admin/courses` + apply a new price to all selected courses in one action | 8 | Single-field bulk edit, narrow scope by design. **Cuttable.** With 26 ASA 101 + 5 Open Sailing nights in the season, mid-season price changes are otherwise a lot of hand-edits. Multi-field bulk edit is V3. |
 
-**Phase 5 total: 47 pts** (was 39; +8 for 5.11)
+**Phase 5 total: 50 pts** (was 39; +8 for 5.11; +3 for 5.8 re-scope 2 → 5 in session 108)
 **Projected hours: ~17 hrs**
 
 **Ejection point:** Pricing is flexible. Enrollment has safety rails. Prerequisite and waitlist systems exist. Low enrollment flagged early.
@@ -323,7 +324,7 @@ At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–
 | (5.10 early) | 5 | ~2 | 1.00 | 0.20 | Pulled forward from Phase 5; rolled into Phase 5 actuals when phase closes |
 | 2 — Payments | 38 | ~14 | — | — | |
 | 3 — Notifications | 48 | ~18 | ~18.0 | **0.38** | On baseline; many small tasks + 3.11 OAuth scope-creep ate the headroom. See RETROSPECTIVES.md |
-| 4 — Identity | 43 | ~11 | — | — | |
+| 4 — Identity | 45 | ~11 | — | — | |
 | 5 — Pricing | 47 | ~18 | — | — | |
 | 6 — Polish | 54 | ~17 | — | — | |
 | **Total** | **298** | **~113** | — | — | Planning baseline: 0.26–0.35 hrs/pt (Phase 1 pace to conservative) |
