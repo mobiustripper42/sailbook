@@ -3,7 +3,60 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 110 — 2026-04-30 12:28 [open]
+## Session 110 — 2026-04-30 12:28–20:58 (4.00 hrs; subtract 4.5 hrs away from desk from 8.50 hr wall clock)
+**Duration:** 4.00 hrs | **Points:** 5 (4.2b)
+**Task:** Phase 4.2b — consolidate /admin/users + invite routes (Option A). First session under the new PR-per-task workflow.
+
+**Completed:**
+- **Sign-off tracking established.** Eric flagged that he's accumulating tasks he hasn't personally reviewed (4.6, 4.10, 6.2, 4.2 partial — all from sessions 107–109). PR-per-task workflow will absorb this naturally; until each one ships through a PR Eric has tapped, /its-alive briefings + /its-dead summaries carry the unreviewed list.
+- **Pinned for later:** scoping for **5.2 Open Sailing** (per-session enrollment, current 5-pt estimate looks light — likely 8–13) and **6.19 LTSC public course pages** (URL shape, anon RLS, layout chrome) — both still need a dedicated sitting.
+- **4.2b — consolidate /admin/users + invite routes (5 pts; Option A).**
+  - **Scope discovery:** session 109's plan said "delete 6 routes, update 16 refs" but `/admin/users` was not a complete replacement. Three real gaps: no `/admin/users/[id]` detail page; no `/admin/users/new`; `UserEditForm` missing student-only fields (`experience_level`, `asa_number`, `is_member`). Surfaced three options to Eric (A: minimal — keep student detail/edit/new under `/admin/students/*`, link from users-list. B: full consolidation 6–8 pts. C: punt). Eric picked **A**.
+  - **Deleted (5 files):** `src/app/(admin)/admin/students/page.tsx`, `src/app/(admin)/admin/instructors/page.tsx`, `src/app/(admin)/admin/instructors/[id]/edit/page.tsx`, `src/app/invite/admin/[token]/page.tsx`, `src/app/invite/instructor/[token]/page.tsx`.
+  - **Created (1 file):** `src/app/invite/[role]/[token]/page.tsx` with a `ROLE_COPY` map, `notFound()` on invalid role. Existing URLs (`/invite/admin/X`, `/invite/instructor/X`) still resolve under the dynamic route.
+  - **Routing model:** `/admin/users` rows now branch by role. Student rows expose **View** → `/admin/students/[id]` and **Edit** → `/admin/students/[id]/edit` (full `ProfileEditForm` with experience / ASA / member). Non-student rows route Edit → `/admin/users/[id]/edit` (`UserEditForm` — basic + roles). Instructor rows additionally render the existing `InstructorActions` Deactivate/Activate buttons inline (preserves DEC-019 confirm dialog).
+  - **Other source edits:** "Add Student" button on `/admin/users` → `/admin/students/new`. Admin nav + mobile drawer dropped Instructors/Students entries (Users only). Breadcrumbs on the surviving `/admin/students/*` pages now point at `/admin/users` (label "Users"). `ProfileEditForm` `returnPath` flipped to `/admin/users`. `createAdminStudent` redirects to `/admin/users`. `revalidatePath('/admin/instructors')` calls dropped across `actions/{instructors,invites,profiles}.ts`.
+  - **Tests (7 files updated):** `admin-students`, `asa-number`, `instructor-cascade`, `instructor-invite`, `member-pricing`, `student-history`, `unsaved-changes`. Invite-flow tests now expand the `<details>` collapsibles before regenerating. `unsaved-changes` user-edit tests target the **PW Instructor** row so they hit `UserEditForm` (student rows route to `ProfileEditForm`).
+  - tsc clean (after `rm -rf .next` to clear Next type cache referencing deleted routes). Lint clean. Production build clean — `/invite/[role]/[token]` shows in route manifest.
+  - Full Playwright suite: 405/405 passing after 1 fix + 1 flake confirm. Initial run had 5 failures: 4 in `unsaved-changes` (real — student row routed to `/admin/students/[id]/edit`, fixed by targeting the PW Instructor row), 1 in `session-cancellation-notice "notify flag off"` (cross-file isolation flake — passed on retry; carryover from 106).
+  - PR #2 opened (`task/4.2b-route-deletion` → `main`), Eric reviewed on mobile and merged.
+  - Final main commit: `e2fc3fe`.
+- **PR workflow gap caught.** I jumped from `/kill-this` directly to `/its-dead`, skipping the push-branch + open-PR steps. Eric flagged it ("I thought we were getting a PR for this"). Pushed branch + opened PR via `gh pr create` mid-`/its-dead`, then resumed the close after Eric merged. The `/kill-this` skill body does NOT include push or `gh pr create` even though CLAUDE.md describes it that way — gap to fix in the skill (or in CLAUDE.md).
+- Local dev-server snafu mid-session: a wedged `next-server` (PID 3842864) was already on port 3000 (accepted TCP, never responded). Killed it; new `npm run dev` came up clean. `ss -tlnp | grep :3000` is faster than `lsof` for "what's actually listening."
+- Hetzner git config still missing — reused `mobiustripper42 / mobius5kcrypto@gmail.com` one-off flags for the commit (sessions 103/105/107/108/109/110 now). Phase 7 dev-tooling task is the long-term fix.
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification still pending (carryover from 102).
+
+**Unreviewed-by-Eric tasks (running tally; supersedes-as-PR-workflow-lands):**
+- 4.6 — Instructor session notes (s107)
+- 4.10 — ui-reviewer agent recreation (s107)
+- 6.2 — Instructor mobile pass (s109)
+- 4.2 partial — sortable users + invite panels (s109)
+- ~~4.2b~~ — reviewed via PR #2 mobile-merge this session ✓
+
+**Next Steps:**
+1. **Fix the `/kill-this` skill** so it actually pushes branch + opens PR (currently inconsistent with CLAUDE.md description). 1 pt of skill maintenance. Worth doing before the next task starts.
+2. **6.15 — admin pending-cancellation widget (3 pts).** Already scoped: mirror the existing pending-enrollment alert on `/admin/dashboard`, surface `cancel_requested` enrollments as count + linked list. Hook into the dashboard `Promise.all` query batch (same pattern as low-enrollment in 5.8). Playwright desktop test seeding a `cancel_requested` enrollment. No RLS changes expected. Eric explicitly approved this as the next task.
+3. **Pinned scoping (separate sitting):** 5.2 Open Sailing pts re-poker; 6.19 LTSC public course pages — URL shape, anon SELECT RLS, layout chrome.
+4. **4.2b code review cleanups (4 advisory, none blocking):**
+   - `src/actions/profiles.ts:48,139` — two stale `revalidatePath('/admin/students')` calls (parent path no longer renders; nested children won't be picked up by parent-path revalidate). Drop or replace with per-id revalidation.
+   - `src/components/admin/users-list.tsx` — grew from ~178 → 223 lines, over the 200-line CLAUDE.md guideline. Extract `<UserRowActions user={u} />` next time the file gets touched.
+   - `src/components/admin/users-list.tsx:182` — `InstructorActions` rendered when `is_instructor=true` but its toggle is global on `profiles.is_active`. For admin+instructor users, "Deactivate" copy is ambiguous. Future: gate on `is_instructor && !is_admin`, or rename to "Deactivate user" inside a per-row menu.
+   - `src/app/invite/[role]/[token]/page.tsx` — no `loading.tsx`/`error.tsx`. Consistent with what was deleted; flagging only because the consolidation was a chance to add them.
+5. **Carryovers from sessions 106–109 still open** (not addressed this session): pgTAP testing-cadence question for `/kill-this`; manual smoke of 3.10 + 3.11; SMS smoke-test investigation; cross-file Playwright isolation hardening (the `notify flag off` flake is a live example); DEC-015 cleanup; `useTransientSuccess` hook extraction (5+ forms); 5.8 follow-ups (`low_enrollment.ts` error-path silently returns []; N+1; instructor-session page gate duplicates SQL helper logic); session-notes empty/whitespace clears silently; 4 small pgTAP gaps in `10_session_notes_rpc.sql`.
+
+**Context:**
+- **Option A is the explicit design now.** `/admin/users` is the single users entry point, but `/admin/students/{[id], [id]/edit, new}` are still alive on purpose — they own student-specific fields the unified `UserEditForm` doesn't carry. The users-list branches the Edit destination by `is_student`. Do NOT delete the surviving `/admin/students/*` routes without first merging `ProfileEditForm` student fields into `UserEditForm` (that's the deferred Option B work, not in V2).
+- **Session 109's "delete 6 routes, update 16 refs" plan was wrong.** It assumed `/admin/users` was a complete replacement; it was not. `/admin/users/[id]/edit` (UserEditForm) and `/admin/students/[id]/edit` (ProfileEditForm) are different forms with different fields. Anyone reading 109's "next steps" should mentally substitute the Option A scope from this session.
+- **InstructorActions on the users list ≠ instructor-only.** The component flips `profiles.is_active` (generic). For pure-instructor users it's named correctly; for admin+instructor users the "Deactivate" copy is ambiguous (code review #3). Acceptable for now; revisit when adding any per-row action menu.
+- **`<details>` collapsible interaction in tests:** locator pattern is `page.locator('details').filter({ hasText: 'Instructor invites' }).locator('summary').click()`. `getByRole('group')` does NOT work — `<details>` doesn't have a default ARIA role. First time this project asserts on `<details>`; pattern now established.
+- **PR-per-task is now the workflow.** This session was the first run under it. The complete loop is: `/kill-this` (commit + **push + PR**) → mobile review → `/ship-it` (merge) → `/its-dead` (log on main). Skipping the push/PR step lands you on a feature branch with a local commit, which `/its-dead` then tries to push along with the session log into the same branch — polluting the PR diff. The `/kill-this` skill needs the explicit push + `gh pr create` steps.
+- **Sign-off tracking is now part of the session ritual.** Until PR-on-mobile is fully the review unit, every /its-alive and /its-dead summary lists tasks Eric hasn't personally walked. If a task IS reviewed, drop it from the list explicitly. Don't let it accumulate silently — that's how 4.6 and 4.10 ended up two sessions stale.
+- **Wedged dev server symptom:** port 3000 accepts TCP but never responds (curl hangs to timeout). `ss -tlnp | grep :3000` shows the listener PID; if stale `next-server`, kill -9 and restart. Faster than `lsof`.
+
+**Code Review:** 4 advisory items, 0 blocking, 0 security concerns. (@code-review against `692e4c4`.) Findings logged in Next Steps #4.
 
 ## Session 109 — 2026-04-30 02:44–11:00 (1.75 hrs; subtract 6.5 hrs sleep from 8.27 hr wall clock)
 **Duration:** 1.75 hrs | **Points:** 8 (6.2: 2, 4.2 partial: 6)
