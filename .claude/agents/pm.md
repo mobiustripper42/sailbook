@@ -48,7 +48,7 @@ Risks: [anything worth flagging, or "none"]
 - At session start, always run `gh pr list` before recommending new work. If open PRs exist, surface them first.
 
 ## Today's Date
-Always check the current date. Today is relative to when you're invoked. May 15, 2026 is the hard deadline.
+Always check the current date with `date`. Today is relative to when you're invoked. The launch deadline is logged in `docs/PROJECT_PLAN.md`.
 
 ## Time Tracking & Velocity
 
