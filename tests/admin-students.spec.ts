@@ -6,9 +6,9 @@ const ADMIN_EMAIL = 'pw_admin@ltsc.test'
 test.describe('Admin: create student', () => {
   test('admin can navigate to Add Student and create a ghost student', async ({ page }) => {
     await loginAs(page, ADMIN_EMAIL, '/admin/dashboard')
-    await page.goto('/admin/students')
+    await page.goto('/admin/users')
 
-    await expect(page.getByRole('heading', { name: 'Students' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible()
     await page.getByRole('link', { name: 'Add Student' }).click()
     await page.waitForURL('/admin/students/new')
 
@@ -24,8 +24,8 @@ test.describe('Admin: create student', () => {
 
     await page.getByRole('button', { name: 'Create Student' }).click()
 
-    // On success the action redirects to /admin/students
-    await page.waitForURL('/admin/students', { timeout: 15000 })
+    // On success the action redirects to /admin/users
+    await page.waitForURL('/admin/users', { timeout: 15000 })
 
     // Filter by row so the last-name match doesn't collide with the email cell
     await expect(page.getByRole('row').filter({ hasText: `Ghost ${id}` })).toBeVisible()

@@ -27,7 +27,7 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
   return (
     <div className="">
       <p className="text-sm text-muted-foreground mb-1">
-        <Link href="/admin/students" className="hover:underline">Students</Link>
+        <Link href="/admin/users" className="hover:underline">Users</Link>
         {' / '}
         {profile.first_name} {profile.last_name}
         {' / Edit'}
@@ -35,7 +35,7 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
       <h1 className="text-2xl font-semibold mb-6">
         Edit Student — {profile.first_name} {profile.last_name}
       </h1>
-      <ProfileEditForm profile={profile} returnPath="/admin/students" experienceCodes={codes ?? []} />
+      <ProfileEditForm profile={profile} returnPath="/admin/users" experienceCodes={codes ?? []} />
     </div>
   )
 }

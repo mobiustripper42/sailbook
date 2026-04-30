@@ -49,8 +49,10 @@ test.describe('Instructor invite link', () => {
     let inviteUrl: string
     try {
       await loginAs(adminPage, ADMIN_EMAIL, '/admin/dashboard')
-      await adminPage.goto('/admin/instructors')
-      await expect(adminPage.getByRole('heading', { name: 'Instructors' })).toBeVisible()
+      await adminPage.goto('/admin/users')
+      await expect(adminPage.getByRole('heading', { name: 'Users' })).toBeVisible()
+      // Invite panels live inside collapsed <details>; expand the instructor one
+      await adminPage.locator('details').filter({ hasText: 'Instructor invites' }).locator('summary').click()
 
       // Capture whatever token is currently displayed (if any) so we can
       // tell when the regenerate action has actually landed.
@@ -132,7 +134,9 @@ test.describe('Instructor invite link', () => {
     let newUrl: string
     try {
       await loginAs(adminPage, ADMIN_EMAIL, '/admin/dashboard')
-      await adminPage.goto('/admin/instructors')
+      await adminPage.goto('/admin/users')
+      // Invite panels live inside collapsed <details>; expand the instructor one
+      await adminPage.locator('details').filter({ hasText: 'Instructor invites' }).locator('summary').click()
 
       // Single durable handler accepts every confirm dialog this test fires.
       adminPage.on('dialog', (d) => d.accept())

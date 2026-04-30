@@ -37,11 +37,11 @@ test.describe('Instructor deactivation cascade', () => {
     await page.getByRole('button', { name: 'Create Course' }).click({ force: true });
     await page.waitForURL(/\/admin\/courses\/[0-9a-f-]+$/, { timeout: 10000 });
 
-    // Step 2: Navigate to instructors — deactivate PW Instructor
+    // Step 2: Navigate to users — deactivate PW Instructor
     // Accept the confirmation dialog automatically
     page.on('dialog', dialog => dialog.accept());
-    await page.goto('/admin/instructors');
-    await expect(page.getByRole('heading', { name: 'Instructors' })).toBeVisible();
+    await page.goto('/admin/users');
+    await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
 
     const pwRow = page.getByRole('row', { name: /PW.*Instructor/ });
     await pwRow.getByRole('button', { name: 'Deactivate' }).click();
@@ -58,7 +58,7 @@ test.describe('Instructor deactivation cascade', () => {
     await expect(courseRow.locator('td').nth(1)).toHaveText('—');
 
     // Step 4: Reactivate pw_instructor to restore state for subsequent test runs
-    await page.goto('/admin/instructors');
+    await page.goto('/admin/users');
     const pwRowAfter = page.getByRole('row', { name: /PW.*Instructor/ });
     await pwRowAfter.getByRole('button', { name: 'Activate' }).click();
     // Wait for the server action to complete, not just the optimistic UI update.
@@ -70,8 +70,8 @@ test.describe('Instructor deactivation cascade', () => {
     test.skip(test.info().project.name !== 'desktop');
 
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard');
-    await page.goto('/admin/instructors');
-    await expect(page.getByRole('heading', { name: 'Instructors' })).toBeVisible();
+    await page.goto('/admin/users');
+    await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
 
     // Dismiss the dialog — instructor should remain Active
     page.on('dialog', dialog => dialog.dismiss());

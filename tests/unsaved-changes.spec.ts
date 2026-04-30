@@ -203,11 +203,12 @@ test.describe('Unsaved changes guard — user edit form', () => {
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard');
   });
 
+  // Target an instructor row — student rows route to /admin/students/[id]/edit
+  // (ProfileEditForm), not the UserEditForm under test here.
   test('cancel after changes shows confirm dialog; dismiss keeps user on edit page', async ({ page }) => {
     await page.goto('/admin/users');
-    // Find the student user's edit link
-    const editLink = page.getByRole('link', { name: 'Edit' }).first();
-    await editLink.click();
+    const row = page.getByRole('row').filter({ hasText: 'PW Instructor' }).first();
+    await row.getByRole('link', { name: 'Edit' }).click();
     await page.waitForURL(/\/admin\/users\/[0-9a-f-]+\/edit/, { timeout: 5000 });
 
     await page.getByLabel('First Name').fill('Changed');
@@ -220,8 +221,8 @@ test.describe('Unsaved changes guard — user edit form', () => {
 
   test('cancel after changes shows confirm dialog; accept navigates away', async ({ page }) => {
     await page.goto('/admin/users');
-    const editLink = page.getByRole('link', { name: 'Edit' }).first();
-    await editLink.click();
+    const row = page.getByRole('row').filter({ hasText: 'PW Instructor' }).first();
+    await row.getByRole('link', { name: 'Edit' }).click();
     await page.waitForURL(/\/admin\/users\/[0-9a-f-]+\/edit/, { timeout: 5000 });
 
     await page.getByLabel('First Name').fill('Changed');

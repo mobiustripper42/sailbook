@@ -46,7 +46,6 @@ export async function updateUserProfile(formData: FormData) {
 
   revalidatePath('/admin/users')
   revalidatePath('/admin/students')
-  revalidatePath('/admin/instructors')
   return { success: true }
 }
 
@@ -136,8 +135,8 @@ export async function updateProfile(formData: FormData) {
   if (error) return { error: error.message }
 
   revalidatePath(returnPath)
+  revalidatePath('/admin/users')
   revalidatePath('/admin/students')
-  revalidatePath('/admin/instructors')
   return { error: null }
 }
 
@@ -201,6 +200,6 @@ export async function createAdminStudent(
     return profileError.message
   }
 
-  revalidatePath('/admin/students')
-  redirect('/admin/students')
+  revalidatePath('/admin/users')
+  redirect('/admin/users')
 }

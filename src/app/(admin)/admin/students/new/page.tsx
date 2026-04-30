@@ -15,7 +15,7 @@ export default async function NewStudentPage() {
   return (
     <div className="max-w-lg">
       <p className="text-sm text-muted-foreground mb-1">
-        <Link href="/admin/students" className="hover:underline">Students</Link>
+        <Link href="/admin/users" className="hover:underline">Users</Link>
         {' / New'}
       </p>
       <h1 className="text-2xl font-semibold mb-1">Add Student</h1>
