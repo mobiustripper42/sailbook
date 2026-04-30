@@ -3,7 +3,82 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 109 — 2026-04-30 02:44 [open]
+## Session 109 — 2026-04-30 02:44–11:00 (1.75 hrs; subtract 6.5 hrs sleep from 8.27 hr wall clock)
+**Duration:** 1.75 hrs | **Points:** 8 (6.2: 2, 4.2 partial: 6)
+**Task:** Project-plan priority reorder + Phase 6.2 instructor mobile pass + Phase 4.2 partial (column sorting + invite panels on /admin/users + JWT bug verification).
+
+**Started with a snafu:** prior /its-alive in this session hit a "don't ask mode" Edit denial mid-flight while reordering PROJECT_PLAN.md. Picked up from there.
+
+**Completed:**
+- **Project-plan priority reorder (V2 last-blast).** Eric set per-task priorities across Phases 4/5/6. Reordered each phase table: completed rows grouped at top; unfinished rows below in priority order (very high → high → medium → low → "high but last" → close). IDs frozen — no commit/log refs broken. Cuts to V3 Ideas (preserved with original IDs in a "Cut from V2 in session 109" sub-list): **4.7** (instructor profile expansion), **5.1** (member pricing), **5.3** (discount codes), **5.5** (admin qualification grant), **5.6** (duplicate enrollment warning), **6.0** (LTSC theme tune), **6.6** (duplicate course), **6.11** (public landing page), **6.16** (show refund amount). Total cut: **23 pts**.
+- **Two new V2 tasks added** (Eric's call this session): **6.19** Public course browse + detail pages for LTSC inbound links — pts TBD, scoping tomorrow morning. **6.20** Admin + instructor calendar views (promoted from V3 Ideas) — pts TBD, "must ship before V2 release."
+- **Phase totals updated.** Phase 4: 45 → 42; Phase 5: 50 → 39; Phase 6: 52 + TBD for 6.19/6.20. Summary table reconciled (was drifting from section sums for Phase 1, 2, 4, 5, 6 by varying amounts; old Total 298 was off; fixed to actual sum 349 with an inline "Reconciled in session 109" note). Velocity Tracking phase rows + total similarly updated. Eric explicitly said totals would be re-reconciled at end of V2.
+- **Cuttable Tasks section** trimmed to remaining V2 candidates (6.7, 6.9, 5.11, 6.1, 6.10).
+- **6.2 — Instructor mobile responsiveness pass (2 pts).**
+  - Audit revealed 6.2 was confused with 1.20 (mobile drawer infra, already shipped). Real 6.2 = audit-and-fix. Three pages walked.
+  - **Fix 1:** `src/app/(instructor)/instructor/dashboard/page.tsx:84` — stat cards `grid-cols-3` → `grid-cols-2 lg:grid-cols-3` (mirrors admin pattern shipped in 5.8).
+  - **Fix 2:** `src/app/(instructor)/instructor/sessions/[id]/page.tsx` — Email column TableHead + TableCell now `hidden sm:table-cell` so 375px shows Name + Phone + Attendance only. Phone kept (instructors call students from the field); Email is secondary.
+  - `/instructor/students/[id]` clean — no tables/grids, reuses StudentHistoryList.
+  - 2 mobile-only Playwright tests appended to `tests/instructor-views.spec.ts` (stat-card geometry assertion + Email-column hide). Full file 14/14 green, 19 skipped by design.
+- **4.2 partial — column sorting + invite panels + JWT bug (~6 pts).**
+  - **Recon surprise 1:** the JWT bug carryover ("invited instructors bounced from /instructor/dashboard until JWT refresh") was already fixed in the original 4.1 commit `c69b048`. `acceptInstructorInvite` already does `updateUser({data: …}) + refreshSession`. Comment block at lines 53-57 explains why. Carryover note in session 106 was stale before it was logged.
+  - **Recon surprise 2:** `/admin/users` skeleton existed but invite panels weren't there, only an `InstructorInvitePanel` was on `/admin/instructors`. Re-scoping discovery: the invite acceptance flow only existed for instructor — admin path needed creation. Bumped 4.2-partial estimate from 4-5 → 6 pts.
+  - **Action layer:** `acceptInstructorInvite(token)` → generic `acceptInvite(role, token)`. Same updateUser + refreshSession sequence; metadata key + redirect target switch on role.
+  - **Panel:** `instructor-invite-panel.tsx` → `invite-panel.tsx` parameterized on role via a `ROLE_LABELS` map (title/description/pathPrefix). testid is now `invite-url-${role}`.
+  - **Shared form:** `src/components/invite/accept-invite-form.tsx` (new). Old per-route `accept-form.tsx` deleted.
+  - **Admin acceptance route:** `src/app/invite/admin/[token]/page.tsx` mirrors instructor.
+  - **`/admin/users` page:** fetches both invites in parallel, renders two `<details>` collapsibles ("Admin invites" / "Instructor invites") wrapping InvitePanel. Native `<details>` instead of pulling in radix-collapsible.
+  - **Sorting:** `users-list.tsx` adds sort state (Name/Email/Status × asc/desc), `SortableHead` subcomponent, `aria-sort` on the `<th>` (NOT the button — original placement on button tripped jsx-a11y/role-supports-aria-props), ↑/↓/↕ glyphs, click-to-toggle direction.
+  - **Tests:** pgTAP `09_invites.sql` plan 15 → 17 (+2 cases for `accept_invite('admin')`). Suite **133/133** (was 131; aligns with session 108 baseline). Playwright `tests/admin-users.spec.ts` (new), 4 desktop tests covering sort + panel collapse/expand, all green. `instructor-invite.spec.ts` testid updated to `invite-url-instructor`.
+- Build clean. Lint clean. tsc clean. Full Playwright suite green (Eric ran).
+- Hetzner git config still missing — used the same one-off `mobiustripper42 / mobius5kcrypto@gmail.com` flags as sessions 103/105/107/108. Phase 7 dev-tooling task is still the right place for the long-term fix.
+- **Local pgTAP drift caught:** initial `supabase test db` failed across 4 unrelated files due to lingering local DB state from earlier runs. `supabase db reset` cleared it; suite went 133/133. Worth remembering — pgTAP isn't sandbox-clean across days.
+- Commit `9bf52bd`.
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification still pending (carryover from session 102).
+
+**Next Steps:**
+1. **Tomorrow morning scoping session (Eric):** poker for **5.2 Open Sailing** (current "5 pts" estimate looks light — likely 8, possibly 13; data-model question on per-session enrollment may want @architect input) and **6.19 LTSC public course pages** (open questions: URL shape — UUID vs slug vs both; RLS for anon SELECT; layout chrome).
+2. **4.2b — old route deletion (deferred from this session, ~3-4 pts).** Delete `/admin/students/{,[id],[id]/edit,new}` (4 routes) + `/admin/instructors/{,[id]/edit}` (2 routes). Update references in ~9 source files (admin nav, mobile drawer, sub-routes, missed-sessions) + ~7 test files. Code review #1 + #2 suggest folding two cleanups into 4.2b: (a) consolidate `/invite/admin/[token]` + `/invite/instructor/[token]` into `/invite/[role]/[token]` with a ROLE_COPY map (~40 duplicated lines); (b) extract a tiny `<DisclosurePanel title=…>` component if a third `<details>` use lands.
+3. **6.2 deferred follow-up:** roster table at <640px considered a fix already (Email hidden) — but if Eric finds the table still cramped, the next move is hiding Phone too on the very narrowest widths. Not flagged this session.
+4. **Code review cleanups from this session (4 advisory, none blocking):**
+   - `invite-panel.tsx:52` `setTimeout` for copy success has no cleanup — same shape exists in `src/app/dev/copy-button.tsx:14`. One-line fix when convenient (ref + cleanup effect, or mounted-ref guard). Pre-existing, not introduced this session.
+   - Consolidate two near-identical invite route pages into one dynamic `/invite/[role]/[token]` (queue with 4.2b).
+   - Extract DisclosurePanel for the `<details>` pattern (queue with 4.2b).
+   - `tests/admin-users.spec.ts` — every test starts with `test.skip(test.info().project.name !== 'desktop')`; could move to describe-level skip or beforeEach. Consistent with `instructor-views.spec.ts` so cosmetic.
+5. **Carryovers from session 108 still open:**
+   - Eric's close-review of session 107's work — 4.10 + 4.6.
+   - `revalidatePath` in `updateSessionNotes` doesn't invalidate the admin attendance page.
+   - Empty/whitespace-only save silently clears notes; success copy still says "Notes saved."
+   - 4 small pgTAP gaps in `10_session_notes_rpc.sql` (unauthenticated, missing session, whitespace-clear, exact-2000-char boundary).
+   - `useTransientSuccess` hook extraction — 5 forms duplicate the pattern.
+   - 5.8 follow-up cleanups (low_enrollment.ts error-path silently returns [], N+1 query pattern, etc.).
+6. **Carryovers from session 106:**
+   - pgTAP testing-cadence question for `/kill-this`.
+   - Manual smoke of 3.10 + 3.11.
+   - SMS smoke-test investigation, cross-file Playwright isolation hardening, DEC-015 cleanup.
+
+**Context:**
+- **Project plan reorder = IDs are frozen, row positions are not.** Phase 4/5/6 tables now group completed rows at top, unfinished rows below in priority order. Cut tasks live in V3 Ideas with original ID in parens. Anyone reading the file linearly should NOT expect numerical ID order anymore — read by section position, not by ID.
+- **Summary total reconciled mid-session.** Was 298, drifted from section sums; now 349 (matches actual). Inline note flags this. Eric chose to defer further reconciliation to end of V2.
+- **6.19 (public course pages for LTSC) is a launch-gating task.** LTSC keeps WordPress as the marketing front; their per-product pages link "Register" buttons into SailBook. SailBook currently drops anonymous visitors at `/login` so any LTSC inbound is broken. Decision (Eric): option (b) — make `/courses/...` publicly viewable with auth deferred to enrollment CTA. Not (a) — building marketing-grade pages in SailBook. Major V2-scope addition.
+- **6.20 (admin + instructor calendar views) is V2 now.** Promoted from V3 in this session. Reuse the 5.10 student calendar component shell. Pts TBD.
+- **The JWT bug carryover was stale.** Already fixed in 4.1 (`c69b048`, lines 57-63 of invites.ts). Don't trust carryover notes blindly — verify against current code before scheduling work. The comment block in invites.ts explains the WHY perfectly; that's the kind of in-code documentation that survives context loss between sessions.
+- **`acceptInvite(role, token)` is safe even though `role` is now caller-supplied.** The SECURITY DEFINER RPC at `20260423182537_invites_table.sql:31-71` validates `p_role IN ('instructor', 'admin')` server-side AND gates promotion on a token match for that exact role. A student can't escalate to admin without holding the admin token. The action-layer `InviteRole` type is just convenience.
+- **Native `<details>` is the project's first disclosure-pattern use.** Chose it over `@radix-ui/collapsible` to avoid the dep — DEC-style "don't pull a dep for one use." Two un-extracted instances on `/admin/users` are fine; if a third lands, extract `<DisclosurePanel>` (code review #2).
+- **`aria-sort` belongs on `<th>`, not on the inner `<button>`.** First lint pass put it on the button → `jsx-a11y/role-supports-aria-props` warning. Moved to `<TableHead>` which renders as `<th>` (the actual columnheader element). Worth remembering for any future sortable tables.
+- **pgTAP local drift bites.** Local `supabase test db` failed across 4 unrelated files at first run due to lingering state from prior days. `supabase db reset` cleared it. /kill-this skill could plausibly add a "did you reset recently?" prompt — flag for Eric's pgTAP-cadence mulling.
+- **Playwright Chrome MCP doesn't work on Hetzner box** — wants `/opt/google/chrome/chrome` which isn't installed. Pivoted to code-level audit for 6.2; worked fine. Same workaround if any future browser-via-MCP work is needed.
+
+**Code Review:** 4 advisory items, 0 blocking, 0 security concerns. (@code-review against `9bf52bd`.)
+1. **cleanup** `invite/admin/[token]/page.tsx` + `invite/instructor/[token]/page.tsx` — 90% byte-identical, consolidate into `invite/[role]/[token]/page.tsx` with ROLE_COPY map. Queue with 4.2b.
+2. **cleanup** `/admin/users/page.tsx:39-58` — first `<details>` use; two near-identical instances. Extract `<DisclosurePanel>` if a third instance lands.
+3. **cleanup** `invite-panel.tsx:52` — `setTimeout` for copy success has no unmount cleanup. Pre-existing pattern (also in `dev/copy-button.tsx:14`).
+4. **cleanup** `tests/admin-users.spec.ts` — every test repeats `test.skip(... !== 'desktop')`; could move to describe-level. Consistent with prior style; cosmetic only.
+
+**Verified clean:** RPC role validation server-side (admin-escalation prevented at SQL); DEC-015 shape on `acceptInvite` return; no new RLS surface; mobile layout matches admin pattern; `/invite/` already in PUBLIC_PREFIXES proxy allowlist.
 
 ## Session 108 — 2026-04-29 23:38–2026-04-30 01:38 (2.00 hrs)
 **Duration:** 2.00 hrs | **Points:** 7 (4.11: 2, 5.8: 5)
