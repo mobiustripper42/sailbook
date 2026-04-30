@@ -6,6 +6,91 @@ Format per entry: velocity, scope changes, what worked, what didn't, forecast up
 
 ---
 
+## Phase 3 — Notifications + Auth Hardening
+**Completed:** 2026-04-29
+**Sessions:** 92, 93, 95–100, 102–106 (13 sessions; sessions 96–97 were 0-pt maintenance/triage)
+
+### Velocity
+
+| Metric | Value |
+|--------|-------|
+| Effort points (original plan) | 42 pts |
+| Effort points (after 3.4 re-estimate + 3.15 add) | 48 pts |
+| Projected hours | ~18 hrs |
+| Actual hours | ~18.0 hrs |
+| **Hrs/point** | **0.38** |
+| vs. Phase 2 actual (0.22 hrs/pt) | 73% slower |
+| vs. V1 baseline (0.38 hrs/pt) | on baseline |
+
+**Why slower than Phase 2:** Phase 3 had many small tasks (3.1, 3.2, 3.3, 3.5, 3.6, 3.8, 3.9 — all 2–3 pts). Each one carried full per-session overhead (context reload, build, code review, log entry) regardless of task size. Same dynamic Phase 1 had. Two tasks were also genuinely larger than scored: 3.4 was re-estimated 5→8 mid-phase, and 3.11 OAuth was scored 2 but ran ~5 in actual scope (logged as a standing disagreement, not retro-bumped). Off-plan work (test isolation, mobile/Tailscale fix, carryover open-redirect fix, safeNextPath extraction) consumed time but didn't tally to plan tasks — at least 4 hours of "real" work outside the points table.
+
+### Weekly Pace
+
+| Date range | Hours |
+|------------|-------|
+| Apr 24 (3.3) | 0.75 |
+| Apr 25 (3.1, 3.2, 3.4 + 0-pt sessions 96–97) | 4.59 |
+| Apr 25–26 (3.5, 3.6, 3.7, 3.8) | 4.16 |
+| Apr 26 (3.9) | 1.25 |
+| Apr 27 (3.10) | 0.83 |
+| Apr 28–29 (3.11, 3.12) | 3.25 |
+| Apr 29 (3.13, 3.14, 3.15 + carryovers) | ~3.5 |
+
+Phase 3 ran April 24–29 across 6 days. Hot streak vs. Phase 2's 7-day pace, but a lot of the days were short sessions sandwiched around Eric's life (boat day, mobile testing, parallel-thread work).
+
+### Scope Changes
+
+Tasks added or expanded during Phase 3:
+- **3.4 re-estimated 5 → 8 pts** (session 93) — scope included a new cron route + vercel.json entry + threshold logic + both Stripe webhook and admin-enroll trigger paths. Re-estimate happened before work started; clean.
+- **3.15 added** (logged-in password change, +3 pts) — discovered during 3.10 session as a real gap (no in-app way for an authenticated user to change password). Slot found in same phase rather than punting to Phase 4.
+- **6.18 added** (CI + iOS testing, +5 pts in Phase 6) — surfaced by the parallel-thread mobile bug class on Apr 29; phone-only failure that desktop tests didn't catch. Pushed to Phase 6 rather than scope-creeping Phase 3.
+
+Original: 42 pts. Final: 48 pts (+6, +14%). Cleaner than Phase 1 (+45%); on par with Phase 2 (+5%).
+
+### What Worked
+
+- **Trigger-based profile creation (3.11)** — once the `handle_new_user` SECURITY DEFINER trigger landed, all three auth paths (email/password, Google OAuth, admin-createStudent) flowed through one place. Saved real coordination work in 3.13/3.15 where new auth-adjacent code didn't have to think about the path.
+- **DEC-015 form-action shape consistency** — `Promise<string | null>` for forms, `{ error: string | null }` for buttons. Most forms migrated this phase (some still pending in next-steps). Code reviewers caught the deviations early.
+- **Mock buffer for notifications** (3.3) — single `/api/test/notifications` endpoint with a runId-scoped JSON buffer made all the dispatcher gating tests possible. First end-to-end automated coverage of channel suppression. Test pattern carried through 3.5, 3.6, 3.7, 3.9 cleanly.
+- **Pre-Launch Checklist as a destination** — every "this needs Dashboard config in prod" finding got a checklist line instead of being lost in commit messages. Now 8 lines: SMTP, custom email template, password policy, OAuth provider, Site URL + Redirect URLs, etc. Real value at deploy time.
+- **Memory file for Hetzner quirks** — `supabase stop --project-id sailbook`, VS Code Remote-SSH random-port forwarding, allowedDevOrigins-causes-hydration-failure, Tailscale-SSH-breaks-Termius. Each one would have wasted 30+ minutes on re-discovery. Saved as memory.
+- **`/its-dead` skill simplification** — removed PM-agent step (PM runs at `/its-alive` next session anyway), added `git pull --rebase` before push to absorb out-of-band commits. Eric explicitly raged about this, the fix landed same session.
+
+### What Didn't Work
+
+- **3.11 OAuth Google estimate (2 → 5 effective)** — looked like a config flip, was actually an end-to-end auth integration. Trigger refactor across 4 auth paths, host-header callback fix, Google name-key surprise (`name`/`full_name`, not `given_name`/`family_name`), proxy role-flag mismatch on OAuth users, VS Code Remote-SSH port-forwarding rabbit hole. Eric flagged he had an instinct to push back on the 2 and didn't. **Lesson:** provider integrations default to 5+ unless the pattern is already established.
+- **Cross-file Playwright test isolation still flaky.** Pre-existing pattern from session 102 still unresolved at phase close. Cancellation-request test failed in full-suite, passed in isolation. Mock buffer + shared seed-user state. Earmarked as Phase 6 task (~5–8 pts) but it bites every full-suite run.
+- **The /its-dead PM-agent step burned a 30-minute end-of-session wait at session 104.** Skill is now fixed but the friction shipped before being caught. Bigger lesson: skills with slow auxiliary steps need explicit "log off now, opt-in for the slow step" affordances.
+- **Parallel-thread work fragmenting velocity math.** Eric ran a parallel CC tab during sessions 101 and 105, and the work commits landed in this branch's history without being attributed to plan tasks. The wall-clock vs. effective-hours gap is now significant — session 105 was logged 8 hours then corrected to 2. Velocity tracking should account for "wall clock" vs. "active" or it will keep over-stating duration.
+- **Carryover code-review pattern persists.** Same complaint as Phases 1 and 2: every session opens with "fix N CR items from last session." Three phases in, this is just how the project runs. Stopping to call it out instead of fixing it.
+
+### Code Review Debt (carry into Phase 4)
+
+- **Pre-existing: invited instructors get bounced from `/instructor/dashboard` until JWT refresh.** `accept_invite` writes `is_instructor=true` to public.profiles but does NOT touch auth.users.raw_user_meta_data. The proxy reads from JWT metadata. Was exposed (not introduced) by 3.11's trigger work. Filed as 4.x bug — fix during Phase 4 invite consolidation.
+- **Pre-existing: register() role-flag spoof surface.** Hand-crafted client could submit `is_admin: true` via signUp options.data; the trigger trusts user_metadata for defaults. Defense-in-depth: trigger or post-insert step should force `is_admin = is_instructor = false` for `auth_source = 'self_registered'`. Captured as 3.x code-review #2 carryover.
+- **Long-running: `useTransientSuccess(pending, state)` hook extraction.** Pattern duplicated in 4 forms now (admin notif, student notif, student profile, change-password). 1 pt cleanup.
+- **Long-running: DEC-015 cleanup of `updateProfile` / `updateUserProfile`.** Still on `{ error: string | null }` shape; should be `Promise<string | null>`. ~1 pt.
+- **Phase 7 leftover: `~/.claude/agents/ui-reviewer.md` was lost in the dev-box migration.** Re-created as a follow-up; the spec was never committed to git. Either rewrite from scratch or extract from session 38 history.
+
+### Forecast Update (as of 2026-04-29)
+
+**Deadline:** May 15, 2026 (16 days remaining)
+**Remaining work:** ~123 pts across Phases 4–6
+
+| Phase | Pts remaining |
+|-------|--------------|
+| Phase 4 (Identity + Profiles) | 27 (was 27 before phase close — no change) |
+| Phase 5 (Pricing + Enrollment) | 47 |
+| Phase 6 (Polish + UX, includes new 6.18) | 49 (was 54; minus 5.10 already shipped, plus 6.18 +5) |
+
+At Phase-3-actual velocity (0.38 hrs/pt), remaining = ~46.7 hrs. At 8 hrs/week sustainable pace, that's 5.8 weeks. Deadline is 2.3 weeks away.
+
+**Status: behind plan unless velocity recovers to Phase 2 pace (0.22 hrs/pt → 27 hrs remaining → 3.4 weeks).** Phase 4 and 5 have larger task sizes that historically run faster, so Phase-2-pace recovery is plausible. Cuttable list (5.6, 5.11, 6.7, 6.11, 6.6, 6.9 — see PROJECT_PLAN.md "Cuttable Tasks") covers ~22 pts; if all cut, remaining drops to ~101 pts → ~38 hrs at baseline → 4.7 weeks. Still tight.
+
+**Recommendation:** Re-baseline at Phase 4 close. Phase 4 will reveal whether the larger-task velocity recovery materializes. If it does, ship full V2 by May 15. If it doesn't, cut 5.11, 6.6, 6.7, 6.9, 6.11 immediately at Phase 4 close.
+
+---
+
 ## Phase 2 — Payments (Stripe)
 **Completed:** 2026-04-21  
 **Sessions:** 67–85 (minus Phase 1 sessions 71, 73–76; minus tooling session 78)

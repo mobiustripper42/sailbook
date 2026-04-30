@@ -197,3 +197,110 @@ test.describe('Instructor session roster', () => {
     await expect(page.getByRole('heading', { name: 'Roster' })).not.toBeVisible({ timeout: 5000 });
   });
 });
+
+// ─── Session Notes (Phase 4.6) ────────────────────────────────────────────────
+
+test.describe('Instructor session notes', () => {
+  test('instructor saves notes and they persist on reload', async ({ page, browser }) => {
+    test.skip(test.info().project.name !== 'desktop');
+    test.setTimeout(120000);
+
+    const title = `PW Notes ${runId()}`;
+    const { sessionId } = await createInstructorCourse(browser, { title });
+    const noteText = `Wind was 8kts SW. ${runId()} did well on tacks.`;
+
+    await loginAs(page, 'pw_instructor@ltsc.test', '/instructor/dashboard');
+    await page.goto(`/instructor/sessions/${sessionId}`);
+
+    await expect(page.getByText('Session Notes', { exact: true })).toBeVisible();
+
+    const textarea = page.getByPlaceholder(/What happened/);
+    await textarea.fill(noteText);
+    await page.getByRole('button', { name: 'Save notes' }).click();
+    await expect(page.getByText('Notes saved.')).toBeVisible({ timeout: 10000 });
+
+    await page.reload();
+    await expect(textarea).toHaveValue(noteText);
+  });
+
+  test('character counter decrements as instructor types', async ({ page, browser }) => {
+    test.skip(test.info().project.name !== 'desktop');
+    test.setTimeout(90000);
+
+    const title = `PW Counter ${runId()}`;
+    const { sessionId } = await createInstructorCourse(browser, { title });
+
+    await loginAs(page, 'pw_instructor@ltsc.test', '/instructor/dashboard');
+    await page.goto(`/instructor/sessions/${sessionId}`);
+
+    await expect(page.getByText('2000 characters remaining')).toBeVisible();
+    await page.getByPlaceholder(/What happened/).fill('hello');
+    await expect(page.getByText('1995 characters remaining')).toBeVisible();
+  });
+
+  test('admin can read instructor notes on the attendance page', async ({ page, browser }) => {
+    test.skip(test.info().project.name !== 'desktop');
+    test.setTimeout(120000);
+
+    const title = `PW AdminRead ${runId()}`;
+    const { courseId, sessionId } = await createInstructorCourse(browser, { title });
+    const noteText = `Cross-instructor handoff note ${runId()}`;
+
+    // Instructor writes notes
+    const instCtx = await browser.newContext();
+    const instPage = await instCtx.newPage();
+    try {
+      await loginAs(instPage, 'pw_instructor@ltsc.test', '/instructor/dashboard');
+      await instPage.goto(`/instructor/sessions/${sessionId}`);
+      await instPage.getByPlaceholder(/What happened/).fill(noteText);
+      await instPage.getByRole('button', { name: 'Save notes' }).click();
+      await expect(instPage.getByText('Notes saved.')).toBeVisible({ timeout: 10000 });
+    } finally {
+      await instCtx.close();
+    }
+
+    // Admin reads them on the attendance page
+    await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard');
+    await page.goto(`/admin/courses/${courseId}/sessions/${sessionId}/attendance`);
+    await expect(page.getByText(noteText)).toBeVisible();
+  });
+});
+
+// ─── Mobile responsiveness (Phase 6.2) ────────────────────────────────────────
+
+test.describe('Instructor mobile responsiveness', () => {
+  test('dashboard stat cards wrap to two columns at 375px', async ({ page }) => {
+    test.skip(test.info().project.name !== 'mobile');
+
+    await loginAs(page, 'pw_instructor@ltsc.test', '/instructor/dashboard');
+
+    const card1 = await page.getByText('Active Courses', { exact: true }).boundingBox();
+    const card2 = await page.getByText('Upcoming Sessions', { exact: true }).first().boundingBox();
+    const card3 = await page.getByText('Total Students', { exact: true }).boundingBox();
+
+    expect(card1).not.toBeNull();
+    expect(card2).not.toBeNull();
+    expect(card3).not.toBeNull();
+
+    // First two share a row; third wraps below
+    expect(Math.abs(card1!.y - card2!.y)).toBeLessThan(2);
+    expect(card3!.y).toBeGreaterThan(card1!.y + card1!.height);
+  });
+
+  test('roster hides Email column at 375px, keeps Phone visible', async ({ page, browser }) => {
+    test.skip(test.info().project.name !== 'mobile');
+    test.setTimeout(120000);
+
+    const title = `PW Mobile Roster ${runId()}`;
+    const { sessionId } = await createInstructorCourse(browser, { title });
+
+    await loginAs(page, 'pw_instructor@ltsc.test', '/instructor/dashboard');
+    await page.goto(`/instructor/sessions/${sessionId}`);
+
+    await expect(page.getByRole('heading', { name: 'Roster' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Email' })).not.toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Phone' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Name' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Attendance' })).toBeVisible();
+  });
+});

@@ -40,7 +40,11 @@ $$;
 --   a1000000-...-0005 = Sam  (student, confirmed enrollment e1000000-...-0001)
 -- ============================================================
 
--- Ghost user: insert directly into auth.users as postgres (bypasses auth API in tests)
+-- Ghost user: insert directly into auth.users as postgres (bypasses auth API in tests).
+-- This fires the handle_new_user trigger (Phase 3.11), which creates a baseline
+-- profiles row with auth_source defaulting to 'self_registered'. The test then
+-- UPSERTs to set auth_source = 'admin_created', mirroring how the production
+-- admin-createStudent flow works (createUser → trigger inserts → admin upserts).
 INSERT INTO auth.users (
   id, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, aud, role
 ) VALUES (
@@ -63,7 +67,8 @@ INSERT INTO auth.users (
 SELECT lives_ok(
   $$ INSERT INTO public.profiles (id, first_name, last_name, email, is_student, auth_source)
      VALUES ('d0000000-0000-0000-0000-000000000099', 'Ghost', 'Student', 'ghost@test.invalid',
-             true, 'admin_created') $$,
+             true, 'admin_created')
+     ON CONFLICT (id) DO UPDATE SET auth_source = EXCLUDED.auth_source $$,
   'profiles: admin_created is a valid auth_source value'
 );
 

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 import { updatePassword } from "../actions";
+import { PASSWORD_MIN_LENGTH, PASSWORD_RULES_HELP } from "@/lib/auth/password-rules";
 
 export default function ResetPasswordPage() {
   const [ready, setReady] = useState(false);
@@ -51,7 +52,6 @@ export default function ResetPasswordPage() {
         </CardHeader>
         <CardFooter>
           <Button
-            variant="ghost"
             className="w-full"
             onClick={() => router.push("/forgot-password")}
           >
@@ -82,7 +82,7 @@ export default function ResetPasswordPage() {
         <CardTitle>Reset password</CardTitle>
         <CardDescription>Choose a new password for your account.</CardDescription>
       </CardHeader>
-      <form action={action}>
+      <form action={action} noValidate>
         <CardContent className="space-y-4">
           {state?.error && (
             <p className="text-sm text-destructive">{state.error}</p>
@@ -94,9 +94,10 @@ export default function ResetPasswordPage() {
               name="password"
               type="password"
               required
-              minLength={6}
+              minLength={PASSWORD_MIN_LENGTH}
               autoComplete="new-password"
             />
+            <p className="text-xs text-muted-foreground">{PASSWORD_RULES_HELP}</p>
           </div>
         </CardContent>
         <CardFooter className="pt-4">

@@ -3,6 +3,708 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 109 — 2026-04-30 02:44–11:00 (1.75 hrs; subtract 6.5 hrs sleep from 8.27 hr wall clock)
+**Duration:** 1.75 hrs | **Points:** 8 (6.2: 2, 4.2 partial: 6)
+**Task:** Project-plan priority reorder + Phase 6.2 instructor mobile pass + Phase 4.2 partial (column sorting + invite panels on /admin/users + JWT bug verification).
+
+**Started with a snafu:** prior /its-alive in this session hit a "don't ask mode" Edit denial mid-flight while reordering PROJECT_PLAN.md. Picked up from there.
+
+**Completed:**
+- **Project-plan priority reorder (V2 last-blast).** Eric set per-task priorities across Phases 4/5/6. Reordered each phase table: completed rows grouped at top; unfinished rows below in priority order (very high → high → medium → low → "high but last" → close). IDs frozen — no commit/log refs broken. Cuts to V3 Ideas (preserved with original IDs in a "Cut from V2 in session 109" sub-list): **4.7** (instructor profile expansion), **5.1** (member pricing), **5.3** (discount codes), **5.5** (admin qualification grant), **5.6** (duplicate enrollment warning), **6.0** (LTSC theme tune), **6.6** (duplicate course), **6.11** (public landing page), **6.16** (show refund amount). Total cut: **23 pts**.
+- **Two new V2 tasks added** (Eric's call this session): **6.19** Public course browse + detail pages for LTSC inbound links — pts TBD, scoping tomorrow morning. **6.20** Admin + instructor calendar views (promoted from V3 Ideas) — pts TBD, "must ship before V2 release."
+- **Phase totals updated.** Phase 4: 45 → 42; Phase 5: 50 → 39; Phase 6: 52 + TBD for 6.19/6.20. Summary table reconciled (was drifting from section sums for Phase 1, 2, 4, 5, 6 by varying amounts; old Total 298 was off; fixed to actual sum 349 with an inline "Reconciled in session 109" note). Velocity Tracking phase rows + total similarly updated. Eric explicitly said totals would be re-reconciled at end of V2.
+- **Cuttable Tasks section** trimmed to remaining V2 candidates (6.7, 6.9, 5.11, 6.1, 6.10).
+- **6.2 — Instructor mobile responsiveness pass (2 pts).**
+  - Audit revealed 6.2 was confused with 1.20 (mobile drawer infra, already shipped). Real 6.2 = audit-and-fix. Three pages walked.
+  - **Fix 1:** `src/app/(instructor)/instructor/dashboard/page.tsx:84` — stat cards `grid-cols-3` → `grid-cols-2 lg:grid-cols-3` (mirrors admin pattern shipped in 5.8).
+  - **Fix 2:** `src/app/(instructor)/instructor/sessions/[id]/page.tsx` — Email column TableHead + TableCell now `hidden sm:table-cell` so 375px shows Name + Phone + Attendance only. Phone kept (instructors call students from the field); Email is secondary.
+  - `/instructor/students/[id]` clean — no tables/grids, reuses StudentHistoryList.
+  - 2 mobile-only Playwright tests appended to `tests/instructor-views.spec.ts` (stat-card geometry assertion + Email-column hide). Full file 14/14 green, 19 skipped by design.
+- **4.2 partial — column sorting + invite panels + JWT bug (~6 pts).**
+  - **Recon surprise 1:** the JWT bug carryover ("invited instructors bounced from /instructor/dashboard until JWT refresh") was already fixed in the original 4.1 commit `c69b048`. `acceptInstructorInvite` already does `updateUser({data: …}) + refreshSession`. Comment block at lines 53-57 explains why. Carryover note in session 106 was stale before it was logged.
+  - **Recon surprise 2:** `/admin/users` skeleton existed but invite panels weren't there, only an `InstructorInvitePanel` was on `/admin/instructors`. Re-scoping discovery: the invite acceptance flow only existed for instructor — admin path needed creation. Bumped 4.2-partial estimate from 4-5 → 6 pts.
+  - **Action layer:** `acceptInstructorInvite(token)` → generic `acceptInvite(role, token)`. Same updateUser + refreshSession sequence; metadata key + redirect target switch on role.
+  - **Panel:** `instructor-invite-panel.tsx` → `invite-panel.tsx` parameterized on role via a `ROLE_LABELS` map (title/description/pathPrefix). testid is now `invite-url-${role}`.
+  - **Shared form:** `src/components/invite/accept-invite-form.tsx` (new). Old per-route `accept-form.tsx` deleted.
+  - **Admin acceptance route:** `src/app/invite/admin/[token]/page.tsx` mirrors instructor.
+  - **`/admin/users` page:** fetches both invites in parallel, renders two `<details>` collapsibles ("Admin invites" / "Instructor invites") wrapping InvitePanel. Native `<details>` instead of pulling in radix-collapsible.
+  - **Sorting:** `users-list.tsx` adds sort state (Name/Email/Status × asc/desc), `SortableHead` subcomponent, `aria-sort` on the `<th>` (NOT the button — original placement on button tripped jsx-a11y/role-supports-aria-props), ↑/↓/↕ glyphs, click-to-toggle direction.
+  - **Tests:** pgTAP `09_invites.sql` plan 15 → 17 (+2 cases for `accept_invite('admin')`). Suite **133/133** (was 131; aligns with session 108 baseline). Playwright `tests/admin-users.spec.ts` (new), 4 desktop tests covering sort + panel collapse/expand, all green. `instructor-invite.spec.ts` testid updated to `invite-url-instructor`.
+- Build clean. Lint clean. tsc clean. Full Playwright suite green (Eric ran).
+- Hetzner git config still missing — used the same one-off `mobiustripper42 / mobius5kcrypto@gmail.com` flags as sessions 103/105/107/108. Phase 7 dev-tooling task is still the right place for the long-term fix.
+- **Local pgTAP drift caught:** initial `supabase test db` failed across 4 unrelated files due to lingering local DB state from earlier runs. `supabase db reset` cleared it; suite went 133/133. Worth remembering — pgTAP isn't sandbox-clean across days.
+- Commit `9bf52bd`.
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification still pending (carryover from session 102).
+
+**Next Steps:**
+1. **Tomorrow morning scoping session (Eric):** poker for **5.2 Open Sailing** (current "5 pts" estimate looks light — likely 8, possibly 13; data-model question on per-session enrollment may want @architect input) and **6.19 LTSC public course pages** (open questions: URL shape — UUID vs slug vs both; RLS for anon SELECT; layout chrome).
+2. **4.2b — old route deletion (deferred from this session, ~3-4 pts).** Delete `/admin/students/{,[id],[id]/edit,new}` (4 routes) + `/admin/instructors/{,[id]/edit}` (2 routes). Update references in ~9 source files (admin nav, mobile drawer, sub-routes, missed-sessions) + ~7 test files. Code review #1 + #2 suggest folding two cleanups into 4.2b: (a) consolidate `/invite/admin/[token]` + `/invite/instructor/[token]` into `/invite/[role]/[token]` with a ROLE_COPY map (~40 duplicated lines); (b) extract a tiny `<DisclosurePanel title=…>` component if a third `<details>` use lands.
+3. **6.2 deferred follow-up:** roster table at <640px considered a fix already (Email hidden) — but if Eric finds the table still cramped, the next move is hiding Phone too on the very narrowest widths. Not flagged this session.
+4. **Code review cleanups from this session (4 advisory, none blocking):**
+   - `invite-panel.tsx:52` `setTimeout` for copy success has no cleanup — same shape exists in `src/app/dev/copy-button.tsx:14`. One-line fix when convenient (ref + cleanup effect, or mounted-ref guard). Pre-existing, not introduced this session.
+   - Consolidate two near-identical invite route pages into one dynamic `/invite/[role]/[token]` (queue with 4.2b).
+   - Extract DisclosurePanel for the `<details>` pattern (queue with 4.2b).
+   - `tests/admin-users.spec.ts` — every test starts with `test.skip(test.info().project.name !== 'desktop')`; could move to describe-level skip or beforeEach. Consistent with `instructor-views.spec.ts` so cosmetic.
+5. **Carryovers from session 108 still open:**
+   - Eric's close-review of session 107's work — 4.10 + 4.6.
+   - `revalidatePath` in `updateSessionNotes` doesn't invalidate the admin attendance page.
+   - Empty/whitespace-only save silently clears notes; success copy still says "Notes saved."
+   - 4 small pgTAP gaps in `10_session_notes_rpc.sql` (unauthenticated, missing session, whitespace-clear, exact-2000-char boundary).
+   - `useTransientSuccess` hook extraction — 5 forms duplicate the pattern.
+   - 5.8 follow-up cleanups (low_enrollment.ts error-path silently returns [], N+1 query pattern, etc.).
+6. **Carryovers from session 106:**
+   - pgTAP testing-cadence question for `/kill-this`.
+   - Manual smoke of 3.10 + 3.11.
+   - SMS smoke-test investigation, cross-file Playwright isolation hardening, DEC-015 cleanup.
+
+**Context:**
+- **Project plan reorder = IDs are frozen, row positions are not.** Phase 4/5/6 tables now group completed rows at top, unfinished rows below in priority order. Cut tasks live in V3 Ideas with original ID in parens. Anyone reading the file linearly should NOT expect numerical ID order anymore — read by section position, not by ID.
+- **Summary total reconciled mid-session.** Was 298, drifted from section sums; now 349 (matches actual). Inline note flags this. Eric chose to defer further reconciliation to end of V2.
+- **6.19 (public course pages for LTSC) is a launch-gating task.** LTSC keeps WordPress as the marketing front; their per-product pages link "Register" buttons into SailBook. SailBook currently drops anonymous visitors at `/login` so any LTSC inbound is broken. Decision (Eric): option (b) — make `/courses/...` publicly viewable with auth deferred to enrollment CTA. Not (a) — building marketing-grade pages in SailBook. Major V2-scope addition.
+- **6.20 (admin + instructor calendar views) is V2 now.** Promoted from V3 in this session. Reuse the 5.10 student calendar component shell. Pts TBD.
+- **The JWT bug carryover was stale.** Already fixed in 4.1 (`c69b048`, lines 57-63 of invites.ts). Don't trust carryover notes blindly — verify against current code before scheduling work. The comment block in invites.ts explains the WHY perfectly; that's the kind of in-code documentation that survives context loss between sessions.
+- **`acceptInvite(role, token)` is safe even though `role` is now caller-supplied.** The SECURITY DEFINER RPC at `20260423182537_invites_table.sql:31-71` validates `p_role IN ('instructor', 'admin')` server-side AND gates promotion on a token match for that exact role. A student can't escalate to admin without holding the admin token. The action-layer `InviteRole` type is just convenience.
+- **Native `<details>` is the project's first disclosure-pattern use.** Chose it over `@radix-ui/collapsible` to avoid the dep — DEC-style "don't pull a dep for one use." Two un-extracted instances on `/admin/users` are fine; if a third lands, extract `<DisclosurePanel>` (code review #2).
+- **`aria-sort` belongs on `<th>`, not on the inner `<button>`.** First lint pass put it on the button → `jsx-a11y/role-supports-aria-props` warning. Moved to `<TableHead>` which renders as `<th>` (the actual columnheader element). Worth remembering for any future sortable tables.
+- **pgTAP local drift bites.** Local `supabase test db` failed across 4 unrelated files at first run due to lingering state from prior days. `supabase db reset` cleared it. /kill-this skill could plausibly add a "did you reset recently?" prompt — flag for Eric's pgTAP-cadence mulling.
+- **Playwright Chrome MCP doesn't work on Hetzner box** — wants `/opt/google/chrome/chrome` which isn't installed. Pivoted to code-level audit for 6.2; worked fine. Same workaround if any future browser-via-MCP work is needed.
+
+**Code Review:** 4 advisory items, 0 blocking, 0 security concerns. (@code-review against `9bf52bd`.)
+1. **cleanup** `invite/admin/[token]/page.tsx` + `invite/instructor/[token]/page.tsx` — 90% byte-identical, consolidate into `invite/[role]/[token]/page.tsx` with ROLE_COPY map. Queue with 4.2b.
+2. **cleanup** `/admin/users/page.tsx:39-58` — first `<details>` use; two near-identical instances. Extract `<DisclosurePanel>` if a third instance lands.
+3. **cleanup** `invite-panel.tsx:52` — `setTimeout` for copy success has no unmount cleanup. Pre-existing pattern (also in `dev/copy-button.tsx:14`).
+4. **cleanup** `tests/admin-users.spec.ts` — every test repeats `test.skip(... !== 'desktop')`; could move to describe-level. Consistent with prior style; cosmetic only.
+
+**Verified clean:** RPC role validation server-side (admin-escalation prevented at SQL); DEC-015 shape on `acceptInvite` return; no new RLS surface; mobile layout matches admin pattern; `/invite/` already in PUBLIC_PREFIXES proxy allowlist.
+
+## Session 108 — 2026-04-29 23:38–2026-04-30 01:38 (2.00 hrs)
+**Duration:** 2.00 hrs | **Points:** 7 (4.11: 2, 5.8: 5)
+**Task:** Phase 4 cleanup (4.11) + Phase 5 kickoff (5.8). Both bundled in commit `862357b`.
+
+**Completed:**
+- **4.11 — Substitute-instructor page bug + DEC-007 pgTAP coverage (2 pts).**
+  - `src/app/(instructor)/instructor/sessions/[id]/page.tsx` — page authorization at line 66 was redirecting any instructor who wasn't the course-level owner. The `update_session_notes` RPC authorizes both course-level AND session-level instructors per DEC-007, so substitutes assigned only at the session level were redirected before reaching a form they were already RPC-authorized to use. Fix: add `instructor_id` to the session select; gate becomes `course.instructor_id !== user.id && session.instructor_id !== user.id`.
+  - `supabase/tests/10_session_notes_rpc.sql` — added 3 cases (plan 8 → 11) for the DEC-007 override path: session-level-only instructor writes; column actually changed; course-level instructor still authorized when override exists.
+- **5.8 — Low-enrollment thresholds on course_types (5 pts; re-scoped 2 → 5).**
+  - **Re-scope reason:** scoping discovery — the existing 3.4 cron alert was using hardcoded `LOW_ENROLLMENT_RATIO = 0.5` and `LOW_ENROLLMENT_DAYS_OUT = 14`. 5.8 needed to replace both, not just add a dashboard tile.
+  - `supabase/migrations/20260430004850_add_low_enrollment_thresholds.sql` — `course_types.minimum_enrollment` (int, nullable, NULL = opt out) + `course_types.low_enrollment_lead_days` (int NOT NULL DEFAULT 14). Non-negative CHECK constraints on both.
+  - `src/lib/low-enrollment.ts` (new) — shared `findLowEnrollmentCourses(client, now)` helper. Single source of truth for both the daily admin cron alert AND the new admin dashboard tile.
+  - `src/lib/notifications/triggers.ts` — `notifyLowEnrollmentCourses` now calls the helper; constants deleted. Threshold semantics changed from ratio (≥ 0.5 of capacity) to absolute (`enrolled < minimum_enrollment`).
+  - `src/components/admin/course-type-form.tsx` + `src/actions/course-types.ts` — both fields with helper text. Extracted `readThresholds(formData)` so create + update share the parse path.
+  - `src/app/(admin)/admin/dashboard/page.tsx` — new `LowEnrollmentCard` tile next to `InstructorCard`. Stat row now `grid-cols-2 lg:grid-cols-3`. Helper invoked in parallel with the existing dashboard queries (`Promise.all`).
+  - `tests/admin-low-enrollment.spec.ts` (new) — 2 desktop tests: (a) default seed shows ✓ "Enrollment Healthy" (all `minimum_enrollment` are NULL); (b) setting ASA 101's minimum to 99 flips the tile to "⚠ Low Enrollment" (with `finally` cleanup so the seed state isn't polluted).
+- pgTAP **131/131** (was 128 — added 3 for DEC-007 override).
+- tsc clean. Lint clean. Build clean.
+- Full Playwright suite green (Eric ran `npx playwright test`).
+- Type regen: `npx supabase gen types typescript --local 2>/dev/null > src/lib/supabase/types.ts` — same `2>/dev/null` workaround for the CLI's "new version available" stderr leak that session 107 documented.
+- Hetzner git config still missing — used the same one-off `mobiustripper42 / mobius5kcrypto@gmail.com` flags as sessions 103/105/107. Phase 7 dev-tooling task is the right place for the long-term fix.
+- Plan updated: Phase 4 total 43 → 45 (+2 for 4.11), Phase 5 total 47 → 50 (+3 for 5.8 re-scope).
+- Commit `862357b` (4.11 + 5.8 bundled).
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification still pending (carryover from session 102).
+
+**Next Steps:**
+1. **Phase 5 priority order Eric set this session: 5.8 → 5.11 → 5.7.** With 5.8 done, **5.11 (bulk price update, 8 pts)** is next, followed by **5.7 (waitlist, 8 pts)**. 5.7 is unblocked now that Phase 3 notifications shipped.
+2. **5.8 follow-up cleanups from code review** (advisory, no blockers):
+   - `src/lib/low-enrollment.ts:38-41` — error path returns `[]`, dashboard then renders "Enrollment Healthy" (false negative). Same risk on cron path. Consider returning a discriminated union or letting the dashboard surface "Unable to compute" so a broken query isn't invisible.
+   - `src/lib/low-enrollment.ts:46-72` — N+1 query pattern (1 course list + 2 per-course). Fine at single-school scale; revisit if active courses exceed ~50.
+   - `src/actions/course-types.ts:11-13` — `Number(minRaw)` returns `NaN` for malformed input, falls through to a generic Postgres CHECK error. `<input type="number">` makes this unlikely; the CHECK catches it. Acceptable today.
+   - `tests/admin-low-enrollment.spec.ts:31-37` — `finally` cleanup is good but if cleanup itself fails, seed pollutes. A dedicated test-only course type would be more robust. Desktop-only guard mitigates today.
+   - `supabase/tests/10_session_notes_rpc.sql:146-148` — add a comment noting that the DEC-007 override fixture (`UPDATE sessions.instructor_id = pw_instructor`) persists for the remainder of the file. Anyone inserting new cases below would inherit it.
+   - `src/app/(instructor)/instructor/sessions/[id]/page.tsx:67` — page gate duplicates `get_instructor_session_ids` logic. Add a one-liner pointing at the SQL helper so future edits stay in sync.
+3. **Carryovers from session 107 still open:**
+   - Eric's close-review of session 107's work — 4.10 + 4.6. Still flagged; not addressed this session.
+   - `revalidatePath` in `updateSessionNotes` doesn't invalidate the admin attendance page.
+   - Empty/whitespace-only save silently clears notes; success copy still says "Notes saved."
+   - 4 small pgTAP gaps in `10_session_notes_rpc.sql`: unauthenticated, missing session, whitespace-clear, exact-2000-char boundary.
+   - `useTransientSuccess` hook extraction — now 5 forms duplicate the pattern.
+4. **Carryovers from session 106:**
+   - Pre-existing 4.x bug: invited instructors bounced from `/instructor/dashboard` until JWT refresh (`accept_invite` writes role flag to `public.profiles` but not `auth.users.raw_user_meta_data`). Natural fit during 4.2.
+   - pgTAP testing-cadence question for `/kill-this`.
+   - Manual smoke of 3.10 + 3.11.
+   - SMS smoke-test investigation, cross-file Playwright isolation hardening, DEC-015 cleanup.
+
+**Context:**
+- **`findLowEnrollmentCourses` is the single read path** for both the daily admin cron alert (`notifyLowEnrollmentCourses`) and the admin dashboard tile. If this function changes, both surfaces shift together — that's the design. Don't split them. The helper takes an optional `now: Date` for testability; in production both call sites use the default.
+- **Threshold semantics is absolute, not ratio.** A course flags when `enrolled < course_types.minimum_enrollment`, period. Capacity is no longer part of the math. `minimum_enrollment IS NULL` opts the entire course type out of low-enrollment surfacing — both alert and tile.
+- **Dashboard query pattern.** `findLowEnrollmentCourses` is N+1 inside, but it's launched in parallel with the existing dashboard `Promise.all` (kicked off before, awaited after). Fine at single-school scale.
+- **`getByText('Low Enrollment', { exact: true })` does NOT match the warning state of the tile** because the CardTitle renders `<span aria-hidden="true">⚠</span>` as a sibling text node — the parent's text content is "⚠Low Enrollment" with no whitespace between. Drop `exact: true` or use a different locator. Same shape as `InstructorCard`. Cost me a debugging detour this session.
+- **DEC-007 has two enforcement surfaces now.** `update_session_notes` RPC and the instructor-session page both check `course-level OR session-level`. They must stay in sync. `get_instructor_session_ids` is the SQL helper that encodes both. Anywhere else in the instructor surface that does its own ownership check is suspect.
+
+**Code Review:** 7 advisory items, no bugs, no security concerns. (@code-review against `862357b`.)
+1. **consistency** `instructor/sessions/[id]/page.tsx:67` — page gate duplicates SQL helper logic; add cross-reference comment.
+2. **cleanup** `low-enrollment.ts:46-72` — N+1 query pattern; flag for >50-course scale.
+3. **cleanup** `low-enrollment.ts:75` — `capacity` included in returned shape but not used by helper itself (consumer-facing).
+4. **cleanup** `actions/course-types.ts:11-13` — `Number()` returns NaN on malformed input; relies on CHECK constraint to catch.
+5. **cleanup** `low-enrollment.ts:38-41` — error path returns `[]`, false-negative on dashboard.
+6. **consistency** `tests/admin-low-enrollment.spec.ts:31-37` — `finally` cleanup risk if cleanup itself fails; dedicated test course type would be more robust.
+7. **cleanup** `supabase/tests/10_session_notes_rpc.sql:146-148` — override fixture persists for remainder of file; add a comment.
+
+## Session 107 — 2026-04-29 16:53–22:20 (2.42 hrs; subtract 3 hrs interruptions from 5.45 hr wall clock)
+**Duration:** 2.42 hrs | **Points:** 4 (4.10: 1, 4.6: 3)
+**Task:** Phase 4 kickoff — 4.10 (recreate ui-reviewer agent) + 4.6 (instructor session notes / IN-5).
+
+**⚠ ERIC ASKED ME TO HOLD HIM TO THIS:** all of session 107's work needs a close human review later. Don't let this entry get archived without that pass. The code review (below) found one real bug worth attending to before launch.
+
+**Completed:**
+- **4.10 — `.claude/agents/ui-reviewer.md` recreated (1 pt).** 12-point checklist with pass/fix-soon/blocker scoring. Brand rules pulled directly from BRAND.md (Mira/Sky/Mist, Nunito Sans, xs radius, dark-mode-default, mobile@375px). Modeled on `architect.md` / `code-review.md` structure. **Committed to `.claude/agents/` in the repo this time** so it survives box moves (the prior version lived only in `~/.claude/agents/` and was wiped in the Phase 7 dev-box migration).
+- **4.6 — Instructor notes on sessions / IN-5 (3 pts).**
+  - `supabase/migrations/20260429170000_session_notes_rpc.sql` — new SECURITY DEFINER RPC `update_session_notes(p_session_id uuid, p_notes text) returns text`. Returns NULL on success, error string on failure. Authorizes admin via JWT user_metadata, OR assigned instructor via `get_instructor_session_ids` (covers both course-level and session-level / DEC-007 override). 2000-char cap. `nullif(trim(p_notes), '')` so empty/whitespace clears the column.
+  - **Why an RPC, not a column-scoped UPDATE policy:** instructors have SELECT-only on sessions per baseline RLS. Rather than open UPDATE more broadly, route writes through a SECURITY DEFINER RPC that touches only the `notes` column. Same pattern as `update_my_profile` / `profile_role_flags_unchanged`.
+  - `src/actions/sessions.ts` — new `updateSessionNotes` action. DEC-015 form shape (returns `string | null`). Returns the RPC's text return as the inline error.
+  - `src/components/instructor/session-notes-form.tsx` — controlled textarea, 2000-char counter ("N characters remaining"), useActionState, transient-success effect using the established `prevPending` ref → `hasSubmitted` → `showSuccess` pattern (canonical version: `change-password-form.tsx`).
+  - `src/app/(instructor)/instructor/sessions/[id]/page.tsx` — added `notes` to the session select; rendered a Card with the form below the Roster card.
+  - `supabase/tests/10_session_notes_rpc.sql` — 8 pgTAP cases: admin write, owning instructor write, other instructor blocked, student blocked, length cap.
+  - `tests/instructor-views.spec.ts` — 3 new desktop-only tests appended: write+reload, counter decrement, admin reads notes on attendance page.
+- **Type regen friction noted.** `npx supabase gen types --local` writes the CLI's "new version available" stderr message into stdout when redirected, polluting `types.ts`. Workaround: redirect stderr to /dev/null. Not memory-worthy on its own (CLI bug, will go away with an upgrade) but flagging here.
+- **Dev server restart needed mid-session** to clear cached old code (same Hetzner-box symptom session 105 documented). After restart the new page rendered correctly.
+- **Hetzner git config still missing.** Used the same one-off `mobiustripper42 / mobius5kcrypto@gmail.com` flags as session 103 / 105. Phase 7 dev-tooling task is still the right place for the long-term fix.
+- pgTAP **128/128** green (was 120/120 — added 8 cases). Lint clean. tsc clean. Build clean.
+- Targeted Playwright: `instructor-views.spec.ts` 12/12 desktop (15 mobile/tablet skipped by design).
+- **Full Playwright suite NOT run this session** (Eric's call) — should be re-run before 4.9 close, same shape as session 105 → 106 carryover.
+- Commit `f2962bf` (4.10 + 4.6 bundled).
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification still pending (carryover from session 102).
+
+**Next Steps:**
+1. **Eric must close-review session 107's work.** All of 4.10 + 4.6 — the agent definition AND the RPC + form. He flagged this explicitly during the session. **Do not let this drop.**
+2. **Fix the DEC-007 substitute-instructor page bug** flagged in code review #1. `src/app/(instructor)/instructor/sessions/[id]/page.tsx:66` does `if (course.instructor_id !== user.id) redirect(...)`, which contradicts the RPC's session-level override authorization. A substitute instructor assigned only at the session level can write notes via the RPC but can't reach the form to do so — they're redirected first. Fix: replace the line with a check against `get_instructor_session_ids(user.id)` or `course.instructor_id === user.id || session.instructor_id === user.id`. Small change. Should land before launch since substitute-instructor is a real Andy workflow.
+3. **Add pgTAP coverage for the session-level override path** (code review #2). Every "owning instructor" case in `10_session_notes_rpc.sql` uses Mike, who owns at the course level. Need a case where `sessions.instructor_id` is set to someone who is NOT `courses.instructor_id`, asserting that user can write. Untested DEC-007 branch will silently regress otherwise.
+4. **Phase 4 remaining tasks:** 4.2 (admin/users consolidation, 8 pts), 4.3 (student profile expansion, 5 pts), 4.7 (instructor profile expansion — Eric still thinking through scope, hold off), 4.9 (phase close, 5 pts).
+5. **Carryovers from session 106 still open:**
+   - Pre-existing 4.x bug: invited instructors bounced from `/instructor/dashboard` until JWT refresh (`accept_invite` writes role flag to `public.profiles` but not `auth.users.raw_user_meta_data`). Natural fit during 4.2.
+   - pgTAP testing-cadence question for `/kill-this` — Eric is still mulling the right shape.
+   - Manual smoke of 3.10 + 3.11 still deferred.
+   - SMS smoke-test investigation, cross-file Playwright isolation hardening, DEC-015 cleanup, `useTransientSuccess` hook extraction (now **5 forms** duplicate it — code review #6 calls this out specifically; with #5 it's hook-extraction time).
+6. **Cleanups from this session's code review (advisory):**
+   - `revalidatePath` in `updateSessionNotes` only invalidates the instructor view; admin attendance page may show stale notes until natural revalidation. Add `revalidatePath('/admin/courses/[id]/sessions/[sessionId]/attendance', 'page')` or accept staleness.
+   - Empty/whitespace-only save silently clears notes; form still shows "Notes saved." Either drop `trim` or trim client-side. Edge case but loses data.
+   - 4 small pgTAP coverage gaps: unauthenticated, missing session, whitespace-clear behavior, exact-2000-char boundary.
+
+**Context:**
+- **The RPC is the only write path for instructors on sessions.** Baseline RLS gives instructors SELECT only. Future "instructor edits session" features (date/time/location/etc.) face the same choice: open UPDATE with a column-scoped policy, or add another RPC. The latter has been the consistent SailBook pattern. Don't open UPDATE without thinking it through.
+- **`get_instructor_session_ids` is the right authorization helper for instructor-on-session checks** (covers both course-level and session-level / DEC-007 override). The page at `instructor/sessions/[id]/page.tsx:66` does NOT use it — it bypasses with a direct `course.instructor_id` check. That's the bug in next-step #2. Anywhere else in the instructor surface that does its own ownership check rather than calling the helper is suspect.
+- **Transient-success pattern is now in 5 forms** (register-form, student-account-form, change-password-form, notification-preferences-section + this one). Code review flagged it as the threshold. `src/lib/hooks/use-transient-success.ts` is the right next move — small, low-risk, kills duplication.
+- **`npx supabase gen types --local`'s stderr leaks into types.ts** when piped without `2>/dev/null`. The CLI's "new version available" notice corrupts the file. Use `npx supabase gen types typescript --local 2>/dev/null > src/lib/supabase/types.ts`.
+- **CardTitle renders as `<div>`, not a heading element.** `getByRole('heading', { name: '...' })` won't match it reliably. The existing Roster test happens to pass anyway (mechanism unclear — possibly Playwright's accessible-name heuristics on `font-heading` class). For new tests, use `getByText('...', { exact: true })` instead — that's what worked here.
+- **Dev server on Hetzner caches old route handlers.** Same as session 105's `/auth/callback` symptom. After significant page changes, restart the dev server before browser-testing or Playwright will see the old code.
+
+**Code Review:** 7 advisory items, 1 real bug. (@code-review against `f2962bf`.)
+1. **bug** `src/app/(instructor)/instructor/sessions/[id]/page.tsx:66` — page redirects substitute instructors who own at session level only (DEC-007). Page check contradicts RPC authorization. Fix in next-step #2.
+2. **security** `supabase/tests/10_session_notes_rpc.sql` — no coverage for session-level instructor override path. Untested DEC-007 branch.
+3. **cleanup** `10_session_notes_rpc.sql` — 4 missing edge cases: unauthenticated, missing session, whitespace-clear, exact-2000-char boundary.
+4. **consistency** `20260429170000_session_notes_rpc.sql:44` — `nullif(trim(p_notes), '')` silently clears notes on whitespace-only input; form still shows "Notes saved." Same risk against the makeup-session literal in `createMakeupSession`.
+5. **cleanup** `src/actions/sessions.ts:209` — `revalidatePath` only invalidates the instructor view, not the admin attendance page.
+6. **cleanup** `src/components/instructor/session-notes-form.tsx:23-31` — fifth duplication of the transient-success pattern. Hook extraction time.
+7. **cleanup** `tests/instructor-views.spec.ts:201-265` — new tests are desktop-only; new Card not verified at 375px.
+8. **ui-reviewer.md** — frontmatter and structure match the other agents. Clean.
+
+## Session 106 — 2026-04-29 15:45–16:45 (1.00 hr)
+**Duration:** 1.00 hr | **Points:** 5 (3.14: 5)
+**Task:** Phase 3.14 — End-of-phase close. All 4 polish items, UI reviewer pass, retro, lint cleanup, suite + code review. Plus a regression catch in pgTAP that had silently shipped two commits ago.
+
+**Completed:**
+- **Full Playwright suite** at session start: 404/612 passed, 207 skipped (by design), 1 cross-file flake (`tests/cancel-enrollment.spec.ts:5` — passes in isolation, same pattern as the carryover test-isolation hardening task).
+- **pgTAP suite**: 120/120 green after a regression fix. `08_admin_students.sql` tests 1, 3, 9 had been failing since 3.11 (the `handle_new_user` trigger) but pgTAP wasn't run during 3.11 / 3.13 / 3.14 — slipped through. Trigger inserts a baseline profile before the test's explicit INSERT could land. Fixed by switching the test to UPSERT, mirroring the production `createStudent` flow. Eric caught this when running `supabase test db` near end of session.
+- **Code review of `e212ee1`** (deferred from session 105 — Anthropic quota wall) — re-ran cleanly, 9 advisory items. One bug: helper text claimed password complexity that server didn't enforce. Tied directly into polish item (c).
+- **Polish (a) — `noValidate` on auth forms.** All 5: login, register, forgot, reset, change-password. Removes the unstyleable HTML5 popover; server errors land in the destructive paragraph.
+- **Polish (b) — preserve form values on validation failure.** Register form converted to controlled inputs (firstName, lastName, email, phone, experienceLevel, instructorNotes — all `useState`). Password intentionally uncontrolled.
+- **Polish (c) — friendly password-policy error copy + server-side complexity check.** New `src/lib/auth/password-rules.ts`:
+  - `PASSWORD_MIN_LENGTH = 12`, `PASSWORD_RULES_HELP` (extracted from 3 duplicated forms).
+  - `validatePassword(password)` mirrors the Supabase policy server-side (length + lower/upper/digit regex). Returns null or a friendly error.
+  - `friendlyPasswordError(supabaseMessage)` translates Supabase's verbose policy errors ("Password should contain at least one character of each: abcdefghijklmnopqrstuvwxyz...") into our copy. Falls back to the original on no match.
+  - Wired into `register`, `updatePassword` (recovery), `changePassword` — all three. Closes the helper-text-vs-server mismatch the code review flagged.
+- **Polish (d) — register UX review** covered by (a)+(b)+(c).
+- **UI reviewer stand-in** (general-purpose agent — `~/.claude/agents/ui-reviewer.md` was lost in Phase 7 migration, never committed to git). 3 fix-soon items applied:
+  - Register `<select>` + `<textarea>` `rounded-md` → `rounded-xs` (matches xs theme radius). `<textarea>` swapped for shadcn `<Textarea>`.
+  - Reset-password "Link expired" CTA: `variant="ghost"` → default (primary CTA hierarchy consistency).
+  - Phone helper text trimmed: 3 sentences → 1.
+- **Lint cleanup (3 pre-existing warnings).** `courses-view-switcher.tsx` — moved `eslint-disable-next-line` from `setHydrated` (false-positive suppression) to `setView` (the actual triggering call). `admin-students.spec.ts` — dropped unused `browserName` and `browser` parameters from a skipped test. **Lint now actually clean.**
+- **Phase 3 retrospective written** in `docs/RETROSPECTIVES.md`. 48 pts / 18.0 hrs / **0.38 hrs/pt** — on V1 baseline, slower than Phase 2 due to many small tasks plus 3.11 OAuth scope-creep. Velocity table in PROJECT_PLAN.md updated. Forecast for V2: behind plan unless velocity recovers to Phase 2 pace; cuttable list (~22 pts) is a release valve.
+- **4.10 added to plan** (1 pt) — recreate `.claude/agents/ui-reviewer.md` from BRAND.md + retro context. To be done before 4.9. Phase 4 total 42 → 43.
+- Test comment fix at `tests/auth-email-verification.spec.ts:25-26` (stale "Supabase rejects" comment after the new server-side mirror) — caught in code review of `984f72a`.
+- Build green. tsc clean. Lint clean. pgTAP 120/120. Auth Playwright stack 35/35 desktop after polish.
+- Commits: `984f72a` (3.14 close — polish + retro + UI fixes + lint cleanup).
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification still pending (carryover from session 102).
+
+**Next Steps:**
+1. **Phase 4 kickoff.** Pick from 4.2 (admin/users consolidation, 8 pts), 4.3 (student profile expansion, 5 pts), 4.6 (instructor notes on sessions, 3 pts), 4.7 (instructor profile expansion, 3 pts), or 4.10 (ui-reviewer recreation, 1 pt).
+2. **4.10 recreate `.claude/agents/ui-reviewer.md`** before 4.9 close. Model on `architect.md` / `code-review.md`. Pull brand rules from BRAND.md (Mira/Sky/Mist, Nunito Sans, xs radius, dark-mode-default, mobile@375px). 12-point review checklist + scored output. The stand-in prompt I used in 3.14 is a workable starting point.
+3. **Eric is thinking about how test cadence works in `/kill-this`.** pgTAP regression slipped through because only the full Playwright suite is gated, not pgTAP. Open question — Eric is mulling whether `supabase test db` should be added to /kill-this, or whether pgTAP becomes a phase-close gate, or some other shape. Don't act unilaterally.
+4. **Pre-existing 4.x bug carryover from session 104:** invited instructors get bounced from `/instructor/dashboard` until JWT refresh — `accept_invite` writes role flag to public.profiles but not auth.users.raw_user_meta_data; proxy reads from JWT meta. Fix: have accept_invite also UPDATE auth.users.raw_user_meta_data + force a session refresh client-side. Natural fit during 4.2 admin/users work.
+5. **Carryovers still open:** SMS smoke-test investigation (Twilio logs), cross-file Playwright test isolation hardening (~5–8 pts in Phase 6), DEC-015 cleanup of remaining `updateProfile` / `updateUserProfile`, `useTransientSuccess` hook extraction (now 4 forms).
+6. **Manual smoke of 3.10 + 3.11** still deferred. Register a fresh email user (Mailpit confirmation), then a fresh Google OAuth user, verify both end up with proper profiles.
+
+**Context:**
+- **`validatePassword` is the single source of truth for our password policy.** Length + lower + upper + digit. Mirrors Supabase config.toml (`minimum_password_length = 12`, `password_requirements = lower_upper_letters_digits`). If config.toml changes, update this file too. Both the function and `friendlyPasswordError` have header comments calling out the duplication for future-you.
+- **Defense-in-depth pattern for password validation:** client `minLength` (HTML5) → server `validatePassword` (our regex) → Supabase Auth (their enforcement). Three layers; client and server agree, Supabase as backstop. `friendlyPasswordError` translates Supabase's verbose copy to ours when Supabase actually trips.
+- **The `@ui-reviewer` agent was never committed to git.** It lived only in `~/.claude/agents/` (user-level) and got wiped in the Phase 7 dev-box move. Same risk applies to anything else that lives in user-level agent / skill / memory dirs — the new SailBook skills survived because Eric explicitly moved them into `.claude/skills/` (per session 101). Anything still at user level is a single-machine accident waiting to happen. Worth a sweep of `~/.claude/agents/` for surviving SailBook-specific specs and committing them.
+- **Phase 3 done, Phase 4 starts cleanly.** No mid-phase carryover this time — every 3.x task is checked. The pre-existing invited-instructor bug surfaced in 3.11 is filed as a 4.x carryover (next-step #4) but is genuinely Phase 4 territory (touches the invite flow).
+- **Velocity reality check:** Phase 3 came in at 0.38 hrs/pt, on the V1 baseline. Forecast at this pace is ~47 hrs of remaining Phase 4–6 work in 16 days. At 8 hrs/week sustainable that's 5.8 weeks — over budget by ~3.5 weeks. Three options: cut tasks (cuttable list covers 22 pts), recover Phase-2 pace (0.22 hrs/pt → 27 hrs → fits), or extend the deadline. Re-baseline at Phase 4 close (per the retro's recommendation).
+- **pgTAP testing-cadence gap.** The /kill-this skill gates `npm run build` and asks about full Playwright suite, but doesn't run pgTAP. Trigger and RLS-touching commits in 3.11 / 3.13 / 3.14 silently regressed `08_admin_students.sql` until Eric ran `supabase test db` manually. Eric is thinking about the right shape for this — flagged in next-steps #3.
+
+**Code Review:** 8 advisory items, 0 blocking. (Findings via @code-review against `984f72a`, plus pgTAP regression caught manually.)
+1. **bug** (fixed this session) `supabase/tests/08_admin_students.sql` — pgTAP regression introduced silently in 3.11 trigger work. Tests 1, 3, 9 failed because the new `handle_new_user` trigger inserts a baseline profile before the test's explicit INSERT could land. Fixed by switching the test's INSERT → UPSERT (mirrors production `createStudent` flow). pgTAP 120/120 now green.
+2. **cleanup** (fixed this session) `tests/auth-email-verification.spec.ts:25-26` — stale comment "Server returns Supabase's policy error verbatim" no longer accurate. Updated to reflect the validatePassword mirror.
+3. **cleanup** Mixed-shape returns across `actions.ts` are intentional per DEC-015 (form vs. button). Worth noting but no fix.
+4. **cleanup** `password-rules.ts:40` regex coverage adequate for current policy (`lower_upper_letters_digits`). Future `_symbols` expansion will need a third branch. Future-self problem.
+5. **cleanup** Magic string `'lower_upper_letters_digits'` in config.toml ↔ regex set in password-rules.ts can drift. Header comments document the link; leave for now.
+6. **cleanup** Native `<select>` styling is browser lottery regardless of radius. Real fix is shadcn `<Select>`; flagged for future polish. Not urgent.
+7. **cleanup** Hydration concern in register-form was unfounded — `useState('')` defaults match SSR HTML. Verified safe.
+8. **cleanup** `noValidate` cascade — no tests rely on HTML5 validity assertions. Safe.
+
+## Session 105 — 2026-04-29 04:37–12:35 (2.00 hrs active; long wall-clock window with parallel work)
+**Duration:** 2.00 hrs | **Points:** 4 (3.13: 1, 3.15: 3)
+**Task:** Phase 3.13 (Twilio/Resend README) + Phase 3.15 (logged-in password change) + session 104 carryovers (open-redirect Host fix, safeNextPath extraction). Parallel thread: mobile/Tailscale access fix.
+
+**Completed:**
+- **3.13 — Twilio/Resend README (1 pt).** `README.md` gains three sections: Twilio Setup (env vars, Toll-Free Verification gate explained as the carrier-path blocker that silently filters traffic until verified), Resend Setup (env var, sailbook.live domain verification flow, FROM_DEFAULT location in code, note that Supabase Auth emails go through SMTP not this code path), and a unified Notifications gating section (`NOTIFICATIONS_ENABLED`, mock buffer at `/api/test/notifications`, no-op behavior when keys are missing).
+- **3.15 — Logged-in password change (3 pts).** New `/account/password` route, role-agnostic, accessible to any authenticated user.
+  - `src/app/(auth)/actions.ts` — new `changePassword` action. DEC-015 shape (`Promise<string | null>`). Validates fields present, new === confirm, length ≥ 12. Re-authenticates via `signInWithPassword(user.email, current)` before calling `updateUser({ password: new })`. Forwards Supabase's password-policy error verbatim.
+  - `src/components/auth/change-password-form.tsx` — three-field client form (current / new / confirm). Reuses the established transient-success effect pattern (DEC-015 + ref + pending → idle transition). Auto-clears all three fields via `formRef.reset()` on success transition.
+  - `src/app/account/password/page.tsx` — server page, redirects unauthenticated to `/login?next=/account/password`. Computes role-aware "Back to dashboard" link from user_metadata.
+  - "Change password" link added to all 3 desktop sidebars + 3 mobile drawers in the existing user/sign-out footer block.
+  - `tests/auth-password-change.spec.ts` — 5 desktop tests: signed-out redirect, happy path (change → sign out → sign in with new), old-password-rejected-after-change, wrong current password, mismatched new+confirm.
+- **3.12 carryovers (next-step #2 + #7 from session 104):**
+  - `src/app/auth/callback/route.ts` — **Host header allow-list.** Only localhost / 127.0.0.1 (any port) and the canonical `NEXT_PUBLIC_SITE_URL` host are honored; spoofed Host falls back to `NEXT_PUBLIC_SITE_URL` instead of becoming an open-redirect surface. **NOTE:** dev server on this box has been observed to serve cached old `/auth/callback` code (same as session 104). The fix is on disk; will go live on next dev-server restart.
+  - `src/lib/auth/safe-next.ts` — extracted `safeNextPath()` helper. Applied at all 6 redirect-guard sites (login/register actions, signInWithGoogle, login + register pages, callback). **Closes the backslash bypass** (/\evil.com → browser parses as //evil.com) flagged in session 103 code review #4.
+- **Test fix:** `tests/payment-e2e.spec.ts:113` was hitting `NEXT_PUBLIC_SITE_URL` for the webhook POST, but on the Hetzner box that points at a laptop-side forwarded port (`:55934`) the test runner can't reach. Hard-coded `localhost:3000`. The 3 failures in the full-suite run earlier were all this same root cause across viewports.
+- **Parallel thread (different session, bundled into the same commit):**
+  - `next.config.ts` — added `sailbook-dev` + `100.118.147.49` to `allowedDevOrigins` and `serverActions.allowedOrigins`. Phone clicks were dead because hydration silently failed when Next blocked dev assets from the Tailscale origin. Native `<select>` worked because no React event handler. Diagnostic shortcut in memory now: native vs Radix A/B test on phone → if native works and Radix doesn't, check `next.config.ts` allowlists.
+  - `src/app/layout.tsx` — viewport meta export added (was missing entirely; would have caused subtle Android touch-coordinate / scaling issues even after the allowlist fix).
+  - `~/.tmux.conf` (off-repo, on Hetzner box) — `mouse on` + `history-limit 10000` so Termius two-finger swipe scrolls tmux scrollback.
+  - `docs/HETZNER_DEV.md` — Mobile access (Termius + tmux) section, troubleshooting entry for the `allowedDevOrigins` hydration-failure symptom, `tailscale up` correction (no `--ssh` flag — that breaks Termius mobile auth).
+  - `docs/PROJECT_PLAN.md` — new task **6.18 — CI + iOS testing (5 pts)**. Triggered by today's bug class: desktop tests didn't catch a phone-only failure. Phase 6 total 56 → 61 pts.
+  - Memory: 3 new entries in `hetzner_box_quirks.md` — allowedDevOrigins requirement, Tailscale-SSH/Termius conflict, tmux config.
+- **Targeted runs (all green this session):**
+  - `auth-password-change.spec.ts`: 5/5 desktop
+  - `auth.spec.ts` + `auth-oauth.spec.ts` + `auth-email-verification.spec.ts` + `codes.spec.ts`: 69/69
+  - `payment-e2e.spec.ts` + `auth-oauth.spec.ts` + `auth-email-verification.spec.ts`: 33/33 (post-fix re-run)
+- **Full suite at session start:** 388 passed / 3 failed (the payment-e2e bug, root-caused and fixed mid-session). **Not re-run after fix** — deferred to 3.14 phase close.
+- Build green. tsc clean. Lint clean (3 pre-existing warnings, none from this work).
+- Commit `e212ee1`. 22 files, +546 / -82.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- Twilio Toll-Free Verification still pending (carryover from session 102).
+
+**Next Steps:**
+1. **Re-run full Playwright suite** — not done after the post-suite changes; should be the first thing in 3.14 phase close.
+2. **Restart the dev server before browser-testing /auth/callback** — it has been serving cached old code on this box. The Host allow-list and safeNextPath changes land on next restart.
+3. **Code review the 3.13/3.15/carryover commit (`e212ee1`).** /kill-this ran the @code-review agent against HEAD but it returned with an Anthropic-side quota message ("You're out of extra usage · resets 3:20pm UTC") and no findings surfaced. Re-run the review at session 106 start.
+4. **3.14 — Phase 3 close (5 pts).** End-of-phase @ui-reviewer pass, lint clean (the 3 pre-existing warnings should be cleaned up), all tests green, all code review resolved, retrospective, archive session log. Polish backlog already in the plan row: noValidate on auth forms, preserve form values on validation failure, friendly password-policy error copy, register-flow UX review.
+5. **Carryovers from session 104, still open:**
+   - Manual smoke of email/password registration (~5 min)
+   - Manual smoke of fresh Google OAuth (~5 min)
+   - File pre-existing 4.x bug: invited instructors bounced from `/instructor/dashboard` until JWT refresh (`accept_invite` writes role flag to profiles, not auth metadata)
+   - Role-flag spoof surface in `register()` (defense-in-depth, hardening task)
+   - Code review cleanup: extract `PASSWORD_RULES_HELP` constant — duplicated yet again in `change-password-form.tsx` (3.10 code review #2 still open).
+6. **Carryovers from session 102:** SMS smoke-test investigation, cross-file Playwright isolation hardening, DEC-015 cleanup of remaining `updateProfile` / `updateUserProfile`, `useTransientSuccess` hook extraction (now 4 forms duplicate it).
+
+**Context:**
+- **`changePassword` re-auth pattern.** `signInWithPassword(user.email, current)` is the verification step. On success it rotates the session — same user, fresh tokens — and we then call `updateUser({ password })` against that fresh session. Wrong current password fails the re-auth step and we return early before the password update. This is simpler and gives clearer error messages than flipping `secure_password_change = true` in `config.toml` (which gates `updateUser` on session age — UX-heavy).
+- **`safeNextPath` rejects four shapes:** null/empty/non-string, no leading `/`, protocol-relative (`//evil.com`), and backslash-prefixed (`/\evil.com` — browsers parse `\` as `/`). The 5th case (URL-parsing-based same-origin check) is more robust but unnecessary at our threat model — all 4 prefix-string rejections are deterministic and fast.
+- **`/auth/callback` Host allow-list logic.** `hostHeader === siteHost || /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(hostHeader)`. In production sailbook.live → Host matches siteHost → use Host (so `x-forwarded-proto` from Vercel/CloudFlare wins for https). In dev on Hetzner, Host is `localhost:3000` (Playwright) or `localhost:55934` (Eric's VS Code Remote-SSH tunnel) — both match the localhost regex. Anything else → fall back to `NEXT_PUBLIC_SITE_URL`.
+- **Mobile diagnostic from parallel thread.** "Phone clicks dead but native HTML works" → check `next.config.ts` `allowedDevOrigins` first. The signature: hydration silently fails (no console error) when dev assets are blocked, leaving server-rendered HTML and native elements working but every React `onClick` dead. Burned an hour chasing Radix Select fixes before realizing this. Saved as memory.
+- **8-hour wall-clock duration spans both threads.** Parallel session was working concurrently for much of this window; "8 hours of effort" overstates Eric's active dev time on this thread. 4 pts of plan-table tasks completed; the open-redirect + safeNextPath carryovers (~2 pts of real work) and the parallel-thread mobile fix (~3-5 pts of real work) are not in the plan table and don't tally. Velocity for this session will look bad as a result — flag for the retrospective at 3.14.
+- **Repo git config still missing on Hetzner box.** Used the same one-off `mobiustripper42 / mobius5kcrypto@gmail.com` flags as session 103. Phase 7 dev-tooling script is the right place to fix this — open follow-up.
+
+**Code Review:** Deferred to next session per Eric's call. The /kill-this @code-review agent run completed but returned an Anthropic-side quota message ("You're out of extra usage · resets 3:20pm UTC") with no findings; the actual review of `e212ee1` is queued as next-step #3.
+
+## Session 104 — 2026-04-28 14:58 → 2026-04-29 04:05 (3.25 hrs across two sittings)
+**Duration:** 3.25 hrs (sitting 1: 14:58–15:30 = 0.5 hrs · sitting 2: 01:25–04:05 = 2.75 hrs) | **Points:** 5 (3.12: 3, 3.11: 2 [scored 2 — see Estimation Note])
+**Task:** Phase 3.12 Security audit + Phase 3.11 OAuth login (Google) + handle_new_user trigger
+
+**⚠ TOP REMINDER FOR NEXT SESSION:**
+1. **Eric did NOT run the full Playwright suite this session.** Run `npx playwright test` first thing. Some specs that touch /login or /register may have shifted with the Suspense + GoogleSignInButton refactor; only auth.spec.ts / codes.spec.ts / auth-email-verification.spec.ts / auth-oauth.spec.ts / password-reset.spec.ts / admin-students.spec.ts were verified.
+2. **Open-redirect regression in /auth/callback (introduced this session).** Fix: validate Host header against an allow-list before using as redirect base, fall back to url.origin. ~1 pt.
+
+**Completed:**
+- **3.12 — Security audit (3 pts).** /security-review against Phase 3 surface (auth, notifications, test routes, RLS migration, cron, email template). Zero qualifying findings at >80% confidence. Excluded items: instructor_notes length cap, backslash in /auth/callback `next`, listUsers page truncation in dev-only test route, JSONB shape validation absence — noted but excluded by review rules.
+- **3.11 — OAuth login (Google) — original estimate 2, effective scope 5.** Files:
+  - `supabase/migrations/20260429020252_handle_new_user_trigger.sql` — SECURITY DEFINER trigger on auth.users insert. Reads first_name/last_name (email path) or full_name/name (Google path, splits on first space) or given_name/family_name (other OIDC providers). Inserts profile row, ON CONFLICT DO NOTHING. Also stamps role flag defaults (is_admin/is_instructor/is_student) into auth.users.raw_user_meta_data via `||` merge so proxy.ts reads them from the JWT.
+  - `supabase/config.toml` — `[auth.external.google]` block, env-referenced credentials. site_url aligned to localhost (was 127.0.0.1). additional_redirect_urls globbed `http://localhost:*/auth/callback` and `127.0.0.1:*/auth/callback` so any VS Code Remote-SSH-forwarded port works.
+  - `supabase/.env` (gitignored) — Google OAuth client ID + secret. Supabase CLI auto-loads; .env.local is Next.js-only and not read.
+  - `src/app/(auth)/actions.ts` — register() now stuffs all profile fields into options.data (trigger handles the insert; service-role adminClient insert from 3.10 removed). New signInWithGoogle action with `next` open-redirect guard. login() also honors `next` for round-trips.
+  - `src/components/auth/google-sign-in-button.tsx` — Client Component, useActionState wrapper around signInWithGoogle, brand-colored Google SVG, hidden `next` field.
+  - `src/app/(auth)/login/page.tsx` + `register/page.tsx` + `register-form.tsx` — Continue with Google button + divider, hidden next field, useSearchParams for next param. Suspense boundaries on both pages for build-time bailout.
+  - `src/app/auth/callback/route.ts` — redirects now use Host header (with x-forwarded-proto fallback) to round-trip correctly through VS Code Remote-SSH port forwarding (Eric's :55934 ≠ Hetzner's :3000). Open-redirect surface — see top reminder.
+  - `src/app/invite/instructor/[token]/page.tsx` — Sign in / Create account links pass `?next=/invite/instructor/<token>` so OAuth users return to the invite page.
+  - `src/actions/profiles.ts` — admin createStudent: `.insert` → `.upsert` (trigger fires first, this overwrites with rich data + auth_source='admin_created').
+  - `supabase/seed.sql` — profile INSERT switched to ON CONFLICT (id) DO UPDATE for trigger compatibility.
+  - `tests/auth-oauth.spec.ts` — 6 desktop tests: button rendering on /login + /register, instructor invite link shape, login ?next= hidden field, ?next= open-redirect rejection, handle_new_user trigger creates profile.
+  - `tests/codes.spec.ts` — admin-student-edit test patched to use getByRole('button', { name: 'Sign in' }) instead of brittle `button[type="submit"]` (login page now has 2 submit buttons).
+- **Pre-Launch Checklist** in PROJECT_PLAN.md gains a line for the production Google OAuth provider config (Dashboard + Google Cloud Console redirect URIs).
+- **Memory:** `~/.claude/projects/-home-eric-sailbook/memory/hetzner_box_quirks.md` — `supabase stop` requires `--project-id sailbook`; VS Code Remote-SSH forwards Hetzner ports to random local ports, NEXT_PUBLIC_SITE_URL must match the browser-facing port.
+- **Targeted runs (all green):**
+  - `auth-oauth.spec.ts`: 6/6 desktop
+  - `auth-email-verification.spec.ts`: 5/5 desktop
+  - `auth.spec.ts`: 24/24 across 3 viewports
+  - `codes.spec.ts`: 9/9 across 3 viewports (verified after seed-password ripple)
+  - `password-reset.spec.ts`: 18/18 across 3 viewports
+  - `admin-students.spec.ts`: 11+ verified pass
+- Build green. tsc clean. Lint clean.
+- Commits: `befedcd` (session 103 close-out), `9233595` (3.12), `8d4451f` (3.11).
+
+**In Progress:** Nothing. Manual smoke of email/password registration via the new trigger path was NOT done this session (only OAuth was smoke-tested).
+
+**Blocked:**
+- Twilio Toll-Free Verification still pending (3.5/3.6/3.7 SMS prod smoke-test failure carryover from session 102).
+
+**Next Steps:**
+1. **Run full Playwright suite** (`npx playwright test`) — top reminder, see above.
+2. **Fix the open-redirect surface in /auth/callback** — validate Host header against a small allow-list (NEXT_PUBLIC_SITE_URL host + localhost any port for dev) before using as redirect base, fall back to url.origin on mismatch. ~1 pt. Captured in code review #1.
+3. **Manual smoke of email/password registration** — via the new trigger path (3.10's adminClient insert removed). Register a fresh email user, confirm via Mailpit, verify profile row + role flags. ~5 min.
+4. **Manual smoke of fresh Google OAuth (post-trigger fix)** — db reset, sign in, verify name extraction populates first_name/last_name correctly on first try (today we patched the live profile manually).
+5. **Pre-existing bug exposed by 3.11: invited instructors get bounced.** `accept_invite` RPC writes `is_instructor=true` to public.profiles but does NOT touch auth.users.raw_user_meta_data. The proxy reads from JWT metadata, so an invited instructor sees /instructor/dashboard bounce them back until token refresh (~1 hour). Fix: have accept_invite also UPDATE auth.users.raw_user_meta_data and prompt a session refresh client-side. File as a 4.x bug. Captured in code review #3.
+6. **Pre-existing role-flag spoof surface (low risk, follow-up).** `register()` server action takes `is_admin` etc. from form data via options.data. Hand-crafted client could submit `is_admin: true`. Today the form doesn't expose those fields, but defense-in-depth: trigger or post-insert step should force `is_admin = is_instructor = false` for self-registered users. Captured in code review #2.
+7. **Extract a shared `safeNextPath()` helper.** Open-redirect guard `nextRaw.startsWith('/') && !nextRaw.startsWith('//')` duplicated in 5 places (login/register actions, callback route, login/register pages). Code review #4. ~1 pt.
+8. **Carryover next-steps from sessions 102–103:** SMS smoke-test investigation, cross-file Playwright test isolation, DEC-015 cleanup of remaining profile actions, useTransientSuccess hook extraction.
+9. **3.13 — README docs for Twilio/Resend** (1 pt) or **3.14 — phase close** (5 pts).
+
+**Estimation Note (standing disagreement):**
+- 3.11 was scored 2 pts. Actual scope was closer to 5: trigger refactor that touched 4 auth paths, seed compat, config.toml provider block + env file resolution, host-header callback fix, Google name-key surprise (`name`/`full_name` vs `given_name`/`family_name`), proxy role-flag mismatch on OAuth users, VS Code Remote-SSH port-forwarding rabbit hole. Eric flagged he had an instinct to push back and didn't. **Lesson:** "OAuth login Google" looks like a config flip but is actually an end-to-end auth integration. Future estimates of provider integrations should default to 5+ unless the pattern is already established. Logging the 2 pts as scored (not retroactively bumped — tracking accuracy) but adding to standing disagreements.
+
+**Context:**
+- **`handle_new_user` trigger is now the single source of truth for profile creation.** All three auth paths (email/password signUp, Google OAuth, admin createStudent) flow through it. Email/password supplies first_name/last_name + phone/experience/instructor_notes via `signUp({ options: { data: ... } })`. Google supplies `full_name` / `name` (NOT given_name/family_name as I initially assumed) — split on first space. Admin createStudent sets minimal user_metadata, then upserts the rich profile (phone, asa_number, auth_source='admin_created') after the trigger inserts the baseline.
+- **Trigger also stamps role-flag defaults into auth.users.raw_user_meta_data** so proxy.ts can read from the JWT. The `||` merge puts existing keys on top — email/password signUp's options.data wins, Google's empty case gets defaults filled in. PRE-EXISTING SPOOF: client-side options.data is trusted; should harden in a follow-up.
+- **VS Code Remote-SSH forwards Hetzner ports to random local ports.** NEXT_PUBLIC_SITE_URL needs to match the browser-facing port, not Hetzner's :3000. The /auth/callback route now reads the Host header for the redirect base — works for both Eric's :55934 and Playwright's :3000. The catch: trusting Host is an open-redirect surface. Next session priority.
+- **Supabase CLI reads from `supabase/.env`, NOT `.env.local`.** `.env.local` is Next.js-only. Existing `env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)` references in config.toml were dormant — local Supabase doesn't actually use them. New `[auth.external.google]` references env vars that have to live in `supabase/.env` (gitignored).
+- **`supabase stop` on this Hetzner box requires `--project-id sailbook`** — bare form is a no-op or errors. Saved to memory; tooling-script TODO to fix in dev-tooling automation.
+- **Supabase auth panel does NOT sync from config.toml on remote.** [auth.external.google] block is local-dev only; production needs Dashboard config (already in Pre-Launch Checklist).
+- **Hot-reload misfire on Hetzner.** During this session the dev server stopped picking up edits to /auth/callback after a few iterations — `touch`-ing the file forced re-compile. Eric may want to add a watch-mode sanity check or restart between iterations when state gets weird.
+- **Mailpit replaces Inbucket as Supabase's local mailcatcher** at http://127.0.0.1:54324. Same role; URL is different from older docs.
+- **Cookies + ports.** Supabase session cookies were set on the browser-facing host (:55934) during /auth/callback. Cross-port cookies on localhost are domain-wide (browsers treat localhost without port as one origin for cookie purposes). No bug here, just worth knowing if a future change moves to a non-localhost host.
+
+**Code Review:** 8 advisory items, 0 blocking. (Findings via @code-review against 8d4451f.)
+1. **bug** `auth/callback/route.ts:19-23` — Host header trust = open-redirect surface. Fix: allow-list. Captured as next-steps #2.
+2. **security** Trigger `||` merge accepts client-supplied is_admin/is_instructor in user_metadata. Pre-existing in register() flow; should harden. Next-steps #6.
+3. **bug (pre-existing)** Proxy reads role flags from JWT meta, but accept_invite writes only to profiles. Invited instructors bounced from /instructor/dashboard until token refresh. Next-steps #5.
+4. **consistency** `next` open-redirect guard duplicated in 5 places — extract `safeNextPath()`. Next-steps #7.
+5. **cleanup** Trigger's last_name split logic readable but fragile (`NULLIF(NULLIF(SUBSTRING(...), v_full), '')`). Rewrite as CASE expression.
+6. **cleanup** profiles.ts upsert depends on the trigger having inserted. Comment is good; no action.
+7. **cleanup** seed.sql ON CONFLICT DO UPDATE preserves seed determinism. Confirmed safe; no action.
+8. **cleanup** Suspense boundary placement on /login + /register correct. No action.
+
+## Session 103 — 2026-04-27 10:51–11:39 (0.83 hrs)
+**Duration:** 0.83 hrs | **Points:** 3 (3.10: 3)
+**Task:** Phase 3.10 — Password strength + email verification
+
+**⚠ TOP REMINDER FOR NEXT SESSION:**
+**Manual smoke test was NOT performed this session.** Eric stopped before exercising the new register → email confirm → login flow in a real browser. Before doing anything else next session: spin up dev, register a new user, find the confirmation email in Mailpit (http://127.0.0.1:54324), click the link, verify landing on /student/dashboard. If it breaks, code review's `cleanup #1` (rollback auth user on profile-insert failure) becomes load-bearing.
+
+**Completed:**
+- **Password policy.** `supabase/config.toml`: `minimum_password_length = 12`, `password_requirements = "lower_upper_letters_digits"`. `minLength={12}` + helper text on register and reset-password forms.
+- **Email verification (local).** `enable_confirmations = true`. New `src/app/auth/callback/route.ts` exchanges code → session, sanitizes `next` against open-redirect, falls back to `/login?error=...`. New `src/app/(auth)/register/check-email/page.tsx` landing. Register action in `src/app/(auth)/actions.ts` switches profile insert to `adminClient` (signUp returns no session with confirmations on — same pattern as admin-created students). Redirects to `/register/check-email?email=...`. `src/proxy.ts` adds `/auth/` as a public prefix.
+- **Custom email template.** `supabase/templates/confirmation.html` — SailBook-branded, Sky/Mist palette, inline-styled (email clients), wired via `[auth.email.template.confirmation]`.
+- **Resend SMTP stub.** Commented `[auth.email.smtp]` block in config.toml pointing at `smtp.resend.com:587` with a comment that auth panel doesn't sync from config.toml — production wires in the Supabase Dashboard.
+- **Seed password rotated** `qwert12345` → `Sailbook12345` across 7 canonical files: `supabase/seed.sql`, `src/components/dev-login-helper.tsx`, `src/app/dev/page.tsx`, `tests/helpers.ts`, `tests/auth.spec.ts`, `tests/codes.spec.ts`, `docs/QA.md`. Historical archives left alone.
+- **Pre-Launch Checklist** in `docs/PROJECT_PLAN.md` gains five lines for remote auth-config rollout (enable_confirmations, custom SMTP, template upload, password policy, Site URL + Redirect URLs — all Dashboard-only).
+- **Test API.** New `src/app/api/test/confirm-email/route.ts` (devOnly-gated) force-confirms a user via the admin API so specs can simulate clicking the confirmation link without scraping Mailpit.
+- **Tests.** `tests/auth-email-verification.spec.ts` — 5 desktop tests: rejects password missing required character classes, valid registration lands on check-email, unconfirmed user gated from login until force-confirmed, callback with missing code → /login?error=missing_code, callback with invalid code → /login?error=invalid_link.
+- **Targeted runs (all green):**
+  - `auth-email-verification.spec.ts`: 5/5 desktop
+  - `auth.spec.ts`: 36/36 across 3 viewports (verifies new seed password works)
+  - `codes.spec.ts`: 9/9 across 3 viewports (uses new seed password)
+  - `password-reset.spec.ts`: 18/18 across 3 viewports
+- Build green. tsc clean. Lint clean.
+- Commit `02305b9`.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- 3.5/3.6/3.7 SMS smoke-test failure carryover from session 102 — Twilio Toll-Free Verification still pending; need to pull Twilio logs.
+- Remote rollout of email confirmations + SMTP wiring + template upload — all listed in Pre-Launch Checklist for the deploy session.
+
+**Next Steps:**
+1. **Manual smoke test of 3.10 in a browser** (top reminder above). Register a new user, find the confirmation email in Mailpit, click the link, verify dashboard landing. Test path: http://localhost:3000/register → submit → /register/check-email → http://127.0.0.1:54324 → click confirm link → /auth/callback → /student/dashboard.
+2. Carry forward from session 102: investigate 3.5/3.6/3.7 SMS smoke-test failure (Twilio logs).
+3. Carry forward from session 102: cross-file Playwright test isolation hardening (~5–8 pts, Phase 6).
+4. Carry forward from session 102: DEC-015 cleanup of `updateProfile` + `updateUserProfile` (~1 pt).
+5. Carry forward from session 102: extract `useTransientSuccess(pending, state)` hook (~1 pt).
+6. Code review cleanup #1 (rollback auth user on profile-insert failure in `register()`) becomes higher priority if step 1 reveals the broken-state path is reachable. ~1 pt.
+7. Code review cleanup #2 (extract `PASSWORD_RULES_HELP` constant — duplicated in register-form.tsx, reset-password/page.tsx, config.toml). ~1 pt.
+8. **3.11 — OAuth login (Google), 2 pts.** Or 3.12 — Security audit, 3 pts. Both are still in Phase 3.
+
+**Context:**
+- **adminClient on register is the right call.** With `enable_confirmations = true`, `signUp` does NOT create a session, so the user has no auth context to satisfy RLS on the profiles insert. Service-role bypass mirrors the admin-created-student pattern in `src/actions/profiles.ts` (around line 175). Code review confirmed no new exposure: role flags are hardcoded server-side, only the just-created `data.user.id` is touched.
+- **Supabase auth panel does NOT sync from config.toml on remote.** `supabase config push` syncs project settings but the Authentication panel (providers, email templates, SMTP, password policy, URL configuration) is Dashboard-only. Captured in five Pre-Launch Checklist lines so the prod rollout is explicit.
+- **Seed password (`Sailbook12345`) bypasses Supabase's password policy.** Supabase enforces password rules only at the API surface (`signUp`, `updateUser`). Direct `INSERT INTO auth.users (encrypted_password)` via SQL bypasses the check. The new seed password meets the policy regardless, for consistency with what users will see in the register form.
+- **Hetzner box has no git identity configured.** The Phase 7 dev tooling script didn't set `user.email` / `user.name`. Worked around with one-off `git -c user.email=... -c user.name=...` flags on this commit (no persistent config change). Add to dev-tooling script or `git config --global` on the box; either is fine. Used `mobiustripper42 / mobius5kcrypto@gmail.com` to match prior history.
+- **HTML5 `minLength={12}` blocks short passwords client-side.** Server enforces classes-required policy. Tests verify the *missing-classes* path (server-side) by submitting a 14-char all-lowercase password — HTML5 doesn't catch missing uppercase, so the request hits the server.
+- **Mailpit is at http://127.0.0.1:54324 on this box.** Replaces Inbucket (older Supabase CLI versions); same role.
+- **Co-author tag in this repo is `Claude Opus 4.7 (1M context)`** matching the three prior commits — the kill-this skill template still says "Sonnet 4.6" but the repo convention is Opus 4.7. Worth a one-line fix to `.claude/skills/kill-this/SKILL.md` if you want consistency with the actual tooling.
+
+**Code Review:** 5 advisory cleanups, 0 bugs. (Findings via @code-review against 02305b9.)
+1. **consistency** `actions.ts:65` — profile-insert failure leaves orphan `auth.users` row. Same race exists for admin-created students; not new. Either rollback via `admin.deleteUser` on profile error, or document. Captured as next-steps #6.
+2. **consistency** Password rules text duplicated in register-form.tsx, reset-password/page.tsx, config.toml. Extract `PASSWORD_RULES_HELP` constant. Captured as next-steps #7.
+3. **cleanup** `confirm-email/route.ts:32` — `listUsers({ perPage: 1000 })` silently fails if seed exceeds 1000 users. Iterate pages or add a loud assertion. Local-dev-only, low priority.
+4. **cleanup** `auth/callback/route.ts:10` — `next` rejects `//` (good) but not `/\` (backslash). Defense-in-depth: parse with `new URL(...)` and check the origin matches.
+5. **cleanup** `proxy.ts` — `/auth/` PUBLIC_PREFIX is broad; only `/auth/callback` exists. Add a comment or be explicit with `/auth/callback`.
+
+## Session 102 — 2026-04-26 20:31–21:46 (1.25 hrs)
+**Duration:** 1.25 hrs | **Points:** 2 (3.9: 2)
+**Task:** Phase 3.9 — Student notification preferences + DEC-015 migration of updateStudentProfile
+
+**Completed:**
+- **DEC-015 pre-work migration of `updateStudentProfile`.**
+  - `src/actions/profiles.ts` — return type changed from `Promise<{ error: string | null }>` → `Promise<string | null>` (DEC-015 form-action shape). The lone outlier among student-side form actions; resolved before 3.9 forks the pattern further.
+  - `src/components/student/student-account-form.tsx` — reads state directly. "Profile updated." success banner preserved via a transient `pending → idle && state === null` flag. All 4 `instructor-notes.spec.ts` tests still pass against the new shape.
+- **Phase 3.9 — Student notification preferences (2 pts).**
+  - `src/lib/notifications/preferences.ts` — `STUDENT_GLOBAL_KEY`, `isStudentChannelEnabled(prefs, channel)`, `normalizeStudentPreferences(prefs)`. Same defensive defaults as admin helper (any non-bool / null / missing → enabled).
+  - `src/lib/notifications/triggers.ts` — all 4 student fan-outs gated per-channel: `notifyEnrollmentConfirmed`, `notifySessionCancelled`, `notifyMakeupAssigned`, `notifyUpcomingSessionReminders`. Profile selects extended.
+  - `src/actions/notification-preferences.ts` — new `updateStudentNotificationPreferences` (DEC-015 shape). **Both admin and student actions now MERGE with existing JSONB instead of replacing**, fixing a latent dual-role bug where saving one role's prefs would erase the other's. New `readExistingPrefs` helper.
+  - `src/components/student/notification-preferences-section.tsx` — client form, two checkboxes (SMS / email), same transient success pattern.
+  - `src/app/(student)/student/account/page.tsx` — loads `notification_preferences`, mounts new section below the profile form.
+  - `src/app/api/test/set-notification-prefs/route.ts` — dev-only test API behind `devOnly()`. Lets dispatcher gating tests set arbitrary prefs without UI navigation.
+- **Tests** — `tests/student-notification-preferences.spec.ts`. 5 desktop tests: section renders, save+reload persist, SMS-off → email only, email-off → SMS only, both-off → no student notifications. **First automated coverage of the channel-suppression dispatcher path** — possible because Eric flipped `NOTIFICATIONS_ENABLED=false` for this session.
+- **Full-suite triage** of 4 failures Eric ran into:
+  - `enrollment-hold:115` cron expires holds — flake (3/3 pass isolated). Parallel-load.
+  - `enrollment-notifications:17` 3.4 — flake (3/3 pass isolated). Mock buffer cross-spec contention.
+  - `instructor-notes:26` update name — flake (3/3 pass isolated). `pw_student` profile contention.
+  - `member-pricing:52` strikethrough — flake (passes when full file runs serial). Inter-test dependency on `is_member` flag set in prior test of the same describe; cross-spec parallel writes to `pw_student.is_member` race against it.
+  - **All four are pre-existing test-isolation issues, not regressions from today.** Captured in next steps as a Phase 6 hardening task.
+- Commit `ef82ac6`.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- 3.5/3.6/3.7 SMS production smoke test failure — Eric reported: 3.4 SMS+email worked, 3.5/3.6/3.7 email worked but SMS did not. Punted to next session per Eric. Possible causes: Twilio toll-free unverified rate limit, content filter on body (URLs / STOP disclosure), template-specific encoding. Need to check Twilio logs with the actual rejected message SIDs.
+- Twilio Toll-Free Verification still pending submission/approval.
+- Parallel CC running session 101 (Phase 7 — Hetzner remote dev). Independent.
+
+**Next Steps:**
+1. **Investigate 3.5/3.6/3.7 SMS smoke-test failure (Eric's first thing).** Pull Twilio logs for the failed message SIDs from this evening's smoke-test run to see actual rejection reason. Hypotheses to check first: (a) toll-free unverified content filter on URL or "STOP" string, (b) GSM-7 vs UCS-2 segment encoding, (c) per-recipient throttle. 3.4 worked, so account/number basics are fine — it's content-shape specific.
+2. **Cross-file Playwright test isolation hardening (Phase 6 task, ~5–8 pts).** Tests collide on shared seed users (`pw_student` mostly) and the module-level mock buffer. Recommended fixes: (a) mock-buffer specs should scope assertions by `runId()` substrings so cross-spec dirtying doesn't cause false positives; (b) `is_member`-mutating tests should use a dedicated alt user (e.g. `pw_student2`); (c) `member-pricing.spec.ts` afterAll should verify reset; (d) consider a per-test transactional fixture if the pattern keeps biting. **Race tests will keep coming up as more concurrent-write features ship — worth investing.**
+3. Code review cleanup: `updateProfile` + `updateUserProfile` in `src/actions/profiles.ts` still use `{ error }` shape — DEC-015 cleanup task, ~1 pt. Slot before any admin-form change.
+4. Code review cleanup: `useTransientSuccess(pending, state)` hook to dedupe the pending-transition pattern now duplicated across 3 forms (admin notif, student profile, student notif). ~1 pt.
+5. **3.10 — Password strength + email verification (3 pts).** Now unblocked since Resend is live (Eric did Phase 3.2 in session 95+) and `NOTIFICATIONS_ENABLED` is back to false-for-tests. Custom email template via Resend, Supabase Auth password requirements config.
+6. `supabase db push` to remote — confirm `20260426232739_admin_notification_preferences.sql` is on remote (Eric pushed at start of session 100; this session's 3.9 reuses the existing column so no new migration needed).
+
+**Context:**
+- **Latent dual-role JSONB-clobber bug fixed in session 102.** Admin AND student actions both wrote `notification_preferences` by replacing the whole object. Profiles can be `is_admin && is_student` (1.13 dual-role pattern). Saving one role's prefs would silently erase the other's. New shallow-merge pattern via `readExistingPrefs` keeps both intact. Read-modify-write race window exists in theory; acceptable for V1 single-user single-form.
+- **Shallow merge depth is load-bearing.** Top-level keys (`admin_enrollment_alert`, `admin_low_enrollment`, `student_global`) are disjoint, so `{ ...existing, ...newBlock }` replaces only the changed block. If a future event nests deeper, the merge silently wipes — comment in the code calls this out.
+- **Transient-success pattern.** `useState + useRef + useEffect` to flip a `hasSubmitted` flag on the `pending → idle` transition, then derive `showSuccess` from `hasSubmitted && state === null && !pending`. Survives Strict Mode double-renders (refs persist, effect fires on falling edge). Now duplicated across 3 forms; ripe for extraction into a `useTransientSuccess` hook (next-steps #4).
+- **Dispatcher gating tests are flaky against `NOTIFICATIONS_ENABLED=true`.** They use `notify=true` against `/api/test/enroll` — would fire real Twilio/Resend. Tests should add `test.skip(process.env.NOTIFICATIONS_ENABLED === 'true', 'requires mock buffer')` at the top of each gating test (code review flagged; not addressed this session).
+- **Cross-spec parallel race patterns are accumulating.** Mock buffer + shared seed user state are concurrent-write hotspots. Workers=4 surfaces the races. Symptom: tests pass in isolation, fail intermittently in full suite. As notifications/preferences/etc. add more shared mutation, this bites harder. Earmarked as a real Phase 6 task (~5–8 pts).
+- **Filter SMS test entries by template-specific phrase, not just title.** Student SMS template uses "you're enrolled in {title}"; admin SMS uses "{name} enrolled in {title}". Both contain the title — filtering on `title + "you're enrolled"` disambiguates student vs admin entries in the mock buffer. Discovered while debugging the first-run dispatcher test failure.
+
+**Code Review:** 6 cleanups, 0 bugs. The dual-role JSONB merge fix is the real win.
+1. **cleanup** `notification-preferences.ts:17` — `readExistingPrefs` uses `any` for the supabase client param. Adds to existing `project_types_debt` MEMORY. Type as `Awaited<ReturnType<typeof createClient>>` or extract a shared alias.
+2. **cleanup** Shallow-merge depth is intentional; comment in code recommends documenting that top-level key disjointness is the load-bearing assumption.
+3. **cleanup** `updateProfile` + `updateUserProfile` still on old shape; file a DEC-015 cleanup ticket. (Captured in next steps #3.)
+4. **consistency** Read-modify-write race window noted; acceptable for V1, document the assumption in the code.
+5. **cleanup** Extract `useTransientSuccess(pending, state)` hook now that 3 forms duplicate the pattern. (Captured in next steps #4.)
+6. **consistency** Add `test.skip(process.env.NOTIFICATIONS_ENABLED === 'true')` guard to dispatcher gating tests so a stray env flip doesn't fire real Twilio/Resend.
+
+RLS unchanged — existing self-update policy on `profiles` covers the new column writes. Test API route correctly gated behind `devOnly()`.
+
+## Session 101 — 2026-04-26 20:03 → 2026-04-27 00:30 (~4.5 hrs, exact time TBD)
+**Duration:** ~4.5 hrs | **Points:** 18 (7.1: 3, 7.2: 3, 7.3: 3, 7.4: 5, 7.5: 2, 7.6: 2)
+**Task:** Phase 7 — Remote Dev Environment. Move dev off the laptop onto a Hetzner Cloud box accessed over Tailscale, edited via VS Code Remote-SSH.
+
+**Completed:**
+- **7.1 — Hetzner provisioning.** `hcloud` CLI installed to `~/.local/bin`, ed25519 key `~/.ssh/sailbook_hetzner` generated, project `sailbook` + R/W token configured (token in `~/.config/hcloud/cli.toml`, mode 600, gitignored). SSH key registered as `sailbook-laptop`. Cloud Firewall `sailbook-dev-fw` created with SSH-from-anywhere + ICMP. Server provisioned at `5.161.209.160` after CPX41 turned out to be retired across all locations — landed on **ccx23** (4 dCPU / 16 GB / 160 GB SSD / Ashburn / Ubuntu 24.04, $40/mo). Took 3 placement attempts; Hetzner's "Available: yes" lies during capacity crunches.
+- **7.2 — Server hardening + Tailscale.** `scripts/hetzner-bootstrap.sh` (idempotent, two-pass): apt upgrade, sudo user `eric` (passwordless, key-only), 4 GB swap (swappiness=10), ufw default-deny + OpenSSH, fail2ban sshd jail, unattended-upgrades, Tailscale install. Pass 2 (`TAILSCALE_UP=1`) hardens sshd via `/etc/ssh/sshd_config.d/99-sailbook-hardening.conf` (root login + password auth disabled). Hetzner Cloud Firewall stripped to ICMP only — **public port 22 closed**, only the tailnet routes in. Box reachable as `100.118.147.49` / `sailbook-dev` on tailnet.
+- **7.3 — Dev tooling.** `scripts/hetzner-dev-tooling.sh` (idempotent): fnm + Node 22.22.2, Docker CE 29.4.1 + Compose 5.1.3 (eric in `docker` group, no sudo needed), Supabase CLI 2.90.0 (matches laptop), gh 2.91.0, Playwright system deps + all 5 browsers (chromium, chromium-headless-shell, firefox, webkit, ffmpeg). Critical fix: symlinks `node`/`npm`/`npx`/`corepack`/`supabase` into `/usr/local/bin` so non-interactive SSH (`ssh host 'cmd'`) finds them — Ubuntu's `.bashrc` early-returns for non-interactive shells, and SSH cmd-exec doesn't source `.profile` either.
+- **7.4 — Repo bring-up.** `gh auth login` interactively, repo cloned, `.env.local` scp'd over the tailnet, `supabase start` (15 containers, ~3 min cold), `npm install`, `npx playwright install`. **9/9 tests passed** on `tests/codes.spec.ts`, full pgTAP suite green. Dev URL forwarded to Windows browser through VS Code Remote-SSH later in 7.5.
+- **7.5 — VS Code Remote-SSH.** SSH config block added to WSL `~/.ssh/config`. Walked Eric through Windows-side setup: Tailscale for Windows install + tailnet join, Remote-SSH extension, `sailbook_hetzner` key copied to `C:\Users\eric\.ssh\` with `icacls` permissions tightened, host block in `C:\Users\eric\.ssh\config`. Notepad's "save as .txt" gotcha bit; `Move-Item config.txt config -Force` fixed it. End-to-end loop closed: VS Code on Windows edits files on Hetzner over Tailscale, port 3000 auto-forwarded, browser hits Next dev served from Ashburn.
+- **7.6 — Document.** `docs/HETZNER_DEV.md` (architecture / daily workflow / pause-stop / first-time-from-new-device / rebuild-from-scratch / troubleshooting). `scripts/hetzner-provision.sh` wraps the initial hcloud calls with retry on placement failure. `scripts/firewall-locked.json` is the post-bootstrap firewall rule set. README pointer added.
+
+**In Progress:** None.
+
+**Blocked:** None.
+
+**Next Steps:**
+1. Resume Phase 3.10 (password strength + email verification) on the new remote box. Now unblocked since Resend is live.
+2. Carry forward from session 102: investigate 3.5/3.6/3.7 SMS smoke-test failure (Twilio logs).
+3. Carry forward from session 102: cross-file Playwright test isolation hardening (~5–8 pts, Phase 6 task).
+4. **Snapshot + delete the server** when stepping away for weeks (`hcloud server create-image --type snapshot ...` then `hcloud server delete`). Hetzner bills hourly whether on or off — `poweroff` does NOT save money, my earlier suggestion was wrong. Snapshot-and-delete drops the cost from $40/mo running to ~$2/mo (snapshot only); restore is ~5 min.
+5. Update PROJECT_PLAN.md Velocity Tracking table with Phase 7 actuals next time the plan gets a refresh (Phase 7 not on the critical V1 path so the table didn't get a row, but actuals are: 18 pts / ~4.5 hrs / 0.25 hrs/pt).
+
+**Context:**
+- **CPX41 is retired everywhere.** Hetzner's listing showed pricing on `cpx41` but `Available: no` in every region. The new generation (`cpx42`) is EU-only. For US, the working 16 GB option is `ccx23` (dedicated vCPU, $40/mo, 160 GB). We had to retry 3x to get capacity even after switching off CPX41.
+- **Local Supabase publishable keys are deterministic.** `supabase status -o env` shows the same `sb_publishable_*` and `eyJ...` ANON/SERVICE_ROLE keys on the laptop and the new Hetzner box — `.env.local` Just Works once copied. Earlier confusion came from a sloppy diff that compared two ANON-prefixed lines from the laptop's file.
+- **Non-interactive SSH doesn't source shell init files.** `ssh host 'cmd'` runs with `/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin` — neither `.bashrc` (interactive guard returns early) nor `.profile` (login-only) is read. The fix is symlinks into `/usr/local/bin`. Same trap will bite VS Code Remote-SSH bootstrap (it runs commands non-interactively to install its server bits).
+- **Tailscale SSH is the auth backstop.** With `tailscale up --ssh`, the box accepts SSH from any tailnet member without keys. When Eric's Windows SSH config was busted (empty `config`, content in `config.txt`), `ssh sailbook-dev hostname` still worked from PowerShell — Tailscale identity was doing the auth. Worth knowing: if you ever brick the SSH key/config story, you can still get in via Tailscale.
+- **Hetzner placement reliability is mediocre.** "Available: yes" in `hcloud server-type describe` ≠ guaranteed placement. Both `ccx23` in `ash` and `hil` failed back-to-back during the same minute. `scripts/hetzner-provision.sh` now retries 3x with 30s sleep. For initial provisioning, advise picking a non-peak window.
+- **Ubuntu 24.04 base image is missing `unzip`.** fnm's installer needs it. `scripts/hetzner-dev-tooling.sh` step 0 now apt-installs unzip + git + build-essential + pkg-config.
+- **Notepad on Windows saves with `.txt` by default** even when you typed `config` as the filename (it appends an extension based on the file type). `Get-ChildItem $HOME\.ssh\` reveals it; `Move-Item` fixes it. Worth a one-liner in HETZNER_DEV.md troubleshooting.
+- **Cost reality.** Server is hourly-billed ($0.064/hr ≈ $46/mo at full uptime; "$40/mo" is the listed monthly cap). Leaving it running 24/7 = $40/mo. Powering off when away = ~$20/mo. Deleting the server entirely while keeping the SSH key + firewall = $0 until next provision.
+- **Plan renumbering.** Old "Phase 7: Skills & Tracking" pushed to Phase 8 to make room. Summary table updated.
+
+**Code Review:** Skipped — infra/docs only, no app code touched. Two scripts (`hetzner-bootstrap.sh`, `hetzner-dev-tooling.sh`, `hetzner-provision.sh`) are idempotent and were exercised end-to-end during the session.
+
+## Session 100 — 2026-04-26 19:09–20:13 (1.08 hrs)
+**Duration:** 1.08 hrs | **Points:** 3 (3.8: 3)
+**Task:** Phase 3.8 — Admin notification preferences (settings/UI shift away from triggers)
+
+**Completed:**
+- **Phase 3.8 — Admin notification preferences (3 pts).**
+  - Migration `20260426232739_admin_notification_preferences.sql` — `notification_preferences jsonb` column on profiles, default NULL, comment documents the shape.
+  - `src/lib/notifications/preferences.ts` — `ADMIN_NOTIFICATION_EVENTS` const (`admin_enrollment_alert`, `admin_low_enrollment`), `isAdminChannelEnabled()` (defensive: any non-bool / non-object / null / undefined → enabled), `normalizeAdminPreferences()` for form initial state.
+  - `src/lib/notifications/triggers.ts` — admin fan-outs in `notifyEnrollmentConfirmed` and `notifyLowEnrollmentCourses` now read each admin's `notification_preferences` and gate per-channel sends. Profile selects extended to include the column.
+  - `src/actions/notification-preferences.ts` — `updateAdminNotificationPreferences` server action, admin-only check + own-row write only. DEC-015 form-action shape (`Promise<string | null>`).
+  - `src/app/(admin)/admin/notification-preferences/page.tsx` + `src/components/admin/notification-preferences-form.tsx` — server page + client form, four checkboxes (2 events × 2 channels).
+  - Sidebar nav links added in `admin-nav.tsx` + `admin-mobile-nav-drawer.tsx`.
+  - DEC-026 in `docs/DECISIONS.md` — JSONB on profiles over a separate table; resolved the TBD row.
+  - `tests/admin-notification-preferences.spec.ts` — 4 desktop tests (page loads with defaults, save + reload persistence, non-admin redirect, sidebar link). All green.
+- Commit `45714b9`.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- `NOTIFICATIONS_ENABLED=true` for ongoing smoke testing → dispatcher-firing Playwright tests are paused for "a few sessions" per Eric. Will surface as test debt in the meantime.
+- Twilio Toll-Free Verification still pending submission/approval.
+- Parallel CC running session 101 (Phase 7 — Hetzner remote dev environment). Independent from 3.8 scope; worked around at commit time by staging files explicitly instead of `git add -A`.
+
+**Next Steps:**
+1. **3.9 — Student notification preferences (2 pts).** Reuses the same `notification_preferences` column on profiles. Spec calls for "opt out of SMS, email-only option" — simpler shape than admin (single global toggle vs per-event matrix). 3.9 is the natural next bite; DEC-026's "preferences will reuse the same column" claim gets exercised here.
+2. Eric to finish smoke testing 3.4–3.8 with `NOTIFICATIONS_ENABLED=true` and a single test number. Confirm preferences toggles actually suppress channels in real Twilio/Resend output.
+3. Code review test-debt follow-up: when notification env settles, add (a) unit tests for `isAdminChannelEnabled` covering the realistic JSON shapes, and (b) a triggers-level test asserting `mockBuffer` respects per-recipient prefs.
+4. Form-action return-shape inconsistency: `updateAdminNotificationPreferences` returns `Promise<string | null>` (DEC-015 form-action shape), while existing `updateStudentProfile` returns `Promise<{ error: string | null }>`. Pick a winner before 3.9 reuses this column and forks the pattern further. Recommendation: standardize on `string | null` for form actions (matches DEC-015 explicitly).
+5. `supabase db push` to remote (still overdue, but Eric did push earlier today — confirm whether the migration landed on remote).
+
+**Context:**
+- **Pattern shift in Phase 3.** Sessions 92–99 were notification-trigger work — every task was "new template + new trigger function + wire into action + test route". 3.8 is the first task that operates on the dispatcher itself rather than adding to it. 3.9 will follow the same pattern: read prefs in the recipient fan-out, gate channels.
+- **JSONB-on-profiles design (DEC-026).** Null/missing keys mean enabled. This preserves historical behavior for any profile predating the column. The defensive helper (`isAdminChannelEnabled`) is the load-bearing piece — accidentally muting an admin is worse than accidentally sending, so any malformed value defaults to enabled. The OPPOSITE direction would be a bug.
+- **Parallel CC commit hygiene.** When two CC sessions are running in the same working tree, `/kill-this`'s default `git add -A` would cross-contaminate. Stage explicit file paths to keep commits scoped to the current session's task. Both sessions can write to `session-log.md` (each prepends its open marker — order is whatever wins the race).
+- **Types regen gotcha.** `npx supabase gen types typescript --local > types.ts` includes npm warnings from stderr if the supabase CLI isn't already installed. Add `2>/dev/null` to the redirect, or the file gets corrupted with `npm warn exec ...` lines that break tsc.
+- **Dispatcher gating is the load-bearing logic.** UI tests pass; dispatcher behavior is currently only manual-smoke confirmed. Acceptable risk for V1, flagged as test debt in next steps.
+
+**Code Review:** 4 cleanups, 0 bugs. RLS check confirmed the existing self-update policy covers the new column (DEC-026 claim holds).
+1. **consistency** Form-action return-shape inconsistency between `updateAdminNotificationPreferences` (`string | null`) and `updateStudentProfile` (`{ error: string | null }`). Standardize before 3.9 forks further.
+2. **cleanup** Add a one-line comment in `preferences.ts:38` that "default to enabled on any non-bool" is intentional (corrupted JSON wins by sending, not by muting).
+3. **cleanup** Action validates FormData correctly — only iterates known events, drops extras. No change needed.
+4. **cleanup** Test debt — dispatcher gating not automated. Add unit tests for `isAdminChannelEnabled` + triggers-level test once `NOTIFICATIONS_ENABLED` settles.
+
+## Session 99 — 2026-04-26 07:42–08:32 (0.83 hrs)
+**Duration:** 0.83 hrs | **Points:** 5 (3.7: 5)
+**Task:** Phase 3.7 — Session reminders + 3 carryover cleanups from session 98 code review
+
+**Completed:**
+- **Phase 3.7 — Session reminders (5 pts).**
+  - `src/lib/notifications/templates.ts` — `sessionReminder()` template + `SessionReminderData` type. Single template parameterized by `leadTimeLabel` ("tomorrow" or "in 1 week").
+  - `src/lib/notifications/triggers.ts` — `notifyUpcomingSessionReminders(referenceDate?: Date)`. Lead-time table at top of file (`SESSION_REMINDER_LEAD_TIMES = [{daysOut: 7, label: "in 1 week"}, {daysOut: 1, label: "tomorrow"}]`). UTC-safe date math via `isoDateOffset()`. Idempotency from exact-date filter — each session fires reminders exactly once per slot. Optional `referenceDate` lets tests simulate "today".
+  - `src/app/api/cron/session-reminders/route.ts` — daily cron route, mirrors `expire-holds` and `low-enrollment`. CRON_SECRET auth, returns `{ fired: N }`.
+  - `vercel.json` — third cron entry, daily at 14:00 UTC.
+  - `src/app/api/test/run-session-reminders/route.ts` — dev-only test route.
+  - `tests/session-reminders.spec.ts` — 5 desktop tests (7-day fires, 24-hour fires, off-target dates skip, cancelled sessions skip, cron route smoke). All green.
+- **Carryover cleanups from session 98 code review.**
+  - `sessionCancellation` SMS body: `on {date} at {time} at {location}` → `on {when} ({where})` to avoid the awkward double "at" (also matches new `sessionReminder` formatting).
+  - `notifyMakeupAssigned`: `courseResult` + `enrollments` lookups parallelized via `Promise.all` (matches `notifyEnrollmentConfirmed` pattern).
+  - New `src/lib/dev-only.ts` helper exporting `devOnly()`. Refactored all 8 `/api/test/*` routes to use it. Now blocks on `NODE_ENV !== 'development' || VERCEL_ENV` — defense in depth against a misconfigured Vercel deploy exposing service-role writes.
+- **Vercel plugin queued for next-session cleanup** (Eric will disable it via `/plugins`). Currently injecting ~5k tokens of skill descriptions on session start; trims fast-burn context budget.
+- **Manual cron test commands documented** for all 3 crons (expire-holds, low-enrollment, session-reminders).
+- Commit `00c0d56`.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- `supabase db push` to remote — still uncertain if today's seed/migration changes are reflected.
+- Smoke testing 3.7 cron live (Eric is doing this immediately after session close).
+
+**Test failures from full suite:** Eric ran the full suite and confirmed everything passed.
+
+**Next Steps (in order):**
+1. **Manual smoke tests (Eric will do these post-close):**
+   - 3.4 enrollment notification — already verified live, re-confirm
+   - 3.5 cancellation notice — admin cancels a session with enrolled students → expect SMS+email per student
+   - 3.6 makeup assignment — admin creates a makeup → SMS+email per affected student
+   - 3.7 session reminder — `curl -X POST /api/test/run-session-reminders -d '{"referenceDate":"2026-05-02"}'` against a real seed enrollment to fire a 1-week reminder
+2. **Vercel plugin disable** (next session start). Eric to run `/plugins` and disable. Should reduce session-start context by ~5k tokens.
+3. **Phase 3 mode shift** — next phase 3 task is **3.8 Admin notification preferences (3 pts).** No more triggers/templates from here on; this is settings/UI work. DEC needed: settings table vs JSON column on profiles.
+4. **Optional cleanups (advisory, not blocking):**
+   - `sessionReminder` SMS body is ~217 chars = 2 Twilio segments. Trimming "Schedule: sailbook.live/student/courses." would land it back at 1 segment. ~50% per-reminder cost reduction. Tradeoff: less helpful body. Reminders are highest-volume of all triggers (per-student × per-session × 2 lead times) so the math favors trim.
+   - Stale doc comment in `enroll/route.ts:3` still says "Gated behind NODE_ENV !== 'development'" — now uses `devOnly()`. One-line fix.
+   - `isoDateOffset` could use a one-line comment that `Date.UTC` overflow normalization is the load-bearing detail.
+5. `supabase db push` to remote.
+
+**Context:**
+- **Notification trigger pattern is now well-established across 4 implementations** (3.4, 3.5, 3.6, 3.7). Each: dedicated template (pure function, STOP disclosure on student-facing only), dedicated trigger (`notifyXyz()` with admin-client + per-channel try/catch + per-recipient fan-out), wired into the action that just performed the side effect, plus a dev-only `/api/test/*` route mirroring the action for testability. Phase 3.8 onwards departs from this pattern.
+- **Cron pattern is now established across 3 implementations** (expire-holds, low-enrollment, session-reminders). Each: GET route with `CRON_SECRET` Bearer auth, returns `{ count: N }`, vercel.json entry. Add new ones by copying any of the three.
+- **Mock buffer is shared module-level state across all notification tests.** Cross-file Playwright parallelism races it — must run with `--workers=1` for reliable group runs. Within-file is fine via `mode: 'serial'`.
+- **`devOnly()` blocks if `VERCEL_ENV` is set** (any Vercel env: dev/preview/production) AND if `NODE_ENV !== 'development'`. Both conditions matter — a misconfigured `NODE_ENV=development` deploy still gets blocked by the `VERCEL_ENV` check.
+- **Test data persists across serial Playwright tests in the same file.** Reminder tests had to scope assertions by course title because earlier tests' courses lived through to later tests. Worth the same hardening in future tests that read shared state.
+- **SMS encoding still GSM-7 across the board** post-em-dash cleanup. New `sessionReminder` lands at 2 segments; everything else 1 segment. Trim flagged in optional cleanups.
+
+**Code Review:** 4 cleanups, 1 doc-comment fix, 1 SMS-cost flag. No bugs.
+1. **cleanup** `templates.ts:314` — `sessionReminder` SMS body ~217 chars = 2 Twilio segments. Trim "Schedule: sailbook.live/student/courses." for ~50% per-reminder cost reduction. Tradeoff: less helpful body. Worth doing because reminders are highest-volume trigger type.
+2. **cleanup** `triggers.ts:459` — Add a one-line comment that `Date.UTC` overflow normalization is the load-bearing detail in `isoDateOffset`.
+3. **cleanup** `triggers.ts:546` — `as unknown as { ... }` cast on `enrollments!inner` join. Third copy of the same types-debt pattern (MEMORY: `project_types_debt`). Cleanup gets slightly bigger when `supabase gen types` runs pre-V2.
+4. **cleanup** `enroll/route.ts:3` — stale doc comment still says "Gated behind NODE_ENV !== 'development'" — now uses `devOnly()`.
+5. **consistency** `dev-only.ts` — design is right. Pure function, no module-level side effects, returns `NextResponse | null` for early-return idiom.
+
+## Session 98 — 2026-04-25 21:49 → 2026-04-26 07:28 wall clock (1.50 hrs active — overnight gap)
+**Duration:** 1.50 hrs | **Points:** 6 (3.5: 3, 3.6: 3)
+**Task:** Phase 3.5 + 3.6 — session cancellation + makeup notifications + pending-payment UX cleanup
+
+**Completed:**
+- **Phase 3.5 — Session cancellation notice (3 pts).**
+  - `src/lib/notifications/templates.ts` — `sessionCancellation()` template + `SessionCancellationData` type. SMS body, email subject/text/html, optional cancel reason, "Reply STOP to opt out."
+  - `src/lib/notifications/triggers.ts` — `notifySessionCancelled(sessionId)`. Identifies affected students by reading `session_attendance` rows that just flipped `expected → missed`. No admin alert (admin did the cancelling).
+  - `src/actions/sessions.ts` — `cancelSession` calls trigger after the attendance flip, before `revalidatePath`.
+  - `src/app/api/test/cancel-session/route.ts` — new dev-only test route mirroring side effects.
+  - `tests/session-cancellation-notice.spec.ts` — 3 desktop tests (with-reason, without-reason, notify-off). All green.
+- **Phase 3.6 — Makeup assignment notice (3 pts).**
+  - `src/lib/notifications/templates.ts` — `makeupAssignment()` template. Mentions both the original missed session date AND the new makeup date/time/location.
+  - `src/lib/notifications/triggers.ts` — `notifyMakeupAssigned(makeupSessionId)`. Identifies affected students by reading `session_attendance.makeup_session_id` links via FK embed (`sessions!session_attendance_session_id_fkey ( date )` confirmed by code review).
+  - `src/actions/sessions.ts` — `createMakeupSession` calls trigger after the link update, only when missed records were linked.
+  - `src/app/api/test/create-makeup-session/route.ts` — new dev-only test route.
+  - `tests/makeup-assignment-notice.spec.ts` — 3 desktop tests. All green.
+- **Pending-payment UX cleanups (uncovered during 3.4 smoke test).**
+  - `enrollmentStatusLabel` returns `"Payment Pending"` instead of raw `"pending_payment"` on the browse-list badge.
+  - Badge variant for `pending_payment` is now `warn` (yellow) — signals action needed.
+  - New `isEffectivelyEnrolled(status, holdExpiresAt)` helper in `courses-card-list.tsx`: pending_payment with expired hold = treated as not-enrolled. Removes the inconsistency where the browse list said "Payment Pending" but detail page said "Register & Pay".
+  - `my-courses` page query pulls `hold_expires_at` and filters expired-hold pending_payment rows out before render.
+  - Browse page passes `hold_expires_at` through to `CourseCardData`.
+- **3.4 smoke-tested live** — Stripe webhook (CLI listening) → `notifyEnrollmentConfirmed` → real Twilio SMS + real Resend email both delivered to Eric's phone. Phase 3.4 is done-done, not just mock-done.
+- Commit `7a490db`.
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- `supabase db push` to remote — stale state on remote vs. local. Eric pushed earlier today but unclear if today's seed/migration changes are reflected.
+- Locally: `/api/cron/expire-holds` doesn't auto-run, so pending_payment records sit until manually triggered. The cron-expired-hold UX cleanups in this commit decouple display from cron, but the underlying records still need a manual sweep in dev.
+
+**Test failures from full suite:** Eric punted the full suite to start of next session.
+
+**Next Steps (in order, pinned by Eric):**
+1. **Run full Playwright suite** at the start of next session (carryover, was punted tonight).
+2. **Manual smoke tests** for 3.4, 3.5, 3.6 — Eric explicitly asked for a reminder. Real-provider verification of each notification path:
+   - 3.4: pay & register flow → enrollment confirmation SMS+email arrives (already verified once; re-verify in batch).
+   - 3.5: admin cancels a session with enrolled students → cancellation SMS+email per student.
+   - 3.6: admin creates a makeup for that cancelled session → makeup SMS+email per affected student.
+3. **3.7 — Session reminders (5 pts).** Cron-scheduled SMS+email 1 week and 24 hours before session start. Same pattern as the low-enrollment cron route + new template + new trigger.
+4. Optional code-review cleanups before phase close (none blocking):
+   - SMS copy: `sessionCancellation` body has "...session on {date} at {time} at {location}..." — double "at" reads awkwardly. Switch to `on {when} ({where})` or split sentences.
+   - `notifyMakeupAssigned`: parallelize the courseResult + enrollments lookup in `Promise.all` (matches pattern in `notifyEnrollmentConfirmed`).
+   - Defense-in-depth on dev test routes: also gate by `VERCEL_ENV` or require `x-test-token` header in case `NODE_ENV` is misconfigured.
+
+**Context:**
+- **The cron not running locally** is now annotated in the data-display layer instead of the data layer. UX gracefully handles stale pending_payment via the `isEffectivelyEnrolled` helper. The actual record cleanup still happens via the cron in prod — locally the records sit but display correctly.
+- **Manual smoke-test path established.** Stripe CLI listening (`stripe listen --forward-to localhost:3000/api/webhooks/stripe`) bridges Stripe → localhost webhook. Without the CLI, paying through the hosted page leaves enrollments stuck in pending_payment because the `checkout.session.completed` webhook never reaches the dev server. Re-run `stripe listen` and update `STRIPE_WEBHOOK_SECRET` in `.env.local` if the CLI session restarts.
+- **Trigger tests must reset DB before running.** Manual smoke tests leave pending_payment + Stripe customer state behind. Affected counts in tests like `student-enrollment.spec.ts:31` (spots-remaining) drift if the DB has leftover real-paid enrollments. Run `supabase db reset` before the full suite.
+- **Notification trigger pattern is now well-established across 3 implementations** (3.4, 3.5, 3.6). Each: dedicated template (pure function), dedicated trigger (`notifyXyz(id)` with admin-client + per-channel try/catch + per-recipient fan-out), wired into the action that just performed the side effect, plus a dev-only `/api/test/*` route mirroring the action for testability. 3.7 should follow the same shape.
+- **SMS encoding:** new templates land at 2 GSM-7 segments (cancellation 259 chars, makeup 218 chars). Em-dash → hyphen cleanup from earlier today held — no UCS-2 regression.
+
+**Code Review:** 1 copy nit, 2 cleanup notes, 1 security suggestion. No bugs.
+1. **consistency** `templates.ts` — `sessionCancellation` SMS body reads "session on {date} at {time} at {location}". The double "at" is awkward. Fix to `on {when} ({where})` or split sentences.
+2. **cleanup** `triggers.ts:212-236, 311-333` — `as unknown as { ... }` casts on embedded relations. Same Supabase types-debt pattern from MEMORY (`project_types_debt`). Track for V2 cleanup.
+3. **cleanup** `triggers.ts:281, 287` — `notifyMakeupAssigned`'s `courseResult` + `enrollments` lookups are independent. Wrap in `Promise.all` for a small latency win (matches `notifyEnrollmentConfirmed` pattern).
+4. **security** Dev test routes (`/api/test/cancel-session`, `/api/test/create-makeup-session`) only gate on `NODE_ENV !== 'development'`. Belt-and-suspenders: also require a header secret or refuse if `VERCEL_ENV` is set.
+
 ## Session 97 — 2026-04-25 20:45–21:38 (0.92 hrs, triage session)
 **Duration:** 0.92 hrs | **Points:** 0 (triage pins — pre-3.5 prep, not plan-table tasks)
 **Task:** Phase 3 triage pins (STOP language, register consent, pgTAP fixes)

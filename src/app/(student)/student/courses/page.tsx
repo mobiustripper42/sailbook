@@ -32,7 +32,7 @@ export default async function CourseBrowsePage() {
     supabase.rpc('get_all_course_enrollment_counts'),
     supabase
       .from('enrollments')
-      .select('course_id, status')
+      .select('course_id, status, hold_expires_at')
       .eq('student_id', user.id)
       .neq('status', 'cancelled'),
   ])
@@ -52,8 +52,13 @@ export default async function CourseBrowsePage() {
     enrollmentCounts?.map(({ course_id, active_count }: { course_id: string; active_count: number }) => [course_id, active_count]) ?? []
   )
 
-  const enrollmentMap = new Map<string, string>(
-    myEnrollments?.map(({ course_id, status }: { course_id: string; status: string }) => [course_id, status]) ?? []
+  const enrollmentMap = new Map<string, { status: string; holdExpiresAt: string | null }>(
+    myEnrollments?.map(
+      ({ course_id, status, hold_expires_at }: { course_id: string; status: string; hold_expires_at: string | null }) => [
+        course_id,
+        { status, holdExpiresAt: hold_expires_at },
+      ],
+    ) ?? [],
   )
 
   const cardData: CourseCardData[] = visibleCourses.map((c) => {
@@ -62,6 +67,7 @@ export default async function CourseBrowsePage() {
     const sessions = (c.sessions as unknown as { date: string }[]) ?? []
     const activeEnrollments = countMap.get(c.id) ?? 0
     const spotsRemaining = c.capacity - activeEnrollments
+    const enrollment = enrollmentMap.get(c.id) ?? null
     return {
       id: c.id,
       title: c.title,
@@ -72,7 +78,8 @@ export default async function CourseBrowsePage() {
       capacity: c.capacity,
       price: c.price,
       sessionDates: sessions.map((s) => s.date),
-      myStatus: enrollmentMap.get(c.id) ?? null,
+      myStatus: enrollment?.status ?? null,
+      myHoldExpiresAt: enrollment?.holdExpiresAt ?? null,
       spotsRemaining,
       isFull: spotsRemaining <= 0,
     }

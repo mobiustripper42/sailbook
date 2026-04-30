@@ -1,6 +1,6 @@
 /**
  * DEV/TEST ONLY — exercises the notification dispatcher and reads the mock buffer.
- * Gated behind NODE_ENV !== 'development'. Never deploy with NODE_ENV=development.
+ * Gated behind devOnly() — local dev only, refused on Vercel deployments.
  *
  * GET    /api/test/notifications        → returns mock buffer entries
  * POST   /api/test/notifications        → { channel: 'sms'|'email', to, subject?, body } → sends via dispatcher
@@ -9,13 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendEmail, sendSMS } from '@/lib/notifications'
 import { clearMockBuffer, getMockBuffer } from '@/lib/notifications/mock'
-
-function devOnly() {
-  if (process.env.NODE_ENV !== 'development') {
-    return NextResponse.json({ error: 'Not available' }, { status: 403 })
-  }
-  return null
-}
+import { devOnly } from '@/lib/dev-only'
 
 export async function GET() {
   const blocked = devOnly()

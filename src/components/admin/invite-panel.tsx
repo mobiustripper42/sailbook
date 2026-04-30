@@ -5,9 +5,25 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { regenerateInvite } from '@/actions/invites'
 
+type Role = 'instructor' | 'admin'
+
 type Props = {
+  role: Role
   token: string | null
   createdAt: string | null
+}
+
+const ROLE_LABELS: Record<Role, { title: string; description: string; pathPrefix: string }> = {
+  instructor: {
+    title: 'Instructor invite link',
+    description: 'Anyone with this link becomes an instructor on sign-in. Regenerate to revoke.',
+    pathPrefix: '/invite/instructor',
+  },
+  admin: {
+    title: 'Admin invite link',
+    description: 'Anyone with this link becomes an admin on sign-in. Regenerate to revoke.',
+    pathPrefix: '/invite/admin',
+  },
 }
 
 function formatCreatedAt(iso: string) {
@@ -20,12 +36,13 @@ function formatCreatedAt(iso: string) {
   })
 }
 
-export default function InstructorInvitePanel({ token, createdAt }: Props) {
+export default function InvitePanel({ role, token, createdAt }: Props) {
+  const labels = ROLE_LABELS[role]
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
-  const path = token ? `/invite/instructor/${token}` : null
+  const path = token ? `${labels.pathPrefix}/${token}` : null
 
   async function handleCopy() {
     if (!path) return
@@ -41,11 +58,11 @@ export default function InstructorInvitePanel({ token, createdAt }: Props) {
   function handleRegenerate() {
     const confirmMsg = token
       ? 'Regenerating will invalidate the existing link. Anyone holding it will no longer be able to join. Continue?'
-      : 'Generate a shareable instructor invite link?'
+      : `Generate a shareable ${role} invite link?`
     if (!window.confirm(confirmMsg)) return
     setError(null)
     startTransition(async () => {
-      const result = await regenerateInvite('instructor')
+      const result = await regenerateInvite(role)
       if (result.error) setError(result.error)
     })
   }
@@ -53,18 +70,16 @@ export default function InstructorInvitePanel({ token, createdAt }: Props) {
   return (
     <Card size="sm" className="mb-6">
       <CardHeader>
-        <CardTitle>Instructor invite link</CardTitle>
+        <CardTitle>{labels.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-muted-foreground text-sm">
-          Anyone with this link becomes an instructor on sign-in. Regenerate to revoke.
-        </p>
+        <p className="text-muted-foreground text-sm">{labels.description}</p>
 
         {path ? (
           <div className="space-y-2">
             <div
               className="bg-muted rounded-sm px-3 py-2 font-mono text-xs break-all"
-              data-testid="invite-url"
+              data-testid={`invite-url-${role}`}
             >
               {path}
             </div>

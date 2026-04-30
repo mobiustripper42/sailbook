@@ -52,11 +52,11 @@ export async function updateUserProfile(formData: FormData) {
 
 export async function updateStudentProfile(
   _: unknown,
-  formData: FormData
-): Promise<{ error: string | null }> {
+  formData: FormData,
+): Promise<string | null> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated.' }
+  if (!user) return 'Not authenticated.'
 
   const first_name = (formData.get('first_name') as string).trim()
   const last_name = (formData.get('last_name') as string).trim()
@@ -65,12 +65,9 @@ export async function updateStudentProfile(
   const experience_level = (formData.get('experience_level') as string) || null
   const instructor_notes = (formData.get('instructor_notes') as string)?.trim() || null
 
-  if (!first_name || !last_name) {
-    return { error: 'First name and last name are required.' }
-  }
-
+  if (!first_name || !last_name) return 'First name and last name are required.'
   if (instructor_notes && instructor_notes.length > 2000) {
-    return { error: 'Notes must be 2000 characters or fewer.' }
+    return 'Notes must be 2000 characters or fewer.'
   }
 
   const { error } = await supabase
@@ -86,10 +83,10 @@ export async function updateStudentProfile(
     })
     .eq('id', user.id)
 
-  if (error) return { error: error.message }
+  if (error) return error.message
 
   revalidatePath('/student/account')
-  return { error: null }
+  return null
 }
 
 export async function updateProfile(formData: FormData) {
@@ -181,9 +178,12 @@ export async function createAdminStudent(
   if (authError) return authError.message
   if (!authData.user) return 'Failed to create user account.'
 
+  // The handle_new_user trigger has already inserted a basic profile (Phase
+  // 3.11). Upsert to add the admin-only fields (asa_number, auth_source) and
+  // overwrite any defaults the trigger filled in.
   const { error: profileError } = await adminClient
     .from('profiles')
-    .insert({
+    .upsert({
       id: authData.user.id,
       first_name,
       last_name,

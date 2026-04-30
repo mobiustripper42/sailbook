@@ -1,11 +1,13 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const PUBLIC_ROUTES = ['/login', '/register', '/dev', '/forgot-password', '/reset-password']
+const PUBLIC_ROUTES = ['/login', '/register', '/dev', '/forgot-password', '/reset-password', '/register/check-email']
 // PUBLIC_PREFIXES lets unauthenticated users through BUT, unlike PUBLIC_ROUTES,
 // does not bounce logged-in users off to their dashboard — an authenticated
 // user visiting an invite URL needs to see the accept page, not their home.
-const PUBLIC_PREFIXES = ['/invite/']
+// /auth/ covers the email-confirmation callback (/auth/callback) — the user
+// has no session yet at that point and the route handler establishes it.
+const PUBLIC_PREFIXES = ['/invite/', '/auth/']
 
 function getPrimaryHome(meta: Record<string, unknown>): string {
   if (meta.is_admin) return '/admin/dashboard'

@@ -27,6 +27,8 @@ type User = {
 }
 
 type RoleFilter = 'all' | 'admin' | 'instructor' | 'student'
+type SortKey = 'name' | 'email' | 'status'
+type SortDir = 'asc' | 'desc'
 
 const ROLE_FILTERS: { label: string; value: RoleFilter }[] = [
   { label: 'All', value: 'all' },
@@ -35,9 +37,34 @@ const ROLE_FILTERS: { label: string; value: RoleFilter }[] = [
   { label: 'Student', value: 'student' },
 ]
 
+function compareUsers(a: User, b: User, key: SortKey): number {
+  if (key === 'name') {
+    const aKey = `${a.last_name} ${a.first_name}`.toLowerCase()
+    const bKey = `${b.last_name} ${b.first_name}`.toLowerCase()
+    return aKey.localeCompare(bKey)
+  }
+  if (key === 'email') {
+    return a.email.toLowerCase().localeCompare(b.email.toLowerCase())
+  }
+  // status: active first ascending
+  if (a.is_active === b.is_active) return 0
+  return a.is_active ? -1 : 1
+}
+
 export default function UsersList({ users }: { users: User[] }) {
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
+  const [sortKey, setSortKey] = useState<SortKey>('name')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
+
+  function toggleSort(key: SortKey) {
+    if (key === sortKey) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
 
   const filtered = users.filter((u) => {
     const matchesSearch =
@@ -52,6 +79,11 @@ export default function UsersList({ users }: { users: User[] }) {
       (roleFilter === 'student' && u.is_student)
 
     return matchesSearch && matchesRole
+  })
+
+  const sorted = [...filtered].sort((a, b) => {
+    const cmp = compareUsers(a, b, sortKey)
+    return sortDir === 'asc' ? cmp : -cmp
   })
 
   return (
@@ -81,7 +113,7 @@ export default function UsersList({ users }: { users: User[] }) {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {sorted.length === 0 ? (
         <EmptyState
           message={
             search || roleFilter !== 'all'
@@ -94,15 +126,15 @@ export default function UsersList({ users }: { users: User[] }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
+                <SortableHead label="Name" sortKey="name" activeKey={sortKey} dir={sortDir} onClick={toggleSort} />
+                <SortableHead label="Email" sortKey="email" activeKey={sortKey} dir={sortDir} onClick={toggleSort} />
                 <TableHead>Roles</TableHead>
-                <TableHead>Status</TableHead>
+                <SortableHead label="Status" sortKey="status" activeKey={sortKey} dir={sortDir} onClick={toggleSort} />
                 <TableHead className="w-16" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((u) => (
+              {sorted.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-medium">
                     {u.first_name} {u.last_name}
@@ -138,5 +170,35 @@ export default function UsersList({ users }: { users: User[] }) {
         </div>
       )}
     </div>
+  )
+}
+
+function SortableHead({
+  label,
+  sortKey,
+  activeKey,
+  dir,
+  onClick,
+}: {
+  label: string
+  sortKey: SortKey
+  activeKey: SortKey
+  dir: SortDir
+  onClick: (key: SortKey) => void
+}) {
+  const isActive = sortKey === activeKey
+  return (
+    <TableHead aria-sort={isActive ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+      <button
+        type="button"
+        onClick={() => onClick(sortKey)}
+        className="inline-flex items-center gap-1 text-left hover:text-foreground"
+      >
+        {label}
+        <span className={cn('text-xs', isActive ? 'text-foreground' : 'text-muted-foreground/40')}>
+          {isActive ? (dir === 'asc' ? '↑' : '↓') : '↕'}
+        </span>
+      </button>
+    </TableHead>
   )
 }

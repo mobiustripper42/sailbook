@@ -1,11 +1,14 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { findLowEnrollmentCourses } from '@/lib/low-enrollment'
 
 async function getDashboardData() {
   const supabase = await createClient()
   const today = new Date().toISOString().slice(0, 10)
   const sevenDaysOut = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+
+  const lowEnrollmentPromise = findLowEnrollmentCourses(supabase)
 
   const [activeCourses, unassigned, upcomingSessions, pendingEnrollments, pendingCount] = await Promise.all([
     supabase
@@ -60,9 +63,12 @@ async function getDashboardData() {
       .eq('status', 'registered'),
   ])
 
+  const lowEnrollmentCourses = await lowEnrollmentPromise
+
   return {
     activeCourses: activeCourses.count ?? 0,
     coursesWithoutInstructor: unassigned.count ?? 0,
+    lowEnrollmentCount: lowEnrollmentCourses.length,
     upcomingSessions: upcomingSessions.data ?? [],
     pendingEnrollments: pendingEnrollments.data ?? [],
     pendingTotal: pendingCount.count ?? 0,
@@ -91,9 +97,10 @@ export default async function AdminDashboard() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <StatCard label="Active Courses" value={data.activeCourses} />
         <InstructorCard value={data.coursesWithoutInstructor} />
+        <LowEnrollmentCard value={data.lowEnrollmentCount} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -132,6 +139,30 @@ function InstructorCard({ value }: { value: number }) {
           <>
             <p className="text-3xl font-semibold text-right text-warning">{value}</p>
             <p className="text-xs text-warning mt-1 text-right">Assign before publishing</p>
+          </>
+        ) : (
+          <p className="text-3xl font-semibold text-right">✓</p>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function LowEnrollmentCard({ value }: { value: number }) {
+  const isWarning = value > 0
+  return (
+    <Card size="sm" className={isWarning ? 'border-warning/40 bg-warning/10' : undefined}>
+      <CardHeader className="h-14 items-start justify-end pb-0">
+        <CardTitle className={`text-sm font-medium flex items-center gap-1.5 ${isWarning ? 'text-warning' : 'text-muted-foreground'}`}>
+          {isWarning && <span aria-hidden="true">⚠</span>}
+          {isWarning ? 'Low Enrollment' : 'Enrollment Healthy'}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isWarning ? (
+          <>
+            <p className="text-3xl font-semibold text-right text-warning">{value}</p>
+            <p className="text-xs text-warning mt-1 text-right">Below minimum, starting soon</p>
           </>
         ) : (
           <p className="text-3xl font-semibold text-right">✓</p>

@@ -22,6 +22,7 @@ export type CourseCardData = {
   price: number | null
   sessionDates: string[]
   myStatus: string | null
+  myHoldExpiresAt: string | null  // For pending_payment rows; null otherwise
   spotsRemaining: number
   isFull: boolean
 }
@@ -41,7 +42,21 @@ function enrollmentStatusLabel(status: string): string {
   if (status === 'cancelled') return 'Cancelled'
   if (status === 'completed') return 'Completed'
   if (status === 'cancel_requested') return 'Cancellation Requested'
+  if (status === 'pending_payment') return 'Payment Pending'
   return status
+}
+
+// pending_payment with expired hold = stale enrollment that's still in the DB
+// because the daily expire-holds cron hasn't swept it yet. Treat as not-enrolled
+// so the user sees a normal Pay & Register path matching what the detail page
+// already shows.
+function isEffectivelyEnrolled(status: string | null, holdExpiresAt: string | null): boolean {
+  if (status === null) return false
+  if (status === 'pending_payment') {
+    if (!holdExpiresAt) return false
+    return new Date(holdExpiresAt) > new Date()
+  }
+  return true
 }
 
 export function CoursesCardList({ courses }: { courses: CourseCardData[] }) {
@@ -52,7 +67,7 @@ export function CoursesCardList({ courses }: { courses: CourseCardData[] }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {courses.map((c) => {
-        const isEnrolled = c.myStatus !== null
+        const isEnrolled = isEffectivelyEnrolled(c.myStatus, c.myHoldExpiresAt)
         const displayTitle = c.title ?? c.typeName ?? '—'
 
         return (
@@ -65,7 +80,7 @@ export function CoursesCardList({ courses }: { courses: CourseCardData[] }) {
                     variant={
                       c.myStatus === 'confirmed'
                         ? 'ok'
-                        : c.myStatus === 'cancel_requested'
+                        : c.myStatus === 'cancel_requested' || c.myStatus === 'pending_payment'
                           ? 'warn'
                           : 'neutral'
                     }

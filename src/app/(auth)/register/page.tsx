@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import RegisterForm from './register-form'
 
@@ -11,5 +12,10 @@ export default async function RegisterPage() {
     .eq('is_active', true)
     .order('sort_order')
 
-  return <RegisterForm experienceCodes={codes ?? []} />
+  // RegisterForm uses useSearchParams() — Suspense bailout required for build.
+  return (
+    <Suspense>
+      <RegisterForm experienceCodes={codes ?? []} />
+    </Suspense>
+  )
 }

@@ -131,18 +131,19 @@ Users know what's happening. Auth is production-grade.
 | 3.2 | ~~Resend setup — account, API key, domain verification for sailbook.live~~ | 2 | [x] <!-- completed 2026-04-25 --> Domain verified, SPF + DKIM in Cloudflare, API key in `.env.local`. `npm install resend`. `@ts-expect-error` directive removed. |
 | 3.3 | ~~Notification service — shared module for SMS (Twilio) + email (Resend) with mock mode for testing~~ | 3 | [x] <!-- completed 2026-04-24 --> Dispatcher with `NOTIFICATIONS_ENABLED` gate. Mock buffer + dev-only test API route. Twilio/Resend lazy-imported behind `@ts-expect-error` (remove in 3.1/3.2). 4 Playwright tests. |
 | 3.4 | ~~Enrollment notifications — SMS + email on confirmed, plus admin alert on new enrollment, plus low enrollment warning to admin~~ | 8 | [x] <!-- completed 2026-04-25 --> Re-estimated from 5 → 8 in session 93: scope includes new cron route + vercel.json entry + threshold logic + both Stripe webhook and admin-enroll trigger paths. Code review flagged 3 fixups (HTML escape, missing notify in `confirmEnrollment`, threshold rounding) — queued as first thing next session. Admin shouldn't have to log in to know someone signed up. Andy request. |
-| 3.5 | Session cancellation notice — SMS + email to enrolled students | 3 | Includes reason, makeup info if available. |
-| 3.6 | Makeup session assignment — SMS + email to affected students | 3 | New date/time/location in message. |
-| 3.7 | Session reminder — SMS 24 hours and 1 week before session start | 5 | Scheduled job (cron). DEC: Vercel Cron vs Supabase Edge Function. |
-| 3.8 | Admin notification preferences — checkboxes per event type × channel | 3 | DEC: settings table vs JSON column. |
-| 3.9 | Student notification preferences — opt out of SMS, email-only option | 2 | Profile toggle. Notification service checks before sending. |
-| 3.10 | Password strength + email verification | 3 | Supabase Auth config + custom email template via Resend. |
-| 3.11 | OAuth login — Google | 2 | Supabase toggle + Google Cloud console. Email/password remains fallback. |
-| 3.12 | Security audit — run @security-agent, evaluate findings, fix serious issues | 3 | Post-auth-hardening + payments-live audit. Non-serious findings move to backlog. |
-| 3.13 | README: Twilio/Resend setup instructions — keys, sender config | 1 | Document Twilio phone number, Resend API key, domain verification, and sender config for new devs. |
-| 3.14 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on notification preference UI, new auth flows (email verify, OAuth). |
+| 3.5 | ~~Session cancellation notice — SMS + email to enrolled students~~ | 3 | [x] <!-- completed 2026-04-26 --> sessionCancellation template + notifySessionCancelled trigger wired into cancelSession action. Optional cancel reason. No admin alert (admin did the cancel). 3 desktop Playwright tests green. |
+| 3.6 | ~~Makeup session assignment — SMS + email to affected students~~ | 3 | [x] <!-- completed 2026-04-26 --> makeupAssignment template + notifyMakeupAssigned trigger wired into createMakeupSession. References both original and new session dates. FK embed via session_attendance.makeup_session_id. 3 desktop Playwright tests green. |
+| 3.7 | ~~Session reminder — SMS 24 hours and 1 week before session start~~ | 5 | [x] <!-- completed 2026-04-26 --> sessionReminder template + notifyUpcomingSessionReminders trigger + /api/cron/session-reminders route + vercel.json entry. UTC-safe date math, single template parameterized by leadTimeLabel. Optional referenceDate for testability. 5 desktop Playwright tests green. Vercel Cron chosen over Supabase Edge Function (absorbed into established cron pattern from expire-holds + low-enrollment). |
+| 3.8 | ~~Admin notification preferences — checkboxes per event type × channel~~ | 3 | [x] <!-- completed 2026-04-26 --> DEC-026: JSONB on profiles. `notification_preferences` column, `isAdminChannelEnabled()` helper, gated in both admin fan-outs. UI at `/admin/notification-preferences`. 4 desktop UI tests green. Dispatcher tests deferred until `NOTIFICATIONS_ENABLED=false` returns. |
+| 3.9 | ~~Student notification preferences — opt out of SMS, email-only option~~ | 2 | [x] <!-- completed 2026-04-26 --> Two checkboxes (SMS / email) on `/student/account`, reuses 3.8's `notification_preferences` JSONB column with `student_global` key. All 4 student fan-outs in `triggers.ts` gated. Both admin + student actions now merge with existing JSONB (dual-role bug fix). Bundled DEC-015 migration of `updateStudentProfile`. 5 desktop tests green incl. dispatcher gating. |
+| 3.10 | ~~Password strength + email verification~~ | 3 | [x] <!-- completed 2026-04-27 --> Min length 12, `lower_upper_letters_digits`. `enable_confirmations = true`. New `/auth/callback` route + `/register/check-email` landing. Branded confirmation template at `supabase/templates/confirmation.html`. Register action uses `adminClient` for profile insert (no session post-signUp with confirmations on). Seed password rotated to `Sailbook12345`. 5 desktop tests green. **Manual smoke test deferred to next session.** |
+| 3.11 | ~~OAuth login — Google~~ | 2 | [x] <!-- completed 2026-04-29 --> Scored 2, effective scope 5 (see standing disagreements). Google provider in `supabase/config.toml`, creds in `supabase/.env`. New `signInWithGoogle` action + GoogleSignInButton on /login + /register. New `handle_new_user` SECURITY DEFINER trigger unifies profile creation across email/password, Google OAuth, and admin-createStudent. Invite page passes `?next=` for OAuth round-trip. 6 desktop tests green. |
+| 3.12 | ~~Security audit — run @security-agent, evaluate findings, fix serious issues~~ | 3 | [x] <!-- completed 2026-04-28 --> /security-review skill against Phase 3 surface (auth, notifications, test routes, RLS migration, cron, email template). Zero qualifying findings at >80% confidence. Excluded items (length cap on `instructor_notes`, backslash in `auth/callback` `next`, `listUsers` page truncation in dev-only test route, JSONB shape validation absence) noted but excluded by review rules. |
+| 3.13 | ~~README: Twilio/Resend setup instructions — keys, sender config~~ | 1 | [x] <!-- completed 2026-04-29 --> README gains Twilio Setup, Resend Setup, and a Notifications gating section. Toll-Free Verification gate documented (carrier filter blocks SMS until approved). Resend domain-verification flow + note that Supabase Auth emails go through SMTP (separate Dashboard config, in Pre-Launch Checklist). |
+| 3.14 | ~~End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log~~ | 5 | [x] <!-- completed 2026-04-29 --> Full Playwright suite 404/612 green (1 cross-file flake — known issue, tracked). Lint clean (3 pre-existing warnings cleaned up). Code review of e212ee1 cleared. Retrospective written in `docs/RETROSPECTIVES.md`. Polish backlog all 4 items shipped: (a) `noValidate` on all 5 auth forms; (b) controlled inputs preserve register values across rejection; (c) `validatePassword` + `friendlyPasswordError` in `src/lib/auth/password-rules.ts`, `PASSWORD_RULES_HELP` extracted (3 forms now share); (d) covered by a+b+c. UI reviewer findings: rounded-md→xs on register select/textarea, ghost→default button on reset-password "Link expired", phone helper-text tightened. |
+| 3.15 | ~~Logged-in password change — "Change password" form on student/admin/instructor account pages~~ | 3 | [x] <!-- completed 2026-04-29 --> New `/account/password` route, role-agnostic. `changePassword` server action re-auths via `signInWithPassword` then calls `updateUser`. Three-field client form (current/new/confirm) with auto-clear on success. "Change password" link added to all 3 desktop sidebars + 3 mobile drawers. 5 desktop tests green. Did NOT flip `secure_password_change` in config.toml — manual re-auth gives clearer errors. |
 
-**Phase 3 total: 45 pts** (was 42; +3 for 3.4 re-estimate)
+**Phase 3 total: 48 pts** (was 45; +3 for 3.15)
 **Projected hours: ~16 hrs**
 
 **Ejection point:** Students get confirmations, cancellation notices, and reminders. Auth is solid with email verification and OAuth. Security audited. The school runs without phone calls.
@@ -153,21 +154,24 @@ Users know what's happening. Auth is production-grade.
 
 Clean onboarding. Richer student and instructor records.
 
+Rows ordered: completed grouped at top; unfinished below in priority order (medium → low → close). Cut to V3: 4.7 (instructor profile expansion). IDs frozen.
+
 | # | Task | Effort | Notes |
 |---|------|--------|-------|
 | 4.1 | ~~Instructor invite link — `invites` table, single shared reusable token per role, auto-sets `is_instructor`~~ | 3 | [x] <!-- completed 2026-04-23 --> Design diverged from "one-time token" to single shared reusable link (admin regenerates to revoke). `invites` PK on role + SECURITY DEFINER `accept_invite` RPC. 15 pgTAP + 5 Playwright tests green. Reusable for 4.2 admin invite. |
-| 4.2 | `/admin/users` consolidation — unified users page with role filter (Admin / Instructor / Student), two collapsed invite panels (admin + instructor), column sorting, replaces `/admin/students` + `/admin/instructors` | 8 | Re-scoped from 2 → 8 pts (session 94). Old `/admin/students` + `/admin/instructors` routes deleted (no redirects — nothing bookmarked). Column sorting over search. Reuses 4.1 invite infrastructure. |
-| 4.3 | Student profile expansion — classes taken, editable ASA number, experience level from codes table | 5 | Profile page redesign. Experience level pulls from codes table (1.7). |
 | 4.4a | ~~Admin-created student profiles — passwordless auth row + `auth_source` discriminator, admin "Add Student" form~~ | 5 | [x] <!-- completed 2026-04-22 --> DEC-024. service-role createUser (no password, email_confirm: true). auth_source col on profiles. |
 | 4.4b | ~~Admin-initiated enrollment + manual payment — student picker on course page, enrollment → confirmed, payment_method col~~ | 5 | [x] <!-- completed 2026-04-22 --> DEC-025. Bypasses Stripe entirely. Partial UNIQUE on stripe_checkout_session_id. payment_method: cash/check/venmo/stripe_manual. |
 | 4.5 | (NOT REQUIRED) Link admin-created student to login — student uses Forgot Password on existing email | 3 | No code needed in V1. Admin tells student to use Forgot Password with their email. |
-| 4.6 | Instructor notes on sessions — text field per session, visible to all instructors + admin | 3 | IN-5 from V1 backlog. `notes` column already exists on sessions table. UI only. |
-| 4.7 | Instructor profile expansion — availability field + bio/website link | 3 | General availability for admin assignment. Name links to Simply Sailing website bio. Andy request. |
+| 4.6 | ~~Instructor notes on sessions — text field per session, visible to all instructors + admin~~ | 3 | [x] <!-- completed 2026-04-29 --> IN-5. `update_session_notes` SECURITY DEFINER RPC (admin OR assigned instructor only — RLS gives instructors SELECT only on sessions, so the RPC is the write surface). 2000-char cap. New `<SessionNotesForm>` on `/instructor/sessions/[id]` with character counter + transient-success feedback. Admin reads on the existing attendance page. 8 pgTAP cases + 3 Playwright tests. |
 | 4.8 | ~~Cookie-based theme sync~~ | 2 | [x] <!-- removed 2026-04-15 --> Superseded by DEC-020: theme is localStorage-only per device. No cross-device sync, no FOUC problem to solve. |
-| 4.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on profile expansion pages, invite flow, instructor onboarding. |
+| 4.10 | ~~Recreate `.claude/agents/ui-reviewer.md` (lost in Phase 7 migration)~~ | 1 | [x] <!-- completed 2026-04-29 --> Modeled on `architect.md` / `code-review.md`. Brand rules pulled from BRAND.md (Mira/Sky/Mist, Nunito Sans, xs radius, dark-mode-default, mobile@375px). 12-point review checklist with pass/fix-soon/blocker scoring. Committed to `.claude/agents/` so it survives box moves this time. |
+| 4.11 | ~~Substitute-instructor page bug fix + DEC-007 pgTAP coverage~~ | 2 | [x] <!-- completed 2026-04-29 --> Session 107 cleanup. (a) `src/app/(instructor)/instructor/sessions/[id]/page.tsx:66` redirected substitute instructors assigned only at the session level — page check contradicted the `update_session_notes` RPC's authorization. Fix: gate now `course.instructor_id !== user.id && session.instructor_id !== user.id`. (b) `10_session_notes_rpc.sql` plan 8 → 11; 3 cases for the DEC-007 override path. |
+| 4.3 | Student profile expansion — classes taken, editable ASA number, experience level from codes table | 5 | **Priority: medium.** Profile page redesign. Experience level pulls from codes table (1.7). |
+| 4.2 | `/admin/users` consolidation — unified users page with role filter (Admin / Instructor / Student), two collapsed invite panels (admin + instructor), column sorting, replaces `/admin/students` + `/admin/instructors` | 8 | **Priority: low. Partial — session 109 (~6 pts) shipped sorting (`SortableHead` w/ aria-sort), both invite panels (collapsed `<details>`), generalized `acceptInvite(role, token)` action + `InvitePanel` component + new `/invite/admin/[token]` route + shared `AcceptInviteForm`. JWT bug carryover verified already-fixed in 4.1 commit. 4.2b (~2 pts) remaining: delete old `/admin/students/*` + `/admin/instructors/*` routes and update ~16 source/test references.** Re-scoped from 2 → 8 pts (session 94). Reuses 4.1 invite infrastructure. |
+| 4.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | **Always last.** Focus on profile expansion pages, invite flow, instructor onboarding. |
 
-**Phase 4 total: 42 pts** (updated session 94: 4.2 re-estimated 2 → 8 pts; 4.4 was split into 4.4a+4.4b = 10 pts)
-**Projected hours: ~11 hrs**
+**Phase 4 total: 42 pts** (session 109: −3 for 4.7 cut to V3; session 108: +2 for 4.11 substitute-instructor bug + DEC-007 pgTAP coverage)
+**Projected hours: ~10 hrs**
 
 **Ejection point:** Instructors get proper onboarding. Student profiles are richer. Instructor notes captured. Admin can create students for non-technical users.
 
@@ -177,22 +181,20 @@ Clean onboarding. Richer student and instructor records.
 
 Flexible pricing, enrollment safety rails, and waitlist.
 
+Rows ordered: completed grouped at top; unfinished below in priority order (high → low → close). Cut to V3: 5.1, 5.3, 5.5, 5.6. IDs frozen.
+
 | # | Task | Effort | Notes |
 |---|------|--------|-------|
-| 5.1 | (this is solved with discount codes, please put in the trash) Member pricing model — `is_member` flag on profiles, checkout uses correct price | 3 | Admin-editable flag. Foundation for SailTime/boat owner discounts later. |
-| 5.2 | Open Sailing (holding a spot for $11) (then $60+tip to the captain day of) — per-session enrollment + payment | 5 | Different enrollment model. DEC: flag on course (`is_drop_in`), not course_type. |
-| 5.3 | Discount codes — enable Stripe promotion codes on checkout | 2 | `allow_promotion_codes: true`. Admin creates codes in Stripe dashboard. UI note on checkout page. |
-| 5.4 | If a course is flagged, then admin needs to appove. student had a textbox they can justify their bullshit. notificatoins all on this crap ---- Prerequisite flagging — `course_type_prerequisites` table, admin warning + override | 3 | Flag, not block. "⚠️ No ASA 101 on record" with override checkbox. |
-| 5.5 | Admin qualification grant ("test out") — `qualifications` table, manual ASA cert grants | 3 | Same effect as completing a course. Satisfies prereq flags. |
-| 5.6 | (probalby will not happen) Duplicate enrollment in same course type — warn student + flag for admin | 3 | ⚠️ Scope creep risk. Keep tight: warning on enrollment + admin dashboard flag. No auto-clear. |
-| 5.7 | Waitlist — full course → join waitlist → notify on opening | 8 | New table, student UI, admin visibility, notification on spot opening. Depends on Phase 3 notifications. Andy request. |
-| 5.8 | Low enrollment warning — dashboard tile for courses below minimum threshold approaching start date | 2 | Same pattern as "courses without instructors." Meaningful only with payments live. Andy request. |
-| 5.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Focus on waitlist UI, prerequisite warning flow, discount code display on checkout. |
+| 5.8 | ~~Low enrollment warning — dashboard tile for courses below minimum threshold approaching start date~~ | 5 | [x] <!-- completed 2026-04-29 --> Re-scoped from 2 → 5 (session 108): the existing 3.4 cron alert was using hardcoded `LOW_ENROLLMENT_RATIO = 0.5` and `LOW_ENROLLMENT_DAYS_OUT = 14`. 5.8 replaces both with `course_types.minimum_enrollment` (NULL = opt out) + `course_types.low_enrollment_lead_days` (default 14). Single source of truth: shared `findLowEnrollmentCourses` helper in `src/lib/low-enrollment.ts` powers both the daily cron alert AND the new admin dashboard tile. Threshold semantics changed from ratio to absolute. Course-type form gains both fields with helper text. Dashboard stat row now `grid-cols-2 lg:grid-cols-3`. 2 desktop Playwright tests; existing 7 dashboard/notification tests still green. |
 | 5.10 | ~~Student `/student/courses` calendar view — month grid (desktop/tablet) + list fallback (mobile), click weekend → course detail~~ | 5 | [x] <!-- completed 2026-04-25 --> Calendar/List toggle with localStorage persistence, month grid with prev/next/today nav, course pills colored by enrollment status (max 3 per cell + "+N more"), forced list at <640px. Mobile UX needs a better browse pattern than cards (parked for Phase 5/6). 5 desktop Playwright tests green. |
-| 5.11 | Bulk price update — multi-select on `/admin/courses` + apply a new price to all selected courses in one action | 8 | Single-field bulk edit, narrow scope by design. **Cuttable.** With 26 ASA 101 + 5 Open Sailing nights in the season, mid-season price changes are otherwise a lot of hand-edits. Multi-field bulk edit is V3. |
+| 5.2 | Open Sailing (holding a spot for $11) (then $60+tip to the captain day of) — per-session enrollment + payment | 5 | **Priority: high.** Different enrollment model. DEC: flag on course (`is_drop_in`), not course_type. |
+| 5.7 | Waitlist — full course → join waitlist → notify on opening | 8 | **Priority: high.** New table, student UI, admin visibility, notification on spot opening. Depends on Phase 3 notifications. Andy request. |
+| 5.4 | If a course is flagged, then admin needs to appove. student had a textbox they can justify their bullshit. notificatoins all on this crap ---- Prerequisite flagging — `course_type_prerequisites` table, admin warning + override | 3 | **Priority: low.** Flag, not block. "⚠️ No ASA 101 on record" with override checkbox. |
+| 5.11 | Bulk price update — multi-select on `/admin/courses` + apply a new price to all selected courses in one action | 8 | **Priority: low.** Single-field bulk edit, narrow scope by design. With 26 ASA 101 + 5 Open Sailing nights in the season, mid-season price changes are otherwise a lot of hand-edits. Multi-field bulk edit is V3. |
+| 5.9 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | **Always last.** Focus on waitlist UI, prerequisite warning flow. |
 
-**Phase 5 total: 47 pts** (was 39; +8 for 5.11)
-**Projected hours: ~17 hrs**
+**Phase 5 total: 39 pts** (session 109: −11 for 5.1/5.3/5.5/5.6 cut to V3; was 50)
+**Projected hours: ~13 hrs**
 
 **Ejection point:** Pricing is flexible. Enrollment has safety rails. Prerequisite and waitlist systems exist. Low enrollment flagged early.
 
@@ -202,34 +204,59 @@ Flexible pricing, enrollment safety rails, and waitlist.
 
 Design quality, accessibility, navigation, convenience features.
 
+Rows ordered: completed grouped at top; unfinished below in priority order (very high → high → medium → low → "high but last" → close). Cut to V3: 6.0, 6.6, 6.11, 6.16. IDs frozen.
+
 | # | Task | Effort | Notes |
 |---|------|--------|-------|
-| 6.1 | Mobile responsiveness pass — admin pages | 3 | Deferred from V1 (5.23). |
-| 6.2 | Mobile responsiveness pass — instructor pages | 2 | Deferred from V1 (5.24). |
 | 6.3 | ~~Full @ui-reviewer design review — all roles, all pages, three viewports~~ | 5 | [x] <!-- completed 2026-04-15 --> 8 pages audited across 3 viewports. Scored 7.75/10. S1 nav token, S3 warning color, layout padding, rounded-xl, stat card sizing, heading weights all fixed. |
 | 6.4 | ~~Implement @ui-reviewer findings~~ | 5 | [x] <!-- completed 2026-04-15 --> All High + Medium findings fixed. Low-priority items deferred to Phase 5 polish. |
-| 6.5 | axe-core accessibility audit — fix critical/serious violations | 3 | WCAG 2.1 AA compliance. |
-| 6.6 | Duplicate course — one-click copy, drop into edit | 2 | Deferred from V1 (5.11). |
-| 6.7 | Relative session badges — "Tomorrow", "This week" instead of "Upcoming" | 3 | Date math. Always harder than it looks. |
-| 6.8 | WebsiteAuditAI + Attention Insight external audit | 2 | 10-minute external validation at phase boundary. |
-| 6.9 | Admin dashboard UX redesign | 5 | Dashboard has real data by now (payments, holds, notifications). Design it properly. |
-| 6.10 | Back button / breadcrumb audit — consistent navigation across all roles and views | 5 | Audit every page, establish breadcrumb pattern, fix dead ends. Andy request. |
-| 6.11 | Public landing page + contact form for sailbook.live | 3 | Currently drops straight to login. Basic public page + contact form. **Cuttable.** |
-| 6.12 | Security audit (V2 final) — run @security-agent, evaluate findings, fix serious issues, prime V3 backlog | 3 | Full V2 surface area: payments, notifications, waitlist, prereqs, qualifications. Non-serious findings seed V3 backlog. |
-| 6.13 | Using an agent redsign date and time picker (date picker isn't terrible, but time picker is almost unsable) | 3 | Human find time picker to be unusable. Needs redisign, then date picker to match (maybe even combine the two if that makes sense) |
-| 6.14 | Consolidate user/student/instructor profile edit screens | 2 | Three separate edit UIs with overlapping fields feel redundant. Audit overlap, design a unified approach (shared component or merged page per role). Low priority, nice for V2. |
-| 6.15 | Admin dashboard — pending cancellation requests widget | 3 | Surface `cancel_requested` enrollments as a count/list on the admin dashboard, similar to the existing pending-enrollment alert. Links to the enrollment detail. |
-| 6.16 | Show refund amount to student — display refund details on student My Courses and course detail pages when enrollment is cancelled with a refund on record | 2 | Pull from payments table (refund_amount_cents). Show "Refunded $X.XX" badge or line alongside cancelled status. |
-| 6.17 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | Full V2 surface area. Final retrospective before handoff. |
+| 6.2 | ~~Mobile responsiveness pass — instructor pages~~ | 2 | [x] <!-- completed 2026-04-30 --> Audited /instructor/dashboard, /instructor/sessions/[id], /instructor/students/[id] at 375px. Two fixes: dashboard stat cards `grid-cols-3` → `grid-cols-2 lg:grid-cols-3` (matches admin pattern from 5.8); roster Email column `hidden sm:table-cell` so 375px shows Name + Phone + Attendance only. 2 mobile-only Playwright tests added. |
+| 6.19 | Public course browse + detail pages — `/courses` and `/courses/[id]` (or `/courses/[slug]`) viewable without login; "Register" / "Enroll" CTA prompts auth → `/login?next=...&intent=enroll` | TBD | **Priority: very high — LTSC launch blocker.** Decision (session 109): keep LTSC's WordPress as the marketing front; their per-product pages link "Register" buttons into SailBook. Currently SailBook drops anonymous visitors at `/login`, so any LTSC inbound link is broken. Scope TBD — needs poker. Open questions: (1) URL shape — `/courses/[uuid]` (LTSC link is per-course, admin updates each season) vs `/courses/[slug]` (course-type-level, lists all upcoming courses of that type — closer to LTSC's `/product/asa101-...` shape) vs both; (2) RLS — open SELECT on active courses to `anon` role, or use a public RPC; (3) layout — minimal public chrome (no student/admin sidebar) or stripped student layout; (4) does this also mean a public `/` landing or stays as redirect to `/login`. |
+| 6.15 | Admin dashboard — pending cancellation requests widget | 3 | **Priority: high.** Surface `cancel_requested` enrollments as a count/list on the admin dashboard, similar to the existing pending-enrollment alert. Links to the enrollment detail. |
+| 6.20 | Admin + instructor calendar views — month grid + list fallback, mirroring the student calendar (5.10) | TBD | **Priority: high — must ship before V2 release.** Reuse the 5.10 component shell. Admin view: all courses, all sessions, filterable by course-type/instructor. Instructor view: only sessions where they're the assigned (course-level OR session-level / DEC-007) instructor. Pts TBD — likely 5–8 since the component exists but role-specific data shapes + filters add work. Promoted from V3 Ideas in session 109. |
+| 6.1 | Mobile responsiveness pass — admin pages | 3 | **Priority: medium.** Deferred from V1 (5.23). |
+| 6.13 | Using an agent redsign date and time picker (date picker isn't terrible, but time picker is almost unsable) | 3 | **Priority: medium.** Human find time picker to be unusable. Needs redisign, then date picker to match (maybe even combine the two if that makes sense) |
+| 6.14 | Consolidate user/student/instructor profile edit screens | 2 | **Priority: medium.** Three separate edit UIs with overlapping fields feel redundant. Audit overlap, design a unified approach (shared component or merged page per role). |
+| 6.5 | axe-core accessibility audit — fix critical/serious violations | 3 | **Priority: medium** (default). WCAG 2.1 AA compliance. |
+| 6.7 | Relative session badges — "Tomorrow", "This week" instead of "Upcoming" | 3 | **Priority: low.** Date math. Always harder than it looks. |
+| 6.9 | Admin dashboard UX redesign | 5 | **Priority: low.** Dashboard has real data by now (payments, holds, notifications). Design it properly. |
+| 6.10 | Back button / breadcrumb audit — consistent navigation across all roles and views | 5 | **Priority: low.** Audit every page, establish breadcrumb pattern, fix dead ends. Andy request. |
+| 6.18 | CI + iOS testing — GitHub Actions runs Playwright on PRs to main, add iPhone WebKit project (CI-only) | 5 | **Priority: medium** (default). Triggered by Apr 29 mobile bug (missing viewport meta, broke all dropdowns on Android) — desktop tests didn't catch it. Scope: GH Actions workflow with Supabase service container, env secrets, full Playwright run on PR + push to main; add a 4th `iphone` project to `playwright.config.ts` gated to CI (`process.env.CI`); tag the layout/touch-sensitive specs (auth, dropdowns, calendar, payment) so iPhone project only runs those. Decision still open: skip iOS in CI entirely vs full WebKit run vs tagged subset — defer until task starts. Until then, no automated iOS coverage; manual phone test before each demo. |
+| 6.8 | WebsiteAuditAI + Attention Insight external audit | 2 | **Priority: high but last** (run after the rest of Phase 6 settles). 10-minute external validation at phase boundary. |
+| 6.12 | Security audit (V2 final) — run @security-agent, evaluate findings, fix serious issues, prime V3 backlog | 3 | **Priority: high but last** (run after the rest of Phase 6 settles). Full V2 surface area: payments, notifications, waitlist, prereqs, qualifications. Non-serious findings seed V3 backlog. |
+| 6.17 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | **Always last.** Full V2 surface area. Final retrospective before handoff. |
 
-**Phase 6 total: 54 pts**
-**Projected hours: ~19 hrs**
+**Phase 6 total: 52 pts + TBD for 6.19, 6.20** (totals to be reconciled at end of V2 per Eric. Session 109: −9 for 6.0/6.6/6.11/6.16 cut to V3; +TBD for 6.19 LTSC public pages and 6.20 admin/instructor calendars promoted from V3.)
+**Projected hours: ~18 hrs + TBD**
 
 **Ejection point:** The app looks and feels professional. Accessible. Navigable. Polished. Security verified.
 
 ---
 
-## Phase 7: Skills & Tracking (future — scope TBD)
+## Phase 7: Remote Dev Environment ✅
+
+Move dev off the laptop onto a Hetzner Cloud server, accessed over Tailscale, edited via VS Code Remote-SSH. Frees the laptop, gives a stable always-on dev box, lets long-running tasks (Playwright, Supabase) keep running across reboots.
+
+| Task | Description | Pts | Status |
+|------|-------------|-----|--------|
+| 7.1 | Hetzner provisioning — API token, `hcloud` CLI, SSH key, Cloud Firewall, server in Ashburn | 3 | ✅ |
+| 7.2 | Server hardening + Tailscale — non-root sudo user, ufw, fail2ban, swap, unattended-upgrades, Tailscale joined, public SSH closed | 3 | ✅ |
+| 7.3 | Dev tooling — fnm + Node 22, Docker + Compose, Supabase CLI, gh, Playwright system deps + browsers | 3 | ✅ |
+| 7.4 | Repo bring-up — gh auth, clone, `.env.local` synced, `supabase start`, `npm install`, full pgTAP + Playwright pass on remote | 5 | ✅ |
+| 7.5 | VS Code Remote-SSH — Windows-side SSH config, Tailscale for Windows, port forward 3000, edit→save→hot-reload loop | 2 | ✅ |
+| 7.6 | Document — `docs/HETZNER_DEV.md`, `scripts/hetzner-provision.sh`, `scripts/hetzner-bootstrap.sh`, `scripts/hetzner-dev-tooling.sh`, README pointer | 2 | ✅ |
+
+**Phase 7 total: 18 pts. Server is `ccx23` (4 dCPU / 16 GB / 160 GB) in `ash` at $40/mo.**
+
+**Outcomes:**
+- CPX41 was retired across all locations; landed on ccx23 ($6/mo cheaper than CPX41 was, dedicated vCPU vs shared).
+- Local Supabase publishable keys are deterministic across machines (same `.env.local` Just Works).
+- Non-interactive SSH doesn't source `.bashrc` — `node`/`supabase` are symlinked into `/usr/local/bin` so plain `ssh host 'cmd'` finds them.
+- Tailscale SSH (`tailscale up --ssh`) is the auth backstop: even if the SSH config is busted, tailnet identity gets you in.
+
+---
+
+## Phase 8: Skills & Tracking (future — scope TBD)
 
 Transforms the app from scheduling into a learning management tool.
 
@@ -242,7 +269,7 @@ Transforms the app from scheduling into a learning management tool.
 - Automated experience level progression based on completed skills
 - Advanced analytics/reporting
 
-**Phase 7: estimated 40–60 pts. Break down when Phase 6 is complete.**
+**Phase 8: estimated 40–60 pts. Break down when Phase 6 is complete.**
 
 ---
 
@@ -258,12 +285,23 @@ Transforms the app from scheduling into a learning management tool.
 - "Put me in next available" — auto-enroll on next course opening
 - Duplicate enrollment auto-clear — confirming one section cancels pending others (refund implications)
 - Student calendar view — monthly calendar of enrolled sessions
-- Admin / instructor calendar views
+- ~~Admin / instructor calendar views~~ — promoted to V2 task 6.20 in session 109
 - Automated makeup suggestions
 - Multi-school / multi-tenant
 - AI season setup agent
 - Admin impersonation mode ("view as student")
 - Full coupon/discount engine (beyond Stripe promotion codes)
+
+**Cut from V2 in session 109 (2026-04-30 priority pass):**
+- (4.7) Instructor profile expansion — availability field + bio/website link. Andy request.
+- (5.1) Member pricing model — `is_member` flag on profiles, checkout uses correct price. Eric noted: solved by discount codes.
+- (5.3) Discount codes — Stripe `allow_promotion_codes: true` + admin-managed codes in Stripe dashboard.
+- (5.5) Admin qualification grant ("test out") — manual ASA cert grants via `qualifications` table.
+- (5.6) Duplicate enrollment in same course type — warn student + flag for admin. Eric: probably will not happen.
+- (6.0) LTSC theme tune — defuse Andy's color reaction (shift `--primary` toward navy, demo in light, stash `globals.ltsc.css` backup).
+- (6.6) Duplicate course — one-click copy, drop into edit.
+- (6.11) Public landing page + contact form for sailbook.live.
+- (6.16) Show refund amount to student on My Courses + course detail.
 
 ---
 
@@ -272,17 +310,19 @@ Transforms the app from scheduling into a learning management tool.
 | Phase | Pts | Projected Hours (at 0.38 hr/pt) | Ejection Point Value |
 |-------|-----|--------------------------------|---------------------|
 | 0 — Infrastructure | 70 | ~27 hrs | Dev environment ready |
-| 1 — V1 Fixes | 51 | ~19 hrs | V1 is solid |
-| 2 — Payments | 38 | ~14 hrs | App makes money |
-| 3 — Notifications + Auth | 40 | ~15 hrs | Users stay informed, auth hardened, security audited |
-| 4 — Identity | 27 | ~10 hrs | Onboarding is clean |
-| 5 — Pricing | 47 | ~18 hrs | Flexible pricing, waitlist, prereqs, student calendar view, bulk price update |
-| 6 — Polish | 44 | ~17 hrs | Professional, accessible, navigable, security verified |
-| 7 — Skills | 40–60 | ~15–23 hrs | Learning management |
-| **Total (0–6)** | **298** | **~113 hrs** | |
+| 1 — V1 Fixes | 58 | ~22 hrs | V1 is solid |
+| 2 — Payments | 40 | ~15 hrs | App makes money |
+| 3 — Notifications + Auth | 48 | ~18 hrs | Users stay informed, auth hardened, security audited |
+| 4 — Identity | 42 | ~10 hrs | Onboarding is clean (4.7 cut to V3) |
+| 5 — Pricing | 39 | ~13 hrs | Flexible pricing, waitlist, prereqs (5.1/5.3/5.5/5.6 cut to V3) |
+| 6 — Polish | 52 | ~18 hrs | Professional, accessible, navigable, security verified (6.0/6.6/6.11/6.16 cut to V3) |
+| 7 — Remote Dev Env ✅ | 18 | ~7 hrs | Stable dev box, edit anywhere |
+| 8 — Skills | 40–60 | ~15–23 hrs | Learning management |
+| **Total (0–6)** | **349** | **~123 hrs** | |
 
-At V1 velocity (0.38 hrs/pt): ~110 hours for Phases 0–6.
-At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–2 (critical path to payments).
+Reconciled in session 109 (2026-04-30). Previous Summary total of 298 had been drifting from section totals for several phases (Phase 1 +7, Phase 2 +2, Phase 4/5/6 changes since). New total matches the sum of section totals.
+
+At V1 velocity (0.38 hrs/pt): ~133 hours for Phases 0–6 (theoretical). At Phase 1 pace (0.26 hrs/pt): ~91 hours. With ~5.1 + 14.9 + 18.0 = 38 hrs already spent on Phases 0/1/3 actuals plus partial others, the remaining runway to May 15 is the relevant number — not the all-in.
 
 ---
 
@@ -294,11 +334,11 @@ At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–
 | 1 — V1 Fixes | 58 | ~19 | ~14.9 | **0.26** | +8 polish credit (session 49); 0.23 all-in; see RETROSPECTIVES.md |
 | (5.10 early) | 5 | ~2 | 1.00 | 0.20 | Pulled forward from Phase 5; rolled into Phase 5 actuals when phase closes |
 | 2 — Payments | 38 | ~14 | — | — | |
-| 3 — Notifications | 40 | ~15 | — | — | |
-| 4 — Identity | 27 | ~10 | — | — | |
-| 5 — Pricing | 47 | ~18 | — | — | |
-| 6 — Polish | 44 | ~17 | — | — | |
-| **Total** | **298** | **~113** | — | — | Planning baseline: 0.26–0.35 hrs/pt (Phase 1 pace to conservative) |
+| 3 — Notifications | 48 | ~18 | ~18.0 | **0.38** | On baseline; many small tasks + 3.11 OAuth scope-creep ate the headroom. See RETROSPECTIVES.md |
+| 4 — Identity | 42 | ~10 | — | — | Session 109: −3 (4.7 cut to V3) |
+| 5 — Pricing | 39 | ~13 | — | — | Session 109: −11 (5.1/5.3/5.5/5.6 cut to V3) |
+| 6 — Polish | 52 | ~18 | — | — | Session 109: −9 (6.0/6.6/6.11/6.16 cut to V3) |
+| **Total** | **349** | **~123** | — | — | Reconciled in session 109. Planning baseline: 0.26–0.35 hrs/pt (Phase 1 pace to conservative) |
 
 ---
 
@@ -306,23 +346,19 @@ At 8 hrs/week: ~13 weeks — mid-July for everything, early June for Phases 0–
 
 | Task | Claude | Spink | Resolution | Notes |
 |------|--------|-------|------------|-------|
-| — | — | — | — | None. All estimates agreed. |
+| 3.11 OAuth Google (retro) | 2 | 2 | Both wrong — actual ≈5 | Eric had instinct to push back but didn't. Trigger refactor across 4 auth paths, host-header callback fix, Google name-key surprise, proxy role-flag mismatch, VS Code port-forwarding rabbit hole. Lesson: provider integrations look like config flips but aren't — default 5+ unless pattern is established. Logged 2 pts as scored, not retro-bumped. |
 
 ---
 
 ## Cuttable Tasks (if time is tight)
 
-Ordered by least impact to cut:
+Session 109 already moved the obvious cuts to V3 (4.7, 5.1, 5.3, 5.5, 5.6, 6.0, 6.6, 6.11, 6.16). Remaining V2 candidates if more is needed, ordered by least impact to cut:
 
 - **6.7** — Relative session badges. Nice UX, zero operational impact.
-- **6.11** — Public landing page. Current login-only works.
-- **6.6** — Duplicate course. Admin can create from scratch — just slower.
 - **6.9** — Admin dashboard redesign. Functional beats pretty.
-- **5.6** — Duplicate enrollment warning. Edge case. Costs a few refunds at worst.
-- **5.3** — Discount codes. Manual pricing adjustments work short-term.
 - **5.11** — Bulk price update. Hand-edit each course if cut; only painful when prices change mid-season.
-- **6.1/6.2** — Mobile admin/instructor pass. Hamburger menu is the V1 stopgap.
-- **4.4/4.5** — Admin-created students. Workaround: admin creates account on student's behalf.
+- **6.1** — Mobile admin pages. Hamburger menu is the V1 stopgap. (6.2 instructor mobile is "very high" — leave it in.)
+- **6.10** — Back button / breadcrumb audit. Real but not blocker-grade.
 
 ---
 
@@ -379,4 +415,10 @@ Before go-live (real data, real students):
 - [ ] `CRON_SECRET` set in prod env vars (or remove if not needed)
 - [ ] Twilio / Resend credentials set and `NOTIFICATIONS_ENABLED=true`
 - [ ] `supabase db push` applied to prod Supabase project
-- [ ] Smoke test: student registers → pays → sees enrollment → admin sees payment status
+- [ ] **Auth: enable email confirmations** in Supabase Dashboard → Authentication → Providers → Email → "Confirm email" on. (config.toml does not sync auth panel settings to remote.)
+- [ ] **Auth: custom SMTP (Resend) configured** in Dashboard → Authentication → SMTP Settings: host `smtp.resend.com`, port `587`, user `resend`, pass = Resend API key, sender `info@sailbook.live`, sender name `SailBook`. Send the dashboard test email to verify.
+- [ ] **Auth: confirmation email template uploaded** in Dashboard → Authentication → Email Templates → "Confirm signup". Subject: "Confirm your SailBook account". Body matches `supabase/templates/confirmation.html`. The `{{ .ConfirmationURL }}` token must be preserved.
+- [ ] **Auth: password policy set** in Dashboard → Authentication → Policies: minimum length 12, requirements `lower_upper_letters_digits`. Match `supabase/config.toml`.
+- [ ] **Auth: Site URL + Redirect URLs** in Dashboard → Authentication → URL Configuration: Site URL = `https://sailbook.live`, Redirect URLs include `https://sailbook.live/auth/callback`.
+- [ ] **Auth: Google OAuth provider** in Dashboard → Authentication → Providers → Google: enable, paste Client ID + Client Secret. In Google Cloud Console, add `https://<prod-supabase-ref>.supabase.co/auth/v1/callback` to Authorized redirect URIs and `https://sailbook.live` to Authorized JavaScript origins.
+- [ ] Smoke test: student registers → confirms email → pays → sees enrollment → admin sees payment status

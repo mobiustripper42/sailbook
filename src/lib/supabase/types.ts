@@ -74,8 +74,10 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean | null
+          low_enrollment_lead_days: number
           max_students: number | null
           min_hours: number | null
+          minimum_enrollment: number | null
           name: string
           short_code: string
           updated_at: string | null
@@ -86,8 +88,10 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          low_enrollment_lead_days?: number
           max_students?: number | null
           min_hours?: number | null
+          minimum_enrollment?: number | null
           name: string
           short_code: string
           updated_at?: string | null
@@ -98,8 +102,10 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          low_enrollment_lead_days?: number
           max_students?: number | null
           min_hours?: number | null
+          minimum_enrollment?: number | null
           name?: string
           short_code?: string
           updated_at?: string | null
@@ -342,6 +348,7 @@ export type Database = {
           is_member: boolean
           is_student: boolean
           last_name: string
+          notification_preferences: Json | null
           phone: string | null
           stripe_customer_id: string | null
           theme_preference: string
@@ -362,6 +369,7 @@ export type Database = {
           is_member?: boolean
           is_student?: boolean
           last_name: string
+          notification_preferences?: Json | null
           phone?: string | null
           stripe_customer_id?: string | null
           theme_preference?: string
@@ -382,6 +390,7 @@ export type Database = {
           is_member?: boolean
           is_student?: boolean
           last_name?: string
+          notification_preferences?: Json | null
           phone?: string | null
           stripe_customer_id?: string | null
           theme_preference?: string
@@ -541,6 +550,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: string[]
       }
+      profile_auth_source_unchanged: {
+        Args: { p_auth_source: string; p_id: string }
+        Returns: boolean
+      }
       profile_role_flags_unchanged: {
         Args: {
           p_id: string
@@ -551,6 +564,10 @@ export type Database = {
           p_is_student: boolean
         }
         Returns: boolean
+      }
+      update_session_notes: {
+        Args: { p_notes: string; p_session_id: string }
+        Returns: string
       }
     }
     Enums: {

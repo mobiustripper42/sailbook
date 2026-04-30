@@ -41,7 +41,7 @@ function fmtDate(d: string) {
 
 function enrollmentStatusVariant(status: string): 'ok' | 'neutral' | 'warn' {
   if (status === 'confirmed' || status === 'completed') return 'ok'
-  if (status === 'cancel_requested') return 'warn'
+  if (status === 'cancel_requested' || status === 'pending_payment') return 'warn'
   return 'neutral'
 }
 
@@ -50,6 +50,8 @@ function enrollmentStatusLabel(status: string): string {
   if (status === 'confirmed') return 'Enrolled'
   if (status === 'cancelled') return 'Cancelled'
   if (status === 'completed') return 'Completed'
+  if (status === 'cancel_requested') return 'Cancellation Requested'
+  if (status === 'pending_payment') return 'Payment Pending'
   return status
 }
 

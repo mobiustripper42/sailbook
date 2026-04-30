@@ -12,6 +12,7 @@ const links = [
   { href: '/admin/students', label: 'Students' },
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/missed-sessions', label: 'Missed Sessions' },
+  { href: '/admin/notification-preferences', label: 'Notifications' },
 ]
 
 export default function AdminNav() {

@@ -4,6 +4,15 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
+function readThresholds(formData: FormData) {
+  const minRaw = formData.get('minimum_enrollment')
+  const leadRaw = formData.get('low_enrollment_lead_days')
+  return {
+    minimum_enrollment: minRaw && String(minRaw).length > 0 ? Number(minRaw) : null,
+    low_enrollment_lead_days: leadRaw && String(leadRaw).length > 0 ? Number(leadRaw) : 14,
+  }
+}
+
 export async function createCourseType(prevState: string | null, formData: FormData) {
   const supabase = await createClient()
 
@@ -14,6 +23,7 @@ export async function createCourseType(prevState: string | null, formData: FormD
     description: (formData.get('description') as string) || null,
     min_hours: formData.get('min_hours') ? Number(formData.get('min_hours')) : null,
     max_students: Number(formData.get('max_students')) || 4,
+    ...readThresholds(formData),
   }
 
   const { error } = await supabase.from('course_types').insert(payload)
@@ -33,6 +43,7 @@ export async function updateCourseType(id: string, prevState: string | null, for
     description: (formData.get('description') as string) || null,
     min_hours: formData.get('min_hours') ? Number(formData.get('min_hours')) : null,
     max_students: Number(formData.get('max_students')) || 4,
+    ...readThresholds(formData),
     updated_at: new Date().toISOString(),
   }
 

@@ -29,6 +29,35 @@ export type LowEnrollmentWarningData = {
   capacity: number
 }
 
+export type SessionCancellationData = {
+  studentFirstName: string
+  courseTitle: string
+  sessionDate: string | null        // ISO "2026-05-09"
+  sessionStart: string | null       // "08:00:00"
+  sessionLocation: string | null
+  cancelReason: string | null       // free-text from admin; null = none provided
+  // makeupInfo intentionally omitted — 3.6 builds the makeup-assignment trigger
+  // and uses a separate template. Cancellation notice never speaks for makeups.
+}
+
+export type MakeupAssignmentData = {
+  studentFirstName: string
+  courseTitle: string
+  originalSessionDate: string | null  // ISO; null = unknown (rare)
+  makeupSessionDate: string | null
+  makeupSessionStart: string | null
+  makeupSessionLocation: string | null
+}
+
+export type SessionReminderData = {
+  studentFirstName: string
+  courseTitle: string
+  sessionDate: string | null
+  sessionStart: string | null
+  sessionLocation: string | null
+  leadTimeLabel: string             // "tomorrow" or "in 1 week" — drives wording
+}
+
 export type Rendered = {
   smsBody: string
   emailSubject: string
@@ -179,6 +208,138 @@ export function lowEnrollmentWarning(data: LowEnrollmentWarningData): Rendered {
   <strong>Enrolled:</strong> ${esc(data.enrolledCount)} of ${esc(data.capacity)}
 </p>
 <p><a href="https://sailbook.live/admin/courses">Admin view</a></p>`.trim()
+
+  return { smsBody, emailSubject, emailText, emailHtml }
+}
+
+export function sessionCancellation(data: SessionCancellationData): Rendered {
+  const dateStr = formatDate(data.sessionDate)
+  const timeStr = formatTime(data.sessionStart)
+  const when = data.sessionDate ? `${dateStr}${timeStr ? ` at ${timeStr}` : ''}` : 'TBD'
+  const where = data.sessionLocation ?? 'TBD'
+  const reasonClause = data.cancelReason ? ` Reason: ${data.cancelReason}.` : ''
+
+  // Same STOP disclosure rationale as enrollmentConfirmation.
+  // "on {when} ({where})" avoids the awkward "at {time} at {location}" double-at
+  // that "on {when} at {where}" produces when `when` already ends with a time.
+  const smsBody =
+    `SailBook: Hi ${data.studentFirstName}, your ${data.courseTitle} session ` +
+    `on ${when} (${where}) has been cancelled.${reasonClause} ` +
+    `Your schedule: sailbook.live/student/courses. Reply STOP to opt out.`
+
+  const emailSubject = `Cancelled: ${data.courseTitle} session on ${dateStr}`
+
+  const lines = [
+    `Hi ${data.studentFirstName},`,
+    ``,
+    `Your ${data.courseTitle} session has been cancelled.`,
+    ``,
+    `Cancelled session: ${when}`,
+    `Location: ${where}`,
+    data.cancelReason ? `Reason: ${data.cancelReason}` : null,
+    ``,
+    `View your schedule: https://sailbook.live/student/courses`,
+    ``,
+    `— Simply Sailing`,
+  ].filter((l): l is string => l !== null)
+
+  const emailText = lines.join('\n')
+
+  const emailHtml = `
+<p>Hi ${esc(data.studentFirstName)},</p>
+<p>Your <strong>${esc(data.courseTitle)}</strong> session has been cancelled.</p>
+<p>
+  <strong>Cancelled session:</strong> ${esc(when)}<br>
+  <strong>Location:</strong> ${esc(where)}
+  ${data.cancelReason ? `<br><strong>Reason:</strong> ${esc(data.cancelReason)}` : ''}
+</p>
+<p><a href="https://sailbook.live/student/courses">View your schedule</a></p>
+<p>— Simply Sailing</p>`.trim()
+
+  return { smsBody, emailSubject, emailText, emailHtml }
+}
+
+export function makeupAssignment(data: MakeupAssignmentData): Rendered {
+  const origDateStr = formatDate(data.originalSessionDate)
+  const makeupDateStr = formatDate(data.makeupSessionDate)
+  const makeupTimeStr = formatTime(data.makeupSessionStart)
+  const makeupWhen = data.makeupSessionDate
+    ? `${makeupDateStr}${makeupTimeStr ? ` at ${makeupTimeStr}` : ''}`
+    : 'TBD'
+  const makeupWhere = data.makeupSessionLocation ?? 'TBD'
+
+  // Same STOP disclosure rationale as enrollmentConfirmation.
+  const smsBody =
+    `SailBook: Hi ${data.studentFirstName}, your missed ${data.courseTitle} ` +
+    `session (${origDateStr}) has a makeup scheduled: ${makeupWhen} at ${makeupWhere}. ` +
+    `Schedule: sailbook.live/student/courses. Reply STOP to opt out.`
+
+  const emailSubject = `Makeup scheduled: ${data.courseTitle} on ${makeupDateStr}`
+
+  const emailText = [
+    `Hi ${data.studentFirstName},`,
+    ``,
+    `A makeup has been scheduled for the ${data.courseTitle} session you missed (${origDateStr}).`,
+    ``,
+    `Makeup session: ${makeupWhen}`,
+    `Location: ${makeupWhere}`,
+    ``,
+    `View your schedule: https://sailbook.live/student/courses`,
+    ``,
+    `— Simply Sailing`,
+  ].join('\n')
+
+  const emailHtml = `
+<p>Hi ${esc(data.studentFirstName)},</p>
+<p>A makeup has been scheduled for the <strong>${esc(data.courseTitle)}</strong> session you missed (${esc(origDateStr)}).</p>
+<p>
+  <strong>Makeup session:</strong> ${esc(makeupWhen)}<br>
+  <strong>Location:</strong> ${esc(makeupWhere)}
+</p>
+<p><a href="https://sailbook.live/student/courses">View your schedule</a></p>
+<p>— Simply Sailing</p>`.trim()
+
+  return { smsBody, emailSubject, emailText, emailHtml }
+}
+
+export function sessionReminder(data: SessionReminderData): Rendered {
+  const dateStr = formatDate(data.sessionDate)
+  const timeStr = formatTime(data.sessionStart)
+  const when = data.sessionDate ? `${dateStr}${timeStr ? ` at ${timeStr}` : ''}` : 'TBD'
+  const where = data.sessionLocation ?? 'TBD'
+
+  // Same STOP disclosure rationale as enrollmentConfirmation.
+  // "on {when} ({where})" — same formatting choice as sessionCancellation
+  // to avoid the "at {time} at {location}" double-at issue.
+  const smsBody =
+    `SailBook reminder: Hi ${data.studentFirstName}, your ${data.courseTitle} session ` +
+    `is ${data.leadTimeLabel} on ${when} (${where}). ` +
+    `Schedule: sailbook.live/student/courses. Reply STOP to opt out.`
+
+  const emailSubject = `Reminder: ${data.courseTitle} ${data.leadTimeLabel}`
+
+  const emailText = [
+    `Hi ${data.studentFirstName},`,
+    ``,
+    `Reminder — your ${data.courseTitle} session is ${data.leadTimeLabel}.`,
+    ``,
+    `Session: ${when}`,
+    `Location: ${where}`,
+    ``,
+    `View your schedule: https://sailbook.live/student/courses`,
+    ``,
+    `— Simply Sailing`,
+  ].join('\n')
+
+  const emailHtml = `
+<p>Hi ${esc(data.studentFirstName)},</p>
+<p>Reminder — your <strong>${esc(data.courseTitle)}</strong> session is ${esc(data.leadTimeLabel)}.</p>
+<p>
+  <strong>Session:</strong> ${esc(when)}<br>
+  <strong>Location:</strong> ${esc(where)}
+</p>
+<p><a href="https://sailbook.live/student/courses">View your schedule</a></p>
+<p>— Simply Sailing</p>`.trim()
 
   return { smsBody, emailSubject, emailText, emailHtml }
 }

@@ -14,6 +14,7 @@ import {
 import { fmtDateLong, fmtTime } from '@/lib/utils'
 import { attendanceStatusConfig } from '@/lib/attendance'
 import type { AttendanceStatus } from '@/lib/attendance'
+import SessionNotesForm from '@/components/instructor/session-notes-form'
 
 type StudentRow = {
   enrollment_id: string
@@ -42,7 +43,7 @@ export default async function InstructorSessionRosterPage({
   const { data: session } = await supabase
     .from('sessions')
     .select(`
-      id, date, start_time, end_time, location, status,
+      id, date, start_time, end_time, location, status, notes, instructor_id,
       courses!inner (
         id, title, capacity, instructor_id,
         course_types ( name )
@@ -61,8 +62,11 @@ export default async function InstructorSessionRosterPage({
     course_types: { name: string } | null
   }
 
-  // Verify this instructor owns the course
-  if (course.instructor_id !== user.id) redirect('/instructor/dashboard')
+  // DEC-007: an instructor may be assigned at the course level OR at the session
+  // level (substitute). Either path authorizes access to the session view.
+  if (course.instructor_id !== user.id && session.instructor_id !== user.id) {
+    redirect('/instructor/dashboard')
+  }
 
   // Fetch enrollments with student profiles
   const { data: enrollments } = await supabase
@@ -170,7 +174,7 @@ export default async function InstructorSessionRosterPage({
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead className="hidden sm:table-cell">Email</TableHead>
                   <TableHead>Attendance</TableHead>
                 </TableRow>
               </TableHeader>
@@ -201,7 +205,7 @@ export default async function InstructorSessionRosterPage({
                     <TableCell className="text-muted-foreground">
                       {s.phone ?? '—'}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="hidden sm:table-cell text-muted-foreground">
                       {s.email}
                     </TableCell>
                     <TableCell>
@@ -230,6 +234,18 @@ export default async function InstructorSessionRosterPage({
               </TableBody>
             </Table>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Session Notes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Visible to all instructors and admin. Use for continuity between sessions.
+          </p>
+          <SessionNotesForm sessionId={session.id} initialNotes={session.notes ?? ''} />
         </CardContent>
       </Card>
     </div>

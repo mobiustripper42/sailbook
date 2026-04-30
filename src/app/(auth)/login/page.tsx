@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { Suspense, useActionState, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,11 +16,24 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { login } from "../actions";
+import { safeNextPath } from "@/lib/auth/safe-next";
+import GoogleSignInButton from "@/components/auth/google-sign-in-button";
 import DevLoginHelper from "@/components/dev-login-helper";
 
 export default function LoginPage() {
+  // useSearchParams() requires a Suspense boundary for static-render bailout.
+  return (
+    <Suspense>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
   const [state, action, pending] = useActionState(login, null);
   const [email, setEmail] = useState("");
+  const searchParams = useSearchParams();
+  const next = safeNextPath(searchParams.get("next")) ?? undefined;
 
   return (
     <div className="flex flex-col items-center w-full max-w-sm">
@@ -38,7 +52,16 @@ export default function LoginPage() {
           priority
         />
       </CardHeader>
-      <form action={action}>
+      <CardContent className="space-y-4 pb-0">
+        <GoogleSignInButton next={next} />
+        <div className="flex items-center gap-3 py-1">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs text-muted-foreground">or</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+      </CardContent>
+      <form action={action} noValidate>
+        {next ? <input type="hidden" name="next" value={next} /> : null}
         <CardContent className="space-y-4">
           {state?.error && (
             <p className="text-sm text-destructive">{state.error}</p>

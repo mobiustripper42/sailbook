@@ -81,7 +81,7 @@ export default async function InstructorDashboard() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard label="Active Courses" value={courseIds.size} />
         <StatCard label="Upcoming Sessions" value={upcomingCount} />
         <StatCard label="Total Students" value={studentIds.size} />

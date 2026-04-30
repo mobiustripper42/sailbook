@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -30,14 +30,23 @@ export default function StudentAccountForm({
 }) {
   const [state, action, pending] = useActionState(updateStudentProfile, null)
 
+  // DEC-015 form actions return `string | null` — null is success, string is
+  // an error. Both null-on-success and null-on-mount look the same, so derive
+  // a "just succeeded" flag from the pending → idle transition with state=null.
+  const [hasSubmitted, setHasSubmitted] = useState(false)
+  const prevPending = useRef(false)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (prevPending.current && !pending) setHasSubmitted(true)
+    prevPending.current = pending
+  }, [pending])
+
+  const showSuccess = hasSubmitted && state === null && !pending
+
   return (
     <form action={action} className="space-y-5 max-w-md">
-      {state?.error && (
-        <p className="text-sm text-destructive">{state.error}</p>
-      )}
-      {state && !state.error && (
-        <p className="text-sm text-primary">Profile updated.</p>
-      )}
+      {state && <p className="text-sm text-destructive">{state}</p>}
+      {showSuccess && <p className="text-sm text-primary">Profile updated.</p>}
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">

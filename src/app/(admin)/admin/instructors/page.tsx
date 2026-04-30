@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import InstructorActions from '@/components/admin/instructor-actions'
-import InstructorInvitePanel from '@/components/admin/instructor-invite-panel'
+import InvitePanel from '@/components/admin/invite-panel'
 
 export default async function InstructorsPage() {
   const supabase = await createClient()
@@ -46,7 +46,7 @@ export default async function InstructorsPage() {
         </div>
       )}
 
-      <InstructorInvitePanel token={invite?.token ?? null} createdAt={invite?.created_at ?? null} />
+      <InvitePanel role="instructor" token={invite?.token ?? null} createdAt={invite?.created_at ?? null} />
 
       {instructors?.length === 0 ? (
         <EmptyState message="No instructors yet." />

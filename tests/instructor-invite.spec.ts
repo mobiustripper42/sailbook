@@ -55,7 +55,7 @@ test.describe('Instructor invite link', () => {
       // Capture whatever token is currently displayed (if any) so we can
       // tell when the regenerate action has actually landed.
       const initialText =
-        (await adminPage.getByTestId('invite-url').textContent().catch(() => null))?.trim() ?? null
+        (await adminPage.getByTestId('invite-url-instructor').textContent().catch(() => null))?.trim() ?? null
 
       // Regenerate — confirm dialog pops up; accept it.
       // `.on` (not `.once`) — the page may emit multiple dialogs over the
@@ -72,11 +72,11 @@ test.describe('Instructor invite link', () => {
       // value satisfies this check).
       await expect
         .poll(async () =>
-          (await adminPage.getByTestId('invite-url').textContent().catch(() => null))?.trim() ?? null,
+          (await adminPage.getByTestId('invite-url-instructor').textContent().catch(() => null))?.trim() ?? null,
         )
         .not.toBe(initialText)
 
-      inviteUrl = (await adminPage.getByTestId('invite-url').textContent())?.trim() ?? ''
+      inviteUrl = (await adminPage.getByTestId('invite-url-instructor').textContent())?.trim() ?? ''
       expect(inviteUrl).toMatch(/\/invite\/instructor\/[A-Za-z0-9_-]+$/)
     } finally {
       await adminCtx.close()
@@ -139,16 +139,16 @@ test.describe('Instructor invite link', () => {
 
       // Generate once
       await adminPage.getByRole('button', { name: /Generate link|Regenerate link/ }).click()
-      await expect(adminPage.getByTestId('invite-url')).toContainText('/invite/instructor/')
-      oldUrl = (await adminPage.getByTestId('invite-url').textContent())?.trim() ?? ''
+      await expect(adminPage.getByTestId('invite-url-instructor')).toContainText('/invite/instructor/')
+      oldUrl = (await adminPage.getByTestId('invite-url-instructor').textContent())?.trim() ?? ''
 
       // Regenerate again
       await adminPage.getByRole('button', { name: 'Regenerate link' }).click()
       // Wait for the URL to actually change
       await expect
-        .poll(async () => (await adminPage.getByTestId('invite-url').textContent())?.trim())
+        .poll(async () => (await adminPage.getByTestId('invite-url-instructor').textContent())?.trim())
         .not.toBe(oldUrl)
-      newUrl = (await adminPage.getByTestId('invite-url').textContent())?.trim() ?? ''
+      newUrl = (await adminPage.getByTestId('invite-url-instructor').textContent())?.trim() ?? ''
       expect(newUrl).not.toEqual(oldUrl)
     } finally {
       await adminCtx.close()

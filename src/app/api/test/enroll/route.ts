@@ -11,11 +11,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/types'
 import { notifyEnrollmentConfirmed } from '@/lib/notifications/triggers'
+import { devOnly } from '@/lib/dev-only'
 
 export async function POST(req: NextRequest) {
-  if (process.env.NODE_ENV !== 'development') {
-    return NextResponse.json({ error: 'Not available' }, { status: 403 })
-  }
+  const blocked = devOnly()
+  if (blocked) return blocked
 
   const { courseId, studentEmail, notify } = await req.json() as {
     courseId: string

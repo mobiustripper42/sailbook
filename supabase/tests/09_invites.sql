@@ -10,7 +10,7 @@
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(15);
+SELECT plan(17);
 
 CREATE SCHEMA IF NOT EXISTS tests;
 
@@ -224,6 +224,35 @@ SELECT lives_ok(
 );
 
 RESET ROLE;
+
+-- ============================================================
+-- accept_invite: admin role grants is_admin on caller's profile
+-- ============================================================
+
+-- Seed an admin invite as postgres (bypasses RLS)
+INSERT INTO public.invites (role, token, created_by)
+  VALUES ('admin', 'tok_seed_admin', 'a1000000-0000-0000-0000-000000000001');
+
+-- Authenticate as Alex (a still-student, untouched by earlier tests)
+SELECT tests.authenticate(
+  'a1000000-0000-0000-0000-000000000006',
+  p_is_student => true
+);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  public.accept_invite('admin', 'tok_seed_admin'),
+  true,
+  'accept_invite: valid admin token returns true'
+);
+
+RESET ROLE;
+
+SELECT is(
+  (SELECT is_admin FROM public.profiles WHERE id = 'a1000000-0000-0000-0000-000000000006'),
+  true,
+  'accept_invite: is_admin set to true on caller profile'
+);
 
 SELECT * FROM finish();
 ROLLBACK;
