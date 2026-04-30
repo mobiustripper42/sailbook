@@ -174,7 +174,7 @@ export default async function InstructorSessionRosterPage({
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead className="hidden sm:table-cell">Email</TableHead>
                   <TableHead>Attendance</TableHead>
                 </TableRow>
               </TableHeader>
@@ -205,7 +205,7 @@ export default async function InstructorSessionRosterPage({
                     <TableCell className="text-muted-foreground">
                       {s.phone ?? '—'}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="hidden sm:table-cell text-muted-foreground">
                       {s.email}
                     </TableCell>
                     <TableCell>
