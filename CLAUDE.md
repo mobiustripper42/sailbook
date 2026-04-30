@@ -55,7 +55,8 @@ waitlist_entries (notify on spot opening)
 3. **Build it** — implement the feature
 4. **Write the test** — Playwright integration test + pgTAP if RLS-touching
 5. **Run targeted tests** — `npx playwright test tests/foo.spec.ts`. `supabase test db` if RLS-touching. Do NOT run the full suite — that's the user's call.
-6. **Close out** — `/kill-this` → `/its-dead` → push
+6. **Open PR** — `/kill-this` commits, pushes branch, opens PR. Preview URL lands in the PR description.
+7. **Review & ship** — tap the preview URL, address any `@code-review` findings, run full suite if RLS-touching, then `/ship-it` to merge.
 
 **Full suite (`npx playwright test`) is never run automatically.** `/kill-this` will ask before closing out.
 
@@ -69,6 +70,7 @@ waitlist_entries (notify on spot opening)
 - Never edit schema through the Supabase dashboard on any environment
 - `supabase/seed.sql` runs automatically on `db reset` — use for test data
 - After schema changes: regenerate types with `npx supabase gen types typescript --local > src/lib/supabase/types.ts`
+- **Before creating a migration:** run `gh pr list` to check for open PRs touching the same tables. If overlap exists, merge the in-flight PR first (or rename the new migration to a later timestamp to keep ledger order clean).
 
 ## Commands
 ```bash
@@ -166,8 +168,9 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 | `/its-alive` | Session start | Stamp time, read context, recommend task |
 | `/pause-this` | Mid-session break | Build check, commit WIP, note pause |
 | `/restart-this` | Resume from pause | Reload context, continue same session |
-| `/kill-this` | Session end (part 1) | Build check, commit, code review, draft log (time/points TBD) |
-| `/its-dead` | Session end (part 2) | Calc time + points, write log, update plan, push, PM recommendation |
+| `/kill-this` | Session end (part 1) | Build check, commit, push branch, open PR, code review, draft log |
+| `/ship-it` | After PR review passes | Merge PR, push migration if any, record ship time + wall clock |
+| `/its-dead` | Session end (part 2) | Calc time + points, write log, update plan, PM recommendation |
 
 ## Agent Workflow
 
@@ -177,6 +180,27 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 | @code-review | Sonnet | After every commit (wired into `/kill-this`) | Catch issues early |
 | @pm | Sonnet | Start/end of sessions (via skills) | Track progress, flag risks |
 | @ui-reviewer | Sonnet | After UI work, phase boundaries | Design quality |
+
+## Model Selection
+
+- **Main CC session:** Sonnet by default. Switch to Opus manually when you're stuck on something hard.
+- **Agents:** model is set in each agent's frontmatter. Don't override unless the task warrants it.
+
+## PR Workflow
+
+- Each task gets a branch (`git checkout -b task/X.Y-short-description`).
+- `/kill-this` opens the PR. `/ship-it` merges it.
+- Keep no more than 3 open PRs at once. Prefer 1.
+- Never have two open PRs with migrations touching the same table — merge one first.
+- Self-approve unless Andy review is explicitly needed.
+
+### PR Review on Mobile
+
+- **GitHub mobile app, not web** — the native app's diff + approve + merge flow is usable.
+- **Tap the Vercel preview URL first** — posted as a comment automatically. 60 seconds of clicking catches more than reading the diff.
+- **Enable auto-merge** — repo Settings → enable auto-merge, then "Enable auto-merge" on each PR.
+- **Branch protection:** require CI green (Vercel build + Playwright). Skip reviewer count for solo dev.
+- **Checklist PR descriptions** — `/kill-this` should populate: migration? RLS change? UI at 375px?
 
 ## Workflow Notes
 - **Diagnostic commands** (build, lint, type check, test): run directly — see errors, fix them, don't bother the user.
