@@ -52,11 +52,12 @@ waitlist_entries (notify on spot opening)
 
 1. **Spec it** — poker estimate, acceptance criteria
 2. **Plan it** — summarize what you're going to do (files to create/edit, approach). Wait for explicit approval before writing any code or running any commands.
-3. **Build it** — implement the feature
-4. **Write the test** — Playwright integration test + pgTAP if RLS-touching
-5. **Run targeted tests** — `npx playwright test tests/foo.spec.ts`. `supabase test db` if RLS-touching. Do NOT run the full suite — that's the user's call.
-6. **Open PR** — `/kill-this` commits, pushes branch, opens PR. Preview URL lands in the PR description.
-7. **Review & ship** — tap the preview URL, address any `@code-review` findings, run full suite if RLS-touching, then `/ship-it` to merge.
+3. **Cut the branch** — once the plan is approved: `git checkout -b task/X.Y-short-description`. Branch name includes the task ID.
+4. **Build it** — implement the feature
+5. **Write the test** — Playwright integration test + pgTAP if RLS-touching
+6. **Run targeted tests** — `npx playwright test tests/foo.spec.ts`. `supabase test db` if RLS-touching. Do NOT run the full suite — that's the user's call.
+7. **Open PR** — `/kill-this` commits, pushes branch, opens PR. Preview URL lands in the PR description.
+8. **Review & ship** — tap the preview URL, address any `@code-review` findings, run full suite if RLS-touching, then `/ship-it` to merge.
 
 **Full suite (`npx playwright test`) is never run automatically.** `/kill-this` will ask before closing out.
 
