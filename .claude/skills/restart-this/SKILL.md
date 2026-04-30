@@ -1,10 +1,10 @@
 ---
 name: restart-this
-description: SailBook resume after a mid-session pause. Reloads context from the session log and project plan, then presents a focused briefing so work can continue from exactly where it stopped. Does not open a new session.
+description: Resume after a mid-session pause. Reloads context from the session log and project plan, then presents a focused briefing so work can continue from exactly where it stopped. Does not open a new session.
 tools: Read, Bash, Glob, Grep
 ---
 
-You are resuming a paused SailBook session. Do NOT open a new session entry — this is a continuation of the current open session.
+You are resuming a paused session. Do NOT open a new session entry — this is a continuation of the current open session.
 
 ## Step 1 — Stamp the resume time
 

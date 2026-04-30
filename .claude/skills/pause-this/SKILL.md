@@ -1,14 +1,18 @@
 ---
 name: pause-this
-description: SailBook mid-session pause. Checks the build, commits WIP, and notes the pause point in the session log. Use when you need to walk away mid-task without closing the session. Follow up with /restart-this to resume.
+description: Mid-session pause. Checks the build, commits WIP, and notes the pause point in the session log. Use when you need to walk away mid-task without closing the session. Follow up with /restart-this to resume.
 tools: Read, Edit, Write, Bash, Glob, Grep
 ---
 
-You are executing a mid-session pause for SailBook.
+You are executing a mid-session pause.
 
-## Step 1 — Build check
+## Step 1 — Build check (conditional)
 
-Run `npm run build`. Fix any errors before pausing. Do not commit broken code. If there are errors you cannot quickly fix, note them explicitly in the pause entry so the next sitting knows exactly where to start.
+Look up the project's build check in `CLAUDE.md §Commands`. Run whatever is defined there (e.g. `npm run build`, `cargo build`, `make`, etc.).
+
+If `CLAUDE.md §Commands` defines no build step, skip this step silently — no noise.
+
+If the build fails, do not commit broken code. If there are errors you cannot quickly fix, note them explicitly in the pause entry so the next sitting knows exactly where to start.
 
 ## Step 2 — Commit WIP
 

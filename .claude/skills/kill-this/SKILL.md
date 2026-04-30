@@ -1,34 +1,35 @@
 ---
 name: kill-this
-description: First half of the SailBook end-of-session shutdown. Checks the build, commits code changes, runs code review, and shows a draft session log entry for review. Time calculation and point tally happen in /its-dead. Follow up with /its-dead to finalize.
+description: First half of the end-of-session shutdown. Checks the build, commits code changes, runs code review, and shows a draft session log entry for review. Time calculation and point tally happen in /its-dead. Follow up with /its-dead to finalize.
 tools: Read, Edit, Write, Bash, Glob, Grep
 ---
 
-You are executing the first half of the SailBook end-of-session shutdown.
+You are executing the first half of the end-of-session shutdown.
 
-## Step 1 — Full suite check
+## Step 1 — Verification recap
 
-Ask the user: **"Did you run the full Playwright suite (`npx playwright test`) this session?"**
+Ask the user: **"How was this session's work verified? (live run / test message + log inspection / doc re-read / suite run / nothing — list what applies)"**
 
-Wait for their answer.
+The answer is **advisory, non-blocking** — capture it for the draft session log entry's Completed or Context section. Decision-only sessions where "nothing to verify" is the honest answer are fine; do not require a specific verification mode.
 
-- If yes: continue.
-- If no: ask separately: **"Do you want to run it now before committing?"**
-  - If yes: run `npx playwright test` and fix any failures before proceeding.
-  - If no: continue.
+## Step 2 — Build check (conditional)
 
-## Step 2 — Build check
+Look up the project's build check in `CLAUDE.md §Commands`. Run whatever is defined there (e.g. `npm run build`, `cargo build`, `make`, `supabase db reset`, etc. — whatever the project considers a build verification).
 
-Run `npm run build`. Fix any errors before proceeding. Do not commit broken code.
+If `CLAUDE.md §Commands` defines no build step (e.g. a markdown-only repo, a domain project with no software build), skip this step silently — no noise.
 
-## Step 3 — Commit code
+If the build fails, fix errors before proceeding. Do not commit broken code.
+
+## Step 3 — Commit and push code
 
 Stage and commit all uncommitted changes with `git add -A`. Write a commit message that:
 - Starts with the phase/task (e.g. "Phase 5.5 —")
 - Summarizes what was done in plain English
 - Ends with `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
 
-If there is nothing to commit, skip and say so.
+If there is nothing to commit, skip the commit and say so.
+
+Then push: `git push origin main`. Push unconditionally — even with no new commit, this catches any unpushed commits from earlier in the session (work-product, amends) so the stop hook stays quiet through `/kill-this` → `/its-dead`. Per DEC-005 + task 13.
 
 ## Step 4 — Code review
 
@@ -52,4 +53,4 @@ Compose the full session log entry but DO NOT write it yet. Duration and points 
 
 Show the draft to the user and ask: **"Does this look right? Any edits before I lock it in? Run /its-dead when ready — pass any time adjustments as args (e.g. /its-dead subtract 30 minutes for time away from desk)."**
 
-Stop here. Do not write anything to session-log.md yet. Do not push.
+Stop here. Do not write anything to session-log.md yet. (Step 3 already pushed work-product; the log push happens in `/its-dead` Step 5.)
