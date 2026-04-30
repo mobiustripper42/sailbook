@@ -3,7 +3,70 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 108 — 2026-04-29 23:38 [open]
+## Session 108 — 2026-04-29 23:38–2026-04-30 01:38 (2.00 hrs)
+**Duration:** 2.00 hrs | **Points:** 7 (4.11: 2, 5.8: 5)
+**Task:** Phase 4 cleanup (4.11) + Phase 5 kickoff (5.8). Both bundled in commit `862357b`.
+
+**Completed:**
+- **4.11 — Substitute-instructor page bug + DEC-007 pgTAP coverage (2 pts).**
+  - `src/app/(instructor)/instructor/sessions/[id]/page.tsx` — page authorization at line 66 was redirecting any instructor who wasn't the course-level owner. The `update_session_notes` RPC authorizes both course-level AND session-level instructors per DEC-007, so substitutes assigned only at the session level were redirected before reaching a form they were already RPC-authorized to use. Fix: add `instructor_id` to the session select; gate becomes `course.instructor_id !== user.id && session.instructor_id !== user.id`.
+  - `supabase/tests/10_session_notes_rpc.sql` — added 3 cases (plan 8 → 11) for the DEC-007 override path: session-level-only instructor writes; column actually changed; course-level instructor still authorized when override exists.
+- **5.8 — Low-enrollment thresholds on course_types (5 pts; re-scoped 2 → 5).**
+  - **Re-scope reason:** scoping discovery — the existing 3.4 cron alert was using hardcoded `LOW_ENROLLMENT_RATIO = 0.5` and `LOW_ENROLLMENT_DAYS_OUT = 14`. 5.8 needed to replace both, not just add a dashboard tile.
+  - `supabase/migrations/20260430004850_add_low_enrollment_thresholds.sql` — `course_types.minimum_enrollment` (int, nullable, NULL = opt out) + `course_types.low_enrollment_lead_days` (int NOT NULL DEFAULT 14). Non-negative CHECK constraints on both.
+  - `src/lib/low-enrollment.ts` (new) — shared `findLowEnrollmentCourses(client, now)` helper. Single source of truth for both the daily admin cron alert AND the new admin dashboard tile.
+  - `src/lib/notifications/triggers.ts` — `notifyLowEnrollmentCourses` now calls the helper; constants deleted. Threshold semantics changed from ratio (≥ 0.5 of capacity) to absolute (`enrolled < minimum_enrollment`).
+  - `src/components/admin/course-type-form.tsx` + `src/actions/course-types.ts` — both fields with helper text. Extracted `readThresholds(formData)` so create + update share the parse path.
+  - `src/app/(admin)/admin/dashboard/page.tsx` — new `LowEnrollmentCard` tile next to `InstructorCard`. Stat row now `grid-cols-2 lg:grid-cols-3`. Helper invoked in parallel with the existing dashboard queries (`Promise.all`).
+  - `tests/admin-low-enrollment.spec.ts` (new) — 2 desktop tests: (a) default seed shows ✓ "Enrollment Healthy" (all `minimum_enrollment` are NULL); (b) setting ASA 101's minimum to 99 flips the tile to "⚠ Low Enrollment" (with `finally` cleanup so the seed state isn't polluted).
+- pgTAP **131/131** (was 128 — added 3 for DEC-007 override).
+- tsc clean. Lint clean. Build clean.
+- Full Playwright suite green (Eric ran `npx playwright test`).
+- Type regen: `npx supabase gen types typescript --local 2>/dev/null > src/lib/supabase/types.ts` — same `2>/dev/null` workaround for the CLI's "new version available" stderr leak that session 107 documented.
+- Hetzner git config still missing — used the same one-off `mobiustripper42 / mobius5kcrypto@gmail.com` flags as sessions 103/105/107. Phase 7 dev-tooling task is the right place for the long-term fix.
+- Plan updated: Phase 4 total 43 → 45 (+2 for 4.11), Phase 5 total 47 → 50 (+3 for 5.8 re-scope).
+- Commit `862357b` (4.11 + 5.8 bundled).
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification still pending (carryover from session 102).
+
+**Next Steps:**
+1. **Phase 5 priority order Eric set this session: 5.8 → 5.11 → 5.7.** With 5.8 done, **5.11 (bulk price update, 8 pts)** is next, followed by **5.7 (waitlist, 8 pts)**. 5.7 is unblocked now that Phase 3 notifications shipped.
+2. **5.8 follow-up cleanups from code review** (advisory, no blockers):
+   - `src/lib/low-enrollment.ts:38-41` — error path returns `[]`, dashboard then renders "Enrollment Healthy" (false negative). Same risk on cron path. Consider returning a discriminated union or letting the dashboard surface "Unable to compute" so a broken query isn't invisible.
+   - `src/lib/low-enrollment.ts:46-72` — N+1 query pattern (1 course list + 2 per-course). Fine at single-school scale; revisit if active courses exceed ~50.
+   - `src/actions/course-types.ts:11-13` — `Number(minRaw)` returns `NaN` for malformed input, falls through to a generic Postgres CHECK error. `<input type="number">` makes this unlikely; the CHECK catches it. Acceptable today.
+   - `tests/admin-low-enrollment.spec.ts:31-37` — `finally` cleanup is good but if cleanup itself fails, seed pollutes. A dedicated test-only course type would be more robust. Desktop-only guard mitigates today.
+   - `supabase/tests/10_session_notes_rpc.sql:146-148` — add a comment noting that the DEC-007 override fixture (`UPDATE sessions.instructor_id = pw_instructor`) persists for the remainder of the file. Anyone inserting new cases below would inherit it.
+   - `src/app/(instructor)/instructor/sessions/[id]/page.tsx:67` — page gate duplicates `get_instructor_session_ids` logic. Add a one-liner pointing at the SQL helper so future edits stay in sync.
+3. **Carryovers from session 107 still open:**
+   - Eric's close-review of session 107's work — 4.10 + 4.6. Still flagged; not addressed this session.
+   - `revalidatePath` in `updateSessionNotes` doesn't invalidate the admin attendance page.
+   - Empty/whitespace-only save silently clears notes; success copy still says "Notes saved."
+   - 4 small pgTAP gaps in `10_session_notes_rpc.sql`: unauthenticated, missing session, whitespace-clear, exact-2000-char boundary.
+   - `useTransientSuccess` hook extraction — now 5 forms duplicate the pattern.
+4. **Carryovers from session 106:**
+   - Pre-existing 4.x bug: invited instructors bounced from `/instructor/dashboard` until JWT refresh (`accept_invite` writes role flag to `public.profiles` but not `auth.users.raw_user_meta_data`). Natural fit during 4.2.
+   - pgTAP testing-cadence question for `/kill-this`.
+   - Manual smoke of 3.10 + 3.11.
+   - SMS smoke-test investigation, cross-file Playwright isolation hardening, DEC-015 cleanup.
+
+**Context:**
+- **`findLowEnrollmentCourses` is the single read path** for both the daily admin cron alert (`notifyLowEnrollmentCourses`) and the admin dashboard tile. If this function changes, both surfaces shift together — that's the design. Don't split them. The helper takes an optional `now: Date` for testability; in production both call sites use the default.
+- **Threshold semantics is absolute, not ratio.** A course flags when `enrolled < course_types.minimum_enrollment`, period. Capacity is no longer part of the math. `minimum_enrollment IS NULL` opts the entire course type out of low-enrollment surfacing — both alert and tile.
+- **Dashboard query pattern.** `findLowEnrollmentCourses` is N+1 inside, but it's launched in parallel with the existing dashboard `Promise.all` (kicked off before, awaited after). Fine at single-school scale.
+- **`getByText('Low Enrollment', { exact: true })` does NOT match the warning state of the tile** because the CardTitle renders `<span aria-hidden="true">⚠</span>` as a sibling text node — the parent's text content is "⚠Low Enrollment" with no whitespace between. Drop `exact: true` or use a different locator. Same shape as `InstructorCard`. Cost me a debugging detour this session.
+- **DEC-007 has two enforcement surfaces now.** `update_session_notes` RPC and the instructor-session page both check `course-level OR session-level`. They must stay in sync. `get_instructor_session_ids` is the SQL helper that encodes both. Anywhere else in the instructor surface that does its own ownership check is suspect.
+
+**Code Review:** 7 advisory items, no bugs, no security concerns. (@code-review against `862357b`.)
+1. **consistency** `instructor/sessions/[id]/page.tsx:67` — page gate duplicates SQL helper logic; add cross-reference comment.
+2. **cleanup** `low-enrollment.ts:46-72` — N+1 query pattern; flag for >50-course scale.
+3. **cleanup** `low-enrollment.ts:75` — `capacity` included in returned shape but not used by helper itself (consumer-facing).
+4. **cleanup** `actions/course-types.ts:11-13` — `Number()` returns NaN on malformed input; relies on CHECK constraint to catch.
+5. **cleanup** `low-enrollment.ts:38-41` — error path returns `[]`, false-negative on dashboard.
+6. **consistency** `tests/admin-low-enrollment.spec.ts:31-37` — `finally` cleanup risk if cleanup itself fails; dedicated test course type would be more robust.
+7. **cleanup** `supabase/tests/10_session_notes_rpc.sql:146-148` — override fixture persists for remainder of file; add a comment.
 
 ## Session 107 — 2026-04-29 16:53–22:20 (2.42 hrs; subtract 3 hrs interruptions from 5.45 hr wall clock)
 **Duration:** 2.42 hrs | **Points:** 4 (4.10: 1, 4.6: 3)
