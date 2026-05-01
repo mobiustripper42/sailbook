@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { MANUAL_PAYMENT_METHODS } from '@/lib/constants'
-import { notifyEnrollmentConfirmed } from '@/lib/notifications/triggers'
+import { notifyEnrollmentConfirmed, notifyWaitlistSpotOpened } from '@/lib/notifications/triggers'
 
 export async function adminEnrollStudent(
   _: unknown,
@@ -90,6 +90,14 @@ export async function adminEnrollStudent(
     if (paymentError) return `Enrollment created but payment record failed: ${paymentError.message}`
   }
 
+  // Best-effort: if this student happened to be on the course's waitlist,
+  // remove them. Failure is non-fatal — admins can clean up by hand.
+  await adminClient
+    .from('waitlist_entries')
+    .delete()
+    .eq('course_id', courseId)
+    .eq('student_id', studentId)
+
   await notifyEnrollmentConfirmed(enrollment.id)
 
   revalidatePath(`/admin/courses/${courseId}`)
@@ -98,11 +106,28 @@ export async function adminEnrollStudent(
 
 export async function confirmEnrollment(enrollmentId: string, courseId: string) {
   const supabase = await createClient()
+
+  // Look up student_id BEFORE flipping status, so we can clear the waitlist
+  // entry afterward without a second round-trip via the enrollments table.
+  const { data: enrollmentRow } = await supabase
+    .from('enrollments')
+    .select('student_id')
+    .eq('id', enrollmentId)
+    .maybeSingle()
+
   const { error } = await supabase
     .from('enrollments')
     .update({ status: 'confirmed', updated_at: new Date().toISOString() })
     .eq('id', enrollmentId)
   if (error) return { error: error.message }
+
+  if (enrollmentRow?.student_id) {
+    await supabase
+      .from('waitlist_entries')
+      .delete()
+      .eq('course_id', courseId)
+      .eq('student_id', enrollmentRow.student_id)
+  }
 
   await notifyEnrollmentConfirmed(enrollmentId)
 
@@ -124,6 +149,9 @@ export async function cancelEnrollment(enrollmentId: string, courseId: string) {
     .update({ status: 'missed', updated_at: new Date().toISOString() })
     .eq('enrollment_id', enrollmentId)
     .eq('status', 'expected')
+
+  // A spot just opened — fan out to the waitlist (best-effort, errors logged).
+  await notifyWaitlistSpotOpened(courseId)
 
   revalidatePath(`/admin/courses/${courseId}`)
   return { error: null }

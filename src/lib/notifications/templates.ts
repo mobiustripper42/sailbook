@@ -58,6 +58,12 @@ export type SessionReminderData = {
   leadTimeLabel: string             // "tomorrow" or "in 1 week" — drives wording
 }
 
+export type WaitlistSpotOpenedData = {
+  studentFirstName: string
+  courseTitle: string
+  courseId: string                  // for the deep link to the enrollment page
+}
+
 export type Rendered = {
   smsBody: string
   emailSubject: string
@@ -339,6 +345,40 @@ export function sessionReminder(data: SessionReminderData): Rendered {
   <strong>Location:</strong> ${esc(where)}
 </p>
 <p><a href="https://sailbook.live/student/courses">View your schedule</a></p>
+<p>— Simply Sailing</p>`.trim()
+
+  return { smsBody, emailSubject, emailText, emailHtml }
+}
+
+export function waitlistSpotOpened(data: WaitlistSpotOpenedData): Rendered {
+  const enrollUrl = `https://sailbook.live/student/courses/${data.courseId}`
+
+  // Notify-all model: every waitlister gets this when a spot frees up. First
+  // to register wins; remaining stay on the list. STOP disclosure same as
+  // other student-facing templates.
+  const smsBody =
+    `SailBook: Hi ${data.studentFirstName}, a spot just opened in ${data.courseTitle}. ` +
+    `Register here: ${enrollUrl}. First to enroll gets the spot. Reply STOP to opt out.`
+
+  const emailSubject = `A spot opened: ${data.courseTitle}`
+
+  const emailText = [
+    `Hi ${data.studentFirstName},`,
+    ``,
+    `A spot just opened in ${data.courseTitle}.`,
+    ``,
+    `Register here: ${enrollUrl}`,
+    ``,
+    `Heads up — everyone on the waitlist was notified at the same time. First to enroll gets the spot.`,
+    ``,
+    `— Simply Sailing`,
+  ].join('\n')
+
+  const emailHtml = `
+<p>Hi ${esc(data.studentFirstName)},</p>
+<p>A spot just opened in <strong>${esc(data.courseTitle)}</strong>.</p>
+<p><a href="${esc(enrollUrl)}">Register here</a></p>
+<p>Heads up — everyone on the waitlist was notified at the same time. First to enroll gets the spot.</p>
 <p>— Simply Sailing</p>`.trim()
 
   return { smsBody, emailSubject, emailText, emailHtml }

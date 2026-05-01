@@ -17,6 +17,7 @@ import SessionRow from '@/components/admin/session-row'
 import CourseStatusActions from '@/components/admin/course-status-actions'
 import EnrollmentActions from '@/components/admin/enrollment-actions'
 import AdminEnrollStudentPanel from '@/components/admin/admin-enroll-student-panel'
+import AdminWaitlistCard from '@/components/admin/admin-waitlist-card'
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -265,6 +266,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           )}
         </CardContent>
       </Card>
+
+      <AdminWaitlistCard courseId={id} />
     </div>
   )
 }
