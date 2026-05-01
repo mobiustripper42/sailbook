@@ -55,6 +55,9 @@ export default function AdminEnrollStudentPanel({
     ? (coursePriceCents / 100).toFixed(2)
     : ''
 
+  const [paymentMethod, setPaymentMethod] = useState('cash')
+  const [amount, setAmount] = useState(defaultAmount)
+
   if (!open) {
     return (
       <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
@@ -90,7 +93,7 @@ export default function AdminEnrollStudentPanel({
 
           <div className="space-y-1.5">
             <Label>Payment method</Label>
-            <Select name="payment_method" defaultValue="cash">
+            <Select name="payment_method" value={paymentMethod} onValueChange={setPaymentMethod}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -113,7 +116,8 @@ export default function AdminEnrollStudentPanel({
             type="number"
             min="0"
             step="0.01"
-            defaultValue={defaultAmount}
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
             placeholder="0.00"
           />
         </div>

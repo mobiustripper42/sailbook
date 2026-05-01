@@ -13,6 +13,8 @@ export default function AddSessionForm({ courseId }: { courseId: string }) {
   const [open, setOpen] = useState(false)
   const [isDirty, setIsDirty] = useState(false)
   const { confirmDiscard } = useUnsavedChanges(isDirty && open)
+  const [startTime, setStartTime] = useState('08:00')
+  const [endTime, setEndTime] = useState('16:00')
 
   if (!open) {
     return (
@@ -32,11 +34,11 @@ export default function AddSessionForm({ courseId }: { courseId: string }) {
         </div>
         <div className="space-y-1.5">
           <Label>Start</Label>
-          <Input type="time" name="start_time" required defaultValue="08:00" />
+          <Input type="time" name="start_time" required value={startTime} onChange={(e) => setStartTime(e.target.value)} />
         </div>
         <div className="space-y-1.5">
           <Label>End</Label>
-          <Input type="time" name="end_time" required defaultValue="16:00" />
+          <Input type="time" name="end_time" required value={endTime} onChange={(e) => setEndTime(e.target.value)} />
         </div>
       </div>
       <div className="space-y-1.5">
