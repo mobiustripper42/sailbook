@@ -3,7 +3,77 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 112 — 2026-05-01 00:40 [open]
+## Session 112 — 2026-05-01 00:40–02:54 (2.25 hrs)
+**Duration:** 2.25 hrs | **Points:** 3 (6.1)
+**Task:** 6.1 — Admin mobile responsiveness pass + CR cleanup from s111
+
+**Completed:**
+- **CR cleanup — 4 advisory items from s111 code review.**
+  - Extracted `EnrollmentQueueCard` component to
+    `src/components/admin/enrollment-queue-card.tsx`; removed near-duplicate
+    `CancellationRequests` + `PendingEnrollments` inline functions.
+    Dashboard shrinks from 373 → 288 lines.
+  - Sort-order comment added to the `cancel_requested` query.
+  - `test.skip(project !== 'desktop')` guard added to
+    `tests/dashboard-cancel-requests.spec.ts`.
+  - `as unknown as` casts left as tech debt.
+
+- **6.1 — Admin mobile responsiveness pass (3 pts).**
+  - `hidden sm:table-cell` / `hidden md:table-cell` applied to secondary
+    columns across: courses list (Instructor, Sessions, Price), course-types
+    list (Cert Body, Max Students, Min Hours), users list (Email), course
+    detail sessions table (Time, Location, Instructor), course detail
+    enrollments table (Email, Payment, Enrolled), dashboard upcoming sessions
+    (Instructor). Each table retains 3 key columns + actions at 375px.
+  - `src/components/admin/session-row.tsx` cells match header visibility.
+  - 2 new mobile-only Playwright tests in `tests/admin-mobile.spec.ts`.
+  - Full-suite follow-up: 5 mobile test failures found and fixed — mobile
+    skip guards added to `enrollment-refund.spec.ts` (3 tests using nth()
+    locators on hidden payment/status columns), `payment-e2e.spec.ts` (2
+    tests — one directly, one serial-flow cascade), and
+    `admin-course-crud.spec.ts` (Location column assertion). Pre-existing
+    failures not caused by this session: `student-enrollment.spec.ts:16`
+    (strict-mode violation on calendar pills) and
+    `session-cancellation-notice.spec.ts:86` (intermittent flake, passed
+    on re-run).
+  - Verified live on Eric's phone. Build clean, lint clean.
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification still pending (carryover from s102).
+
+**Unreviewed-by-Eric tasks (running tally):**
+- 4.6 — Instructor session notes (s107)
+- 4.10 — ui-reviewer agent recreation (s107)
+- 6.2 — Instructor mobile pass (s109)
+- 4.2 partial — sortable users + invite panels (verbally confirmed s111, not tapped)
+- 6.1 — Admin mobile pass (s112; verified on Eric's phone ✓)
+
+**Next Steps:**
+1. **Scoping sit: 5.2 Open Sailing + 6.19 LTSC public pages.** Do poker
+   estimates before any build work. Eric has deferred this two sessions running.
+2. Fix pre-existing `student-enrollment.spec.ts:16` strict-mode failure
+   (calendar pills — addInitScript not forcing list view).
+3. **Cut a task branch** (`git checkout -b task/X.Y-...`) before any coding
+   next session — PR was skipped this session because work stayed on main.
+
+**Context:**
+- `toQueueRows()` in dashboard/page.tsx typed against `pendingEnrollments`
+  but called with both queues — silent on shape divergence. Code review flagged.
+- `EnrollmentQueueCard` uses raw `<table>` (matches `UpcomingSessions` sibling)
+  rather than shadcn `<Table>`. Pre-existing inconsistency, low urgency.
+- "Showing 10 of N pending" footer copy wrong for cancellation requests. Low priority.
+- `student-enrollment.spec.ts:16` [mobile/desktop]: strict-mode violation —
+  `getByText('ASA 101 - Evening Series (May)')` resolves to 4 calendar pills.
+  Pre-existing, not caused by s112.
+- **PR missed this session** — work committed directly to main. Task branch
+  must be cut right after plan approval next session.
+
+**Code Review:** 4 advisory items, 0 bugs, 0 security issues.
+- (consistency) `toQueueRows` type implies pending-only, called with both queues.
+- (consistency) `EnrollmentQueueCard` uses raw `<table>` instead of shadcn `<Table>`.
+- (cleanup) "Showing 10 of N pending" copy wrong for cancellation requests.
+- (cleanup) Mobile-only test skips use inline `test.skip` — consistent but not centralized.
 
 ## Session 111 — 2026-04-30 21:31–22:34 (1.1 hrs)
 **Duration:** 1.1 hrs | **Points:** 3 (6.15)
