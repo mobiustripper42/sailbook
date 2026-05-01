@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 
 const links = [
   { href: '/instructor/dashboard', label: 'Dashboard' },
+  { href: '/instructor/calendar', label: 'Calendar' },
 ]
 
 export default function InstructorDesktopNav() {
