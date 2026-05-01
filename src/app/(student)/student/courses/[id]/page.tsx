@@ -141,14 +141,6 @@ export default async function StudentCourseDetailPage({
         <p className="text-sm text-muted-foreground">{description}</p>
       )}
 
-      {type?.is_drop_in && (
-        <div className="rounded-xs border border-border bg-muted/50 px-4 py-3 text-sm">
-          <span className="font-medium">Drop-in session.</span>{' '}
-          Pay {displayPrice != null ? `$${displayPrice}` : 'the hold amount'} now to reserve your spot.
-          The remaining balance is paid to the captain on the day.
-        </div>
-      )}
-
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
         <div>
           <p className="text-muted-foreground">Instructor</p>
@@ -264,6 +256,14 @@ export default async function StudentCourseDetailPage({
           )}
         </CardContent>
       </Card>
+
+      {type?.is_drop_in && (
+        <div className="rounded-xs border border-warning/50 bg-warning/10 px-4 py-3 text-sm text-foreground">
+          <span className="font-medium">Drop-in session.</span>{' '}
+          Pay {displayPrice != null ? `$${displayPrice}` : 'the hold amount'} now to reserve your spot.
+          The remaining balance is paid to the captain on the day.
+        </div>
+      )}
 
       <div className="pt-2">
         {isCancellationRequested ? (
