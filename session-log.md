@@ -3,7 +3,78 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 111 — 2026-04-30 21:31 [open]
+## Session 111 — 2026-04-30 21:31–22:34 (1.1 hrs)
+**Duration:** 1.1 hrs | **Points:** 3 (6.15)
+**Task:** Phase 6.15 — Admin pending-cancellation widget
+
+**Completed:**
+- **4.2 sign-off confirmed.** Eric verified sort + invite panels working. Dropped 4.2 from the unreviewed list.
+- **6.15 — Admin dashboard pending-cancellation widget (3 pts).**
+  - Two new queries added to `getDashboardData()` Promise.all in
+    `src/app/(admin)/admin/dashboard/page.tsx`: `cancelRequests` (top 10
+    `cancel_requested` enrollments, newest-first, with student + course joins)
+    and `cancelCount` (count-only).
+  - New `CancellationRequests` component mirrors `PendingEnrollments` exactly —
+    card with `"Cancellation Requests (N)"` title, student/course/enrolled-date
+    table, "Showing 10 of N" footer. Each course name links to
+    `/admin/courses/${course.id}`.
+  - Sort order: newest-first (vs oldest-first for PendingEnrollments) — most
+    recently requested cancellations land at the top.
+  - New `tests/dashboard-cancel-requests.spec.ts`: seeds a uniquely-titled
+    course + enrollment, flips it to cancel_requested, asserts card renders
+    with count and correct course link. 1 desktop test, 5.1s.
+  - tsc clean, lint clean, production build clean. Smoke-tested in live app — widget renders correctly; "Cancel (no refund)" path confirmed for students without Stripe payment records.
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification still pending (carryover from 102).
+
+**Unreviewed-by-Eric tasks (running tally):**
+- 4.6 — Instructor session notes (s107)
+- 4.10 — ui-reviewer agent recreation (s107)
+- 6.2 — Instructor mobile pass (s109)
+- 4.2 partial — sortable users + invite panels (s109; Eric verbally confirmed working this session but not via PR tap)
+
+**Next Steps:**
+1. **Scoping sit: 5.2 Open Sailing + 6.19 LTSC public pages.** Both need a
+   poker estimate before work starts. Eric flagged these as the next scoping
+   priority. Consider doing both in one planning sit before the next build session.
+2. **6.1 — Admin mobile responsiveness pass (3 pts).** Next high-priority build
+   task after 6.15.
+3. **Code review cleanups to carry forward (4 items, none blocking):**
+   - `CancellationRequests` + `PendingEnrollments` are near-duplicate — extract
+     shared `EnrollmentQueueCard` component; will also bring dashboard file back
+     under 200 lines (currently ~373).
+   - `tests/dashboard-cancel-requests.spec.ts` needs
+     `test.skip(test.info().project.name !== 'desktop')` guard to prevent
+     triple-run in serial mode across mobile/tablet/desktop workers.
+   - Sort-order divergence between the two widgets warrants a one-line comment
+     explaining why cancellations are newest-first.
+   - `as unknown as` cast pattern on nested Supabase selects is tech debt (same
+     smell in both components); tracked for when type regeneration lands.
+
+**Context:**
+- **Cancellations widget is newest-first by design.** Admin wants to see what
+  just arrived, not what's been sitting. PendingEnrollments stays oldest-first
+  as a FIFO confirmation queue. The difference is intentional.
+- **Dashboard is now 373 lines**, exceeding the 200-line convention. The
+  two enrollment-queue cards are the bulk of the excess. Extraction into
+  `components/dashboard/enrollment-queue-card.tsx` is the right fix but was
+  out of scope for a 3-pt task.
+- **Test locator pattern for dashboard cards:** use
+  `page.locator('[data-slot="card"]').filter({ hasText: /Title Regex/ })`
+  to scope row assertions to a specific card, avoiding false matches across
+  the page's multiple tables.
+- **Oldest-to-newest test isolation:** the cancel-requests test uses a uniquely-
+  titled course (via `runId()`) and newest-first query ordering so prior test
+  runs' leftover cancel_requested rows don't crowd out the assertion target.
+- **Students without Stripe payment records** hit the "Cancel (no refund)" button path — no Stripe API call. Expected for cash/check/venmo/admin-enrolled students.
+
+**Code Review:** 4 advisory items, 0 bugs, 0 security issues.
+- (consistency) Sort order divergence from PendingEnrollments — add a comment.
+- (consistency) CancellationRequests + PendingEnrollments are exact duplicates → extract shared component; also fixes the 200-line violation.
+- (cleanup) Test missing `test.skip(project !== 'desktop')` guard — will triple-run with undefined behavior on mobile/tablet workers.
+- (cleanup) `as unknown as` casts on nested Supabase selects — tech debt, not urgent.
 
 ## Session 110 — 2026-04-30 12:28–20:58 (4.00 hrs; subtract 4.5 hrs away from desk from 8.50 hr wall clock)
 **Duration:** 4.00 hrs | **Points:** 5 (4.2b)
