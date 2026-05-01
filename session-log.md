@@ -3,7 +3,59 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 113 — 2026-05-01 03:22 [open]
+## Session 113 — 2026-05-01 03:22–11:29 (8.1 hrs)
+**Duration:** 8.1 hrs | **Points:** 1 bug fix (unplanned) + 5.2 (5 pts)
+**Task:** BUG — Admin-created students OAuth redirect loop + PKCE reset-password fix; 5.2 Open Sailing drop-in landed on main via same PR
+
+**Completed:**
+- **BUG: Admin-created student OAuth infinite redirect loop.**
+  - Root cause: Supabase overwrites `raw_user_meta_data` with the OAuth
+    provider payload when linking a new identity to an existing `auth.users`
+    row, wiping `is_admin`/`is_instructor`/`is_student` flags. `proxy.ts`
+    reads those flags from the JWT (no DB lookup per request — intentional).
+    Missing flags → role guard redirects `/student/*` → loop.
+  - Fix: `BEFORE UPDATE OF raw_user_meta_data` trigger
+    (`handle_user_meta_update`) re-stamps flags from `public.profiles` when
+    any flag is missing. Merge order preserves OAuth keys (name, picture, etc.).
+  - Backfill in same migration re-stamps existing affected rows.
+  - 8 pgTAP tests in `supabase/tests/11_oauth_role_flags.sql` — all green.
+  - Manual verification step added to `tests/auth-oauth.spec.ts`.
+
+- **BUG: Forgot-password page stuck on "Verifying…" with PKCE flow.**
+  - Root cause: `reset-password/page.tsx` waited for `PASSWORD_RECOVERY` event
+    (implicit flow only). Local Supabase and new cloud projects use PKCE —
+    reset links arrive as `?code=...`. Browser client (`detectSessionInUrl:
+    true`) auto-exchanges the code, first firing `SIGNED_OUT` (prior session
+    cleared) then `SIGNED_IN`. Old code treated `SIGNED_OUT` as "link expired".
+  - Fix: detect `hasPkceCode` from URL; listen for `SIGNED_IN` on PKCE path;
+    only treat `SIGNED_OUT` as expired when no code was present. No explicit
+    `exchangeCodeForSession` call (avoids double-exchange race with SDK).
+  - Verified end-to-end: admin adds student → student uses forgot-password →
+    Mailpit email → reset link → password set → `/student/dashboard`.
+
+- **5.2 — Open Sailing drop-in enrollment model.**
+  - Committed on the BUG branch (`ba27e6d`) and landed on main via PR #4
+    alongside the bug fix. No separate 5.2 PR.
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification still pending (carryover from s102).
+
+**Next Steps:**
+1. `supabase db push` — apply the OAuth trigger migration to production before
+   any admin-created student tries Google sign-in.
+2. Verify production Supabase Auth flow type (Auth → URL Configuration) — if
+   PKCE, the reset-password PKCE fix is also needed there (already on main).
+3. Fix pre-existing `student-enrollment.spec.ts:16` strict-mode failure
+   (calendar pills — addInitScript not forcing list view).
+4. Continue with next Phase 5 task (5.7 waitlist or 5.4 prereq flagging).
+
+**Context:**
+- `f1000000-*` UUID range now used by 5.2 seed data (pw_admin, pw_instructor,
+  pw_student, pw_student2). Use `f9000000-*` or higher for new pgTAP test users.
+- PKCE is now the default for local Supabase and new cloud projects. Auth emails
+  (password reset, magic link) go through Mailpit locally — not Resend. Resend
+  is for app notifications only (session cancellations etc.).
 
 ## Session 112 — 2026-05-01 00:40–02:54 (2.25 hrs)
 **Duration:** 2.25 hrs | **Points:** 3 (6.1)
