@@ -47,9 +47,9 @@ export default async function CourseTypesPage() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Code</TableHead>
-                <TableHead>Cert Body</TableHead>
-                <TableHead>Max Students</TableHead>
-                <TableHead>Min Hours</TableHead>
+                <TableHead className="hidden sm:table-cell">Cert Body</TableHead>
+                <TableHead className="hidden md:table-cell">Max Students</TableHead>
+                <TableHead className="hidden md:table-cell">Min Hours</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-24" />
               </TableRow>
@@ -59,9 +59,9 @@ export default async function CourseTypesPage() {
                 <TableRow key={ct.id}>
                   <TableCell className="font-medium">{ct.name}</TableCell>
                   <TableCell className="font-mono text-sm">{ct.short_code}</TableCell>
-                  <TableCell>{ct.certification_body ?? '—'}</TableCell>
-                  <TableCell>{ct.max_students}</TableCell>
-                  <TableCell>{ct.min_hours ?? '—'}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{ct.certification_body ?? '—'}</TableCell>
+                  <TableCell className="hidden md:table-cell">{ct.max_students}</TableCell>
+                  <TableCell className="hidden md:table-cell">{ct.min_hours ?? '—'}</TableCell>
                   <TableCell>
                     <Badge variant={ct.is_active ? 'ok' : 'neutral'}>
                       {ct.is_active ? 'Active' : 'Inactive'}

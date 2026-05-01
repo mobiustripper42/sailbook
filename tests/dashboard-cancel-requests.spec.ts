@@ -36,6 +36,7 @@ test.describe('Admin dashboard — cancellation requests widget', () => {
   })
 
   test('widget shows request after enrollment is cancel_requested', async ({ page }) => {
+    test.skip(test.info().project.name !== 'desktop', 'desktop-only — avoids triple-run across viewports')
     const apiCtx = await page.context().browser()!.newContext()
     const apiPage = await apiCtx.newPage()
     try {

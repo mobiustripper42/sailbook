@@ -142,9 +142,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Instructor</TableHead>
+                  <TableHead className="hidden sm:table-cell">Time</TableHead>
+                  <TableHead className="hidden md:table-cell">Location</TableHead>
+                  <TableHead className="hidden sm:table-cell">Instructor</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-16" />
                 </TableRow>
@@ -196,10 +196,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <TableHeader>
                 <TableRow>
                   <TableHead>Student</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead className="hidden sm:table-cell">Email</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Payment</TableHead>
-                  <TableHead>Enrolled</TableHead>
+                  <TableHead className="hidden sm:table-cell">Payment</TableHead>
+                  <TableHead className="hidden md:table-cell">Enrolled</TableHead>
                   <TableHead className="w-32" />
                 </TableRow>
               </TableHeader>
@@ -210,13 +210,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   return (
                     <TableRow key={e.id}>
                       <TableCell>{student ? `${student.first_name} ${student.last_name}` : '—'}</TableCell>
-                      <TableCell>{student?.email ?? '—'}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{student?.email ?? '—'}</TableCell>
                       <TableCell>
                         <Badge variant={e.status === 'confirmed' ? 'ok' : e.status === 'cancel_requested' ? 'warn' : 'neutral'}>
                           {e.status === 'confirmed' ? 'Enrolled' : e.status === 'registered' ? 'Pending confirmation' : e.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="hidden sm:table-cell text-sm">
                         {payment ? (
                           <span className="flex items-center gap-1.5">
                             <span className={payment.status === 'refunded' ? 'text-muted-foreground line-through' : ''}>
@@ -242,7 +242,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                           <span className="text-muted-foreground">—</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
+                      <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
                         {new Date(e.enrolled_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>

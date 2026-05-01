@@ -51,10 +51,10 @@ export default async function CoursesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Course</TableHead>
-                <TableHead>Instructor</TableHead>
-                <TableHead>Sessions</TableHead>
+                <TableHead className="hidden sm:table-cell">Instructor</TableHead>
+                <TableHead className="hidden md:table-cell">Sessions</TableHead>
                 <TableHead>Enrolled / Cap</TableHead>
-                <TableHead>Price</TableHead>
+                <TableHead className="hidden sm:table-cell">Price</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-16" />
               </TableRow>
@@ -78,12 +78,12 @@ export default async function CoursesPage() {
                         {c.title && <p className="text-xs text-muted-foreground">{type?.name}</p>}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {instructor ? `${instructor.first_name} ${instructor.last_name}` : '—'}
                     </TableCell>
-                    <TableCell>{sessionCount}</TableCell>
+                    <TableCell className="hidden md:table-cell">{sessionCount}</TableCell>
                     <TableCell>{enrollmentCount} / {c.capacity}</TableCell>
-                    <TableCell>{c.price != null ? `$${c.price}` : '—'}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{c.price != null ? `$${c.price}` : '—'}</TableCell>
                     <TableCell>
                       <Badge variant={c.status === 'active' ? 'ok' : 'neutral'}>
                         {c.status.charAt(0).toUpperCase() + c.status.slice(1)}

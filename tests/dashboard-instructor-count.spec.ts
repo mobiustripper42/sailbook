@@ -58,6 +58,7 @@ test.describe('Admin — dashboard instructor count', () => {
   // DEC-007: session instructor_id NULL means "use course default" — should display
   // "Course default" in the session row select, not blank or "Unassigned"
   test('session instructor select shows "Course default" for sessions with no override', async ({ page }) => {
+    test.skip(test.info().project.name === 'mobile', 'Instructor column hidden on mobile — select not visible')
     // Seed sessions all omit instructor_id (NULL) — navigate to any course with sessions
     await page.goto('/admin/courses/c1000000-0000-0000-0000-000000000001')
     // The session row renders a SessionInstructorSelect — trigger should show "Course default"

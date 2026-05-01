@@ -128,7 +128,7 @@ export default function UsersList({ users }: { users: User[] }) {
             <TableHeader>
               <TableRow>
                 <SortableHead label="Name" sortKey="name" activeKey={sortKey} dir={sortDir} onClick={toggleSort} />
-                <SortableHead label="Email" sortKey="email" activeKey={sortKey} dir={sortDir} onClick={toggleSort} />
+                <SortableHead label="Email" sortKey="email" activeKey={sortKey} dir={sortDir} onClick={toggleSort} className="hidden sm:table-cell" />
                 <TableHead>Roles</TableHead>
                 <SortableHead label="Status" sortKey="status" activeKey={sortKey} dir={sortDir} onClick={toggleSort} />
                 <TableHead className="w-16" />
@@ -144,7 +144,7 @@ export default function UsersList({ users }: { users: User[] }) {
                     <TableCell className="font-medium">
                       {u.first_name} {u.last_name}
                     </TableCell>
-                    <TableCell>{u.email}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{u.email}</TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
                         {u.is_admin && <Badge variant="ok">Admin</Badge>}
@@ -198,16 +198,18 @@ function SortableHead({
   activeKey,
   dir,
   onClick,
+  className,
 }: {
   label: string
   sortKey: SortKey
   activeKey: SortKey
   dir: SortDir
   onClick: (key: SortKey) => void
+  className?: string
 }) {
   const isActive = sortKey === activeKey
   return (
-    <TableHead aria-sort={isActive ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+    <TableHead className={className} aria-sort={isActive ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
       <button
         type="button"
         onClick={() => onClick(sortKey)}

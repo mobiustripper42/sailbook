@@ -99,11 +99,11 @@ export default function SessionRow({
             day: 'numeric',
           })}
         </TableCell>
-        <TableCell className="whitespace-nowrap">
+        <TableCell className="whitespace-nowrap hidden sm:table-cell">
           {fmtTime(session.start_time)} – {fmtTime(session.end_time)}
         </TableCell>
-        <TableCell>{session.location ?? '—'}</TableCell>
-        <TableCell>
+        <TableCell className="hidden md:table-cell">{session.location ?? '—'}</TableCell>
+        <TableCell className="hidden sm:table-cell">
           <SessionInstructorSelect
             sessionId={session.id}
             courseId={courseId}

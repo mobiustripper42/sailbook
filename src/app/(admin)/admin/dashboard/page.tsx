@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { findLowEnrollmentCourses } from '@/lib/low-enrollment'
+import { EnrollmentQueueCard } from '@/components/admin/enrollment-queue-card'
+import type { QueueRow } from '@/components/admin/enrollment-queue-card'
 
 async function getDashboardData() {
   const supabase = await createClient()
@@ -61,6 +63,7 @@ async function getDashboardData() {
       .from('enrollments')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'registered'),
+    // Newest-first: admin wants to see what just arrived, not what's been sitting.
     supabase
       .from('enrollments')
       .select(`
@@ -98,8 +101,6 @@ async function getDashboardData() {
 
 type DashboardData = Awaited<ReturnType<typeof getDashboardData>>
 type UpcomingSession = DashboardData['upcomingSessions'][number]
-type PendingEnrollment = DashboardData['pendingEnrollments'][number]
-type CancelRequest = DashboardData['cancelRequests'][number]
 
 function formatTime(time: string) {
   const [h, m] = time.split(':').map(Number)
@@ -110,6 +111,20 @@ function formatTime(time: string) {
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+function toQueueRows(enrollments: DashboardData['pendingEnrollments']): QueueRow[] {
+  return enrollments.map((e) => {
+    const course = e.course as unknown as { id: string; title: string | null; course_type: { name: string } | null } | null
+    const student = e.student as unknown as { first_name: string; last_name: string } | null
+    return {
+      id: e.id,
+      studentName: student ? `${student.first_name} ${student.last_name}` : '—',
+      courseName: course?.title ?? course?.course_type?.name ?? '—',
+      courseId: course?.id ?? null,
+      date: e.enrolled_at,
+    }
+  })
 }
 
 export default async function AdminDashboard() {
@@ -127,8 +142,18 @@ export default async function AdminDashboard() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <UpcomingSessions sessions={data.upcomingSessions} />
-        <PendingEnrollments enrollments={data.pendingEnrollments} totalCount={data.pendingTotal} />
-        <CancellationRequests requests={data.cancelRequests} totalCount={data.cancelTotal} />
+        <EnrollmentQueueCard
+          title="Pending Confirmation"
+          emptyMessage="No enrollments pending confirmation."
+          rows={toQueueRows(data.pendingEnrollments)}
+          totalCount={data.pendingTotal}
+        />
+        <EnrollmentQueueCard
+          title="Cancellation Requests"
+          emptyMessage="No cancellation requests pending."
+          rows={toQueueRows(data.cancelRequests)}
+          totalCount={data.cancelTotal}
+        />
       </div>
     </div>
   )
@@ -210,7 +235,7 @@ function UpcomingSessions({ sessions }: { sessions: UpcomingSession[] }) {
               <tr className="border-b text-muted-foreground">
                 <th className="text-left pb-2 font-medium">Course</th>
                 <th className="text-left pb-2 font-medium">Date / Time</th>
-                <th className="text-left pb-2 font-medium">Instructor</th>
+                <th className="text-left pb-2 font-medium hidden sm:table-cell">Instructor</th>
                 <th className="text-right pb-2 font-medium">Enrolled</th>
               </tr>
             </thead>
@@ -243,7 +268,7 @@ function UpcomingSessions({ sessions }: { sessions: UpcomingSession[] }) {
                     <td className="py-2 pr-4 whitespace-nowrap">
                       {formatDate(s.date)}, {formatTime(s.start_time)}–{formatTime(s.end_time)}
                     </td>
-                    <td className="py-2 pr-4">
+                    <td className="py-2 pr-4 hidden sm:table-cell">
                       {instructor ? (
                         `${instructor.first_name} ${instructor.last_name}`
                       ) : (
@@ -256,116 +281,6 @@ function UpcomingSessions({ sessions }: { sessions: UpcomingSession[] }) {
               })}
             </tbody>
           </table>
-        )}
-      </CardContent>
-    </Card>
-  )
-}
-
-function CancellationRequests({ requests, totalCount }: { requests: CancelRequest[]; totalCount: number }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base font-semibold">
-          Cancellation Requests{totalCount > 0 && ` (${totalCount})`}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {requests.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No cancellation requests pending.</p>
-        ) : (
-          <>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-muted-foreground">
-                  <th className="text-left pb-2 font-medium">Student</th>
-                  <th className="text-left pb-2 font-medium">Course</th>
-                  <th className="text-right pb-2 font-medium">Enrolled</th>
-                </tr>
-              </thead>
-              <tbody>
-                {requests.map((e) => {
-                  const course = e.course as unknown as { id: string; title: string | null; course_type: { name: string } | null } | null
-                  const student = e.student as unknown as { first_name: string; last_name: string } | null
-                  const courseName = course?.title ?? course?.course_type?.name ?? '—'
-
-                  return (
-                    <tr key={e.id} className="border-b last:border-0">
-                      <td className="py-2 pr-4">
-                        {student ? `${student.first_name} ${student.last_name}` : '—'}
-                      </td>
-                      <td className="py-2 pr-4">
-                        {course?.id ? (
-                          <Link href={`/admin/courses/${course.id}`} className="hover:underline">{courseName}</Link>
-                        ) : courseName}
-                      </td>
-                      <td className="py-2 text-right whitespace-nowrap">{formatDate(e.enrolled_at)}</td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-            {totalCount > 10 && (
-              <p className="mt-3 text-xs text-muted-foreground text-right">
-                Showing 10 of {totalCount} pending
-              </p>
-            )}
-          </>
-        )}
-      </CardContent>
-    </Card>
-  )
-}
-
-function PendingEnrollments({ enrollments, totalCount }: { enrollments: PendingEnrollment[]; totalCount: number }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base font-semibold">
-          Pending Confirmation{totalCount > 0 && ` (${totalCount})`}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {enrollments.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No enrollments pending confirmation.</p>
-        ) : (
-          <>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-muted-foreground">
-                  <th className="text-left pb-2 font-medium">Student</th>
-                  <th className="text-left pb-2 font-medium">Course</th>
-                  <th className="text-right pb-2 font-medium">Enrolled</th>
-                </tr>
-              </thead>
-              <tbody>
-                {enrollments.map((e) => {
-                  const course = e.course as unknown as { id: string; title: string | null; course_type: { name: string } | null } | null
-                  const student = e.student as unknown as { first_name: string; last_name: string } | null
-                  const courseName = course?.title ?? course?.course_type?.name ?? '—'
-
-                  return (
-                    <tr key={e.id} className="border-b last:border-0">
-                      <td className="py-2 pr-4">
-                        {student ? `${student.first_name} ${student.last_name}` : '—'}
-                      </td>
-                      <td className="py-2 pr-4">
-                        {course?.id ? (
-                          <Link href={`/admin/courses/${course.id}`} className="hover:underline">{courseName}</Link>
-                        ) : courseName}
-                      </td>
-                      <td className="py-2 text-right whitespace-nowrap">{formatDate(e.enrolled_at)}</td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-            {totalCount > 10 && (
-              <p className="mt-3 text-xs text-muted-foreground text-right">
-                Showing 10 of {totalCount} pending
-              </p>
-            )}
-          </>
         )}
       </CardContent>
     </Card>
