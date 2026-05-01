@@ -175,7 +175,7 @@ export default function SessionRow({
           <TableCell colSpan={6} className="bg-muted/30">
             <form onSubmit={handleSubmit} className="space-y-3 py-2" onChange={() => setIsDirty(true)}>
               {editError && <p className="text-sm text-destructive">{editError}</p>}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="space-y-1.5">
                   <Label>Date</Label>
                   <Input

@@ -1,13 +1,13 @@
 -- RLS tests for course_types, courses, sessions
 -- Policies under test:
---   course_types: admin all | authenticated reads active only
---   courses:      admin all | student reads active+enrolled | instructor reads all
---   sessions:     admin all | student reads active-course+enrolled | instructor reads all
+--   course_types: admin all | authenticated reads active only | anon reads active only
+--   courses:      admin all | student reads active+enrolled | instructor reads all | anon reads active
+--   sessions:     admin all | student reads active-course+enrolled | instructor reads all | anon reads active-course
 --
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(15);
+SELECT plan(18);
 
 -- Reuse authenticate() helper from 01_rls_profiles.sql.
 -- If running this file standalone, recreate it here.
@@ -52,13 +52,33 @@ $$;
 -- COURSE TYPES
 -- ============================================================
 
--- Anon: no policy grants SELECT to anon → 0 rows
+-- Anon: can read active course_types (4 of 5; Advanced Racing is inactive)
 SET LOCAL ROLE anon;
 
 SELECT is(
   (SELECT count(*)::int FROM public.course_types),
+  4,
+  'anon: sees 4 active course_types'
+);
+
+SELECT is(
+  (SELECT count(*)::int FROM public.course_types WHERE id = 'b1000000-0000-0000-0000-000000000005'),
   0,
-  'anon: cannot read course_types'
+  'anon: cannot see inactive course_type (Advanced Racing)'
+);
+
+-- Anon: can read active courses (c001,c002,c003,c006-c010 = 8)
+SELECT is(
+  (SELECT count(*)::int FROM public.courses),
+  8,
+  'anon: sees 8 active courses'
+);
+
+-- Anon: can read sessions for active courses (d001-d006 + d010-d014 = 11; not d007/d008 completed, not d009 draft)
+SELECT is(
+  (SELECT count(*)::int FROM public.sessions),
+  11,
+  'anon: sees 11 sessions belonging to active courses'
 );
 
 RESET ROLE;

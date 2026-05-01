@@ -88,6 +88,24 @@ export default function CourseTypeForm({ courseType }: Props) {
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="slug">Public URL Slug</Label>
+        <div className="flex items-center gap-0">
+          <span className="text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-xs px-2 py-1.5 h-9 flex items-center">/courses/</span>
+          <Input
+            id="slug"
+            name="slug"
+            required
+            defaultValue={courseType?.slug ?? ''}
+            placeholder="asa101"
+            className="rounded-l-none"
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Lowercase letters, numbers, hyphens only. Used in the public LTSC link.
+        </p>
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
         <Textarea id="description" name="description" rows={3} defaultValue={courseType?.description ?? ''} />
       </div>

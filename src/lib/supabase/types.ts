@@ -81,6 +81,7 @@ export type Database = {
           minimum_enrollment: number | null
           name: string
           short_code: string
+          slug: string
           updated_at: string | null
         }
         Insert: {
@@ -96,6 +97,7 @@ export type Database = {
           minimum_enrollment?: number | null
           name: string
           short_code: string
+          slug: string
           updated_at?: string | null
         }
         Update: {
@@ -111,6 +113,7 @@ export type Database = {
           minimum_enrollment?: number | null
           name?: string
           short_code?: string
+          slug?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -707,3 +710,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

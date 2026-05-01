@@ -19,6 +19,7 @@ export async function createCourseType(prevState: string | null, formData: FormD
   const payload = {
     name: formData.get('name') as string,
     short_code: (formData.get('short_code') as string).toUpperCase(),
+    slug: (formData.get('slug') as string).toLowerCase().replace(/[^a-z0-9-]/g, '-'),
     certification_body: (formData.get('certification_body') as string) || null,
     description: (formData.get('description') as string) || null,
     min_hours: formData.get('min_hours') ? Number(formData.get('min_hours')) : null,
@@ -40,6 +41,7 @@ export async function updateCourseType(id: string, prevState: string | null, for
   const payload = {
     name: formData.get('name') as string,
     short_code: (formData.get('short_code') as string).toUpperCase(),
+    slug: (formData.get('slug') as string).toLowerCase().replace(/[^a-z0-9-]/g, '-'),
     certification_body: (formData.get('certification_body') as string) || null,
     description: (formData.get('description') as string) || null,
     min_hours: formData.get('min_hours') ? Number(formData.get('min_hours')) : null,
