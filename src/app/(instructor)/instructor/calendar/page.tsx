@@ -28,8 +28,16 @@ export default async function InstructorCalendarPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // DEC-007: sessions where this instructor is the course default (no session override)
-  const { data: courseSessions } = await supabase
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_instructor')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (!profile?.is_instructor) redirect('/login')
+
+  // DEC-007: sessions where this instructor is the course default (no session-level override).
+  // courses!inner + .eq('courses.status', 'active') excludes sessions on inactive/cancelled courses.
+  const { data: courseSessions, error: e1 } = await supabase
     .from('sessions')
     .select(`
       id, date, start_time, end_time, location, status,
@@ -40,8 +48,9 @@ export default async function InstructorCalendarPage() {
     .is('instructor_id', null)
     .order('date')
 
-  // DEC-007: sessions where this instructor is assigned at the session level
-  const { data: overrideSessions } = await supabase
+  // DEC-007: sessions directly assigned to this instructor at the session level.
+  // courses!inner + .eq('courses.status', 'active') excludes sessions on inactive/cancelled courses.
+  const { data: overrideSessions, error: e2 } = await supabase
     .from('sessions')
     .select(`
       id, date, start_time, end_time, location, status,
@@ -50,6 +59,9 @@ export default async function InstructorCalendarPage() {
     .eq('instructor_id', user.id)
     .eq('courses.status', 'active')
     .order('date')
+
+  if (e1) return <div className="text-destructive">{e1.message}</div>
+  if (e2) return <div className="text-destructive">{e2.message}</div>
 
   const seen = new Set<string>()
   const allRaw: RawSession[] = []

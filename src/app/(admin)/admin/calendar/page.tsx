@@ -5,6 +5,25 @@ import { createClient } from '@/lib/supabase/server'
 import { AdminCalendarView } from '@/components/admin/admin-calendar-view'
 import type { SessionEvent } from '@/components/shared/sessions-calendar'
 
+type RawSessionRow = {
+  id: string
+  date: string
+  start_time: string
+  end_time: string
+  location: string | null
+  status: string
+  instructor_id: string | null
+  session_instructor: { first_name: string; last_name: string } | null
+}
+
+type RawCourse = {
+  id: string
+  title: string | null
+  course_type: { id: string; name: string } | null
+  course_instructor: { first_name: string; last_name: string } | null
+  sessions: RawSessionRow[]
+}
+
 export default async function AdminCalendarPage() {
   const supabase = await createClient()
   const {
@@ -12,7 +31,14 @@ export default async function AdminCalendarPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: courses } = await supabase
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (!profile?.is_admin) redirect('/login')
+
+  const { data: courses, error } = await supabase
     .from('courses')
     .select(`
       id, title,
@@ -26,37 +52,24 @@ export default async function AdminCalendarPage() {
     .eq('status', 'active')
     .order('created_at')
 
+  if (error) return <div className="text-destructive">{error.message}</div>
+
   const sessions: SessionEvent[] = []
 
-  for (const course of courses ?? []) {
-    const ct = course.course_type as unknown as { id: string; name: string } | null
-    const courseInstructor = course.course_instructor as unknown as {
-      first_name: string
-      last_name: string
-    } | null
-
-    for (const s of (course.sessions as unknown as {
-      id: string
-      date: string
-      start_time: string
-      end_time: string
-      location: string | null
-      status: string
-      instructor_id: string | null
-      session_instructor: { first_name: string; last_name: string } | null
-    }[]) ?? []) {
-      const effectiveInstructor = s.session_instructor ?? courseInstructor
+  for (const course of (courses as unknown as RawCourse[]) ?? []) {
+    for (const s of course.sessions ?? []) {
+      const effectiveInstructor = s.session_instructor ?? course.course_instructor
       sessions.push({
         id: s.id,
         date: s.date,
         startTime: s.start_time,
         endTime: s.end_time,
         location: s.location,
-        label: course.title ?? ct?.name ?? 'Session',
+        label: course.title ?? course.course_type?.name ?? 'Session',
         href: `/admin/courses/${course.id}`,
         cancelled: s.status === 'cancelled',
-        courseTypeId: ct?.id,
-        courseTypeName: ct?.name,
+        courseTypeId: course.course_type?.id,
+        courseTypeName: course.course_type?.name,
         instructorName: effectiveInstructor
           ? `${effectiveInstructor.first_name} ${effectiveInstructor.last_name}`
           : null,

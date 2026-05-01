@@ -5,13 +5,19 @@ import type { SessionEvent } from '@/components/shared/sessions-calendar'
 import { SessionsCalendar } from '@/components/shared/sessions-calendar'
 import { SessionsList } from '@/components/shared/sessions-list'
 import { SessionsViewSwitcher } from '@/components/shared/sessions-view-switcher'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
-const selectCls =
-  'rounded-xs border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring'
+const ALL = '__all__'
 
 export function AdminCalendarView({ sessions }: { sessions: SessionEvent[] }) {
-  const [courseTypeId, setCourseTypeId] = useState('')
-  const [instructorName, setInstructorName] = useState('')
+  const [courseTypeId, setCourseTypeId] = useState(ALL)
+  const [instructorName, setInstructorName] = useState(ALL)
 
   const courseTypes = useMemo(() => {
     const map = new Map<string, string>()
@@ -32,8 +38,8 @@ export function AdminCalendarView({ sessions }: { sessions: SessionEvent[] }) {
   const filtered = useMemo(
     () =>
       sessions.filter((s) => {
-        if (courseTypeId && s.courseTypeId !== courseTypeId) return false
-        if (instructorName && s.instructorName !== instructorName) return false
+        if (courseTypeId !== ALL && s.courseTypeId !== courseTypeId) return false
+        if (instructorName !== ALL && s.instructorName !== instructorName) return false
         return true
       }),
     [sessions, courseTypeId, instructorName],
@@ -42,35 +48,41 @@ export function AdminCalendarView({ sessions }: { sessions: SessionEvent[] }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3" data-testid="calendar-filters">
-        <select
-          value={courseTypeId}
-          onChange={(e) => setCourseTypeId(e.target.value)}
-          className={selectCls}
-          aria-label="Filter by course type"
-          data-testid="filter-course-type"
-        >
-          <option value="">All course types</option>
-          {courseTypes.map(([id, name]) => (
-            <option key={id} value={id}>
-              {name}
-            </option>
-          ))}
-        </select>
+        <Select value={courseTypeId} onValueChange={setCourseTypeId}>
+          <SelectTrigger
+            className="w-48"
+            aria-label="Filter by course type"
+            data-testid="filter-course-type"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>All course types</SelectItem>
+            {courseTypes.map(([id, name]) => (
+              <SelectItem key={id} value={id}>
+                {name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        <select
-          value={instructorName}
-          onChange={(e) => setInstructorName(e.target.value)}
-          className={selectCls}
-          aria-label="Filter by instructor"
-          data-testid="filter-instructor"
-        >
-          <option value="">All instructors</option>
-          {instructors.map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
+        <Select value={instructorName} onValueChange={setInstructorName}>
+          <SelectTrigger
+            className="w-48"
+            aria-label="Filter by instructor"
+            data-testid="filter-instructor"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>All instructors</SelectItem>
+            {instructors.map((n) => (
+              <SelectItem key={n} value={n}>
+                {n}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <SessionsViewSwitcher
