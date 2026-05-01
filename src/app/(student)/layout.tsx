@@ -31,7 +31,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <div className="flex min-h-screen">
-      <aside className="hidden md:flex w-56 border-r bg-sidebar flex-col shrink-0">
+      <aside className="hidden md:flex w-56 border-r bg-sidebar flex-col shrink-0 sticky top-0 h-screen overflow-y-auto">
         <div className="px-4 py-5 border-b">
           <Link href="/student/dashboard" className="font-semibold text-sm tracking-tight">
             SailBook

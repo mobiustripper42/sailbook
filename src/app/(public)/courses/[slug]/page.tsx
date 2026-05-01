@@ -45,7 +45,7 @@ export default async function PublicCoursePage({
   const { data: courses } = await supabase
     .from('courses')
     .select(`
-      id, title, price, member_price, capacity,
+      id, title, price,
       sessions ( id, date, start_time, end_time, location, status )
     `)
     .eq('course_type_id', courseType.id)
@@ -55,8 +55,10 @@ export default async function PublicCoursePage({
   // Filter to courses with at least one future session, then sort by first session date
   const upcoming = (courses ?? [])
     .map((course) => {
-      const sessions = (course.sessions as { id: string; date: string; start_time: string; end_time: string; location: string | null; status: string }[] | null) ?? []
-      const futureSessions = sessions.filter((s) => s.status !== 'cancelled' && s.date >= today)
+      const sessions = (course.sessions ?? []) as { id: string; date: string; start_time: string; end_time: string; location: string | null; status: string }[]
+      const futureSessions = sessions
+        .filter((s) => s.status !== 'cancelled' && s.date >= today)
+        .sort((a, b) => a.date.localeCompare(b.date))
       return { ...course, sessions, futureSessions }
     })
     .filter((c) => c.futureSessions.length > 0)

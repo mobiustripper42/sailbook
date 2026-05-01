@@ -65,18 +65,24 @@ export default function InstructorMobileNavDrawer({ name, isStudent }: { name: s
         </div>
 
         <nav className="flex-1 px-2 py-3 space-y-0.5">
-          <Link
-            href="/instructor/dashboard"
-            onClick={() => setOpen(false)}
-            className={cn(
-              'block px-3 py-2 rounded-lg text-sm transition-colors',
-              pathname === '/instructor/dashboard'
-                ? 'bg-accent text-accent-foreground font-medium'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-            )}
-          >
-            Dashboard
-          </Link>
+          {[
+            { href: '/instructor/dashboard', label: 'Dashboard' },
+            { href: '/instructor/calendar', label: 'Calendar' },
+          ].map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              onClick={() => setOpen(false)}
+              className={cn(
+                'block px-3 py-2 rounded-lg text-sm transition-colors',
+                pathname === href || (href !== '/instructor/dashboard' && pathname.startsWith(href))
+                  ? 'bg-accent text-accent-foreground font-medium'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              )}
+            >
+              {label}
+            </Link>
+          ))}
         </nav>
 
         <div className="px-4 py-4 border-t">
