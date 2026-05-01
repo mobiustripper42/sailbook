@@ -6,13 +6,7 @@ tools: Read, Edit, Write, Bash, Glob, Grep, Agent
 
 You are executing the first half of the end-of-session shutdown.
 
-## Step 1 — Verification recap
-
-Ask the user: **"How was this session's work verified? (live run / test message + log inspection / doc re-read / suite run / nothing — list what applies)"**
-
-The answer is **advisory, non-blocking** — capture it for the draft session log entry's Completed or Context section. Decision-only sessions where "nothing to verify" is the honest answer are fine; do not require a specific verification mode.
-
-## Step 2 — Build check (conditional)
+## Step 1 — Build check (conditional)
 
 Look up the project's build check in `CLAUDE.md §Commands`. Run whatever is defined there (e.g. `npm run build`, `cargo build`, `make`, `supabase db reset`, etc. — whatever the project considers a build verification).
 
@@ -20,7 +14,7 @@ If `CLAUDE.md §Commands` defines no build step (e.g. a markdown-only repo, a do
 
 If the build fails, fix errors before proceeding. Do not commit broken code.
 
-## Step 3 — Commit and push branch
+## Step 2 — Commit and push branch
 
 Stage and commit all uncommitted changes with `git add -A`. Write a commit message that:
 - Starts with the phase/task (e.g. "Phase 5.5 —")
@@ -32,17 +26,17 @@ If there is nothing to commit, skip the commit and say so.
 Then push based on the current branch — **do not open a PR yet**:
 
 **On `main` (DEC-005 solo flow):**
-Run `git push origin main`. Push unconditionally — catches any earlier-session unpushed commits so the stop hook stays quiet through `/kill-this` → `/its-dead`. Skip Steps 4 and 5 — no PR needed. Go straight to Step 6.
+Run `git push origin main`. Push unconditionally — catches any earlier-session unpushed commits so the stop hook stays quiet through `/kill-this` → `/its-dead`. Skip Steps 3 and 4 — no PR needed. Go straight to Step 5.
 
 **On a `task/*`, `claude/<slug>`, or feature branch (PR flow):**
 Capture: `BRANCH=$(git branch --show-current)` and `SUBJECT=$(git log -1 --format=%s)`.
 Push the branch: `git push -u origin $BRANCH`. Do not open a PR yet — code review runs first.
 
-## Step 4 — Code review
+## Step 3 — Code review
 
 Run the @code-review agent against HEAD (`git diff HEAD~1`). Wait for it to complete. Capture the findings — you'll need them for the PR body and the session log draft.
 
-## Step 5 — Open PR (feature branches only)
+## Step 4 — Open PR (feature branches only)
 
 Now open the PR with code review findings included in the body.
 
@@ -60,18 +54,21 @@ Bulleted list from `git diff --name-only main..HEAD`.
 Paste the findings from Step 4 here. If clean, say "Clean bill of health."
 
 **## Test plan**
-Checkbox list tailored to what actually changed — never skip this. Projects should customize; example for a Next.js + Supabase project:
-- [ ] Playwright tests run for changed files?
-- [ ] Migration needed? → `supabase db push` on remote
-- [ ] RLS change? → `supabase test db` passes
-- [ ] UI change? → verified at 375px
+Generate this yourself by inspecting `git diff --name-only main..HEAD`. Do NOT copy from the code review findings — this section is for the human reviewer. Check each category and add a checkbox if it applies:
+- Any `supabase/migrations/*.sql`? → `- [ ] Migration applied to remote: \`supabase db push\``
+- Any RLS policy or `supabase/tests/` file? → `- [ ] RLS tests pass: \`supabase test db\``
+- Any file under `src/app/`, `src/components/`, or other UI paths? → `- [ ] UI verified at 375px mobile viewport`
+- Any new user-facing flow or feature? → `- [ ] [Feature name] tested end-to-end in the browser`
+- Any `tests/*.spec.ts` Playwright file? → `- [ ] Playwright tests pass for changed spec`
+
+Always include at least one human action item. Never leave this section empty, generic, or as a copy of the code review.
 
 Capture the returned PR URL. Surface it in your response and note it in the draft session log entry's `Context` section.
 
 **Fallback if `gh pr create` fails for any reason** (unavailable, unauthenticated, missing `pull_request:write` scope, org policy, network, etc.):
 Push already succeeded, so the branch is on the remote. Tell the user to open the PR manually. Note the missing PR in the draft log's Context.
 
-## Step 6 — Draft session log entry
+## Step 5 — Draft session log entry
 
 Compose the full session log entry but DO NOT write it yet. Duration and points are not yet known — use `[TBD]` placeholders:
 
@@ -89,4 +86,4 @@ Compose the full session log entry but DO NOT write it yet. Duration and points 
 
 Show the draft to the user and ask: **"Does this look right? Any edits before I lock it in? Run /its-dead when ready — pass any time adjustments as args (e.g. /its-dead subtract 30 minutes for time away from desk)."**
 
-Stop here. Do not write anything to session-log.md yet. (Step 3 already pushed work-product — to main directly, or via PR on a feature branch; the log push happens in `/its-dead` Step 4.)
+Stop here. Do not write anything to session-log.md yet. (Step 2 already pushed work-product — to main directly, or via PR on a feature branch; the log push happens in `/its-dead` Step 4.)
