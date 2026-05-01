@@ -49,6 +49,7 @@ test.describe('Admin — course creation', () => {
   });
 
   test('creates a course with one session and lands on course detail', async ({ page }) => {
+    test.skip(test.info().project.name === 'mobile', 'Location column hidden at 375px — session creation verified at tablet/desktop')
     await page.goto('/admin/courses/new');
     await expect(page.getByRole('heading', { name: 'New Course' })).toBeVisible();
 

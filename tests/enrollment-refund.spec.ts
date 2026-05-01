@@ -52,6 +52,7 @@ test.describe('Admin refund & cancel flow', () => {
   })
 
   test('payment column shows dash when no payment exists', async ({ page }) => {
+    test.skip(test.info().project.name === 'mobile', 'Payment column hidden at 375px')
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
     await page.goto(`/admin/courses/${courseId}`)
     const row = page.getByRole('row').filter({ hasText: 'pw_student@ltsc.test' })
@@ -60,6 +61,7 @@ test.describe('Admin refund & cancel flow', () => {
   })
 
   test('cancel_requested without payment shows Cancel (no refund) button', async ({ page }) => {
+    test.skip(test.info().project.name === 'mobile', 'Status/payment columns use nth() locators that shift on mobile')
     const apiCtx = await page.context().browser()!.newContext()
     const apiPage = await apiCtx.newPage()
     try {
@@ -79,6 +81,7 @@ test.describe('Admin refund & cancel flow', () => {
   })
 
   test('no-refund cancel transitions enrollment to cancelled', async ({ page }) => {
+    test.skip(test.info().project.name === 'mobile', 'Status/payment columns use nth() locators that shift on mobile')
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
     await page.goto(`/admin/courses/${courseId}`)
     // Only one "Cancel (no refund)" button exists at this point in the serial flow
@@ -91,6 +94,7 @@ test.describe('Admin refund & cancel flow', () => {
   })
 
   test('payment column shows amount + Stripe link and partial refund works', async ({ page }) => {
+    test.skip(test.info().project.name === 'mobile', 'Payment/status columns use nth() locators that shift on mobile')
     // Create a real Stripe test PI outside Next.js so processRefund can refund it
     const stripe = stripeClient()
     const pi = await stripe.paymentIntents.create({

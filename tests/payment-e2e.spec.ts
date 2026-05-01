@@ -149,6 +149,7 @@ test.describe('Full payment chain E2E', () => {
   // Test 3: admin processes a full refund
   // ---------------------------------------------------------------------------
   test('admin sees payment and processes full refund', async ({ page }) => {
+    test.skip(test.info().project.name === 'mobile', 'Payment column hidden at 375px')
     test.setTimeout(30000)
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
     await page.goto(`/admin/courses/${courseId}`)
@@ -178,6 +179,7 @@ test.describe('Full payment chain E2E', () => {
   // Test 4: student sees enrollment is gone after refund
   // ---------------------------------------------------------------------------
   test('student course page no longer shows active enrollment after refund', async ({ page }) => {
+    test.skip(test.info().project.name === 'mobile', 'Depends on refund processed in prior test, which skips on mobile')
     test.setTimeout(30000)
     await loginAs(page, 'pw_student@ltsc.test', '/student/dashboard')
     await page.goto(`/student/courses/${courseId}`)
