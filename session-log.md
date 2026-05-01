@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 118 — 2026-05-01 16:57 [open]
+
 ## Session 117 — 2026-05-01 16:21–16:41 (0.33 hrs)
 **Duration:** 0.33 hrs | **Points:** 7 (6.21 = 2, 6.20 = 5)
 **Task:** 6.21 sticky sidebar + 6.20 admin/instructor calendar views
@@ -93,7 +95,7 @@ Format: prepend newest entry at the top.
 - **(consistency)** `/dev` in `PUBLIC_ROUTES` + carved-out exception at line 60 is subtle.
 - **(advisory)** `/dev/ltsc` visible on Vercel preview URLs — low severity, harmless.
 
-## Session 115 — 2026-05-01 13:11–13:XX [open]
+## Session 115 — 2026-05-01 13:11–13:XX [abandoned]
 **Duration:** ~TBD | **Points:** unplanned bug fixes (0 pts)
 **Task:** Test suite failures — diagnose and fix 8 failures from full Playwright run
 
@@ -138,7 +140,7 @@ Format: prepend newest entry at the top.
 - `instructor-notes.spec.ts:94` is a known intermittent; if it shows up consistently,
   look for a test that mutates pw_student's `instructor_notes` field without cleaning up.
 
-## Session 114 — 2026-05-01 13:05 [open]
+## Session 114 — 2026-05-01 13:05 [abandoned]
 
 ## Session 113 — 2026-05-01 03:22–11:29 (8.1 hrs)
 **Duration:** 8.1 hrs | **Points:** 1 bug fix (unplanned) + 5.2 (5 pts)
