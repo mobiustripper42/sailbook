@@ -24,12 +24,25 @@ export default function ResetPasswordPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Supabase delivers the recovery token as a hash fragment.
-    // The client SDK fires PASSWORD_RECOVERY, which establishes a recovery session.
-    // We rely solely on this event — no getSession fallback — so a logged-in user
-    // without a valid recovery token cannot bypass the gate.
     const supabase = createClient();
 
+    // PKCE flow (local Supabase and new cloud projects): Supabase redirects here
+    // with ?code=... instead of #access_token=...&type=recovery. Exchange it
+    // explicitly so the recovery session is established before the event fires.
+    const code = new URLSearchParams(window.location.search).get("code");
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) {
+          setTokenError("Your reset link has expired. Please request a new one.");
+        } else {
+          setReady(true);
+          window.history.replaceState({}, "", "/reset-password");
+        }
+      });
+    }
+
+    // Implicit flow (older cloud projects): Supabase delivers the recovery token
+    // as a hash fragment; the client SDK fires PASSWORD_RECOVERY automatically.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event) => {
         if (event === "PASSWORD_RECOVERY") {
