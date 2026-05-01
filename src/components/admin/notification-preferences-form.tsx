@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { updateAdminNotificationPreferences } from '@/actions/notification-preferences'
@@ -28,6 +28,7 @@ export default function NotificationPreferencesForm({
     updateAdminNotificationPreferences,
     null,
   )
+  const [prefs, setPrefs] = useState<NormalizedPrefs>(initialPrefs)
 
   return (
     <form action={action} className="space-y-6 max-w-xl">
@@ -35,7 +36,6 @@ export default function NotificationPreferencesForm({
 
       {(Object.keys(EVENT_LABELS) as AdminNotificationEvent[]).map((event) => {
         const labels = EVENT_LABELS[event]
-        const prefs = initialPrefs[event]
         return (
           <fieldset key={event} className="space-y-2 rounded-md border p-4">
             <legend className="px-1 text-sm font-medium">{labels.title}</legend>
@@ -49,7 +49,8 @@ export default function NotificationPreferencesForm({
                   id={`${event}__sms`}
                   name={`${event}__sms`}
                   type="checkbox"
-                  defaultChecked={prefs.sms}
+                  checked={prefs[event].sms}
+                  onChange={(e) => setPrefs(p => ({ ...p, [event]: { ...p[event], sms: e.target.checked } }))}
                   className="size-4 rounded border-input accent-primary"
                 />
                 SMS
@@ -62,7 +63,8 @@ export default function NotificationPreferencesForm({
                   id={`${event}__email`}
                   name={`${event}__email`}
                   type="checkbox"
-                  defaultChecked={prefs.email}
+                  checked={prefs[event].email}
+                  onChange={(e) => setPrefs(p => ({ ...p, [event]: { ...p[event], email: e.target.checked } }))}
                   className="size-4 rounded border-input accent-primary"
                 />
                 Email

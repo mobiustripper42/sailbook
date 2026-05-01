@@ -13,8 +13,10 @@ export default function AddSessionForm({ courseId }: { courseId: string }) {
   const [open, setOpen] = useState(false)
   const [isDirty, setIsDirty] = useState(false)
   const { confirmDiscard } = useUnsavedChanges(isDirty && open)
+  const [date, setDate] = useState('')
   const [startTime, setStartTime] = useState('08:00')
   const [endTime, setEndTime] = useState('16:00')
+  const [location, setLocation] = useState('')
 
   if (!open) {
     return (
@@ -30,7 +32,7 @@ export default function AddSessionForm({ courseId }: { courseId: string }) {
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-1.5">
           <Label>Date</Label>
-          <Input type="date" name="date" required />
+          <Input type="date" name="date" required value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
         <div className="space-y-1.5">
           <Label>Start</Label>
@@ -43,7 +45,7 @@ export default function AddSessionForm({ courseId }: { courseId: string }) {
       </div>
       <div className="space-y-1.5">
         <Label>Location</Label>
-        <Input name="location" placeholder="e.g. Dock A, Edgewater" />
+        <Input name="location" placeholder="e.g. Dock A, Edgewater" value={location} onChange={(e) => setLocation(e.target.value)} />
       </div>
       <div className="flex gap-2">
         <Button type="submit" size="sm" disabled={pending}>
