@@ -3,7 +3,38 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 117 — 2026-05-01 16:21 [open]
+## Session 117 — 2026-05-01 16:21–16:41 (0.33 hrs)
+**Duration:** 0.33 hrs | **Points:** 7 (6.21 = 2, 6.20 = 5)
+**Task:** 6.21 sticky sidebar + 6.20 admin/instructor calendar views
+
+**Completed:**
+- **6.19 CR fixes** (no pts). `src/app/(public)/courses/[slug]/page.tsx`:
+  sort `futureSessions` before `[0]`/`[last]`; drop unused `member_price`/`capacity`.
+- **6.21 — Sticky sidebar** (2 pts). `sticky top-0 h-screen overflow-y-auto` on
+  `aside` in all three role layouts (`(admin)`, `(instructor)`, `(student)`).
+- **6.20 — Admin + instructor calendar views** (5 pts). PR #7, merged.
+  - `src/components/shared/sessions-calendar.tsx` — month-grid calendar, `SessionEvent` type.
+  - `src/components/shared/sessions-list.tsx` — list fallback (forced on mobile <640px).
+  - `src/components/shared/sessions-view-switcher.tsx` — calendar/list toggle, `sailbook.sessions-view` key (shared admin + instructor by design).
+  - `src/components/admin/admin-calendar-view.tsx` — shadcn Select filters for Course Type + Instructor.
+  - `src/app/(admin)/admin/calendar/page.tsx` — is_admin guard, error check, `RawCourse`/`RawSessionRow` types.
+  - `src/app/(instructor)/instructor/calendar/page.tsx` — is_instructor guard, error checks, DEC-007 two-query merge (course-default sessions + session-level overrides, deduplicated).
+  - Calendar link in all 4 nav files (admin + instructor, desktop + mobile).
+  - 6 Playwright tests green. All code review findings fixed before end of session.
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification pending (carryover from s102).
+
+**Next Steps:**
+1. Next task: **6.23** (preserve `?next=` through registration, 2 pts)
+   or **6.22** (form field preservation on server action error, 5 pts).
+
+**Context:**
+- Instructor calendar uses two queries + Set dedup for DEC-007 — don't collapse into one.
+- Shared `sailbook.sessions-view` storage key is intentional — admin + instructor share the calendar/list preference.
+
+**Code Review:** Clean — all findings fixed before end of session.
 
 ## Session 116 — 2026-05-01 13:05–15:55 (2.85 hrs)
 **Duration:** 2.85 hrs | **Points:** 5 (6.19)
