@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 117 — 2026-05-01 16:21 [open]
+
 ## Session 116 — 2026-05-01 13:05–15:55 (2.85 hrs)
 **Duration:** 2.85 hrs | **Points:** 5 (6.19)
 **Task:** 6.19 — Public course browse pages for LTSC inbound links
