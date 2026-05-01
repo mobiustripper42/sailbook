@@ -226,6 +226,8 @@ INSERT INTO public.course_types (id, name, short_code, certification_body, descr
    'Competitive racing tactics and rules.',
    24, 6, false);
 
+UPDATE public.course_types SET is_drop_in = true WHERE id = 'b1000000-0000-0000-0000-000000000004';
+
 -- ============================================================
 -- COURSES
 -- ============================================================

@@ -146,6 +146,12 @@
 **Tradeoffs:** No DB-level shape validation — the app must defend against malformed values. The dispatcher helper `isAdminChannelEnabled()` validates defensively (typeof checks, null/undefined → enabled) so a bad JSON value can never throw or default to "disabled" silently. Querying "which admins have SMS enabled for X" is awkward (would need a JSON path expression), but no current or planned feature needs that.
 **Revisit if:** preferences need to be queryable (e.g., bulk admin reporting), shape grows beyond ~5 events × multiple channels, or a third role (instructor) wants distinct preferences with overlapping events.
 
+## DEC-027: Drop-in enrollment model for Open Sailing (2026-05-01)
+**Decision:** Drop-in courses (Open Sailing) reuse the existing `enrollments` + `session_attendance` + `payments` model without schema changes to those tables. `is_drop_in` flag lives on `course_type` (not `course`). Each Open Sailing night is its own course with exactly one session. The hold amount is the course `price` — no separate field. Enrollment lifecycle (`pending_payment → confirmed → cancelled`) is identical to regular course enrollment. Attendance is seeded for the one session on webhook confirmation, identical to the existing path.
+**Why:** "Drop-in" is a property of what Open Sailing IS, not a per-course toggle — `course_type` is the right level. One-course-per-night means `UNIQUE(course_id, student_id)` on enrollments remains correct for independent Monday + Thursday bookings. No new table needed because "all sessions in a one-session course" and "the single session the student picked" are the same thing.
+**What `is_drop_in` gates:** Student-facing callout ("pay $X now, balance to captain on the day"), admin "Drop-in" badge on course detail. Not the payment flow — the hold amount is just the course price.
+**Revisit if:** Open Sailing moves to a season-pass or multi-session-booking model.
+
 ## V2 Decisions (to be resolved during build)
 
 | ID | Decision | When | Who | Status |
@@ -158,4 +164,4 @@
 | DEC-TBD | Pessimistic inventory / enrollment hold duration | Phase 2, task 2.3 | DEC + Andy | Pending |
 | DEC-TBD | Scheduled job infrastructure (Vercel Cron vs Supabase Edge Functions) | Phase 2, task 2.4 | @architect | Pending |
 | DEC-026 | Notification settings storage (JSONB on profiles) | Phase 3, task 3.8 | @architect | Done |
-| DEC-TBD | Drop-in enrollment model (per-session vs per-course, flag on course) | Phase 5, task 5.2 | @architect + Andy | Pending |
+| DEC-027 | Drop-in enrollment model (per-session vs per-course, flag on course_type) | Phase 5, task 5.2 | @architect + Andy | Done |

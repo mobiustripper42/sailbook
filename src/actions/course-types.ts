@@ -23,6 +23,7 @@ export async function createCourseType(prevState: string | null, formData: FormD
     description: (formData.get('description') as string) || null,
     min_hours: formData.get('min_hours') ? Number(formData.get('min_hours')) : null,
     max_students: Number(formData.get('max_students')) || 4,
+    is_drop_in: formData.get('is_drop_in') === 'true',
     ...readThresholds(formData),
   }
 
@@ -43,6 +44,7 @@ export async function updateCourseType(id: string, prevState: string | null, for
     description: (formData.get('description') as string) || null,
     min_hours: formData.get('min_hours') ? Number(formData.get('min_hours')) : null,
     max_students: Number(formData.get('max_students')) || 4,
+    is_drop_in: formData.get('is_drop_in') === 'true',
     ...readThresholds(formData),
     updated_at: new Date().toISOString(),
   }
