@@ -3,7 +3,62 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 116 — 2026-05-01 [open]
+## Session 116 — 2026-05-01 13:05–15:55 (2.85 hrs)
+**Duration:** 2.85 hrs | **Points:** 5 (6.19)
+**Task:** 6.19 — Public course browse pages for LTSC inbound links
+
+**Completed:**
+- **6.19 — Public course browse** (5 pts). PR #6, merged.
+  - Migration: `slug TEXT UNIQUE NOT NULL` on `course_types`, backfilled from
+    `short_code` lowercase (`ASA101` → `asa101`). Anon SELECT policies on
+    `course_types` (active), `courses` (active), `sessions` (active courses only).
+  - `src/app/(public)/layout.tsx` — minimal header (logo + Log in / Create account).
+  - `src/app/(public)/courses/[slug]/page.tsx` — unauthenticated course type page.
+    Lists upcoming sections with date range, time, location, price, "Enroll →"
+    button → `/login?next=/student/courses/[id]`.
+  - `src/app/dev/ltsc/page.tsx` — mock LTSC product-category page (dev/preview only).
+    Shows all active course types with "Select options" buttons → SailBook public pages.
+  - `src/proxy.ts` — `/courses/` and `/dev/` added to `PUBLIC_PREFIXES`.
+  - `src/components/admin/course-type-form.tsx` + `src/actions/course-types.ts` —
+    slug field added; auto-sanitized on save.
+  - pgTAP: 3 new anon SELECT tests (146 total, all green).
+  - Playwright: 7 new tests (LTSC mock, public page, 404, enroll link, E2E
+    inbound flow — all green). Verified via live run.
+- **Session log + plan recovered** from merge collision: sessions 115/116 entries
+  added, tasks 6.21/6.22 restored to PROJECT_PLAN.md, 6.19 marked done.
+- **Task 6.23 added** — preserve `?next=` through registration (medium, 2 pts).
+- **s115 test fixes bundled** into same commit: open-sailing slug uniqueness,
+  student-enrollment `addInitScript` order, unsaved-changes mobile skip,
+  session-row `grid-cols-1 sm:grid-cols-3`.
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification pending (carryover from s102).
+
+**Next Steps:**
+1. Fix CR bug: `futureSessions` in `src/app/(public)/courses/[slug]/page.tsx:58`
+   needs `.sort((a,b) => a.date.localeCompare(b.date))` before `[0]`/`[last]`
+   date-range display and card sort order.
+2. `supabase db push` — apply slug migration to prod.
+3. Next task: **6.20** (admin/instructor calendar, 5 pts) or **6.21** (sticky
+   sidebar, 2 pts, fast win). Both high priority, deadline May 4.
+
+**Context:**
+- LTSC links to use: `https://sailbook.live/courses/asa101`, `/asa103`, `/dinghy`,
+  `/open`. Admin can edit slugs via Course Types → Edit.
+- `/dev/ltsc` is accessible on Vercel preview deployments (low-severity — harmless
+  mock, but visible to anyone with the preview URL).
+- `futureSessions` sort bug: cards currently sort correctly only if Supabase returns
+  sessions in date order (usually true, not guaranteed).
+
+**Code Review:** 1 bug, 2 cleanup, 3 consistency/advisory.
+- **(bug)** `public/courses/[slug]/page.tsx:58` — `futureSessions` array not sorted
+  before `[0]`/`[last]` used for date range + card sort. Fix next session.
+- **(cleanup)** Same file: `member_price` + `capacity` selected but never rendered.
+- **(cleanup)** Same file: inline type cast on sessions array — use `Tables<'sessions'>`.
+- **(consistency)** `generateMetadata` issues a second DB round-trip for the same row.
+- **(consistency)** `/dev` in `PUBLIC_ROUTES` + carved-out exception at line 60 is subtle.
+- **(advisory)** `/dev/ltsc` visible on Vercel preview URLs — low severity, harmless.
 
 ## Session 115 — 2026-05-01 13:11–13:XX [open]
 **Duration:** ~TBD | **Points:** unplanned bug fixes (0 pts)
