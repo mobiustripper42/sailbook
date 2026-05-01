@@ -5,12 +5,11 @@ import { loginAs, runId, createTestCourse } from './helpers';
 
 test.describe('Student — browse courses', () => {
   test.beforeEach(async ({ page }) => {
-    await loginAs(page, 'pw_student@ltsc.test', '/student/dashboard');
-    // Force list view — the calendar is the default on desktop/tablet but
-    // these tests assert against list-view UI (cards, badges, full titles).
+    // Must be registered before any navigation so it fires on /student/courses.
     await page.addInitScript(() => {
       try { localStorage.setItem('sailbook.courses-view', 'list') } catch {}
     });
+    await loginAs(page, 'pw_student@ltsc.test', '/student/dashboard');
   });
 
   test('shows active seed courses on browse page', async ({ page }) => {

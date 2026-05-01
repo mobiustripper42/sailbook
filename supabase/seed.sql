@@ -199,30 +199,30 @@ ON CONFLICT (category, value) DO NOTHING;
 -- COURSE TYPES
 -- ============================================================
 
-INSERT INTO public.course_types (id, name, short_code, certification_body, description, min_hours, max_students, is_active) VALUES
+INSERT INTO public.course_types (id, name, short_code, slug, certification_body, description, min_hours, max_students, is_active) VALUES
   ('b1000000-0000-0000-0000-000000000001',
-   'ASA 101 - Basic Keelboat Sailing', 'ASA101', 'ASA',
+   'ASA 101 - Basic Keelboat Sailing', 'ASA101', 'asa101', 'ASA',
    'Foundation keelboat course. Covers points of sail, basic maneuvers, and docking.',
    16, 4, true),
 
   ('b1000000-0000-0000-0000-000000000002',
-   'ASA 103 - Basic Coastal Cruising', 'ASA103', 'ASA',
+   'ASA 103 - Basic Coastal Cruising', 'ASA103', 'asa103', 'ASA',
    'Overnight coastal cruising. Prereq: ASA 101.',
    32, 4, true),
 
   ('b1000000-0000-0000-0000-000000000003',
-   'Dinghy Sailing for Adults', 'DINGHY', null,
+   'Dinghy Sailing for Adults', 'DINGHY', 'dinghy', null,
    'Fun introduction to dinghy sailing. No experience needed.',
    8, 6, true),
 
   ('b1000000-0000-0000-0000-000000000004',
-   'Open Sailing', 'OPEN', null,
+   'Open Sailing', 'OPEN', 'open', null,
    'Supervised open sailing time on club boats. No formal instruction.',
    null, 8, true),
 
   -- Inactive — should not appear in New Course dropdown
   ('b1000000-0000-0000-0000-000000000005',
-   'Advanced Racing', 'RACE', 'US Sailing',
+   'Advanced Racing', 'RACE', 'race', 'US Sailing',
    'Competitive racing tactics and rules.',
    24, 6, false);
 

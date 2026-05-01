@@ -66,18 +66,20 @@ test.describe('Open Sailing drop-in', () => {
   })
 
   test('admin can create a course type with is_drop_in checked', async ({ page }) => {
+    const id = runId()
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
     await page.goto('/admin/course-types/new')
 
-    await page.getByLabel('Name').fill(`Drop-in Test ${runId()}`)
-    await page.getByLabel('Short Code').fill('DROPTEST')
+    await page.getByLabel('Name').fill(`Drop-in Test ${id}`)
+    await page.getByLabel('Short Code').fill(`DRP${id}`)
     await page.getByLabel('Max Students').fill('6')
+    await page.getByLabel('Public URL Slug').fill(`drop-${id}`)
     await page.getByLabel('Drop-in / per-session enrollment').check()
 
     await page.getByRole('button', { name: 'Create' }).click()
     await page.waitForURL('/admin/course-types', { timeout: 10000 })
 
     // The new type should appear in the list
-    await expect(page.getByText('DROPTEST')).toBeVisible()
+    await expect(page.getByText(`DRP${id}`)).toBeVisible()
   })
 })
