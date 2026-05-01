@@ -7,7 +7,7 @@
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(13);
+SELECT plan(15);
 
 -- Reuse authenticate() helper from 01_rls_profiles.sql.
 -- If running this file standalone, recreate it here.
@@ -193,6 +193,28 @@ SELECT is(
   (SELECT count(*)::int FROM public.sessions),
   14,
   'instructor (mike): sees all 14 sessions'
+);
+
+RESET ROLE;
+
+-- ============================================================
+-- IS_DROP_IN FLAG
+-- ============================================================
+
+-- Open Sailing course type has is_drop_in = true; ASA101 has is_drop_in = false
+SELECT tests.authenticate('a1000000-0000-0000-0000-000000000001', p_is_admin => true);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  (SELECT is_drop_in FROM public.course_types WHERE id = 'b1000000-0000-0000-0000-000000000004'),
+  true,
+  'admin: Open Sailing course_type has is_drop_in = true'
+);
+
+SELECT is(
+  (SELECT is_drop_in FROM public.course_types WHERE id = 'b1000000-0000-0000-0000-000000000001'),
+  false,
+  'admin: ASA101 course_type has is_drop_in = false'
 );
 
 RESET ROLE;

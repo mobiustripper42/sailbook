@@ -74,6 +74,7 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean | null
+          is_drop_in: boolean
           low_enrollment_lead_days: number
           max_students: number | null
           min_hours: number | null
@@ -88,6 +89,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_drop_in?: boolean
           low_enrollment_lead_days?: number
           max_students?: number | null
           min_hours?: number | null
@@ -102,6 +104,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_drop_in?: boolean
           low_enrollment_lead_days?: number
           max_students?: number | null
           min_hours?: number | null
@@ -704,4 +707,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-
