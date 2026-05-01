@@ -137,6 +137,21 @@ export async function confirmEnrollment(enrollmentId: string, courseId: string) 
 
 export async function cancelEnrollment(enrollmentId: string, courseId: string) {
   const supabase = await createClient()
+
+  // Read prior status BEFORE the update. Two reasons:
+  //   1) Only confirmed/cancel_requested rows hold a real seat — cancelling
+  //      a pending_hold or already-cancelled row must not blast the waitlist.
+  //   2) If RLS hides the row, we'd otherwise no-op the update silently and
+  //      still fire the notification — the prior-status read also returns
+  //      nothing in that case, so we bail early.
+  const { data: prior } = await supabase
+    .from('enrollments')
+    .select('status')
+    .eq('id', enrollmentId)
+    .maybeSingle()
+
+  const heldASpot = prior?.status === 'confirmed' || prior?.status === 'cancel_requested'
+
   const { error } = await supabase
     .from('enrollments')
     .update({ status: 'cancelled', updated_at: new Date().toISOString() })
@@ -150,8 +165,11 @@ export async function cancelEnrollment(enrollmentId: string, courseId: string) {
     .eq('enrollment_id', enrollmentId)
     .eq('status', 'expected')
 
-  // A spot just opened — fan out to the waitlist (best-effort, errors logged).
-  await notifyWaitlistSpotOpened(courseId)
+  // A spot just opened — fan out to the waitlist. Skip when the prior status
+  // never held a confirmed seat, so we don't blast on no-op cancels.
+  if (heldASpot) {
+    await notifyWaitlistSpotOpened(courseId)
+  }
 
   revalidatePath(`/admin/courses/${courseId}`)
   return { error: null }
