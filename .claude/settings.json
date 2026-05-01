@@ -36,22 +36,5 @@
       "Bash(rm -rf ..*)",
       "Bash(rm -rf /*)"
     ]
-  },
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Bash",
-        "if": "Bash(git commit:*)",
-        "hooks": [
-          {
-            "type": "agent",
-            "prompt": "You are @code-review for SailBook. A git commit just completed. Run `git diff HEAD~1` to see what changed, then review those changes against the project conventions in CLAUDE.md and docs/DECISIONS.md. Check for: (1) inconsistent patterns, (2) missing error handling, (3) RLS policy gaps, (4) hardcoded values that should be constants, (5) components over 200 lines, (6) missing loading/error states, (7) type safety issues, (8) convention violations. Output a short findings list ranked by severity. If everything looks clean, say so in one line. Skip nitpicks.",
-            "model": "claude-sonnet-4-6",
-            "timeout": 120,
-            "statusMessage": "Running code review..."
-          }
-        ]
-      }
-    ]
   }
 }
