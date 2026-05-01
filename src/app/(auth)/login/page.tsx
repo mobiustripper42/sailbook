@@ -104,7 +104,7 @@ function LoginPageContent() {
           <p className="text-sm text-muted-foreground text-center">
             No account?{" "}
             <Link
-              href={next ? `/register?next=${encodeURIComponent(next)}` : "/register"}
+              href={next ? `/register?next=${next}` : "/register"}
               className="underline underline-offset-4 hover:text-foreground"
             >
               Register
