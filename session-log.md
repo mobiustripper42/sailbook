@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 114 — 2026-05-01 13:05 [open]
+
 ## Session 113 — 2026-05-01 03:22–11:29 (8.1 hrs)
 **Duration:** 8.1 hrs | **Points:** 1 bug fix (unplanned) + 5.2 (5 pts)
 **Task:** BUG — Admin-created students OAuth redirect loop + PKCE reset-password fix; 5.2 Open Sailing drop-in landed on main via same PR
