@@ -5,6 +5,15 @@ import { test, expect } from '@playwright/test'
 // account); we verify our integration points: button is rendered, the action
 // kicks off an OAuth redirect or fails gracefully, the trigger creates a
 // profile, and the invite page round-trips `next` through sign-in.
+//
+// Manual verification required (BUG: admin-created-student-oauth):
+//   1. Admin creates a student via /admin/students/new (email/password, no Google)
+//   2. That student later signs in with Google (same email address)
+//   3. Verify they land on /student/dashboard without a redirect loop
+//   4. Verify raw_user_meta_data in auth.users still contains is_student=true
+// The BEFORE UPDATE trigger (20260501041124_preserve_role_flags_on_oauth_link)
+// and pgTAP suite (supabase/tests/11_oauth_role_flags.sql) cover the DB logic;
+// the full round-trip requires a live Google OAuth callback.
 
 test.describe('3.11 — Google OAuth button rendering', () => {
   test('login page shows Continue with Google', async ({ page }) => {

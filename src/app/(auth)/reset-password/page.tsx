@@ -24,17 +24,31 @@ export default function ResetPasswordPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Supabase delivers the recovery token as a hash fragment.
-    // The client SDK fires PASSWORD_RECOVERY, which establishes a recovery session.
-    // We rely solely on this event — no getSession fallback — so a logged-in user
-    // without a valid recovery token cannot bypass the gate.
     const supabase = createClient();
+
+    // The browser client has detectSessionInUrl: true, so it auto-exchanges
+    // any ?code= it finds on load — no need to call exchangeCodeForSession
+    // ourselves (doing so races with the SDK and can cause "code already used").
+    //
+    // Two flows:
+    //   Implicit (older Supabase instances): recovery token arrives as
+    //     #access_token=...&type=recovery → SDK fires PASSWORD_RECOVERY.
+    //   PKCE (local + new cloud projects): recovery code arrives as ?code=...
+    //     → SDK exchanges it, fires SIGNED_OUT (clearing the prior session)
+    //     then SIGNED_IN. We must not treat that SIGNED_OUT as "link expired".
+    const hasPkceCode = !!new URLSearchParams(window.location.search).get("code");
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event) => {
         if (event === "PASSWORD_RECOVERY") {
+          // Implicit flow
           setReady(true);
-        } else if (event === "SIGNED_OUT") {
+        } else if (event === "SIGNED_IN" && hasPkceCode) {
+          // PKCE flow — recovery session now active
+          setReady(true);
+          window.history.replaceState({}, "", "/reset-password");
+        } else if (event === "SIGNED_OUT" && !hasPkceCode) {
+          // No code in URL means there was no valid recovery token at all
           setTokenError("Your reset link has expired. Please request a new one.");
         }
       }

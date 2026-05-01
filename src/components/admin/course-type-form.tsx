@@ -92,6 +92,23 @@ export default function CourseTypeForm({ courseType }: Props) {
         <Textarea id="description" name="description" rows={3} defaultValue={courseType?.description ?? ''} />
       </div>
 
+      <div className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          id="is_drop_in"
+          name="is_drop_in"
+          value="true"
+          defaultChecked={courseType?.is_drop_in ?? false}
+          className="mt-0.5"
+        />
+        <div>
+          <Label htmlFor="is_drop_in" className="font-medium">Drop-in / per-session enrollment</Label>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Students pay to hold a single session spot. Remaining balance is paid on the day.
+          </p>
+        </div>
+      </div>
+
       <div className="flex gap-3 pt-2">
         <Button type="submit" disabled={pending}>
           {pending ? 'Saving…' : courseType ? 'Save Changes' : 'Create'}

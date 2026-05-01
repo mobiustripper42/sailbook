@@ -19,6 +19,8 @@
       "Bash(mv *)",
       "Bash(chmod *)",
       "Bash(curl *)",
+      "Bash(grep *)",
+      "Bash(git commit *)",
       "mcp__ccd_session__mark_chapter"
     ],
     "deny": [

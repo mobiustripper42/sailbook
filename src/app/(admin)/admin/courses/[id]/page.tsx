@@ -26,7 +26,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     .from('courses')
     .select(`
       *,
-      course_types ( name, short_code ),
+      course_types ( name, short_code, is_drop_in ),
       instructor:profiles!courses_instructor_id_fkey ( id, first_name, last_name )
     `)
     .eq('id', id)
@@ -95,7 +95,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     (paymentRows ?? []).map((p) => [p.enrollment_id, p])
   )
 
-  const type = course.course_types as { name: string; short_code: string } | null
+  const type = course.course_types as { name: string; short_code: string; is_drop_in: boolean } | null
   const instructor = course.instructor as { id: string; first_name: string; last_name: string } | null
 
   return (
@@ -107,9 +107,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             {' / '}
             {course.title ?? type?.name}
           </p>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-semibold">{course.title ?? type?.name}</h1>
             <Badge variant={course.status === 'active' ? 'ok' : 'neutral'}>{course.status}</Badge>
+            {type?.is_drop_in && <Badge variant="neutral">Drop-in</Badge>}
           </div>
           {course.title && <p className="text-muted-foreground">{type?.name}</p>}
           <p className="text-sm text-muted-foreground mt-1">

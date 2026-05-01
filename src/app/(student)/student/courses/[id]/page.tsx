@@ -31,7 +31,7 @@ export default async function StudentCourseDetailPage({
     .from('courses')
     .select(`
       id, title, description, capacity, price, member_price, status,
-      course_types ( name, short_code, description, certification_body ),
+      course_types ( name, short_code, description, certification_body, is_drop_in ),
       instructor:profiles!courses_instructor_id_fkey ( first_name, last_name )
     `)
     .eq('id', id)
@@ -102,6 +102,7 @@ export default async function StudentCourseDetailPage({
     short_code: string
     description: string | null
     certification_body: string | null
+    is_drop_in: boolean
   } | null
   const instructor = course.instructor as unknown as { first_name: string; last_name: string } | null
 
@@ -138,6 +139,14 @@ export default async function StudentCourseDetailPage({
 
       {description && (
         <p className="text-sm text-muted-foreground">{description}</p>
+      )}
+
+      {type?.is_drop_in && (
+        <div className="rounded-xs border border-border bg-muted/50 px-4 py-3 text-sm">
+          <span className="font-medium">Drop-in session.</span>{' '}
+          Pay {displayPrice != null ? `$${displayPrice}` : 'the hold amount'} now to reserve your spot.
+          The remaining balance is paid to the captain on the day.
+        </div>
       )}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
