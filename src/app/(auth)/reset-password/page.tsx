@@ -26,28 +26,29 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     const supabase = createClient();
 
-    // PKCE flow (local Supabase and new cloud projects): Supabase redirects here
-    // with ?code=... instead of #access_token=...&type=recovery. Exchange it
-    // explicitly so the recovery session is established before the event fires.
-    const code = new URLSearchParams(window.location.search).get("code");
-    if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (error) {
-          setTokenError("Your reset link has expired. Please request a new one.");
-        } else {
-          setReady(true);
-          window.history.replaceState({}, "", "/reset-password");
-        }
-      });
-    }
+    // The browser client has detectSessionInUrl: true, so it auto-exchanges
+    // any ?code= it finds on load — no need to call exchangeCodeForSession
+    // ourselves (doing so races with the SDK and can cause "code already used").
+    //
+    // Two flows:
+    //   Implicit (older Supabase instances): recovery token arrives as
+    //     #access_token=...&type=recovery → SDK fires PASSWORD_RECOVERY.
+    //   PKCE (local + new cloud projects): recovery code arrives as ?code=...
+    //     → SDK exchanges it, fires SIGNED_OUT (clearing the prior session)
+    //     then SIGNED_IN. We must not treat that SIGNED_OUT as "link expired".
+    const hasPkceCode = !!new URLSearchParams(window.location.search).get("code");
 
-    // Implicit flow (older cloud projects): Supabase delivers the recovery token
-    // as a hash fragment; the client SDK fires PASSWORD_RECOVERY automatically.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event) => {
         if (event === "PASSWORD_RECOVERY") {
+          // Implicit flow
           setReady(true);
-        } else if (event === "SIGNED_OUT") {
+        } else if (event === "SIGNED_IN" && hasPkceCode) {
+          // PKCE flow — recovery session now active
+          setReady(true);
+          window.history.replaceState({}, "", "/reset-password");
+        } else if (event === "SIGNED_OUT" && !hasPkceCode) {
+          // No code in URL means there was no valid recovery token at all
           setTokenError("Your reset link has expired. Please request a new one.");
         }
       }
