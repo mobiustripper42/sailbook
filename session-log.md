@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 115 — 2026-05-01 13:11 [open]
+
 ## Session 114 — 2026-05-01 13:05 [open]
 
 ## Session 113 — 2026-05-01 03:22–11:29 (8.1 hrs)
