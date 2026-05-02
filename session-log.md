@@ -3,8 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 121 — 2026-05-02 03:45–11:07 (7.33 hrs)
-**Duration:** 7.33 hrs | **Points:** 0 (test debt — unscoped, no plan task)
+## Session 121 — 2026-05-02 03:45–11:07 (1.33 hrs, 6 hrs overnight subtracted)
+**Duration:** 1.33 hrs | **Points:** 0 (test debt — unscoped, no plan task)
 **Task:** Test fixes — full Playwright suite green after 6.13 + 5.7
 
 **Completed:**
@@ -28,7 +28,7 @@ Format: prepend newest entry at the top.
 - **`tests/makeup-assignment-notice.spec.ts:18` flake confirmed**: failed in the parallel suite, passed 3/3 in isolation. Documented Turbopack mock-buffer race from s119 — server-action notification triggers don't bridge into the API-route module graph under contention. Not a real bug; safe to retry on transient failure.
 - **The full Playwright suite must be run after any UI form change** — targeted spec runs miss cross-cutting selector regressions like 6.13. Time-picker passed in s120 because only `time-select.spec.ts` was run; the full suite would have caught the 75-test cascade immediately.
 - TimeSelect hidden-input names: `start_time`/`end_time` for `add-session-form` and inline `session-row`; `session_start_${index}`/`session_end_${index}` for the multi-session `course-form`.
-- 7.33 hr wall clock includes ~35 min of background Playwright runs and an autonomous-loop window — actual hands-on-keyboard time was lower.
+- 7.33 hr wall clock minus 6 hrs overnight = 1.33 hrs hands-on. Background Playwright runs (~35 min total) ran while away.
 - PR #13: https://github.com/mobiustripper42/sailbook/pull/13
 
 **Code Review:** Two non-blocking findings carried forward in PR body: (1) waitlist assertions traded a behavioral guarantee for a presence check, (2) `selectTime` walk-up via `.locator('..')` is fragile to wrapper changes — count assertion would fail loudly. Plus optional polish on hour-range validation and a mobile-only TimeSelect render check.
