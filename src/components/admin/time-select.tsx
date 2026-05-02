@@ -1,5 +1,6 @@
 'use client'
 
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -34,9 +35,7 @@ export default function TimeSelect({ name, value, onChange }: Props) {
   const parts = value.includes(':') ? value.split(':') : ['8', '0']
   const hour = parseInt(parts[0] ?? '8', 10)
   const minute = snapMinute(parseInt(parts[1] ?? '0', 10))
-
-  // Hidden input emits the snapped value so display and submission are always in sync
-  const hiddenValue = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+  const safeValue = value.includes(':') ? value.slice(0, 5) : '08:00'
 
   function setHour(v: string) {
     const h = parseInt(v, 10)
@@ -49,32 +48,45 @@ export default function TimeSelect({ name, value, onChange }: Props) {
   }
 
   return (
-    <div className="flex gap-1 items-center">
-      <input type="hidden" name={name} value={hiddenValue} />
-      <Select value={String(hour)} onValueChange={setHour}>
-        <SelectTrigger className="flex-1">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {HOURS.map((h) => (
-            <SelectItem key={h} value={String(h)}>
-              {formatHour(h)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Select value={String(minute)} onValueChange={setMinute}>
-        <SelectTrigger className="w-[72px]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {MINUTES.map((m) => (
-            <SelectItem key={m} value={String(m)}>
-              {String(m).padStart(2, '0')}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <>
+      {/* Single hidden input — both mobile and desktop update value via onChange */}
+      <input type="hidden" name={name} value={safeValue} />
+
+      {/* Mobile (< sm): native OS time picker */}
+      <Input
+        type="time"
+        className="sm:hidden"
+        value={safeValue}
+        onChange={(e) => onChange(e.target.value)}
+      />
+
+      {/* Desktop (sm+): shadcn Select dropdowns */}
+      <div className="hidden sm:flex gap-1 items-center">
+        <Select value={String(hour)} onValueChange={setHour}>
+          <SelectTrigger className="flex-1">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {HOURS.map((h) => (
+              <SelectItem key={h} value={String(h)}>
+                {formatHour(h)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={String(minute)} onValueChange={setMinute}>
+          <SelectTrigger className="w-[72px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {MINUTES.map((m) => (
+              <SelectItem key={m} value={String(m)}>
+                {String(m).padStart(2, '0')}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </>
   )
 }
