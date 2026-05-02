@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import TimeSelect from '@/components/admin/time-select'
 import {
   Select,
   SelectContent,
@@ -150,12 +151,10 @@ export default function CourseForm({ courseTypes, instructors }: Props) {
             </div>
 
             <input type="hidden" name={`session_date_${index}`} value={session.date} />
-            <input type="hidden" name={`session_start_${index}`} value={session.start_time} />
-            <input type="hidden" name={`session_end_${index}`} value={session.end_time} />
             <input type="hidden" name={`session_location_${index}`} value={session.location} />
 
-            <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1.5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="col-span-2 sm:col-span-1 space-y-1.5">
                 <Label>Date</Label>
                 <Input
                   type="date"
@@ -166,20 +165,18 @@ export default function CourseForm({ courseTypes, instructors }: Props) {
               </div>
               <div className="space-y-1.5">
                 <Label>Start</Label>
-                <Input
-                  type="time"
-                  required
+                <TimeSelect
+                  name={`session_start_${index}`}
                   value={session.start_time}
-                  onChange={(e) => updateSession(index, 'start_time', e.target.value)}
+                  onChange={(v) => updateSession(index, 'start_time', v)}
                 />
               </div>
               <div className="space-y-1.5">
                 <Label>End</Label>
-                <Input
-                  type="time"
-                  required
+                <TimeSelect
+                  name={`session_end_${index}`}
                   value={session.end_time}
-                  onChange={(e) => updateSession(index, 'end_time', e.target.value)}
+                  onChange={(v) => updateSession(index, 'end_time', v)}
                 />
               </div>
             </div>

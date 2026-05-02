@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import SessionInstructorSelect from '@/components/admin/session-instructor-select'
 import MakeupSessionForm from '@/components/admin/makeup-session-form'
+import TimeSelect from '@/components/admin/time-select'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 
 type SessionData = {
@@ -52,6 +53,8 @@ export default function SessionRow({
   const [actionError, setActionError] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [pending, startTransition] = useTransition()
+  const [editStartTime, setEditStartTime] = useState('')
+  const [editEndTime, setEditEndTime] = useState('')
   const isCancelled = session.status === 'cancelled'
   const { confirmDiscard } = useUnsavedChanges(isDirty)
 
@@ -138,7 +141,13 @@ export default function SessionRow({
                   <DropdownMenuItem
                     onSelect={() => {
                       if (isEditing && !confirmDiscard()) return
-                      setIsEditing((v) => !v)
+                      setIsEditing((v) => {
+                        if (!v) {
+                          setEditStartTime(session.start_time.slice(0, 5))
+                          setEditEndTime(session.end_time.slice(0, 5))
+                        }
+                        return !v
+                      })
                       setEditError(null)
                       setIsDirty(false)
                     }}
@@ -175,8 +184,8 @@ export default function SessionRow({
           <TableCell colSpan={6} className="bg-muted/30">
             <form onSubmit={handleSubmit} className="space-y-3 py-2" onChange={() => setIsDirty(true)}>
               {editError && <p className="text-sm text-destructive">{editError}</p>}
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="space-y-1.5">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="col-span-2 sm:col-span-1 space-y-1.5">
                   <Label>Date</Label>
                   <Input
                     type="date"
@@ -187,20 +196,18 @@ export default function SessionRow({
                 </div>
                 <div className="space-y-1.5">
                   <Label>Start</Label>
-                  <Input
-                    type="time"
+                  <TimeSelect
                     name="start_time"
-                    required
-                    defaultValue={session.start_time.slice(0, 5)}
+                    value={editStartTime}
+                    onChange={(v) => { setEditStartTime(v); setIsDirty(true) }}
                   />
                 </div>
                 <div className="space-y-1.5">
                   <Label>End</Label>
-                  <Input
-                    type="time"
+                  <TimeSelect
                     name="end_time"
-                    required
-                    defaultValue={session.end_time.slice(0, 5)}
+                    value={editEndTime}
+                    onChange={(v) => { setEditEndTime(v); setIsDirty(true) }}
                   />
                 </div>
               </div>

@@ -5,6 +5,7 @@ import { addSession } from '@/actions/sessions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import TimeSelect from '@/components/admin/time-select'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 
 export default function AddSessionForm({ courseId }: { courseId: string }) {
@@ -29,18 +30,18 @@ export default function AddSessionForm({ courseId }: { courseId: string }) {
   return (
     <form action={formAction} className="space-y-3" onChange={() => setIsDirty(true)}>
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="space-y-1.5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="col-span-2 sm:col-span-1 space-y-1.5">
           <Label>Date</Label>
           <Input type="date" name="date" required value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
         <div className="space-y-1.5">
           <Label>Start</Label>
-          <Input type="time" name="start_time" required value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+          <TimeSelect name="start_time" value={startTime} onChange={setStartTime} />
         </div>
         <div className="space-y-1.5">
           <Label>End</Label>
-          <Input type="time" name="end_time" required value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+          <TimeSelect name="end_time" value={endTime} onChange={setEndTime} />
         </div>
       </div>
       <div className="space-y-1.5">
