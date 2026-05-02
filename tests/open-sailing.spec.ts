@@ -8,7 +8,7 @@
  */
 
 import { test, expect } from '@playwright/test'
-import { loginAs, runId } from './helpers'
+import { loginAs, runId, selectTime } from './helpers'
 
 test.describe('Open Sailing drop-in', () => {
   test.describe.configure({ mode: 'serial' })
@@ -34,8 +34,8 @@ test.describe('Open Sailing drop-in', () => {
       await page.getByLabel('Price ($)', { exact: true }).fill('11')
 
       await page.locator('input[type="date"]').fill('2027-07-14')
-      await page.locator('input[type="time"]').first().fill('18:00')
-      await page.locator('input[type="time"]').nth(1).fill('21:00')
+      await selectTime(page, 'session_start_0', '18:00')
+      await selectTime(page, 'session_end_0', '21:00')
       await page.locator('section').filter({ hasText: 'Sessions' }).getByPlaceholder(/Dock A/).fill('Edgewater Marina')
 
       await page.getByRole('button', { name: 'Create Course' }).click({ force: true })

@@ -68,9 +68,8 @@ test.describe('Stripe Checkout — initiation', () => {
       await loginAs(jordanPage, 'jordan@ltsc.test', '/student/dashboard');
       await jordanPage.goto(`/student/courses/${courseId}`);
 
-      const fullBtn = jordanPage.getByRole('button', { name: 'Course Full' });
-      await expect(fullBtn).toBeVisible();
-      await expect(fullBtn).toBeDisabled();
+      // Per 5.7: full course replaces "Course Full" disabled button with "Join waitlist" CTA.
+      await expect(jordanPage.getByRole('button', { name: 'Join waitlist' })).toBeVisible();
       await expect(jordanPage.getByRole('button', { name: 'Register & Pay' })).not.toBeVisible();
     } finally {
       await jordanCtx.close();

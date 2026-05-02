@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import type { Browser } from '@playwright/test';
-import { loginAs, runId } from './helpers';
+import { loginAs, runId, selectTime } from './helpers';
 
 /**
  * Creates a test course via admin UI with pw_instructor assigned, then enrolls
@@ -34,8 +34,8 @@ async function createInstructorCourse(
     await adminPage.getByRole('option', { name: /PW.*Instructor/ }).click();
 
     await adminPage.locator('input[type="date"]').fill('2027-09-15');
-    await adminPage.locator('input[type="time"]').first().fill('09:00');
-    await adminPage.locator('input[type="time"]').nth(1).fill('17:00');
+    await selectTime(adminPage, 'session_start_0', '09:00');
+    await selectTime(adminPage, 'session_end_0', '17:00');
     await adminPage.locator('section').filter({ hasText: 'Sessions' }).getByPlaceholder(/Dock A/).fill('Edgewater Park');
 
     await adminPage.getByRole('button', { name: 'Create Course' }).click({ force: true });

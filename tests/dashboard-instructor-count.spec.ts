@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { loginAs, runId } from './helpers'
+import { loginAs, runId, selectTime } from './helpers'
 
 test.describe('Admin — dashboard instructor count', () => {
   test.beforeEach(async ({ page }) => {
@@ -33,8 +33,8 @@ test.describe('Admin — dashboard instructor count', () => {
     await page.getByLabel('Capacity').fill('4')
     await page.getByLabel('Price ($)', { exact: true }).fill('250')
     await page.locator('input[type="date"]').fill('2027-11-15')
-    await page.locator('input[type="time"]').first().fill('09:00')
-    await page.locator('input[type="time"]').nth(1).fill('17:00')
+    await selectTime(page, 'session_start_0', '09:00')
+    await selectTime(page, 'session_end_0', '17:00')
     await page
       .locator('section')
       .filter({ hasText: 'Sessions' })

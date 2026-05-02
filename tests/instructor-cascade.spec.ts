@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAs, runId } from './helpers';
+import { loginAs, runId, selectTime } from './helpers';
 
 /**
  * Instructor deactivation cascade — admin UI integration tests.
@@ -31,8 +31,8 @@ test.describe('Instructor deactivation cascade', () => {
     await page.getByRole('combobox', { name: /Instructor/ }).click();
     await page.getByRole('option', { name: /PW.*Instructor/ }).click();
     await page.locator('input[type="date"]').fill('2027-09-15');
-    await page.locator('input[type="time"]').first().fill('09:00');
-    await page.locator('input[type="time"]').nth(1).fill('17:00');
+    await selectTime(page, 'session_start_0', '09:00');
+    await selectTime(page, 'session_end_0', '17:00');
     await page.locator('section').filter({ hasText: 'Sessions' }).getByPlaceholder(/Dock A/).fill('Edgewater Park');
     await page.getByRole('button', { name: 'Create Course' }).click({ force: true });
     await page.waitForURL(/\/admin\/courses\/[0-9a-f-]+$/, { timeout: 10000 });
