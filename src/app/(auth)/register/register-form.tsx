@@ -173,7 +173,7 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
           <p className="text-sm text-muted-foreground text-center">
             Already have an account?{' '}
             <Link
-              href="/login"
+              href={next ? `/login?next=${next}` : '/login'}
               className="underline underline-offset-4 hover:text-foreground"
             >
               Sign in
