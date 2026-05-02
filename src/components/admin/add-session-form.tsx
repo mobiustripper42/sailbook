@@ -30,8 +30,8 @@ export default function AddSessionForm({ courseId }: { courseId: string }) {
   return (
     <form action={formAction} className="space-y-3" onChange={() => setIsDirty(true)}>
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="space-y-1.5">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        <div className="col-span-2 lg:col-span-1 space-y-1.5">
           <Label>Date</Label>
           <Input type="date" name="date" required value={date} onChange={(e) => setDate(e.target.value)} />
         </div>

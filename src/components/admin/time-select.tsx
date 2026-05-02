@@ -49,21 +49,21 @@ export default function TimeSelect({ name, value, onChange }: Props) {
 
   return (
     <>
-      {/* Single hidden input — both mobile and desktop update value via onChange */}
+      {/* Single hidden input — both modes update value via onChange */}
       <input type="hidden" name={name} value={safeValue} />
 
-      {/* Mobile (< sm): native OS time picker */}
+      {/* Mobile + tablet (< lg): native OS time picker */}
       <Input
         type="time"
-        className="sm:hidden"
+        className="lg:hidden"
         value={safeValue}
         onChange={(e) => onChange(e.target.value)}
       />
 
-      {/* Desktop (sm+): shadcn Select dropdowns */}
-      <div className="hidden sm:flex gap-1 items-center">
+      {/* Desktop (lg+, 1024px+): shadcn Select dropdowns — enough column width */}
+      <div className="hidden lg:flex gap-1 items-center min-w-0">
         <Select value={String(hour)} onValueChange={setHour}>
-          <SelectTrigger className="flex-1">
+          <SelectTrigger className="flex-1 min-w-0">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
