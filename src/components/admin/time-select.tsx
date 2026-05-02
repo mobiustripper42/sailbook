@@ -28,13 +28,15 @@ type Props = {
   name: string
   value: string // "HH:MM"
   onChange: (value: string) => void
-  required?: boolean
 }
 
-export default function TimeSelect({ name, value, onChange, required }: Props) {
-  const [hourStr, minuteStr] = value.split(':')
-  const hour = parseInt(hourStr ?? '8', 10)
-  const minute = snapMinute(parseInt(minuteStr ?? '0', 10))
+export default function TimeSelect({ name, value, onChange }: Props) {
+  const parts = value.includes(':') ? value.split(':') : ['8', '0']
+  const hour = parseInt(parts[0] ?? '8', 10)
+  const minute = snapMinute(parseInt(parts[1] ?? '0', 10))
+
+  // Hidden input emits the snapped value so display and submission are always in sync
+  const hiddenValue = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
 
   function setHour(v: string) {
     const h = parseInt(v, 10)
@@ -48,7 +50,7 @@ export default function TimeSelect({ name, value, onChange, required }: Props) {
 
   return (
     <div className="flex gap-1 items-center">
-      <input type="hidden" name={name} value={value} required={required} />
+      <input type="hidden" name={name} value={hiddenValue} />
       <Select value={String(hour)} onValueChange={setHour}>
         <SelectTrigger className="flex-1">
           <SelectValue />

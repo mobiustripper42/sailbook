@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import TimeSelect from '@/components/ui/time-select'
+import TimeSelect from '@/components/admin/time-select'
 import {
   Select,
   SelectContent,
@@ -169,7 +169,6 @@ export default function CourseForm({ courseTypes, instructors }: Props) {
                   name={`session_start_${index}`}
                   value={session.start_time}
                   onChange={(v) => updateSession(index, 'start_time', v)}
-                  required
                 />
               </div>
               <div className="space-y-1.5">
@@ -178,7 +177,6 @@ export default function CourseForm({ courseTypes, instructors }: Props) {
                   name={`session_end_${index}`}
                   value={session.end_time}
                   onChange={(v) => updateSession(index, 'end_time', v)}
-                  required
                 />
               </div>
             </div>

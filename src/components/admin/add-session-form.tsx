@@ -5,7 +5,7 @@ import { addSession } from '@/actions/sessions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import TimeSelect from '@/components/ui/time-select'
+import TimeSelect from '@/components/admin/time-select'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 
 export default function AddSessionForm({ courseId }: { courseId: string }) {
@@ -37,11 +37,11 @@ export default function AddSessionForm({ courseId }: { courseId: string }) {
         </div>
         <div className="space-y-1.5">
           <Label>Start</Label>
-          <TimeSelect name="start_time" value={startTime} onChange={setStartTime} required />
+          <TimeSelect name="start_time" value={startTime} onChange={setStartTime} />
         </div>
         <div className="space-y-1.5">
           <Label>End</Label>
-          <TimeSelect name="end_time" value={endTime} onChange={setEndTime} required />
+          <TimeSelect name="end_time" value={endTime} onChange={setEndTime} />
         </div>
       </div>
       <div className="space-y-1.5">
