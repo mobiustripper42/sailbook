@@ -20,7 +20,7 @@ export default function CourseStatusActions({ id, status }: { id: string; status
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {status === 'draft' && (
           <Button onClick={() => handle(() => publishCourse(id))} disabled={pending}>
             {pending
