@@ -29,8 +29,8 @@ export default function CourseStatusActions({ id, status }: { id: string; status
     <div className="flex flex-col items-end gap-1">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" disabled={pending} aria-label="Course actions">
-            ⋯
+          <Button variant="ghost" size="sm" disabled={pending} aria-label="Course actions">
+            •••
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
