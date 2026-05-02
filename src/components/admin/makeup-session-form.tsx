@@ -61,11 +61,12 @@ export default function MakeupSessionForm({
   }
 
   return (
-    <form action={formAction} className="space-y-3 border rounded-md p-4 bg-background" onChange={() => setIsDirty(true)}>
-      <p className="text-sm font-medium">
-        Schedule Makeup Session
-        {unlinked > 0 && <span className="font-normal text-muted-foreground"> — {unlinked} student{unlinked !== 1 ? 's' : ''} need makeup</span>}
-      </p>
+    <form action={formAction} className="space-y-3" onChange={() => setIsDirty(true)}>
+      {unlinked > 0 && (
+        <p className="text-xs text-muted-foreground">
+          {unlinked} student{unlinked !== 1 ? 's' : ''} need makeup
+        </p>
+      )}
       {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div className="col-span-2 sm:col-span-1 space-y-1.5">

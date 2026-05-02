@@ -168,57 +168,59 @@ export default function SessionCardItem({
       {actionError && <p className="text-xs text-destructive">{actionError}</p>}
 
       {isEditing && (
-        <form onSubmit={handleSubmit} className="space-y-3 pt-2 border-t" onChange={() => setIsDirty(true)}>
-          {editError && <p className="text-sm text-destructive">{editError}</p>}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div className="col-span-2 sm:col-span-1 space-y-1.5">
-              <Label>Date</Label>
-              <Input type="date" name="date" required defaultValue={session.date} />
+        <div className="pt-2 border-t">
+          <form onSubmit={handleSubmit} className="space-y-3" onChange={() => setIsDirty(true)}>
+            {editError && <p className="text-sm text-destructive">{editError}</p>}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="col-span-2 sm:col-span-1 space-y-1.5">
+                <Label>Date</Label>
+                <Input type="date" name="date" required defaultValue={session.date} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Start</Label>
+                <TimeSelect
+                  name="start_time"
+                  value={editStartTime}
+                  onChange={(v) => { setEditStartTime(v); setIsDirty(true) }}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>End</Label>
+                <TimeSelect
+                  name="end_time"
+                  value={editEndTime}
+                  onChange={(v) => { setEditEndTime(v); setIsDirty(true) }}
+                />
+              </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Start</Label>
-              <TimeSelect
-                name="start_time"
-                value={editStartTime}
-                onChange={(v) => { setEditStartTime(v); setIsDirty(true) }}
+              <Label>Location</Label>
+              <Input
+                name="location"
+                defaultValue={session.location ?? ''}
+                placeholder="e.g. Dock A, Edgewater"
               />
             </div>
-            <div className="space-y-1.5">
-              <Label>End</Label>
-              <TimeSelect
-                name="end_time"
-                value={editEndTime}
-                onChange={(v) => { setEditEndTime(v); setIsDirty(true) }}
-              />
+            <div className="flex gap-2">
+              <Button type="submit" size="sm" disabled={pending}>
+                {pending ? 'Saving…' : 'Save'}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  if (!confirmDiscard()) return
+                  setIsEditing(false)
+                  setEditError(null)
+                  setIsDirty(false)
+                }}
+              >
+                Cancel
+              </Button>
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Location</Label>
-            <Input
-              name="location"
-              defaultValue={session.location ?? ''}
-              placeholder="e.g. Dock A, Edgewater"
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button type="submit" size="sm" disabled={pending}>
-              {pending ? 'Saving…' : 'Save'}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                if (!confirmDiscard()) return
-                setIsEditing(false)
-                setEditError(null)
-                setIsDirty(false)
-              }}
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
+          </form>
+        </div>
       )}
 
       {isCancelled && (
