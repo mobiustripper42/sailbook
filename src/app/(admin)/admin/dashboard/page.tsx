@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { findLowEnrollmentCourses } from '@/lib/low-enrollment'
 import { EnrollmentQueueCard } from '@/components/admin/enrollment-queue-card'
 import type { QueueRow } from '@/components/admin/enrollment-queue-card'
@@ -109,8 +110,22 @@ function formatTime(time: string) {
   return `${hour}:${m.toString().padStart(2, '0')} ${ampm}`
 }
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+function dayHeader(dateStr: string): string {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const target = new Date(dateStr + 'T00:00:00')
+  const diffDays = Math.round((target.getTime() - today.getTime()) / (24 * 60 * 60 * 1000))
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Tomorrow'
+  return target.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
+}
+
+function todayHeading(): string {
+  return new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  })
 }
 
 function toQueueRows(enrollments: DashboardData['pendingEnrollments']): QueueRow[] {
@@ -132,16 +147,22 @@ export default async function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
+      <header className="space-y-1">
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">{todayHeading()}</p>
+      </header>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-        <StatCard label="Active Courses" value={data.activeCourses} />
-        <InstructorCard value={data.coursesWithoutInstructor} />
-        <LowEnrollmentCard value={data.lowEnrollmentCount} />
-      </div>
+      <QuickActions />
+
+      <StatRow
+        activeCourses={data.activeCourses}
+        coursesWithoutInstructor={data.coursesWithoutInstructor}
+        lowEnrollmentCount={data.lowEnrollmentCount}
+      />
+
+      <UpcomingSessions sessions={data.upcomingSessions} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <UpcomingSessions sessions={data.upcomingSessions} />
         <EnrollmentQueueCard
           title="Pending Confirmation"
           emptyMessage="No enrollments pending confirmation."
@@ -159,6 +180,51 @@ export default async function AdminDashboard() {
   )
 }
 
+function QuickActions() {
+  return (
+    <nav aria-label="Quick actions" className="flex flex-wrap gap-2">
+      <Button variant="outline" size="sm" asChild>
+        <Link href="/admin/courses/new">+ New Course</Link>
+      </Button>
+      <Button variant="outline" size="sm" asChild>
+        <Link href="/admin/students/new">+ New Student</Link>
+      </Button>
+      <Button variant="ghost" size="sm" asChild>
+        <Link href="/admin/calendar">Calendar</Link>
+      </Button>
+      <Button variant="ghost" size="sm" asChild>
+        <Link href="/admin/missed-sessions">Missed Sessions</Link>
+      </Button>
+    </nav>
+  )
+}
+
+function StatRow({
+  activeCourses,
+  coursesWithoutInstructor,
+  lowEnrollmentCount,
+}: {
+  activeCourses: number
+  coursesWithoutInstructor: number
+  lowEnrollmentCount: number
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <StatCard label="Active Courses" value={activeCourses} />
+      {coursesWithoutInstructor > 0 ? (
+        <InstructorWarningCard value={coursesWithoutInstructor} />
+      ) : (
+        <CleanIndicator label="All instructors assigned" />
+      )}
+      {lowEnrollmentCount > 0 ? (
+        <LowEnrollmentWarningCard value={lowEnrollmentCount} />
+      ) : (
+        <CleanIndicator label="Enrollment is healthy" />
+      )}
+    </div>
+  )
+}
+
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
     <Card size="sm">
@@ -172,55 +238,59 @@ function StatCard({ label, value }: { label: string; value: number }) {
   )
 }
 
-function InstructorCard({ value }: { value: number }) {
-  const isWarning = value > 0
+function InstructorWarningCard({ value }: { value: number }) {
   return (
-    <Card size="sm" className={isWarning ? 'border-warning/40 bg-warning/10' : undefined}>
+    <Card size="sm" className="border-warning/40 bg-warning/10">
       <CardHeader className="h-14 items-start justify-end pb-0">
-        <CardTitle className={`text-sm font-medium flex items-center gap-1.5 ${isWarning ? 'text-warning' : 'text-muted-foreground'}`}>
-          {isWarning && <span aria-hidden="true">⚠</span>}
-          {isWarning ? 'No Instructor Assigned' : 'All Instructors Assigned'}
+        <CardTitle className="text-sm font-medium flex items-center gap-1.5 text-warning">
+          <span aria-hidden="true">⚠</span>
+          No Instructor Assigned
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isWarning ? (
-          <>
-            <p className="text-3xl font-semibold text-right text-warning">{value}</p>
-            <p className="text-xs text-warning mt-1 text-right">Assign before publishing</p>
-          </>
-        ) : (
-          <p className="text-3xl font-semibold text-right">✓</p>
-        )}
+        <p className="text-3xl font-semibold text-right text-warning">{value}</p>
+        <p className="text-xs text-warning mt-1 text-right">Assign before publishing</p>
       </CardContent>
     </Card>
   )
 }
 
-function LowEnrollmentCard({ value }: { value: number }) {
-  const isWarning = value > 0
+function LowEnrollmentWarningCard({ value }: { value: number }) {
   return (
-    <Card size="sm" className={isWarning ? 'border-warning/40 bg-warning/10' : undefined}>
+    <Card size="sm" className="border-warning/40 bg-warning/10">
       <CardHeader className="h-14 items-start justify-end pb-0">
-        <CardTitle className={`text-sm font-medium flex items-center gap-1.5 ${isWarning ? 'text-warning' : 'text-muted-foreground'}`}>
-          {isWarning && <span aria-hidden="true">⚠</span>}
-          {isWarning ? 'Low Enrollment' : 'Enrollment Healthy'}
+        <CardTitle className="text-sm font-medium flex items-center gap-1.5 text-warning">
+          <span aria-hidden="true">⚠</span>
+          Low Enrollment
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isWarning ? (
-          <>
-            <p className="text-3xl font-semibold text-right text-warning">{value}</p>
-            <p className="text-xs text-warning mt-1 text-right">Below minimum, starting soon</p>
-          </>
-        ) : (
-          <p className="text-3xl font-semibold text-right">✓</p>
-        )}
+        <p className="text-3xl font-semibold text-right text-warning">{value}</p>
+        <p className="text-xs text-warning mt-1 text-right">Below minimum, starting soon</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+function CleanIndicator({ label }: { label: string }) {
+  return (
+    <Card size="sm" className="border-dashed bg-transparent">
+      <CardContent className="flex h-full items-center gap-2 text-sm text-muted-foreground">
+        <span aria-hidden="true">✓</span>
+        {label}
       </CardContent>
     </Card>
   )
 }
 
 function UpcomingSessions({ sessions }: { sessions: UpcomingSession[] }) {
+  const grouped = new Map<string, UpcomingSession[]>()
+  for (const s of sessions) {
+    const list = grouped.get(s.date) ?? []
+    list.push(s)
+    grouped.set(s.date, list)
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -230,59 +300,71 @@ function UpcomingSessions({ sessions }: { sessions: UpcomingSession[] }) {
         {sessions.length === 0 ? (
           <p className="text-sm text-muted-foreground">No sessions scheduled in the next 7 days.</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b text-muted-foreground">
-                <th className="text-left pb-2 font-medium">Course</th>
-                <th className="text-left pb-2 font-medium">Date / Time</th>
-                <th className="text-left pb-2 font-medium hidden sm:table-cell">Instructor</th>
-                <th className="text-right pb-2 font-medium">Enrolled</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sessions.map((s) => {
-                const course = s.course as unknown as {
-                  id: string
-                  title: string | null
-                  capacity: number
-                  course_instructor: { first_name: string; last_name: string } | null
-                  course_type: { name: string } | null
-                  enrollments: { id: string; status: string }[]
-                } | null
-                const sessionInstructor = s.instructor as unknown as { first_name: string; last_name: string } | null
-                const instructor = sessionInstructor ?? course?.course_instructor ?? null
-                const courseName = course?.title ?? course?.course_type?.name ?? '—'
-                const activeCount = (course?.enrollments ?? []).filter((e) => e.status === 'confirmed').length
-                const capacity = course?.capacity ?? 0
-                const attendanceHref = course?.id
-                  ? `/admin/courses/${course.id}/sessions/${s.id}/attendance`
-                  : undefined
-
-                return (
-                  <tr key={s.id} className="border-b last:border-0">
-                    <td className="py-2 pr-4">
-                      {attendanceHref ? (
-                        <Link href={attendanceHref} className="hover:underline">{courseName}</Link>
-                      ) : courseName}
-                    </td>
-                    <td className="py-2 pr-4 whitespace-nowrap">
-                      {formatDate(s.date)}, {formatTime(s.start_time)}–{formatTime(s.end_time)}
-                    </td>
-                    <td className="py-2 pr-4 hidden sm:table-cell">
-                      {instructor ? (
-                        `${instructor.first_name} ${instructor.last_name}`
-                      ) : (
-                        <span className="text-warning">⚠ Unassigned</span>
-                      )}
-                    </td>
-                    <td className="py-2 text-right">{activeCount}/{capacity}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+          <div className="space-y-4">
+            {Array.from(grouped.entries()).map(([date, items]) => (
+              <SessionDayGroup key={date} date={date} sessions={items} />
+            ))}
+          </div>
         )}
       </CardContent>
     </Card>
+  )
+}
+
+function SessionDayGroup({ date, sessions }: { date: string; sessions: UpcomingSession[] }) {
+  return (
+    <div>
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground pb-1.5 border-b">
+        {dayHeader(date)}
+      </h3>
+      <ul className="divide-y">
+        {sessions.map((s) => {
+          const course = s.course as unknown as {
+            id: string
+            title: string | null
+            capacity: number
+            course_instructor: { first_name: string; last_name: string } | null
+            course_type: { name: string } | null
+            enrollments: { id: string; status: string }[]
+          } | null
+          const sessionInstructor = s.instructor as unknown as { first_name: string; last_name: string } | null
+          const instructor = sessionInstructor ?? course?.course_instructor ?? null
+          const courseName = course?.title ?? course?.course_type?.name ?? '—'
+          const activeCount = (course?.enrollments ?? []).filter((e) => e.status === 'confirmed').length
+          const capacity = course?.capacity ?? 0
+          const attendanceHref = course?.id
+            ? `/admin/courses/${course.id}/sessions/${s.id}/attendance`
+            : undefined
+
+          return (
+            <li key={s.id} className="py-2 flex items-center gap-3 text-sm">
+              <span className="text-muted-foreground tabular-nums whitespace-nowrap shrink-0 w-32 sm:w-40">
+                {formatTime(s.start_time)}–{formatTime(s.end_time)}
+              </span>
+              <span className="flex-1 min-w-0 truncate">
+                {attendanceHref ? (
+                  <Link href={attendanceHref} className="hover:underline">
+                    {courseName}
+                  </Link>
+                ) : (
+                  courseName
+                )}
+                <span className="hidden sm:inline text-muted-foreground">
+                  {' · '}
+                  {instructor ? (
+                    `${instructor.first_name} ${instructor.last_name}`
+                  ) : (
+                    <span className="text-warning">⚠ Unassigned</span>
+                  )}
+                </span>
+              </span>
+              <span className="text-muted-foreground tabular-nums shrink-0">
+                {activeCount}/{capacity}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
   )
 }
