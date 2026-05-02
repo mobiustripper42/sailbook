@@ -48,10 +48,12 @@ test.describe('Admin — Student view', () => {
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard');
   });
 
-  test('users list shows View link for each student', async ({ page }) => {
+  test('users list exposes Experience action for student rows', async ({ page }) => {
     await page.goto('/admin/users');
-    // There should be at least one View link (only student rows expose it)
-    await expect(page.getByRole('link', { name: 'View' }).first()).toBeVisible();
+    // Open the first user-actions menu and verify Experience is offered (only student rows expose it)
+    const samRow = page.getByRole('row').filter({ hasText: 'Sam' }).first();
+    await samRow.getByRole('button', { name: 'User actions' }).click();
+    await expect(page.getByRole('menuitem', { name: 'Experience' })).toBeVisible();
   });
 
   test('View link navigates to admin student view page', async ({ page }) => {

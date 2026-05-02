@@ -1,19 +1,20 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import ProfileEditForm from '@/components/admin/profile-edit-form'
+import UserEditForm from '@/components/admin/user-edit-form'
 
 export default async function EditStudentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: profile }, { data: codes }] = await Promise.all([
+  const [{ data: profile }, { data: { user } }, { data: codes }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, first_name, last_name, email, phone, experience_level, asa_number, is_active, is_student, is_instructor, is_member')
+      .select('id, first_name, last_name, email, phone, is_admin, is_instructor, is_student, is_active, asa_number, experience_level, is_member')
       .eq('id', id)
       .eq('is_student', true)
       .single(),
+    supabase.auth.getUser(),
     supabase
       .from('codes')
       .select('value, label, description')
@@ -35,7 +36,11 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
       <h1 className="text-2xl font-semibold mb-6">
         Edit Student — {profile.first_name} {profile.last_name}
       </h1>
-      <ProfileEditForm profile={profile} returnPath="/admin/users" experienceCodes={codes ?? []} />
+      <UserEditForm
+        profile={profile}
+        isSelf={user?.id === profile.id}
+        experienceCodes={codes ?? []}
+      />
     </div>
   )
 }

@@ -44,7 +44,8 @@ test.describe('Instructor deactivation cascade', () => {
     await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
 
     const pwRow = page.getByRole('row', { name: /PW.*Instructor/ });
-    await pwRow.getByRole('button', { name: 'Deactivate' }).click();
+    await pwRow.getByRole('button', { name: 'User actions' }).click();
+    await page.getByRole('menuitem', { name: 'Deactivate' }).click();
 
     // Badge should flip to Inactive
     await expect(pwRow.getByText('Inactive')).toBeVisible({ timeout: 10000 });
@@ -60,10 +61,10 @@ test.describe('Instructor deactivation cascade', () => {
     // Step 4: Reactivate pw_instructor to restore state for subsequent test runs
     await page.goto('/admin/users');
     const pwRowAfter = page.getByRole('row', { name: /PW.*Instructor/ });
-    await pwRowAfter.getByRole('button', { name: 'Activate' }).click();
-    // Wait for the server action to complete, not just the optimistic UI update.
-    // Button re-enables (pending=false) only after the round-trip finishes.
-    await expect(pwRowAfter.getByRole('button', { name: 'Deactivate' })).toBeEnabled({ timeout: 10000 });
+    await pwRowAfter.getByRole('button', { name: 'User actions' }).click();
+    await page.getByRole('menuitem', { name: 'Activate' }).click();
+    // Wait for the badge to flip back to Active — confirms the server round-trip finished.
+    await expect(pwRowAfter.getByText('Active')).toBeVisible({ timeout: 10000 });
   });
 
   test('deactivate button shows confirmation dialog before acting', async ({ page }) => {
@@ -76,7 +77,8 @@ test.describe('Instructor deactivation cascade', () => {
     // Dismiss the dialog — instructor should remain Active
     page.on('dialog', dialog => dialog.dismiss());
     const pwRow = page.getByRole('row', { name: /PW.*Instructor/ });
-    await pwRow.getByRole('button', { name: 'Deactivate' }).click();
+    await pwRow.getByRole('button', { name: 'User actions' }).click();
+    await page.getByRole('menuitem', { name: 'Deactivate' }).click();
 
     // Status should remain Active — no cascade fired
     await expect(pwRow.getByText('Active')).toBeVisible({ timeout: 5000 });

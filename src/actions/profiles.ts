@@ -28,20 +28,27 @@ export async function updateUserProfile(formData: FormData) {
     return { error: "You can't remove your own admin access." }
   }
 
-  const { error } = await supabase
-    .from('profiles')
-    .update({
-      first_name,
-      last_name,
-      phone,
-      is_active,
-      is_admin,
-      is_instructor,
-      is_student,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', id)
+  const updates: Record<string, unknown> = {
+    first_name,
+    last_name,
+    phone,
+    is_active,
+    is_admin,
+    is_instructor,
+    is_student,
+    updated_at: new Date().toISOString(),
+  }
 
+  // Student-specific fields — only written when the form explicitly includes them
+  // (signalled by the hidden `has_student_fields` field rendered by UserEditForm).
+  if (formData.get('has_student_fields') === 'true') {
+    const raw_exp = (formData.get('experience_level') as string) || null
+    updates.asa_number = (formData.get('asa_number') as string)?.trim() || null
+    updates.experience_level = raw_exp === '—' ? null : raw_exp
+    updates.is_member = formData.get('is_member') === 'on'
+  }
+
+  const { error } = await supabase.from('profiles').update(updates).eq('id', id)
   if (error) return { error: error.message }
 
   revalidatePath('/admin/users')

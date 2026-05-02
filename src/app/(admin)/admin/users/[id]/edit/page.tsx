@@ -7,13 +7,19 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: profile }, { data: { user } }] = await Promise.all([
+  const [{ data: profile }, { data: { user } }, { data: codes }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, first_name, last_name, email, phone, is_admin, is_instructor, is_student, is_active')
+      .select('id, first_name, last_name, email, phone, is_admin, is_instructor, is_student, is_active, asa_number, experience_level, is_member')
       .eq('id', id)
       .single(),
     supabase.auth.getUser(),
+    supabase
+      .from('codes')
+      .select('value, label, description')
+      .eq('category', 'experience_level')
+      .eq('is_active', true)
+      .order('sort_order'),
   ])
 
   if (!profile) notFound()
@@ -29,7 +35,11 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
       <h1 className="text-2xl font-semibold mb-6">
         Edit User — {profile.first_name} {profile.last_name}
       </h1>
-      <UserEditForm profile={profile} isSelf={user?.id === profile.id} />
+      <UserEditForm
+        profile={profile}
+        isSelf={user?.id === profile.id}
+        experienceCodes={codes ?? []}
+      />
     </div>
   )
 }

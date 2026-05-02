@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import InstructorActions from '@/components/admin/instructor-actions'
+import UserRowActions from '@/components/admin/user-row-actions'
 import { cn } from '@/lib/utils'
 
 type User = {
@@ -142,7 +142,12 @@ export default function UsersList({ users }: { users: User[] }) {
                 return (
                   <TableRow key={u.id}>
                     <TableCell className="font-medium">
-                      {u.first_name} {u.last_name}
+                      <Link
+                        href={editHref}
+                        className="hover:underline underline-offset-2"
+                      >
+                        {u.first_name} {u.last_name}
+                      </Link>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">{u.email}</TableCell>
                     <TableCell>
@@ -161,25 +166,13 @@ export default function UsersList({ users }: { users: User[] }) {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-3">
-                        {u.is_student && (
-                          <Link
-                            href={`/admin/students/${u.id}`}
-                            className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2"
-                          >
-                            View
-                          </Link>
-                        )}
-                        <Link
-                          href={editHref}
-                          className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2"
-                        >
-                          Edit
-                        </Link>
-                        {u.is_instructor && (
-                          <InstructorActions id={u.id} isActive={u.is_active} />
-                        )}
-                      </div>
+                      <UserRowActions
+                        id={u.id}
+                        editHref={editHref}
+                        isStudent={u.is_student}
+                        isInstructor={u.is_instructor}
+                        isActive={u.is_active}
+                      />
                     </TableCell>
                   </TableRow>
                 )
