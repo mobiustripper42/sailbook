@@ -3,7 +3,38 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 120 — 2026-05-02 02:23 [open]
+## Session 120 — 2026-05-02 02:23–03:39 (1.25 hrs)
+**Duration:** 1.25 hrs | **Points:** 3 (6.13)
+**Task:** 6.13 — Date/time picker redesign
+
+**Completed:**
+- **6.13 — Time picker redesign** (3 pts). PR #12.
+  - New `src/components/admin/time-select.tsx` — two shadcn Select dropdowns (hour in 12h AM/PM, minute in 15-min intervals). `flex-1 min-w-0` on hour trigger + `w-[72px] shrink-0` on minute lets it squeeze into any column width. Hidden input emits snapped `HH:MM` for form submission.
+  - Wired into all four session forms: `add-session-form.tsx`, `makeup-session-form.tsx`, `course-form.tsx`, `session-row.tsx`. Forms switched to `grid-cols-2 sm:grid-cols-3` with Date `col-span-2 sm:col-span-1` (Date full-width on mobile, Start/End side-by-side below).
+  - `session-row.tsx` gains controlled `editStartTime`/`editEndTime` state (was uncontrolled `defaultValue`).
+  - `course-form.tsx` duplicate hidden inputs for start/end removed — `TimeSelect` owns those names directly.
+  - Sessions table wrapped in `overflow-x-auto` on `(admin)/admin/courses/[id]/page.tsx` so it scrolls horizontally inside the card instead of cutting off the page.
+  - 2 desktop Playwright tests green.
+- **CR fixes same session**: moved component from `components/ui/` to `components/admin/`; hidden input emits snapped value (no display/submit desync); removed `required` prop (browser-ignored on hidden inputs); guarded empty value → NaN; removed redundant `useState` init.
+- **6.24 added to plan** — course detail page mobile rewrite. Triggered by 6.13 work: below 1024px the page has multiple structural problems (header squish, table forces overflow, inline edit row cramped) that need a mobile-first redesign, not retrofit. Deferred from this branch.
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification pending (carryover from s102).
+
+**Next Steps:**
+1. Merge PR #12 (Eric is doing this).
+2. Pick next Phase 6 task. Strongest candidates: **6.24** (course detail mobile rewrite, 5 pts, medium — natural follow-on to today) or **6.14** (consolidate profile edit screens, 2 pts, medium).
+3. Phase 5 close (5.9) still waiting — only open Phase 5 task.
+
+**Context:**
+- Iterated three times on the time-picker breakpoint strategy before settling on "always use the dropdowns." Tried `sm` switch to native, `lg` switch to native, `md` switch to native — none worked because viewport width can't tell desktop browser at 375px from a real phone, and the desktop `<input type="time">` UI is what we were trying to escape. The dropdowns shrink fine via `min-w-0`; native fallback was a wrong axis.
+- Course detail page header (`flex justify-between` with title + 4 action buttons) is pre-existing and squishes the title at narrow widths. Not touched in this session — folded into 6.24.
+- Test flake pattern: accumulated DB rows from earlier test runs cause strict-mode violations on `getByText('8:30am – 4:00pm')`. Fix is `.first()` or assert on a unique field (e.g., `Dock ${runId()}`).
+- Test flake pattern 2: clicking "first ASA 101" in `/admin/courses` can land on a course whose first session is cancelled (no Edit option in dropdown). Use `getByRole('row').filter({ has: getByRole('cell', { name: 'scheduled' }) })` to find an editable row instead.
+- PR #12: https://github.com/mobiustripper42/sailbook/pull/12
+
+**Code Review:** All CR findings fixed same session (component placement, hidden-input sync, required prop, NaN guard, redundant state init). One advisory item deferred (course-form session_date hidden input, pre-existing).
 
 ## Session 119 — 2026-05-01 21:53–2026-05-02 02:03 (4.17 hrs)
 **Duration:** 4.17 hrs | **Points:** 8 (5.7)
