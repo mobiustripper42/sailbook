@@ -55,6 +55,6 @@ test.describe('TimeSelect — add session form', () => {
     await editRow.getByRole('button', { name: 'Save' }).click()
 
     await expect(editRow).not.toBeVisible({ timeout: 8000 })
-    await expect(page.getByText('6:00pm', { exact: false })).toBeVisible()
+    await expect(page.getByText('6:00pm').first()).toBeVisible()
   })
 })

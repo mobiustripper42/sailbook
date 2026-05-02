@@ -140,40 +140,42 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           {sessions?.length === 0 ? (
             <p className="px-6 py-4 text-sm text-muted-foreground">No sessions yet.</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="hidden sm:table-cell">Time</TableHead>
-                  <TableHead className="hidden md:table-cell">Location</TableHead>
-                  <TableHead className="hidden sm:table-cell">Instructor</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-16" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sessions?.map((s) => (
-                  <SessionRow
-                    key={s.id}
-                    session={{
-                      id: s.id,
-                      date: s.date,
-                      start_time: s.start_time,
-                      end_time: s.end_time,
-                      location: s.location,
-                      instructor_id: s.instructor_id,
-                      status: s.status as 'scheduled' | 'completed' | 'cancelled',
-                      cancel_reason: s.cancel_reason,
-                      instructor: s.instructor as { first_name: string; last_name: string } | null,
-                    }}
-                    courseId={id}
-                    instructors={instructors ?? []}
-                    missedCount={makeupCounts.get(s.id)?.missed ?? 0}
-                    linkedCount={makeupCounts.get(s.id)?.linked ?? 0}
-                  />
-                ))}
-              </TableBody>
-            </Table>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="hidden sm:table-cell">Time</TableHead>
+                    <TableHead className="hidden md:table-cell">Location</TableHead>
+                    <TableHead className="hidden sm:table-cell">Instructor</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-16" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sessions?.map((s) => (
+                    <SessionRow
+                      key={s.id}
+                      session={{
+                        id: s.id,
+                        date: s.date,
+                        start_time: s.start_time,
+                        end_time: s.end_time,
+                        location: s.location,
+                        instructor_id: s.instructor_id,
+                        status: s.status as 'scheduled' | 'completed' | 'cancelled',
+                        cancel_reason: s.cancel_reason,
+                        instructor: s.instructor as { first_name: string; last_name: string } | null,
+                      }}
+                      courseId={id}
+                      instructors={instructors ?? []}
+                      missedCount={makeupCounts.get(s.id)?.missed ?? 0}
+                      linkedCount={makeupCounts.get(s.id)?.linked ?? 0}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
           <div className="border-t px-6 py-4">
             <AddSessionForm courseId={id} />

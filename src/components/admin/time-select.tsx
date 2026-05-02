@@ -1,6 +1,5 @@
 'use client'
 
-import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -35,7 +34,7 @@ export default function TimeSelect({ name, value, onChange }: Props) {
   const parts = value.includes(':') ? value.split(':') : ['8', '0']
   const hour = parseInt(parts[0] ?? '8', 10)
   const minute = snapMinute(parseInt(parts[1] ?? '0', 10))
-  const safeValue = value.includes(':') ? value.slice(0, 5) : '08:00'
+  const safeValue = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
 
   function setHour(v: string) {
     const h = parseInt(v, 10)
@@ -48,45 +47,32 @@ export default function TimeSelect({ name, value, onChange }: Props) {
   }
 
   return (
-    <>
-      {/* Single hidden input — both modes update value via onChange */}
+    <div className="flex gap-1 items-center min-w-0">
       <input type="hidden" name={name} value={safeValue} />
-
-      {/* Mobile + tablet (< lg): native OS time picker */}
-      <Input
-        type="time"
-        className="lg:hidden"
-        value={safeValue}
-        onChange={(e) => onChange(e.target.value)}
-      />
-
-      {/* Desktop (lg+, 1024px+): shadcn Select dropdowns — enough column width */}
-      <div className="hidden lg:flex gap-1 items-center min-w-0">
-        <Select value={String(hour)} onValueChange={setHour}>
-          <SelectTrigger className="flex-1 min-w-0">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {HOURS.map((h) => (
-              <SelectItem key={h} value={String(h)}>
-                {formatHour(h)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={String(minute)} onValueChange={setMinute}>
-          <SelectTrigger className="w-[72px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {MINUTES.map((m) => (
-              <SelectItem key={m} value={String(m)}>
-                {String(m).padStart(2, '0')}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </>
+      <Select value={String(hour)} onValueChange={setHour}>
+        <SelectTrigger className="flex-1 min-w-0">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {HOURS.map((h) => (
+            <SelectItem key={h} value={String(h)}>
+              {formatHour(h)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select value={String(minute)} onValueChange={setMinute}>
+        <SelectTrigger className="w-[72px] shrink-0">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {MINUTES.map((m) => (
+            <SelectItem key={m} value={String(m)}>
+              {String(m).padStart(2, '0')}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   )
 }
