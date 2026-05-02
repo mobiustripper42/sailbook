@@ -43,6 +43,14 @@ export default function ProfileEditForm({
   const [isDirty, setIsDirty] = useState(false)
   const { confirmDiscard } = useUnsavedChanges(isDirty)
 
+  const [firstName, setFirstName] = useState(profile.first_name)
+  const [lastName, setLastName] = useState(profile.last_name)
+  const [phone, setPhone] = useState(profile.phone ?? '')
+  const [asaNumber, setAsaNumber] = useState(profile.asa_number ?? '')
+  const [experienceLevel, setExperienceLevel] = useState(profile.experience_level ?? '—')
+  const [isMember, setIsMember] = useState(profile.is_member)
+  const [isActive, setIsActive] = useState(profile.is_active ? 'true' : 'false')
+
   function handleSubmit(formData: FormData) {
     setError(null)
 
@@ -82,23 +90,23 @@ export default function ProfileEditForm({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="first_name">First Name</Label>
-          <Input id="first_name" name="first_name" defaultValue={profile.first_name} required />
+          <Input id="first_name" name="first_name" required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="last_name">Last Name</Label>
-          <Input id="last_name" name="last_name" defaultValue={profile.last_name} required />
+          <Input id="last_name" name="last_name" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
         </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="phone">Phone</Label>
-        <Input id="phone" name="phone" defaultValue={profile.phone ?? ''} />
+        <Input id="phone" name="phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
       </div>
 
       {profile.is_student && (
         <div className="space-y-2">
           <Label htmlFor="asa_number">ASA Number</Label>
-          <Input id="asa_number" name="asa_number" defaultValue={profile.asa_number ?? ''} placeholder="e.g. 123456" maxLength={20} />
+          <Input id="asa_number" name="asa_number" value={asaNumber} onChange={(e) => setAsaNumber(e.target.value)} placeholder="e.g. 123456" maxLength={20} />
         </div>
       )}
 
@@ -108,7 +116,8 @@ export default function ProfileEditForm({
           <select
             id="experience_level"
             name="experience_level"
-            defaultValue={profile.experience_level ?? '—'}
+            value={experienceLevel}
+            onChange={(e) => setExperienceLevel(e.target.value)}
             className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <option value="—">Not set</option>
@@ -127,7 +136,8 @@ export default function ProfileEditForm({
             type="checkbox"
             id="is_member"
             name="is_member"
-            defaultChecked={profile.is_member}
+            checked={isMember}
+            onChange={(e) => setIsMember(e.target.checked)}
             className="h-4 w-4 rounded border border-input accent-primary"
           />
           <Label htmlFor="is_member" className="cursor-pointer">Simply Sailing Member (member pricing at checkout)</Label>
@@ -139,7 +149,8 @@ export default function ProfileEditForm({
         <select
           id="is_active"
           name="is_active"
-          defaultValue={profile.is_active ? 'true' : 'false'}
+          value={isActive}
+          onChange={(e) => setIsActive(e.target.value)}
           className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <option value="true">Active</option>

@@ -26,33 +26,46 @@ export default function CourseTypeForm({ courseType }: Props) {
   const [isDirty, setIsDirty] = useState(false)
   const { confirmDiscard } = useUnsavedChanges(isDirty)
 
+  const [name, setName] = useState(courseType?.name ?? '')
+  const [shortCode, setShortCode] = useState(courseType?.short_code ?? '')
+  const [certificationBody, setCertificationBody] = useState(courseType?.certification_body ?? '')
+  const [maxStudents, setMaxStudents] = useState(String(courseType?.max_students ?? 4))
+  const [minHours, setMinHours] = useState(String(courseType?.min_hours ?? ''))
+  const [minimumEnrollment, setMinimumEnrollment] = useState(String(courseType?.minimum_enrollment ?? ''))
+  const [lowEnrollmentLeadDays, setLowEnrollmentLeadDays] = useState(String(courseType?.low_enrollment_lead_days ?? 14))
+  const [slug, setSlug] = useState(courseType?.slug ?? '')
+  const [description, setDescription] = useState(courseType?.description ?? '')
+  const [isDropIn, setIsDropIn] = useState(courseType?.is_drop_in ?? false)
+
+  function handleChange() { setIsDirty(true) }
+
   return (
-    <form action={formAction} className="space-y-4" onChange={() => setIsDirty(true)}>
+    <form action={formAction} className="space-y-4" onChange={handleChange}>
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
-        <Input id="name" name="name" required defaultValue={courseType?.name} placeholder="ASA 101 - Basic Keelboat Sailing" />
+        <Input id="name" name="name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="ASA 101 - Basic Keelboat Sailing" />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="short_code">Short Code</Label>
-        <Input id="short_code" name="short_code" required defaultValue={courseType?.short_code} placeholder="ASA101" className="uppercase" />
+        <Input id="short_code" name="short_code" required value={shortCode} onChange={(e) => setShortCode(e.target.value)} placeholder="ASA101" className="uppercase" />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="certification_body">Certification Body</Label>
-        <Input id="certification_body" name="certification_body" defaultValue={courseType?.certification_body ?? ''} placeholder="ASA (leave blank if none)" />
+        <Input id="certification_body" name="certification_body" value={certificationBody} onChange={(e) => setCertificationBody(e.target.value)} placeholder="ASA (leave blank if none)" />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="max_students">Max Students</Label>
-          <Input id="max_students" name="max_students" type="number" min={1} required defaultValue={courseType?.max_students ?? 4} />
+          <Input id="max_students" name="max_students" type="number" min={1} required value={maxStudents} onChange={(e) => setMaxStudents(e.target.value)} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="min_hours">Min Hours</Label>
-          <Input id="min_hours" name="min_hours" type="number" min={0} defaultValue={courseType?.min_hours ?? ''} placeholder="Optional" />
+          <Input id="min_hours" name="min_hours" type="number" min={0} value={minHours} onChange={(e) => setMinHours(e.target.value)} placeholder="Optional" />
         </div>
       </div>
 
@@ -64,7 +77,8 @@ export default function CourseTypeForm({ courseType }: Props) {
             name="minimum_enrollment"
             type="number"
             min={0}
-            defaultValue={courseType?.minimum_enrollment ?? ''}
+            value={minimumEnrollment}
+            onChange={(e) => setMinimumEnrollment(e.target.value)}
             placeholder="Leave blank to skip"
           />
           <p className="text-xs text-muted-foreground">
@@ -79,7 +93,8 @@ export default function CourseTypeForm({ courseType }: Props) {
             type="number"
             min={0}
             required
-            defaultValue={courseType?.low_enrollment_lead_days ?? 14}
+            value={lowEnrollmentLeadDays}
+            onChange={(e) => setLowEnrollmentLeadDays(e.target.value)}
           />
           <p className="text-xs text-muted-foreground">
             How far ahead of the first session to start flagging.
@@ -95,7 +110,8 @@ export default function CourseTypeForm({ courseType }: Props) {
             id="slug"
             name="slug"
             required
-            defaultValue={courseType?.slug ?? ''}
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
             placeholder="asa101"
             className="rounded-l-none"
           />
@@ -107,7 +123,7 @@ export default function CourseTypeForm({ courseType }: Props) {
 
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" rows={3} defaultValue={courseType?.description ?? ''} />
+        <Textarea id="description" name="description" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
       </div>
 
       <div className="flex items-start gap-3">
@@ -116,7 +132,8 @@ export default function CourseTypeForm({ courseType }: Props) {
           id="is_drop_in"
           name="is_drop_in"
           value="true"
-          defaultChecked={courseType?.is_drop_in ?? false}
+          checked={isDropIn}
+          onChange={(e) => setIsDropIn(e.target.checked)}
           className="mt-0.5"
         />
         <div>

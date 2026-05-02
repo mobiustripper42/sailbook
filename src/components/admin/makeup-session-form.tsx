@@ -30,6 +30,11 @@ export default function MakeupSessionForm({
   const [isDirty, setIsDirty] = useState(false)
   const { confirmDiscard } = useUnsavedChanges(isDirty && open)
 
+  const [date, setDate] = useState('')
+  const [startTime, setStartTime] = useState(defaultStartTime)
+  const [endTime, setEndTime] = useState(defaultEndTime)
+  const [location, setLocation] = useState(defaultLocation ?? '')
+
   const unlinked = missedCount - linkedCount
   const allLinked = missedCount > 0 && unlinked === 0
 
@@ -64,20 +69,20 @@ export default function MakeupSessionForm({
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-1.5">
           <Label>Date</Label>
-          <Input type="date" name="date" required />
+          <Input type="date" name="date" required value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
         <div className="space-y-1.5">
           <Label>Start</Label>
-          <Input type="time" name="start_time" required defaultValue={defaultStartTime} />
+          <Input type="time" name="start_time" required value={startTime} onChange={(e) => setStartTime(e.target.value)} />
         </div>
         <div className="space-y-1.5">
           <Label>End</Label>
-          <Input type="time" name="end_time" required defaultValue={defaultEndTime} />
+          <Input type="time" name="end_time" required value={endTime} onChange={(e) => setEndTime(e.target.value)} />
         </div>
       </div>
       <div className="space-y-1.5">
         <Label>Location</Label>
-        <Input name="location" placeholder="e.g. Dock A, Edgewater" defaultValue={defaultLocation ?? ''} />
+        <Input name="location" placeholder="e.g. Dock A, Edgewater" value={location} onChange={(e) => setLocation(e.target.value)} />
       </div>
       <div className="flex gap-2">
         <Button type="submit" size="sm" disabled={pending}>

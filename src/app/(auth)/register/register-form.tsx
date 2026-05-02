@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useTransition, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -27,20 +27,32 @@ type ExperienceCode = {
 }
 
 export default function RegisterForm({ experienceCodes }: { experienceCodes: ExperienceCode[] }) {
-  const [state, action, pending] = useActionState(register, null)
+  const [error, setError] = useState<string | null>(null)
+  const [pending, startTransition] = useTransition()
   const searchParams = useSearchParams()
   const next = safeNextPath(searchParams.get('next')) ?? undefined
 
-  // Controlled inputs preserve user-typed values across server-action
-  // re-renders when the action returns an error. Password is intentionally
-  // uncontrolled — re-typing on rejection is fine and avoids holding a
-  // failed credential in component state.
+  // All inputs are controlled so values survive server-action errors.
+  // onSubmit + e.preventDefault() is used instead of action={serverAction}
+  // to prevent React 19 from calling form.reset() after the action, which
+  // resets native <select> elements even when controlled via value prop.
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [experienceLevel, setExperienceLevel] = useState('')
   const [instructorNotes, setInstructorNotes] = useState('')
+  const [password, setPassword] = useState('')
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    setError(null)
+    startTransition(async () => {
+      const result = await register(null, formData)
+      if (result?.error) setError(result.error)
+    })
+  }
 
   return (
     <Card className="w-full max-w-sm">
@@ -56,11 +68,11 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
           <div className="h-px flex-1 bg-border" />
         </div>
       </CardContent>
-      <form action={action} noValidate>
+      <form onSubmit={handleSubmit} noValidate>
         {next ? <input type="hidden" name="next" value={next} /> : null}
         <CardContent className="space-y-4">
-          {state?.error && (
-            <p className="text-sm text-destructive">{state.error}</p>
+          {error && (
+            <p className="text-sm text-destructive">{error}</p>
           )}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
@@ -148,6 +160,8 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
               required
               autoComplete="new-password"
               minLength={PASSWORD_MIN_LENGTH}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">{PASSWORD_RULES_HELP}</p>
           </div>
@@ -159,7 +173,7 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
           <p className="text-sm text-muted-foreground text-center">
             Already have an account?{' '}
             <Link
-              href="/login"
+              href={next ? `/login?next=${next}` : '/login'}
               className="underline underline-offset-4 hover:text-foreground"
             >
               Sign in
