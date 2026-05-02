@@ -3,7 +3,24 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 118 — 2026-05-01 16:57 [open]
+## Session 118 — 2026-05-01 16:57–21:31 (4.6 hrs)
+**Duration:** 4.6 hrs | **Points:** 7 (6.23 = 2, 6.22 = 5)
+**Task:** 6.23 — ?next= forwarding through auth links; 6.22 — form field preservation on server action error
+**Completed:**
+- 6.23: login "Register" link + register "Sign in" link forward `?next=`; open-redirect blocked via `safeNextPath`; 4 Playwright tests (`tests/next-param-registration.spec.ts`) — PR #9
+- 6.22: converted all admin + student + auth edit forms from uncontrolled to controlled inputs (12 components total); switched register-form from `useActionState` action binding to `onSubmit` + `e.preventDefault()` to prevent React 19 from calling `form.reset()` on native `<select>`; 2 Playwright tests (`tests/form-field-preservation.spec.ts`) — PR #8
+- Applied CR findings on both branches before opening PRs
+**In Progress:** nothing
+**Blocked:** nothing
+**Next Steps:** Pick next Phase 6 task. 5.7 (waitlist, 8 pts, high priority) or 6.13 (time picker redesign, 3 pts, "almost unusable") are the strongest candidates.
+**Context:**
+- React 19 calls `form.reset()` after every form action invocation (success or error). `defaultValue`/`defaultChecked` = permanent reset on error. For native `<select>`, even controlled `value` prop doesn't fully survive `form.reset()` — must use `onSubmit` + `e.preventDefault()` to stop it.
+- `session-row.tsx` excluded (uses `onSubmit` + `preventDefault` already). `course-form` capacity excluded (`key={selectedTypeId}` is an intentional reset).
+- shadcn Select: must call `setIsDirty(true)` explicitly inside `onValueChange` — native change event doesn't bubble to the parent form's `onChange`.
+- Playwright: assert link hrefs via `toHaveAttribute` (polls through Suspense hydration); clicking and checking `page.url()` runs synchronously and misses Next.js client-side nav.
+- Merge order fumble: #9 (6.23) merged before #8 (6.22); #8 clobbered the ?next= Register link in login/page.tsx. Needed `git checkout main && git pull` to see the corrected state.
+- PR test plans must be step-by-step scenarios (URL → action → what to verify), not just outcome checklists. Already in CLAUDE.md and /kill-this skill — compliance failure, not a missing rule.
+**Code Review:** CR findings applied on both branches (encodeURIComponent inconsistency on 6.23; missed add-session-form date/location + both notification pref forms + auth form passwords on 6.22).
 
 ## Session 117 — 2026-05-01 16:21–16:41 (0.33 hrs)
 **Duration:** 0.33 hrs | **Points:** 7 (6.21 = 2, 6.20 = 5)
