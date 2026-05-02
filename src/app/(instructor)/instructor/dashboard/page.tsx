@@ -1,17 +1,9 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { fmtTime } from '@/lib/utils'
+import { fmtTime, fmtDateRelative } from '@/lib/utils'
 import { EmptyState } from '@/components/empty-state'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-function fmtDate(d: string) {
-  return new Date(d + 'T12:00:00').toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  })
-}
 
 type SessionRow = {
   id: string
@@ -104,7 +96,7 @@ export default async function InstructorDashboard() {
                       {course.title ?? course.course_types?.name ?? '—'}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {fmtDate(s.date)} · {fmtTime(s.start_time)} – {fmtTime(s.end_time)}
+                      {fmtDateRelative(s.date)} · {fmtTime(s.start_time)} – {fmtTime(s.end_time)}
                       {s.location ? ` · ${s.location}` : ''}
                     </p>
                   </div>
