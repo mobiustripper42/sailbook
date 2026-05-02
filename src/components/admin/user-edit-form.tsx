@@ -90,7 +90,7 @@ export default function UserEditForm({
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input id="email" value={profile.email} disabled className="bg-muted" />
-          <p className="text-xs text-muted-foreground">Managed through Supabase Auth — cannot be changed here.</p>
+          <p className="text-xs text-muted-foreground">Email cannot be changed here.</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -171,7 +171,7 @@ export default function UserEditForm({
                 onChange={(e) => setIsMember(e.target.checked)}
                 className="h-4 w-4 rounded border border-input accent-primary"
               />
-              <Label htmlFor="is_member" className="cursor-pointer">Simply Sailing Member (member pricing at checkout)</Label>
+              <Label htmlFor="is_member" className="cursor-pointer">Member Pricing</Label>
             </div>
           </div>
 
