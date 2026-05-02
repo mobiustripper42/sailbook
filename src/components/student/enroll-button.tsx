@@ -6,12 +6,10 @@ import { createCheckoutSession } from '@/app/(student)/student/courses/[id]/acti
 
 interface EnrollButtonProps {
   courseId: string
-  disabled?: boolean
-  disabledReason?: string
   label?: string
 }
 
-export default function EnrollButton({ courseId, disabled, disabledReason, label }: EnrollButtonProps) {
+export default function EnrollButton({ courseId, label }: EnrollButtonProps) {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
@@ -25,14 +23,6 @@ export default function EnrollButton({ courseId, disabled, disabledReason, label
         window.location.href = result.url
       }
     })
-  }
-
-  if (disabled) {
-    return (
-      <Button disabled className="w-full sm:w-auto">
-        {disabledReason ?? 'Unavailable'}
-      </Button>
-    )
   }
 
   return (

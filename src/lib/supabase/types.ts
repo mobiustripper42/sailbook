@@ -519,6 +519,45 @@ export type Database = {
           },
         ]
       }
+      waitlist_entries: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          notified_at: string | null
+          student_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          notified_at?: string | null
+          student_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          notified_at?: string | null
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waitlist_entries_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waitlist_entries_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -556,6 +595,7 @@ export type Database = {
         Args: { user_id: string }
         Returns: string[]
       }
+      get_waitlist_position: { Args: { p_course_id: string }; Returns: number }
       profile_auth_source_unchanged: {
         Args: { p_auth_source: string; p_id: string }
         Returns: boolean

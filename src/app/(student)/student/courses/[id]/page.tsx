@@ -16,6 +16,7 @@ import { attendanceStatusConfig } from '@/lib/attendance'
 import type { AttendanceStatus } from '@/lib/attendance'
 import EnrollButton from '@/components/student/enroll-button'
 import CancelEnrollmentButton from '@/components/student/cancel-enrollment-button'
+import WaitlistButton from '@/components/student/waitlist-button'
 
 export default async function StudentCourseDetailPage({
   params,
@@ -84,6 +85,21 @@ export default async function StudentCourseDetailPage({
         .from('session_attendance')
         .select('session_id, status, makeup_session_id')
         .eq('enrollment_id', myEnrollment.id)
+    : { data: null }
+
+  // Waitlist status — only relevant when not (already) enrolled.
+  const { data: myWaitlistEntry } = user && !isEnrolled
+    ? await supabase
+        .from('waitlist_entries')
+        .select('id')
+        .eq('course_id', id)
+        .eq('student_id', user.id)
+        .maybeSingle()
+    : { data: null }
+  const isOnWaitlist = !!myWaitlistEntry
+
+  const { data: waitlistPosition } = isOnWaitlist
+    ? await supabase.rpc('get_waitlist_position', { p_course_id: id })
     : { data: null }
 
   const attendanceMap = new Map(
@@ -294,12 +310,14 @@ export default async function StudentCourseDetailPage({
               Your spot is held for {holdMinutesRemaining} more {holdMinutesRemaining === 1 ? 'minute' : 'minutes'}.
             </p>
           </div>
-        ) : (
-          <EnrollButton
+        ) : isFull ? (
+          <WaitlistButton
             courseId={id}
-            disabled={isFull}
-            disabledReason={isFull ? 'Course Full' : undefined}
+            isOnWaitlist={isOnWaitlist}
+            position={waitlistPosition ?? null}
           />
+        ) : (
+          <EnrollButton courseId={id} />
         )}
       </div>
     </div>

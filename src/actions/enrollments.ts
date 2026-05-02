@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { MANUAL_PAYMENT_METHODS } from '@/lib/constants'
-import { notifyEnrollmentConfirmed } from '@/lib/notifications/triggers'
+import { notifyEnrollmentConfirmed, notifyWaitlistSpotOpened } from '@/lib/notifications/triggers'
 
 export async function adminEnrollStudent(
   _: unknown,
@@ -90,6 +90,14 @@ export async function adminEnrollStudent(
     if (paymentError) return `Enrollment created but payment record failed: ${paymentError.message}`
   }
 
+  // Best-effort: if this student happened to be on the course's waitlist,
+  // remove them. Failure is non-fatal — admins can clean up by hand.
+  await adminClient
+    .from('waitlist_entries')
+    .delete()
+    .eq('course_id', courseId)
+    .eq('student_id', studentId)
+
   await notifyEnrollmentConfirmed(enrollment.id)
 
   revalidatePath(`/admin/courses/${courseId}`)
@@ -98,11 +106,28 @@ export async function adminEnrollStudent(
 
 export async function confirmEnrollment(enrollmentId: string, courseId: string) {
   const supabase = await createClient()
+
+  // Look up student_id BEFORE flipping status, so we can clear the waitlist
+  // entry afterward without a second round-trip via the enrollments table.
+  const { data: enrollmentRow } = await supabase
+    .from('enrollments')
+    .select('student_id')
+    .eq('id', enrollmentId)
+    .maybeSingle()
+
   const { error } = await supabase
     .from('enrollments')
     .update({ status: 'confirmed', updated_at: new Date().toISOString() })
     .eq('id', enrollmentId)
   if (error) return { error: error.message }
+
+  if (enrollmentRow?.student_id) {
+    await supabase
+      .from('waitlist_entries')
+      .delete()
+      .eq('course_id', courseId)
+      .eq('student_id', enrollmentRow.student_id)
+  }
 
   await notifyEnrollmentConfirmed(enrollmentId)
 
@@ -112,6 +137,21 @@ export async function confirmEnrollment(enrollmentId: string, courseId: string) 
 
 export async function cancelEnrollment(enrollmentId: string, courseId: string) {
   const supabase = await createClient()
+
+  // Read prior status BEFORE the update. Two reasons:
+  //   1) Only confirmed/cancel_requested rows hold a real seat — cancelling
+  //      a pending_hold or already-cancelled row must not blast the waitlist.
+  //   2) If RLS hides the row, we'd otherwise no-op the update silently and
+  //      still fire the notification — the prior-status read also returns
+  //      nothing in that case, so we bail early.
+  const { data: prior } = await supabase
+    .from('enrollments')
+    .select('status')
+    .eq('id', enrollmentId)
+    .maybeSingle()
+
+  const heldASpot = prior?.status === 'confirmed' || prior?.status === 'cancel_requested'
+
   const { error } = await supabase
     .from('enrollments')
     .update({ status: 'cancelled', updated_at: new Date().toISOString() })
@@ -124,6 +164,12 @@ export async function cancelEnrollment(enrollmentId: string, courseId: string) {
     .update({ status: 'missed', updated_at: new Date().toISOString() })
     .eq('enrollment_id', enrollmentId)
     .eq('status', 'expected')
+
+  // A spot just opened — fan out to the waitlist. Skip when the prior status
+  // never held a confirmed seat, so we don't blast on no-op cancels.
+  if (heldASpot) {
+    await notifyWaitlistSpotOpened(courseId)
+  }
 
   revalidatePath(`/admin/courses/${courseId}`)
   return { error: null }

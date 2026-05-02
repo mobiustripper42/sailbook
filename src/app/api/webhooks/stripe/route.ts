@@ -110,6 +110,17 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // If this student happened to be on the waitlist for this course, drop the
+  // entry. Best-effort — failure is non-fatal.
+  const { error: waitlistErr } = await admin
+    .from('waitlist_entries')
+    .delete()
+    .eq('course_id', enrollment.course_id)
+    .eq('student_id', enrollment.student_id)
+  if (waitlistErr) {
+    console.error('Webhook: failed to clear waitlist entry:', waitlistErr.message)
+  }
+
   // Fire-and-await: trigger swallows its own errors, so a notification
   // failure can't 500 the webhook (Stripe would then retry the whole flow).
   await notifyEnrollmentConfirmed(enrollment.id)

@@ -19,6 +19,7 @@ import {
   makeupAssignment,
   sessionCancellation,
   sessionReminder,
+  waitlistSpotOpened,
 } from './templates'
 
 type AdminClient = ReturnType<typeof createAdminClient>
@@ -558,6 +559,81 @@ export async function notifyUpcomingSessionReminders(
   }
 
   return firedCount
+}
+
+/**
+ * Fired when an enrollment transitions to 'cancelled' (admin finalizes the
+ * cancellation/refund) — meaning a spot just opened. Notifies every current
+ * waitlister for the course in parallel; first to enroll wins. Stamps
+ * `notified_at = now()` on each row.
+ *
+ * No admin alert (the admin is the one cancelling — they already know).
+ *
+ * Returns nothing. Errors are logged and swallowed so the caller's primary
+ * write (the cancellation itself) is never blocked by a notification failure.
+ */
+export async function notifyWaitlistSpotOpened(courseId: string): Promise<void> {
+  const admin = createAdminClient()
+
+  const { data: entries, error: entriesErr } = await admin
+    .from('waitlist_entries')
+    .select(`
+      id,
+      student:profiles!waitlist_entries_student_id_fkey ( first_name, email, phone, notification_preferences )
+    `)
+    .eq('course_id', courseId)
+    .order('created_at', { ascending: true })
+
+  if (entriesErr) {
+    console.error('[notifications] waitlist lookup failed:', entriesErr.message)
+    return
+  }
+  if (!entries || entries.length === 0) return
+
+  const { data: courseRow } = await admin
+    .from('courses')
+    .select('title, course_type_id')
+    .eq('id', courseId)
+    .maybeSingle()
+
+  const courseTitle = await resolveCourseTitle(admin, courseRow)
+
+  await Promise.all(
+    entries.flatMap((e) => {
+      const student = e.student as unknown as {
+        first_name: string
+        email: string
+        phone: string | null
+        notification_preferences: unknown
+      } | null
+      if (!student) return []
+
+      const rendered = waitlistSpotOpened({
+        studentFirstName: student.first_name,
+        courseTitle,
+        courseId,
+      })
+      const prefs = student.notification_preferences
+      const sends: Promise<void>[] = []
+      if (isStudentChannelEnabled(prefs, 'sms')) {
+        sends.push(trySMS(student.phone, rendered.smsBody))
+      }
+      if (isStudentChannelEnabled(prefs, 'email')) {
+        sends.push(tryEmail(student.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml))
+      }
+      return sends
+    }),
+  )
+
+  // Stamp notified_at on every entry we just touched. A best-effort write —
+  // a failure here doesn't unsend SMS/email, just costs us a record of when
+  // the most recent broadcast went out.
+  const ids = entries.map((e) => e.id)
+  const { error: stampErr } = await admin
+    .from('waitlist_entries')
+    .update({ notified_at: new Date().toISOString() })
+    .in('id', ids)
+  if (stampErr) console.error('[notifications] notified_at stamp failed:', stampErr.message)
 }
 
 // Course.title is optional; fall back to course_type.name when blank
