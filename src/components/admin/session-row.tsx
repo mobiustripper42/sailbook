@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import SessionInstructorSelect from '@/components/admin/session-instructor-select'
 import MakeupSessionForm from '@/components/admin/makeup-session-form'
+import TimeSelect from '@/components/ui/time-select'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 
 type SessionData = {
@@ -52,6 +53,8 @@ export default function SessionRow({
   const [actionError, setActionError] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [pending, startTransition] = useTransition()
+  const [editStartTime, setEditStartTime] = useState(session.start_time.slice(0, 5))
+  const [editEndTime, setEditEndTime] = useState(session.end_time.slice(0, 5))
   const isCancelled = session.status === 'cancelled'
   const { confirmDiscard } = useUnsavedChanges(isDirty)
 
@@ -138,7 +141,13 @@ export default function SessionRow({
                   <DropdownMenuItem
                     onSelect={() => {
                       if (isEditing && !confirmDiscard()) return
-                      setIsEditing((v) => !v)
+                      setIsEditing((v) => {
+                        if (!v) {
+                          setEditStartTime(session.start_time.slice(0, 5))
+                          setEditEndTime(session.end_time.slice(0, 5))
+                        }
+                        return !v
+                      })
                       setEditError(null)
                       setIsDirty(false)
                     }}
@@ -187,20 +196,20 @@ export default function SessionRow({
                 </div>
                 <div className="space-y-1.5">
                   <Label>Start</Label>
-                  <Input
-                    type="time"
+                  <TimeSelect
                     name="start_time"
+                    value={editStartTime}
+                    onChange={(v) => { setEditStartTime(v); setIsDirty(true) }}
                     required
-                    defaultValue={session.start_time.slice(0, 5)}
                   />
                 </div>
                 <div className="space-y-1.5">
                   <Label>End</Label>
-                  <Input
-                    type="time"
+                  <TimeSelect
                     name="end_time"
+                    value={editEndTime}
+                    onChange={(v) => { setEditEndTime(v); setIsDirty(true) }}
                     required
-                    defaultValue={session.end_time.slice(0, 5)}
                   />
                 </div>
               </div>
