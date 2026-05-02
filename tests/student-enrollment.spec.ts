@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAs, runId, createTestCourse } from './helpers';
+import { loginAs, runId, createTestCourse, selectTime } from './helpers';
 
 // ─── Browse Courses ──────────────────────────────────────────────────────────
 
@@ -53,8 +53,8 @@ test.describe('Student — browse courses', () => {
     await adminPage.getByLabel('Title Override').fill(title);
     await adminPage.getByLabel('Capacity').fill('4');
     await adminPage.locator('input[type="date"]').fill('2020-06-01');
-    await adminPage.locator('input[type="time"]').first().fill('09:00');
-    await adminPage.locator('input[type="time"]').nth(1).fill('17:00');
+    await selectTime(adminPage, 'session_start_0', '09:00');
+    await selectTime(adminPage, 'session_end_0', '17:00');
     await adminPage.locator('section').filter({ hasText: 'Sessions' }).getByPlaceholder(/Dock A/).fill('Edgewater Park');
     await adminPage.getByRole('button', { name: 'Create Course' }).click({ force: true });
     await adminPage.waitForURL(/\/admin\/courses\/[0-9a-f-]+$/, { timeout: 10000 });
@@ -148,9 +148,9 @@ test.describe('Student — capacity enforcement', () => {
       const jordanPage = await jordanCtx.newPage();
       await loginAs(jordanPage, 'jordan@ltsc.test', '/student/dashboard');
       await jordanPage.goto(`/student/courses/${courseId}`);
-      const fullBtn = jordanPage.getByRole('button', { name: 'Course Full' });
-      await expect(fullBtn).toBeVisible();
-      await expect(fullBtn).toBeDisabled();
+      // Per 5.7: full course replaces "Course Full" disabled button with "Join waitlist" CTA.
+      await expect(jordanPage.getByRole('button', { name: 'Join waitlist' })).toBeVisible();
+      await expect(jordanPage.getByRole('button', { name: 'Register & Pay' })).not.toBeVisible();
     } finally {
       await jordanCtx.close();
     }

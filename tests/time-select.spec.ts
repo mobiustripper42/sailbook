@@ -3,6 +3,8 @@ import { loginAs, runId } from './helpers'
 
 test.describe('TimeSelect — add session form', () => {
   test('admin can set start and end time via dropdowns and save session', async ({ page }) => {
+    // Asserts on Location/Time table cells which are `hidden md:table-cell` at 375px.
+    test.skip(test.info().project.name === 'mobile', 'asserts on columns hidden at 375px')
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
 
     await page.goto('/admin/courses')
@@ -33,6 +35,7 @@ test.describe('TimeSelect — add session form', () => {
   })
 
   test('admin can edit session time via inline edit row', async ({ page }) => {
+    test.skip(test.info().project.name === 'mobile', 'asserts on columns hidden at 375px')
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
 
     await page.goto('/admin/courses')

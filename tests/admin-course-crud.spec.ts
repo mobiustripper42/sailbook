@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { loginAs, runId } from './helpers';
+import { loginAs, runId, selectTime } from './helpers';
 
 async function loginAsAdmin(page: Page) {
   await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard');
@@ -24,6 +24,7 @@ test.describe('Admin — course type creation', () => {
     await page.getByLabel('Name').fill(typeName);
     await page.getByLabel('Short Code').fill(shortCode);
     await page.getByLabel('Max Students').fill('3');
+    await page.getByLabel('Public URL Slug').fill(`pw-${id.toLowerCase()}`);
 
     await page.getByRole('button', { name: 'Create' }).click();
 
@@ -64,8 +65,8 @@ test.describe('Admin — course creation', () => {
     // CourseForm session inputs are controlled React (no name attrs on visible inputs);
     // locate by type. Hidden inputs carry the name attrs and are updated via state.
     await page.locator('input[type="date"]').fill('2027-09-15');
-    await page.locator('input[type="time"]').first().fill('09:00');
-    await page.locator('input[type="time"]').nth(1).fill('17:00');
+    await selectTime(page, 'session_start_0', '09:00');
+    await selectTime(page, 'session_end_0', '17:00');
     await page.locator('section').filter({ hasText: 'Sessions' }).getByPlaceholder(/Dock A/).fill('Edgewater Park');
 
     const createBtn = page.getByRole('button', { name: 'Create Course' });
@@ -117,8 +118,8 @@ test.describe('Admin — add session to existing course', () => {
 
     // Fill date, start, end, location
     await page.locator('input[name="date"]').fill('2027-10-20');
-    await page.locator('input[name="start_time"]').fill('08:00');
-    await page.locator('input[name="end_time"]').fill('12:00');
+    await selectTime(page, 'start_time', '08:00');
+    await selectTime(page, 'end_time', '12:00');
     await page.locator('input[name="location"]').fill(location);
 
     await page.getByRole('button', { name: 'Add Session' }).click({ force: true });
@@ -248,8 +249,8 @@ test.describe('Admin — course status transitions', () => {
     await page.getByLabel('Course Type').click();
     await page.getByRole('option', { name: /ASA 101.*Basic Keelboat/ }).click();
     await page.locator('input[type="date"]').fill('2028-06-01');
-    await page.locator('input[type="time"]').first().fill('09:00');
-    await page.locator('input[type="time"]').nth(1).fill('17:00');
+    await selectTime(page, 'session_start_0', '09:00');
+    await selectTime(page, 'session_end_0', '17:00');
     const createBtn = page.getByRole('button', { name: 'Create Course' });
     await createBtn.scrollIntoViewIfNeeded();
     await createBtn.click();

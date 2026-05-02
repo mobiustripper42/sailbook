@@ -34,6 +34,31 @@ export function runId(): string {
 }
 
 /**
+ * Drives the TimeSelect component (two shadcn Select dropdowns wrapping a
+ * hidden input) by hidden-input `name`. Use this instead of `.fill()` on
+ * `input[type="time"]` — those native inputs were replaced in 6.13.
+ *
+ * Minutes snap to 15-minute intervals (00, 15, 30, 45). Other values throw.
+ */
+export async function selectTime(page: Page, name: string, hhmm: string): Promise<void> {
+  const [hStr, mStr] = hhmm.split(':');
+  const hour = parseInt(hStr, 10);
+  const minute = parseInt(mStr, 10);
+  if (![0, 15, 30, 45].includes(minute)) {
+    throw new Error(`selectTime: minute must be 0/15/30/45, got ${minute}`);
+  }
+  const hourLabel =
+    hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`;
+  const minuteLabel = String(minute).padStart(2, '0');
+
+  const wrapper = page.locator(`input[type="hidden"][name="${name}"]`).locator('..');
+  await wrapper.locator('button[role="combobox"]').first().click();
+  await page.getByRole('option', { name: hourLabel, exact: true }).click();
+  await wrapper.locator('button[role="combobox"]').nth(1).click();
+  await page.getByRole('option', { name: minuteLabel, exact: true }).click();
+}
+
+/**
  * Creates a test course via admin UI and publishes it. Returns the course UUID.
  * Requires `page` to be authenticated as an admin, or will log in as pw_admin.
  *
@@ -61,8 +86,8 @@ export async function createTestCourse(
 
   // Far-future date so the session never counts as past
   await page.locator('input[type="date"]').fill('2027-09-15');
-  await page.locator('input[type="time"]').first().fill('09:00');
-  await page.locator('input[type="time"]').nth(1).fill('17:00');
+  await selectTime(page, 'session_start_0', '09:00');
+  await selectTime(page, 'session_end_0', '17:00');
   await page.locator('section').filter({ hasText: 'Sessions' }).getByPlaceholder(/Dock A/).fill('Edgewater Park');
 
   await page.getByRole('button', { name: 'Create Course' }).click({ force: true });
