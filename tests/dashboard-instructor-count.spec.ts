@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { loginAs, runId, selectTime } from './helpers'
+import { loginAs, runId, selectTime, clickCourseAction } from './helpers'
 
 test.describe('Admin — dashboard instructor count', () => {
   test.beforeEach(async ({ page }) => {
@@ -42,8 +42,8 @@ test.describe('Admin — dashboard instructor count', () => {
       .fill('Test Marina')
     await page.getByRole('button', { name: 'Create Course' }).click({ force: true })
     await page.waitForURL(/\/admin\/courses\/[0-9a-f-]+$/, { timeout: 10000 })
-    await page.getByRole('button', { name: 'Publish' }).click()
-    await expect(page.getByRole('button', { name: 'Mark Completed' })).toBeVisible({ timeout: 10000 })
+    await clickCourseAction(page, 'Publish')
+    await expect(page.getByText('active')).toBeVisible({ timeout: 10000 })
 
     await page.goto('/admin/dashboard')
     const newCount = parseInt(
@@ -61,7 +61,9 @@ test.describe('Admin — dashboard instructor count', () => {
     test.skip(test.info().project.name === 'mobile', 'Instructor column hidden on mobile — select not visible')
     // Seed sessions all omit instructor_id (NULL) — navigate to any course with sessions
     await page.goto('/admin/courses/c1000000-0000-0000-0000-000000000001')
-    // The session row renders a SessionInstructorSelect — trigger should show "Course default"
-    await expect(page.getByText('Course default').first()).toBeVisible()
+    // The session row renders a SessionInstructorSelect — trigger should show "Course default".
+    // After 6.24 the select also renders inside the mobile card (md:hidden) — scope to the
+    // visible desktop table to avoid matching the hidden mobile instance.
+    await expect(page.locator('table').getByText('Course default').first()).toBeVisible()
   })
 })

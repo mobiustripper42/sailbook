@@ -121,7 +121,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             {course.price != null && ` · $${course.price}`}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2 sm:shrink-0">
+        <div className="flex items-center gap-2 sm:shrink-0">
           <Button variant="ghost" asChild>
             <Link href={`/admin/courses/${id}/edit`}>Edit</Link>
           </Button>
