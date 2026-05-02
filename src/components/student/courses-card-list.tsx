@@ -123,17 +123,15 @@ export function CoursesCardList({ courses }: { courses: CourseCardData[] }) {
               </div>
             </CardContent>
             <CardFooter>
-              {!isEnrolled && c.isFull ? (
-                <Button className="w-full" disabled>
-                  Course Full
-                </Button>
-              ) : (
-                <Button asChild className="w-full">
-                  <Link href={`/student/courses/${c.id}`}>
-                    {isEnrolled ? 'View' : 'View & Enroll'}
-                  </Link>
-                </Button>
-              )}
+              <Button asChild className="w-full" variant={!isEnrolled && c.isFull ? 'outline' : 'default'}>
+                <Link href={`/student/courses/${c.id}`}>
+                  {isEnrolled
+                    ? 'View'
+                    : c.isFull
+                      ? 'Join waitlist'
+                      : 'View & Enroll'}
+                </Link>
+              </Button>
             </CardFooter>
           </Card>
         )
