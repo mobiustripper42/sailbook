@@ -8,6 +8,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 
+type ExperienceCode = {
+  value: string
+  label: string
+  description: string | null
+}
+
 type Profile = {
   id: string
   first_name: string
@@ -18,14 +24,19 @@ type Profile = {
   is_instructor: boolean
   is_student: boolean
   is_active: boolean
+  asa_number?: string | null
+  experience_level?: string | null
+  is_member?: boolean
 }
 
 export default function UserEditForm({
   profile,
   isSelf,
+  experienceCodes = [],
 }: {
   profile: Profile
   isSelf: boolean
+  experienceCodes?: ExperienceCode[]
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -40,9 +51,19 @@ export default function UserEditForm({
   const [isAdmin, setIsAdmin] = useState(profile.is_admin)
   const [isInstructor, setIsInstructor] = useState(profile.is_instructor)
   const [isStudent, setIsStudent] = useState(profile.is_student)
+  const [asaNumber, setAsaNumber] = useState(profile.asa_number ?? '')
+  const [experienceLevel, setExperienceLevel] = useState(profile.experience_level ?? '—')
+  const [isMember, setIsMember] = useState(profile.is_member ?? false)
 
   function handleSubmit(formData: FormData) {
     setError(null)
+
+    if (profile.is_instructor && profile.is_active && formData.get('is_active') === 'false') {
+      if (!window.confirm('Deactivating this instructor will remove them from all assigned courses and sessions. Continue?')) {
+        return
+      }
+    }
+
     startTransition(async () => {
       const result = await updateUserProfile(formData)
       if (result?.error) {
@@ -63,9 +84,8 @@ export default function UserEditForm({
         </p>
       )}
 
-      {/* All */}
       <div className="space-y-4">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">All</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Profile</h2>
 
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
@@ -106,15 +126,59 @@ export default function UserEditForm({
 
       <hr />
 
-      {/* Instructor */}
-      <div className="space-y-4">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Instructor</h2>
-        <p className="text-sm text-muted-foreground">Credentials and certifications — coming in V2.</p>
-      </div>
+      {isStudent && (
+        <>
+          <input type="hidden" name="has_student_fields" value="true" />
+          <div className="space-y-4">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Student</h2>
 
-      <hr />
+            <div className="space-y-2">
+              <Label htmlFor="asa_number">ASA Number</Label>
+              <Input
+                id="asa_number"
+                name="asa_number"
+                value={asaNumber}
+                onChange={(e) => setAsaNumber(e.target.value)}
+                placeholder="Optional"
+                maxLength={20}
+              />
+            </div>
 
-      {/* Roles */}
+            <div className="space-y-2">
+              <Label htmlFor="experience_level">Experience Level</Label>
+              <select
+                id="experience_level"
+                name="experience_level"
+                value={experienceLevel}
+                onChange={(e) => setExperienceLevel(e.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="—">Not set</option>
+                {experienceCodes.map((code) => (
+                  <option key={code.value} value={code.value}>
+                    {code.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="is_member"
+                name="is_member"
+                checked={isMember}
+                onChange={(e) => setIsMember(e.target.checked)}
+                className="h-4 w-4 rounded border border-input accent-primary"
+              />
+              <Label htmlFor="is_member" className="cursor-pointer">Simply Sailing Member (member pricing at checkout)</Label>
+            </div>
+          </div>
+
+          <hr />
+        </>
+      )}
+
       <div className="space-y-4">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Roles</h2>
 
