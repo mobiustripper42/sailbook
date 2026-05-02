@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { loginAs, runId, selectTime } from './helpers';
+import { loginAs, runId, selectTime, clickCourseAction } from './helpers';
 
 async function loginAsAdmin(page: Page) {
   await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard');
@@ -76,9 +76,11 @@ test.describe('Admin — course creation', () => {
     // Should redirect to /admin/courses/[id]
     await expect(page).toHaveURL(/\/admin\/courses\/[0-9a-f-]+$/);
 
-    // Course detail page should show the session we created
+    // Course detail page should show the session we created.
+    // After 6.24 the location renders in both the mobile card list (md:hidden)
+    // and the desktop table — assert against the visible (desktop) instance.
     await expect(page.getByRole('cell', { name: /Sep.*15|Tue.*Sep/ })).toBeVisible();
-    await expect(page.getByText('Edgewater Park')).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'Edgewater Park' })).toBeVisible();
   });
 
   test('redirects to /admin/course-types/new when no course types exist — skipped (seed has types)', async () => {
@@ -259,19 +261,17 @@ test.describe('Admin — course status transitions', () => {
     await expect(page).toHaveURL(/\/admin\/courses\/[0-9a-f-]+$/, { timeout: 10000 });
     await expect(page.getByText('draft')).toBeVisible();
 
-    // Publish the course
+    // Publish the course (status transitions live behind the ⋯ menu — DEC-028)
     page.on('dialog', (d) => d.accept());
-    await page.getByRole('button', { name: 'Publish' }).click();
+    await clickCourseAction(page, 'Publish');
 
-    // Badge should update to "active" and Revert to Draft button should appear
+    // Badge should update to "active"
     await expect(page.getByText('active')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByRole('button', { name: 'Revert to Draft' })).toBeVisible();
 
-    // Revert back to draft
-    await page.getByRole('button', { name: 'Revert to Draft' }).click();
+    // Revert back to draft via the menu
+    await clickCourseAction(page, 'Revert to Draft');
 
-    // Badge should return to "draft" and Publish button should reappear
+    // Badge should return to "draft"
     await expect(page.getByText('draft')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByRole('button', { name: 'Publish' })).toBeVisible();
   });
 });

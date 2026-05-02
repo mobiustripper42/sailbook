@@ -182,7 +182,7 @@ export default function SessionRow({
       {isEditing && (
         <TableRow>
           <TableCell colSpan={6} className="bg-muted/30">
-            <form onSubmit={handleSubmit} className="space-y-3 py-2" onChange={() => setIsDirty(true)}>
+            <form onSubmit={handleSubmit} className="space-y-3" onChange={() => setIsDirty(true)}>
               {editError && <p className="text-sm text-destructive">{editError}</p>}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <div className="col-span-2 sm:col-span-1 space-y-1.5">

@@ -152,6 +152,13 @@
 **What `is_drop_in` gates:** Student-facing callout ("pay $X now, balance to captain on the day"), admin "Drop-in" badge on course detail. Not the payment flow — the hold amount is just the course price.
 **Revisit if:** Open Sailing moves to a season-pass or multi-session-booking model.
 
+## DEC-028: Page-header actions — visible primary + `•••` overflow menu (2026-05-02)
+**Decision:** When a page header has more than two actions, keep the most-frequent action as a visible button and collapse the rest into a `•••` `DropdownMenu` trigger (matching the row-level pattern in `SessionRow`/`SessionCardItem`). No labeled "Actions" trigger; no shared `PageActionsMenu` component until a second page needs one.
+**Why:** Four buttons in a header wrap awkwardly at narrow desktop widths (~1208px with long titles) and feel heavy on mobile. Keeping the daily action visible preserves discoverability for the 90% case; consistency with existing row-level `•••` menus avoids introducing a second overflow idiom.
+**First use:** `/admin/courses/[id]` — Edit visible, status transitions (Publish / Revert to Draft / Mark Completed / Cancel Course) in menu. @architect reviewed and approved.
+**Test pattern:** Status transitions are no longer queryable as buttons. Use the `clickCourseAction(page, name)` helper in `tests/helpers.ts` which opens the menu, clicks the menu item, and waits for the trigger to re-enable after the server action.
+**Revisit if:** A second page-header collapses actions into a menu — extract a shared `PageActionsMenu` (or equivalent) component instead of inlining the DropdownMenu twice.
+
 ## V2 Decisions (to be resolved during build)
 
 | ID | Decision | When | Who | Status |

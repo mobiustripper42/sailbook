@@ -98,12 +98,33 @@ export async function createTestCourse(
   const courseId = match[1];
 
   // Courses start as draft — publish to make visible to students.
-  // After the server action completes, the page re-renders: Publish disappears,
-  // Mark Completed appears.
-  await page.getByRole('button', { name: 'Publish' }).click();
-  await expect(page.getByRole('button', { name: 'Mark Completed' })).toBeVisible({ timeout: 10000 });
+  // Status transitions live behind the course actions menu (DEC-028).
+  await clickCourseAction(page, 'Publish');
 
   return courseId;
+}
+
+/**
+ * Opens the course-detail page-header `⋯` menu and clicks the named status
+ * transition (Publish / Revert to Draft / Mark Completed / Cancel Course),
+ * then waits for the server action to complete by watching for the menu to
+ * close and the trigger to be re-enabled.
+ *
+ * Per DEC-028, status transitions are no longer visible buttons — this helper
+ * is the canonical way to drive them in tests. Cancel/Revert/Complete prompt a
+ * `window.confirm`; tests using those should accept the dialog before calling
+ * (or use `page.on('dialog', d => d.accept())`).
+ */
+export async function clickCourseAction(
+  page: Page,
+  action: 'Publish' | 'Revert to Draft' | 'Mark Completed' | 'Cancel Course',
+): Promise<void> {
+  const trigger = page.getByRole('button', { name: 'Course actions' });
+  await trigger.click();
+  await page.getByRole('menuitem', { name: action }).click();
+  // Server action runs in a transition → trigger goes disabled, then re-enabled
+  // when the page re-renders. Wait for the trigger to be tappable again.
+  await expect(trigger).toBeEnabled({ timeout: 10000 });
 }
 
 /**

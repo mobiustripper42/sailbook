@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAs, runId, createTestCourse, selectTime } from './helpers';
+import { loginAs, runId, createTestCourse, selectTime, clickCourseAction } from './helpers';
 
 // ─── Browse Courses ──────────────────────────────────────────────────────────
 
@@ -58,8 +58,8 @@ test.describe('Student — browse courses', () => {
     await adminPage.locator('section').filter({ hasText: 'Sessions' }).getByPlaceholder(/Dock A/).fill('Edgewater Park');
     await adminPage.getByRole('button', { name: 'Create Course' }).click({ force: true });
     await adminPage.waitForURL(/\/admin\/courses\/[0-9a-f-]+$/, { timeout: 10000 });
-    await adminPage.getByRole('button', { name: 'Publish' }).click();
-    await expect(adminPage.getByRole('button', { name: 'Mark Completed' })).toBeVisible({ timeout: 10000 });
+    await clickCourseAction(adminPage, 'Publish');
+    await expect(adminPage.getByText('active')).toBeVisible({ timeout: 10000 });
     await adminCtx.close();
 
     // Student browse page must not show the past course

@@ -14,6 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import AddSessionForm from '@/components/admin/add-session-form'
 import SessionRow from '@/components/admin/session-row'
+import SessionCardItem from '@/components/admin/session-card-item'
 import CourseStatusActions from '@/components/admin/course-status-actions'
 import EnrollmentActions from '@/components/admin/enrollment-actions'
 import AdminEnrollStudentPanel from '@/components/admin/admin-enroll-student-panel'
@@ -101,7 +102,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm text-muted-foreground mb-1">
             <Link href="/admin/courses" className="hover:underline">Courses</Link>
@@ -120,7 +121,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             {course.price != null && ` · $${course.price}`}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 sm:shrink-0">
           <Button variant="ghost" asChild>
             <Link href={`/admin/courses/${id}/edit`}>Edit</Link>
           </Button>
@@ -140,42 +141,66 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           {sessions?.length === 0 ? (
             <p className="px-6 py-4 text-sm text-muted-foreground">No sessions yet.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="hidden sm:table-cell">Time</TableHead>
-                    <TableHead className="hidden md:table-cell">Location</TableHead>
-                    <TableHead className="hidden sm:table-cell">Instructor</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-16" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sessions?.map((s) => (
-                    <SessionRow
-                      key={s.id}
-                      session={{
-                        id: s.id,
-                        date: s.date,
-                        start_time: s.start_time,
-                        end_time: s.end_time,
-                        location: s.location,
-                        instructor_id: s.instructor_id,
-                        status: s.status as 'scheduled' | 'completed' | 'cancelled',
-                        cancel_reason: s.cancel_reason,
-                        instructor: s.instructor as { first_name: string; last_name: string } | null,
-                      }}
-                      courseId={id}
-                      instructors={instructors ?? []}
-                      missedCount={makeupCounts.get(s.id)?.missed ?? 0}
-                      linkedCount={makeupCounts.get(s.id)?.linked ?? 0}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <>
+              <div className="md:hidden px-4 pt-3 pb-2 space-y-2">
+                {sessions?.map((s) => (
+                  <SessionCardItem
+                    key={s.id}
+                    session={{
+                      id: s.id,
+                      date: s.date,
+                      start_time: s.start_time,
+                      end_time: s.end_time,
+                      location: s.location,
+                      instructor_id: s.instructor_id,
+                      status: s.status as 'scheduled' | 'completed' | 'cancelled',
+                      cancel_reason: s.cancel_reason,
+                      instructor: s.instructor as { first_name: string; last_name: string } | null,
+                    }}
+                    courseId={id}
+                    instructors={instructors ?? []}
+                    missedCount={makeupCounts.get(s.id)?.missed ?? 0}
+                    linkedCount={makeupCounts.get(s.id)?.linked ?? 0}
+                  />
+                ))}
+              </div>
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="hidden sm:table-cell">Time</TableHead>
+                      <TableHead className="hidden md:table-cell">Location</TableHead>
+                      <TableHead className="hidden sm:table-cell">Instructor</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="w-16" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sessions?.map((s) => (
+                      <SessionRow
+                        key={s.id}
+                        session={{
+                          id: s.id,
+                          date: s.date,
+                          start_time: s.start_time,
+                          end_time: s.end_time,
+                          location: s.location,
+                          instructor_id: s.instructor_id,
+                          status: s.status as 'scheduled' | 'completed' | 'cancelled',
+                          cancel_reason: s.cancel_reason,
+                          instructor: s.instructor as { first_name: string; last_name: string } | null,
+                        }}
+                        courseId={id}
+                        instructors={instructors ?? []}
+                        missedCount={makeupCounts.get(s.id)?.missed ?? 0}
+                        linkedCount={makeupCounts.get(s.id)?.linked ?? 0}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
           <div className="border-t px-6 py-4">
             <AddSessionForm courseId={id} />
@@ -196,6 +221,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           {enrollments?.length === 0 ? (
             <p className="px-6 py-4 text-sm text-muted-foreground">No enrollments yet.</p>
           ) : (
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -265,6 +291,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 })}
               </TableBody>
             </Table>
+            </div>
           )}
         </CardContent>
       </Card>

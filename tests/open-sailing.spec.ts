@@ -8,7 +8,7 @@
  */
 
 import { test, expect } from '@playwright/test'
-import { loginAs, runId, selectTime } from './helpers'
+import { loginAs, runId, selectTime, clickCourseAction } from './helpers'
 
 test.describe('Open Sailing drop-in', () => {
   test.describe.configure({ mode: 'serial' })
@@ -45,8 +45,8 @@ test.describe('Open Sailing drop-in', () => {
       if (!match) throw new Error('Could not extract course ID from URL')
       courseId = match[1]
 
-      await page.getByRole('button', { name: 'Publish' }).click()
-      await expect(page.getByRole('button', { name: 'Mark Completed' })).toBeVisible({ timeout: 10000 })
+      await clickCourseAction(page, 'Publish')
+      await expect(page.getByText('active')).toBeVisible({ timeout: 10000 })
     } finally {
       await ctx.close()
     }

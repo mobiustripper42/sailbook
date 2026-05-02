@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import type { Browser } from '@playwright/test';
-import { loginAs, runId, selectTime } from './helpers';
+import { loginAs, runId, selectTime, clickCourseAction } from './helpers';
 
 /**
  * Creates a test course via admin UI with pw_instructor assigned, then enrolls
@@ -54,8 +54,8 @@ async function createInstructorCourse(
     sessionId = sessionIdAttr;
 
     // Publish the course
-    await adminPage.getByRole('button', { name: 'Publish' }).click();
-    await expect(adminPage.getByRole('button', { name: 'Mark Completed' })).toBeVisible({ timeout: 10000 });
+    await clickCourseAction(adminPage, 'Publish');
+    await expect(adminPage.getByText('active')).toBeVisible({ timeout: 10000 });
   } finally {
     await adminCtx.close();
   }

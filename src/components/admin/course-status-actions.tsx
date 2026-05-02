@@ -3,6 +3,13 @@
 import { useState, useTransition } from 'react'
 import { publishCourse, completeCourse, cancelCourse, revertToDraft } from '@/actions/courses'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export default function CourseStatusActions({ id, status }: { id: string; status: string }) {
   const [pending, startTransition] = useTransition()
@@ -19,46 +26,51 @@ export default function CourseStatusActions({ id, status }: { id: string; status
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex gap-2">
-        {status === 'draft' && (
-          <Button onClick={() => handle(() => publishCourse(id))} disabled={pending}>
-            {pending
-              ? <><span className="mr-1 inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />Publishing…</>
-              : 'Publish'}
+    <div className="flex flex-col items-end gap-1">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" disabled={pending} aria-label="Course actions">
+            •••
           </Button>
-        )}
-        {status === 'active' && (
-          <>
-            <Button variant="ghost" onClick={() => {
-              if (!window.confirm('Revert this course to Draft? It will no longer be visible to students.')) return
-              handle(() => revertToDraft(id))
-            }} disabled={pending}>
-              {pending
-                ? <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                : 'Revert to Draft'}
-            </Button>
-            <Button variant="ghost" onClick={() => {
-              if (!window.confirm('Mark this course as completed?')) return
-              handle(() => completeCourse(id))
-            }} disabled={pending}>
-              {pending
-                ? <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                : 'Mark Completed'}
-            </Button>
-          </>
-        )}
-        {status !== 'cancelled' && (
-          <Button variant="ghost" onClick={() => {
-            if (!window.confirm('Cancel this course? This cannot be undone easily.')) return
-            handle(() => cancelCourse(id))
-          }} disabled={pending}>
-            {pending
-              ? <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              : 'Cancel Course'}
-          </Button>
-        )}
-      </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {status === 'draft' && (
+            <DropdownMenuItem onSelect={() => handle(() => publishCourse(id))}>
+              Publish
+            </DropdownMenuItem>
+          )}
+          {status === 'active' && (
+            <>
+              <DropdownMenuItem
+                onSelect={() => {
+                  if (!window.confirm('Revert this course to Draft? It will no longer be visible to students.')) return
+                  handle(() => revertToDraft(id))
+                }}
+              >
+                Revert to Draft
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => {
+                  if (!window.confirm('Mark this course as completed?')) return
+                  handle(() => completeCourse(id))
+                }}
+              >
+                Mark Completed
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+          <DropdownMenuItem
+            variant="destructive"
+            onSelect={() => {
+              if (!window.confirm('Cancel this course? This cannot be undone easily.')) return
+              handle(() => cancelCourse(id))
+            }}
+          >
+            Cancel Course
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   )
