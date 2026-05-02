@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 120 — 2026-05-02 02:23 [open]
+
 ## Session 119 — 2026-05-01 21:53–2026-05-02 02:03 (4.17 hrs)
 **Duration:** 4.17 hrs | **Points:** 8 (5.7)
 **Task:** 5.7 — Waitlist (full course → join → notify on opening)
