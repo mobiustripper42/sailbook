@@ -50,7 +50,7 @@ export default function TimeSelect({ name, value, onChange }: Props) {
     <div className="flex gap-1 items-center min-w-0">
       <input type="hidden" name={name} value={safeValue} />
       <Select value={String(hour)} onValueChange={setHour}>
-        <SelectTrigger className="flex-1 min-w-0">
+        <SelectTrigger className="flex-1 min-w-0" aria-label="Hour">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -62,7 +62,7 @@ export default function TimeSelect({ name, value, onChange }: Props) {
         </SelectContent>
       </Select>
       <Select value={String(minute)} onValueChange={setMinute}>
-        <SelectTrigger className="w-[72px] shrink-0">
+        <SelectTrigger className="w-[72px] shrink-0" aria-label="Minute">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

@@ -40,7 +40,7 @@ export default function DevLoginHelper() {
         <div className="flex-1 border-t" />
       </div>
       <Select onValueChange={handleSelect}>
-        <SelectTrigger className="w-full text-xs h-8">
+        <SelectTrigger className="w-full text-xs h-8" aria-label="Quick login as a seed user">
           <SelectValue placeholder="Quick login as…" />
         </SelectTrigger>
         <SelectContent>
