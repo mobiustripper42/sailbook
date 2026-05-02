@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 122 — 2026-05-02 12:55 [open]
+
 ## Session 121 — 2026-05-02 03:45–11:07 (1.33 hrs, 6 hrs overnight subtracted)
 **Duration:** 1.33 hrs | **Points:** 0 (test debt — unscoped, no plan task)
 **Task:** Test fixes — full Playwright suite green after 6.13 + 5.7
