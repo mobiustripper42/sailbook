@@ -3,7 +3,35 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 121 — 2026-05-02 03:45 [open]
+## Session 121 — 2026-05-02 03:45–11:07 (7.33 hrs)
+**Duration:** 7.33 hrs | **Points:** 0 (test debt — unscoped, no plan task)
+**Task:** Test fixes — full Playwright suite green after 6.13 + 5.7
+
+**Completed:**
+- **Triaged 83-failure full suite** down to **0 failed / 444 passed**. PR #13, merged.
+  - Root cause: 6.13 swapped `<input type="time">` for shadcn Select dropdowns inside a `TimeSelect` wrapper; 14 test call-sites still targeted the old selector, hanging `.fill()` for 30s and timing out beforeAll hooks across the suite.
+  - New `selectTime(page, name, 'HH:MM')` helper in `tests/helpers.ts` — locates the TimeSelect's hidden input by name, walks up to the wrapper, drives the two combobox triggers.
+  - 14 stale call-sites replaced across `tests/{helpers,instructor-views,open-sailing,admin-course-crud,dashboard-instructor-count,student-enrollment,instructor-cascade}.spec.ts`. Course-form uses `session_start_${index}`/`session_end_${index}`; standalone forms use `start_time`/`end_time`.
+  - `tests/admin-course-crud.spec.ts:15` fills the now-required Public URL Slug field added in 6.19.
+  - 3 "Course Full" assertions updated to "Join waitlist" — UX changed in 5.7. Sites: `student-enrollment:125`, `checkout:44`, `enrollment-hold:76`.
+  - `tests/time-select.spec.ts` skips on mobile — both tests assert on `hidden md:table-cell` columns. Tests were validated desktop-only in s120 but never gated.
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification pending (carryover from s102).
+
+**Next Steps:**
+1. Per code review: add a click-through assertion in `checkout.spec.ts` that "Join waitlist" actually navigates to the waitlist flow (not checkout) — closes the gap left by trading `toBeDisabled()` for a presence check. Defensive `expect(buttons).toHaveCount(2)` in `selectTime` also worth folding in.
+2. Pick next Phase 6 task — strongest candidates remain **6.24** (course detail mobile rewrite, 5 pts) or **6.14** (consolidate profile edits, 2 pts).
+
+**Context:**
+- **`tests/makeup-assignment-notice.spec.ts:18` flake confirmed**: failed in the parallel suite, passed 3/3 in isolation. Documented Turbopack mock-buffer race from s119 — server-action notification triggers don't bridge into the API-route module graph under contention. Not a real bug; safe to retry on transient failure.
+- **The full Playwright suite must be run after any UI form change** — targeted spec runs miss cross-cutting selector regressions like 6.13. Time-picker passed in s120 because only `time-select.spec.ts` was run; the full suite would have caught the 75-test cascade immediately.
+- TimeSelect hidden-input names: `start_time`/`end_time` for `add-session-form` and inline `session-row`; `session_start_${index}`/`session_end_${index}` for the multi-session `course-form`.
+- 7.33 hr wall clock includes ~35 min of background Playwright runs and an autonomous-loop window — actual hands-on-keyboard time was lower.
+- PR #13: https://github.com/mobiustripper42/sailbook/pull/13
+
+**Code Review:** Two non-blocking findings carried forward in PR body: (1) waitlist assertions traded a behavioral guarantee for a presence check, (2) `selectTime` walk-up via `.locator('..')` is fragile to wrapper changes — count assertion would fail loudly. Plus optional polish on hour-range validation and a mobile-only TimeSelect render check.
 
 ## Session 120 — 2026-05-02 02:23–03:39 (1.25 hrs)
 **Duration:** 1.25 hrs | **Points:** 3 (6.13)
