@@ -33,6 +33,14 @@ export default function UserEditForm({
   const [isDirty, setIsDirty] = useState(false)
   const { confirmDiscard } = useUnsavedChanges(isDirty)
 
+  const [firstName, setFirstName] = useState(profile.first_name)
+  const [lastName, setLastName] = useState(profile.last_name)
+  const [phone, setPhone] = useState(profile.phone ?? '')
+  const [isActive, setIsActive] = useState(profile.is_active ? 'true' : 'false')
+  const [isAdmin, setIsAdmin] = useState(profile.is_admin)
+  const [isInstructor, setIsInstructor] = useState(profile.is_instructor)
+  const [isStudent, setIsStudent] = useState(profile.is_student)
+
   function handleSubmit(formData: FormData) {
     setError(null)
     startTransition(async () => {
@@ -68,17 +76,17 @@ export default function UserEditForm({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="first_name">First Name</Label>
-            <Input id="first_name" name="first_name" defaultValue={profile.first_name} required />
+            <Input id="first_name" name="first_name" required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="last_name">Last Name</Label>
-            <Input id="last_name" name="last_name" defaultValue={profile.last_name} required />
+            <Input id="last_name" name="last_name" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
           </div>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="phone">Phone</Label>
-          <Input id="phone" name="phone" defaultValue={profile.phone ?? ''} />
+          <Input id="phone" name="phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
 
         <div className="space-y-2">
@@ -86,7 +94,8 @@ export default function UserEditForm({
           <select
             id="is_active"
             name="is_active"
-            defaultValue={profile.is_active ? 'true' : 'false'}
+            value={isActive}
+            onChange={(e) => setIsActive(e.target.value)}
             className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <option value="true">Active</option>
@@ -115,7 +124,8 @@ export default function UserEditForm({
               type="checkbox"
               id="is_admin"
               name="is_admin"
-              defaultChecked={profile.is_admin}
+              checked={isAdmin}
+              onChange={(e) => setIsAdmin(e.target.checked)}
               disabled={isSelf}
               className="h-4 w-4 rounded border-input accent-foreground"
             />
@@ -132,7 +142,8 @@ export default function UserEditForm({
               type="checkbox"
               id="is_instructor"
               name="is_instructor"
-              defaultChecked={profile.is_instructor}
+              checked={isInstructor}
+              onChange={(e) => setIsInstructor(e.target.checked)}
               className="h-4 w-4 rounded border-input accent-foreground"
             />
             <Label htmlFor="is_instructor">Instructor</Label>
@@ -143,7 +154,8 @@ export default function UserEditForm({
               type="checkbox"
               id="is_student"
               name="is_student"
-              defaultChecked={profile.is_student}
+              checked={isStudent}
+              onChange={(e) => setIsStudent(e.target.checked)}
               className="h-4 w-4 rounded border-input accent-foreground"
             />
             <Label htmlFor="is_student">Student</Label>

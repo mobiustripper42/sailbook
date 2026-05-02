@@ -32,6 +32,7 @@ export default function LoginPage() {
 function LoginPageContent() {
   const [state, action, pending] = useActionState(login, null);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next")) ?? undefined;
 
@@ -94,6 +95,8 @@ function LoginPageContent() {
               type="password"
               required
               autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
         </CardContent>

@@ -16,6 +16,8 @@ export default function NotificationPreferencesSection({
     updateStudentNotificationPreferences,
     null,
   )
+  const [sms, setSms] = useState(initialPrefs.sms)
+  const [email, setEmail] = useState(initialPrefs.email)
 
   // Same DEC-015 pattern as the profile form: derive a transient success
   // banner from the pending → idle transition with state=null.
@@ -50,7 +52,8 @@ export default function NotificationPreferencesSection({
             id="student_sms"
             name="student_sms"
             type="checkbox"
-            defaultChecked={initialPrefs.sms}
+            checked={sms}
+            onChange={(e) => setSms(e.target.checked)}
             className="size-4 rounded border-input accent-primary"
           />
           Receive SMS notifications
@@ -63,7 +66,8 @@ export default function NotificationPreferencesSection({
             id="student_email"
             name="student_email"
             type="checkbox"
-            defaultChecked={initialPrefs.email}
+            checked={email}
+            onChange={(e) => setEmail(e.target.checked)}
             className="size-4 rounded border-input accent-primary"
           />
           Receive email notifications

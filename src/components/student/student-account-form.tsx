@@ -43,6 +43,13 @@ export default function StudentAccountForm({
 
   const showSuccess = hasSubmitted && state === null && !pending
 
+  const [firstName, setFirstName] = useState(profile.first_name)
+  const [lastName, setLastName] = useState(profile.last_name)
+  const [phone, setPhone] = useState(profile.phone ?? '')
+  const [asaNumber, setAsaNumber] = useState(profile.asa_number ?? '')
+  const [experienceLevel, setExperienceLevel] = useState(profile.experience_level ?? '')
+  const [instructorNotes, setInstructorNotes] = useState(profile.instructor_notes ?? '')
+
   return (
     <form action={action} className="space-y-5 max-w-md">
       {state && <p className="text-sm text-destructive">{state}</p>}
@@ -54,8 +61,9 @@ export default function StudentAccountForm({
           <Input
             id="first_name"
             name="first_name"
-            defaultValue={profile.first_name}
             required
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
           />
         </div>
         <div className="space-y-2">
@@ -63,8 +71,9 @@ export default function StudentAccountForm({
           <Input
             id="last_name"
             name="last_name"
-            defaultValue={profile.last_name}
             required
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
           />
         </div>
       </div>
@@ -76,7 +85,8 @@ export default function StudentAccountForm({
           name="phone"
           type="tel"
           autoComplete="tel"
-          defaultValue={profile.phone ?? ''}
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
         />
       </div>
 
@@ -85,7 +95,8 @@ export default function StudentAccountForm({
         <Input
           id="asa_number"
           name="asa_number"
-          defaultValue={profile.asa_number ?? ''}
+          value={asaNumber}
+          onChange={(e) => setAsaNumber(e.target.value)}
           placeholder="Optional"
         />
       </div>
@@ -95,7 +106,8 @@ export default function StudentAccountForm({
         <select
           id="experience_level"
           name="experience_level"
-          defaultValue={profile.experience_level ?? ''}
+          value={experienceLevel}
+          onChange={(e) => setExperienceLevel(e.target.value)}
           className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <option value="">Select experience level</option>
@@ -116,7 +128,8 @@ export default function StudentAccountForm({
           id="instructor_notes"
           name="instructor_notes"
           rows={4}
-          defaultValue={profile.instructor_notes ?? ''}
+          value={instructorNotes}
+          onChange={(e) => setInstructorNotes(e.target.value)}
           className="flex w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
           placeholder="Prior sailing experience, medical conditions, seasickness, etc."
         />
