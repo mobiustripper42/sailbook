@@ -297,6 +297,7 @@ Transforms the app from scheduling into a learning management tool.
 - AI season setup agent
 - Admin impersonation mode ("view as student")
 - Full coupon/discount engine (beyond Stripe promotion codes)
+- TimeSelect compact mode at narrow widths — at <432px the hour Select's chevron starts overlapping AM/PM text inside the Edit / Makeup forms (which sit inside the SessionCardItem `border + p-3` wrapper, ~14px less inner width than AddSessionForm at the bottom of the Sessions card). Two paths: (1) tighten the shadcn `SelectTrigger` chevron padding via a TimeSelect-scoped class, or (2) replace the hour shadcn Select with a number-spinner-only component for time fields. ~2 pts. Noted in session 122 — acceptable for V2 launch.
 
 **Cut from V2 in session 109 (2026-04-30 priority pass):**
 - (4.7) Instructor profile expansion — availability field + bio/website link. Andy request.
