@@ -284,6 +284,123 @@ Transforms the app from scheduling into a learning management tool.
 
 ---
 
+## Phase 9: Deployment & Launch
+
+Take the May-4-ready app and put it in front of real students. One-time work; no feature scope. Order matters — items below are grouped and roughly sequenced.
+
+**Target go-live:** 2026-05-04 (Mon) or 2026-05-05 (Tue), Andy's call. Block off ~3 hours for the deploy itself + 24 hours of "stay near the laptop" after.
+
+### A. Pre-Deploy Sanity (do day before)
+
+- [ ] **Branch state.** `main` is green: full Playwright suite passes locally (worker=4) and `supabase test db` clean. Lint clean. No open PRs.
+- [ ] **`docs/SECURITY_AUDIT_V2.md` checklist** items 1–5 reviewed (env-var presence, smoke test plan).
+- [ ] **Walk the app cold.** Browse SailBook in an incognito window as anon → student (register flow) → admin. Ten minutes. Note anything ugly.
+- [ ] **Andy walk-through.** Show Andy the dashboard, courses list, manual-enroll flow, refund flow. Get his "ready" or "wait one more day."
+- [ ] **Backup the dev DB** (if there's anything in it worth keeping). `supabase db dump --local > backup-pre-launch.sql`.
+- [ ] **Tag the launch commit.** `git tag v2.0.0-rc1` on the merge commit you intend to deploy. Push the tag.
+
+### B. Supabase Production Project
+
+- [ ] **Project exists** at supabase.com. Note the project ref (`xxxxx.supabase.co`).
+- [ ] **`supabase db push --project-ref <prod>`** applies all migrations cleanly. Verify with `supabase migration list --project-ref <prod>` — last migration matches local.
+- [ ] **Seed real data.** This is NOT `supabase/seed.sql` (that's test fixtures). Create the real Andy admin account via Supabase Dashboard → Authentication → Users → Add user, then set `is_admin = true` in `profiles` via SQL editor. Same for any real instructors at launch.
+- [ ] **Course types loaded.** Either manually via Andy in the admin UI post-launch, OR pre-load via SQL (preferred so course catalog isn't empty on day 1). At minimum: ASA 101, ASA 103, Open Sailing, any others Andy is offering.
+- [ ] **Auth panel: enable email confirmations.** Dashboard → Authentication → Providers → Email → "Confirm email" ON. (`config.toml` does NOT sync this.)
+- [ ] **Auth panel: custom SMTP (Resend).** Dashboard → Authentication → SMTP Settings: host `smtp.resend.com`, port `587`, user `resend`, pass = Resend API key, sender `info@sailbook.live`, sender name `SailBook`. Send the dashboard test email and verify delivery.
+- [ ] **Auth panel: confirmation email template.** Dashboard → Authentication → Email Templates → "Confirm signup". Subject: "Confirm your SailBook account". Body matches `supabase/templates/confirmation.html`. The `{{ .ConfirmationURL }}` token must be preserved verbatim.
+- [ ] **Auth panel: password policy.** Dashboard → Authentication → Policies: minimum length 12, requirements `lower_upper_letters_digits` (matches `supabase/config.toml`).
+- [ ] **Auth panel: Site URL + Redirect URLs.** Dashboard → Authentication → URL Configuration: Site URL = `https://sailbook.live`, Redirect URLs include `https://sailbook.live/auth/callback`.
+- [ ] **Auth panel: Google OAuth.** Dashboard → Authentication → Providers → Google: enable, paste Client ID + Secret. In Google Cloud Console: add `https://<prod-ref>.supabase.co/auth/v1/callback` to Authorized redirect URIs and `https://sailbook.live` to Authorized JavaScript origins.
+- [ ] **Database backups confirmed.** Dashboard → Database → Backups: point-in-time recovery is enabled (Pro plan only — verify the project tier). If on Free tier, accept the daily-snapshot-only risk and document it.
+
+### C. Stripe Live Mode
+
+- [ ] **Toggle from test → live mode** in the Stripe dashboard.
+- [ ] **Live API keys**: copy `sk_live_*` (secret) and `pk_live_*` (publishable). The live publishable key is NOT used by SailBook (Checkout Sessions are server-only) but Andy may want it for receipts/branding later — note it.
+- [ ] **Webhook endpoint live.** Stripe Dashboard → Developers → Webhooks → Add endpoint: URL `https://sailbook.live/api/webhooks/stripe`, event `checkout.session.completed`. Copy the signing secret (`whsec_*`).
+- [ ] **Tax / receipts.** Decide: are we collecting tax via Stripe Tax? (Probably no for V2 — sailing instruction is service revenue and Andy handles tax separately.) Confirm receipts are enabled with sensible branding (Stripe Dashboard → Settings → Branding).
+- [ ] **Refund test.** Issue a $1 test charge to a real card, refund it through the admin UI. Verify it appears in the Stripe dashboard refunds tab.
+
+### D. Notification Providers
+
+- [ ] **Twilio.** Account is on a paid plan (not trial — trial caps to verified-only numbers). Buy a US local number if not already done. Note the Account SID, Auth Token, and From number.
+- [ ] **Twilio: A2P 10DLC registration.** Required for SMS to US carriers since 2023. Can take days to approve. **Start early or accept that SMS may bounce on day 1 until brand+campaign are approved.** If unapproved, fall back to email-only by setting `TWILIO_AUTH_TOKEN=""` and the trigger code will skip SMS.
+- [ ] **Resend.** Domain `sailbook.live` verified (DNS records added: SPF, DKIM, optionally DMARC). Send a test email from the Resend dashboard to confirm.
+- [ ] **`info@sailbook.live`** is a real address that forwards to Andy. Otherwise users replying to confirmation emails go nowhere.
+
+### E. Vercel Project
+
+- [ ] **Project linked** to the GitHub repo. Production branch = `main`. Deploys auto on merge.
+- [ ] **Custom domain `sailbook.live`** added to project. SSL cert provisioned (automatic via Vercel/Let's Encrypt).
+- [ ] **DNS records** at the registrar: A record for apex `sailbook.live` → Vercel IP, CNAME for `www.sailbook.live` → `cname.vercel-dns.com`. Verify via `dig sailbook.live` resolves to Vercel.
+- [ ] **Plan tier:** Hobby is free but rejects sub-daily cron schedules. The `expire-holds` cron needs at least every-15-min cadence to keep payment holds tight — this requires Pro ($20/mo). Decision: upgrade to Pro, OR move `expire-holds` to a pg_cron job inside Supabase (no Vercel dependency for that one). Prod requires one or the other.
+- [ ] **Cron jobs configured** in `vercel.json` (or Vercel Dashboard → Settings → Cron Jobs):
+  - `/api/cron/expire-holds` — every 15 min (or whatever the configured `hold_minutes` margin allows)
+  - `/api/cron/session-reminders` — daily at ~07:00 local (Andy's tz: America/New_York)
+  - `/api/cron/low-enrollment` — daily at ~08:00 local
+- [ ] **Environment variables** (Vercel Dashboard → Settings → Environment Variables, scope = Production):
+  - `NEXT_PUBLIC_SUPABASE_URL` = prod Supabase URL
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = prod anon key
+  - `SUPABASE_SERVICE_ROLE_KEY` = prod service role key (NEVER on `NEXT_PUBLIC_*`)
+  - `NEXT_PUBLIC_SITE_URL` = `https://sailbook.live`
+  - `STRIPE_SECRET_KEY` = `sk_live_*`
+  - `STRIPE_WEBHOOK_SECRET` = `whsec_*` from production webhook
+  - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`
+  - `RESEND_API_KEY`
+  - `NOTIFICATIONS_ENABLED` = `true`
+  - `CRON_SECRET` = a long random string (generate with `openssl rand -hex 32`); must match the `Authorization: Bearer` header Vercel Cron sends
+  - `NEXT_PUBLIC_DEV_MODE` = unset (or `false`) — controls dev login helper visibility
+  - Sanity: `NODE_ENV` and `VERCEL_ENV` are set automatically by Vercel; do NOT override.
+- [ ] **Trigger production deploy** — push to main or click "Redeploy" on the latest deployment in the dashboard. Watch the build log for errors. First prod build often surfaces issues that local dev hides (case-sensitive imports on Linux, missing peer deps, etc.).
+
+### F. Deploy-Day Smoke Tests (run in this order on the live URL)
+
+- [ ] **`https://sailbook.live` loads** the public landing/courses page without errors.
+- [ ] **Anon → public catalog → course detail → "Register & Pay"** prompts login. Click "Register" → fill form → check the inbox arrives → confirmation link works → lands on the original course page.
+- [ ] **Stripe checkout end-to-end with a real card** ($1 course or use Andy's actual card). After payment: enrollment shows as confirmed, payment row inserted, confirmation email arrives.
+- [ ] **Refund the test charge** via admin UI. Verify Stripe dashboard shows the refund.
+- [ ] **Cancel + restore enrollment** flow exercised end-to-end.
+- [ ] **SMS** (if A2P approved) — student preferences set to SMS, trigger any notification (e.g., admin enrolls them manually with notify=on), SMS arrives within 30 sec.
+- [ ] **Cron live-fire test.** From a terminal: `curl -H "Authorization: Bearer $CRON_SECRET" https://sailbook.live/api/cron/expire-holds` returns `{"expired": N}`. Repeat for `session-reminders` and `low-enrollment`. Watch Vercel Dashboard → Settings → Cron Jobs for the next scheduled tick to confirm Vercel is hitting them too.
+- [ ] **Without the auth header** the same routes return 401. (`curl https://sailbook.live/api/cron/expire-holds`)
+- [ ] **Test API routes blocked.** `curl https://sailbook.live/api/test/enroll` returns 403 (devOnly belt-and-suspenders).
+- [ ] **Mobile.** Open the live URL on Andy's actual phone. Tap through the admin dashboard, instructor dashboard, student calendar. Anything ugly gets logged for Phase X follow-up; anything broken is a hotfix candidate.
+
+### G. Operational Setup
+
+- [ ] **Vercel deploy notifications** wired to Andy's email (Vercel Dashboard → Settings → Notifications) so failed deploys don't go silent.
+- [ ] **Supabase project notifications** for hitting plan limits (rows, bandwidth) configured.
+- [ ] **Stripe email alerts** for refunds + disputes go to Andy.
+- [ ] **Status page bookmarks** for Andy: status.vercel.com, status.supabase.com, status.stripe.com, status.twilio.com, status.resend.com. When something breaks, check these first.
+- [ ] **Logging access.** Vercel Dashboard → Deployments → [latest] → Runtime Logs is the production log surface. Andy doesn't need this; Eric should know where it is.
+- [ ] **Error monitoring (V3 backlog).** No Sentry-style integration yet. For V2 launch, Vercel Function Logs + Supabase logs cover the surface. Add proper error reporting in V3 if/when traffic warrants.
+
+### H. Communications
+
+- [ ] **Andy is briefed** on: how to add a course, how to enroll a student manually, how to issue a refund, how to deactivate an instructor, how the cancellation request flow works, how to read the dashboard tiles. 30-minute sit-down.
+- [ ] **Andy has the credentials** he needs: his admin login, Stripe dashboard access (as team member, not the API key), Resend dashboard, Twilio dashboard (or just Andy's account, his choice).
+- [ ] **Existing students notified** (if migrating from old system). If not — you're starting fresh, then no notification needed; new students discover via Andy's existing channels (LTSC, word of mouth, the public course catalog).
+- [ ] **Eric is reachable** for the first 24-48 hours post-launch. Phone, Slack, whatever. Andy needs a hotline for "the button isn't working."
+
+### I. Rollback Plan
+
+- [ ] **Revert path documented.** If the deploy goes sideways: Vercel Dashboard → Deployments → previous build → "Promote to Production" rolls back the app in <60 sec. The DB does NOT roll back; only the app code does.
+- [ ] **Migration rollback.** If a migration breaks prod, the answer is NOT `git revert` — it's a new forward-only migration that fixes the issue. Have a forward-fix template ready.
+- [ ] **Maintenance mode.** Not implemented. If we need to take the app down for an hour: simplest is to swap Vercel domain to a static "back soon" page, OR set a feature flag in the homepage. Decide which approach + write the procedure now, before you need it at 2am.
+- [ ] **"Oh shit" contact list.** Vercel support, Supabase support (Pro tier only), Stripe support — phone numbers / chat URLs saved somewhere Andy and Eric can both find.
+
+### J. Post-Launch (first 7 days)
+
+- [ ] **Monitor daily** — check Vercel Function Logs for errors, Supabase Database → Query Performance for slow queries, Stripe for failed payments.
+- [ ] **Capture every Andy bug report** as a GitHub issue tagged `launch-week`. Triage: hotfix vs Phase 9.5.
+- [ ] **First V3 priority pass** (the slow week post-launch): D1–D7 from security audit, 5.11/6.18/6.28 from V2 cuts, plus whatever the V3 backlog at the bottom of this file holds.
+
+### K. V2 Final Retrospective
+
+- [ ] After the dust settles (~7 days post-launch), write the final V2 retro in `docs/RETROSPECTIVES.md`. Cover: V2 in aggregate (started Apr 11, shipped May 4 / 5), velocity per phase reconciled, what broke / didn't break in launch week, lessons for V3 cadence.
+
+---
+
 ## V3 Ideas (parked)
 
 - Proxy enrollment ("Who are you enrolling?" — Me / Me + someone / Someone else) — requires shopping cart model
@@ -435,17 +552,4 @@ At the end of every phase:
 
 ## Pre-Launch Checklist
 
-Before go-live (real data, real students):
-
-- [ ] **Vercel cron — live fire test.** The `expire-holds` cron was only tested via curl locally (Hobby tier rejects sub-daily schedules, so `*/1 * * * *` can't be verified in prod without Pro). Before launch: upgrade to Pro or use pg_cron, deploy with a short schedule, watch Vercel dashboard → Settings → Cron Jobs confirm it fires and `expired` count is correct, then set schedule to production value. Do NOT assume curl = prod parity.
-- [ ] Stripe webhook signing secret set in prod env vars
-- [ ] `CRON_SECRET` set in prod env vars (or remove if not needed)
-- [ ] Twilio / Resend credentials set and `NOTIFICATIONS_ENABLED=true`
-- [ ] `supabase db push` applied to prod Supabase project
-- [ ] **Auth: enable email confirmations** in Supabase Dashboard → Authentication → Providers → Email → "Confirm email" on. (config.toml does not sync auth panel settings to remote.)
-- [ ] **Auth: custom SMTP (Resend) configured** in Dashboard → Authentication → SMTP Settings: host `smtp.resend.com`, port `587`, user `resend`, pass = Resend API key, sender `info@sailbook.live`, sender name `SailBook`. Send the dashboard test email to verify.
-- [ ] **Auth: confirmation email template uploaded** in Dashboard → Authentication → Email Templates → "Confirm signup". Subject: "Confirm your SailBook account". Body matches `supabase/templates/confirmation.html`. The `{{ .ConfirmationURL }}` token must be preserved.
-- [ ] **Auth: password policy set** in Dashboard → Authentication → Policies: minimum length 12, requirements `lower_upper_letters_digits`. Match `supabase/config.toml`.
-- [ ] **Auth: Site URL + Redirect URLs** in Dashboard → Authentication → URL Configuration: Site URL = `https://sailbook.live`, Redirect URLs include `https://sailbook.live/auth/callback`.
-- [ ] **Auth: Google OAuth provider** in Dashboard → Authentication → Providers → Google: enable, paste Client ID + Client Secret. In Google Cloud Console, add `https://<prod-supabase-ref>.supabase.co/auth/v1/callback` to Authorized redirect URIs and `https://sailbook.live` to Authorized JavaScript origins.
-- [ ] Smoke test: student registers → confirms email → pays → sees enrollment → admin sees payment status
+Folded into Phase 9 (Deployment & Launch). See above.
