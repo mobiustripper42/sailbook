@@ -9,7 +9,7 @@ const PUBLIC_ROUTES = ['/login', '/register', '/dev', '/forgot-password', '/rese
 // has no session yet at that point and the route handler establishes it.
 // /courses/ is the public LTSC-inbound browse pages (no auth required).
 // /dev/ covers sub-routes like /dev/ltsc (dev-only mock pages).
-const PUBLIC_PREFIXES = ['/invite/', '/auth/', '/courses/', '/dev/']
+const PUBLIC_PREFIXES = ['/invite/', '/auth/', '/courses', '/dev/']
 
 function getPrimaryHome(meta: Record<string, unknown>): string {
   if (meta.is_admin) return '/admin/dashboard'
