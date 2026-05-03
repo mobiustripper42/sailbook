@@ -49,7 +49,7 @@ export default function SessionInstructorSelect({
   return (
     <div className="flex flex-col gap-1">
       <Select value={value} onValueChange={handleChange} disabled={pending}>
-        <SelectTrigger size="sm" className="h-7 text-xs">
+        <SelectTrigger size="sm" className="h-7 text-xs" aria-label="Session instructor">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

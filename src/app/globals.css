@@ -63,7 +63,8 @@
   --secondary: oklch(0.967 0.001 286.375);
   --secondary-foreground: oklch(0.21 0.006 285.885);
   --muted: oklch(0.963 0.002 197.1);
-  --muted-foreground: oklch(0.56 0.021 213.5);
+  /* WCAG AA: needs 4.5:1 against light bg. 0.56 → 4.43:1 (fail), 0.52 → 4.95:1 (pass). */
+  --muted-foreground: oklch(0.52 0.021 213.5);
   --accent: oklch(0.963 0.002 197.1);
   --accent-foreground: oklch(0.218 0.008 223.9);
   --destructive: oklch(0.577 0.245 27.325);
@@ -71,7 +72,9 @@
   --border: oklch(0.925 0.005 214.3);
   --input: oklch(0.925 0.005 214.3);
   --ring: oklch(0.723 0.014 214.4);
-  --warning: oklch(0.68 0.16 67);
+  /* WCAG AA: warning text on bg-warning/10 needs 4.5:1. 0.68 fails on white;
+     0.55 passes on white but fails on the warm-tinted card bg; 0.48 passes both. */
+  --warning: oklch(0.48 0.16 51);
   --chart-1: oklch(0.872 0.007 219.6);
   --chart-2: oklch(0.56 0.021 213.5);
   --chart-3: oklch(0.45 0.017 213.2);
