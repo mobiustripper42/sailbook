@@ -6,6 +6,63 @@ Format per entry: velocity, scope changes, what worked, what didn't, forecast up
 
 ---
 
+## Phase 5 — Pricing & Enrollment
+**Completed:** 2026-05-03 (retroactive close)
+**Sessions:** overlapping with Phase 4 and Phase 6 sprint toward May 4 launch
+
+### Velocity
+
+| Metric | Value |
+|--------|-------|
+| Effort points | 39 pts (was 50; −11 for 5.1/5.3/5.5/5.6 cut to V3) |
+| Projected hours | ~13 hrs |
+| Actual hours | not separately tracked (merged into multi-phase sprint sessions) |
+
+### Scope Changes
+- **Cut to V3:** 5.1 (per-session pricing override), 5.3 (coupon/promo codes), 5.5 (refund policy enforcement), 5.6 (duplicate same-type enrollment behavior). All safely deferrable.
+- **Added:** 5.2 (Open Sailing drop-in, promoted from V3), 5.4 (prerequisite flagging, promoted), 5.7 (waitlist, promoted), 5.8 (low enrollment warning, promoted).
+- **Carried forward:** 5.11 (bulk price update) — elevated to high priority; expected day-1 use.
+
+### What Worked
+- Promoting the drop-in model (5.2) early was the right call — it forced a clean DEC-027 with zero schema changes to enrollment/payments.
+- Waitlist notify-all-on-opening model (race-to-enroll) avoided the complexity of a queue; correct for a small school.
+- Prerequisite flagging kept strictly informational (warning, not blocking) — avoided a rabbit hole of approval flows.
+
+### What Didn't Work
+- Retrospective was skipped at the time. Sprint pace toward May 4 launch was the reason. Acceptable tradeoff.
+- Phase 5 tasks shipped interleaved with Phase 4 and 6, making velocity per-phase harder to attribute. Future multi-phase sprints: note the phase boundary in the session log.
+
+---
+
+## Phase 4 — Identity & Profiles
+**Completed:** 2026-05-03 (retroactive close)
+**Sessions:** overlapping sprint sessions; core work in sessions 94, 107–110
+
+### Velocity
+
+| Metric | Value |
+|--------|-------|
+| Effort points | 42 pts (−3 for 4.7 cut to V3; +2 for 4.11 substitute-instructor bug) |
+| Projected hours | ~10 hrs |
+| Actual hours | not separately tracked (merged into multi-phase sprint sessions) |
+
+### Scope Changes
+- **Cut to V3:** 4.7 (bulk student import).
+- **Added:** 4.10 (ui-reviewer agent recreated), 4.11 (substitute-instructor bug + DEC-007 pgTAP).
+- **4.3 closed as delivered:** student profile expansion was delivered across 1.5/1.6/1.7/1.23 — no residual scope.
+- **4.5 not required:** admin-created students use Forgot Password to set their own password. No code needed.
+
+### What Worked
+- Reusable invite link design (4.1) paid off immediately when wiring admin invite (4.2) — same RPC, same component pattern.
+- `handle_new_user` SECURITY DEFINER trigger (from 3.11) unified profile creation across all auth paths — no special-casing in invite or admin-create flows.
+- Splitting 4.2 into two sub-tasks (consolidation + deletion of old routes) made the PR reviewable.
+
+### What Didn't Work
+- 4.2 was scoped at 2 pts, shipped at ~11. The consolidation scope (delete routes, migrate invite pages, branch edit by role) wasn't visible at estimate time. Better to spike the deletion surface first.
+- Retrospective was skipped at the time. Same reason as Phase 5: sprint pace toward launch.
+
+---
+
 ## Phase 3 — Notifications + Auth Hardening
 **Completed:** 2026-04-29
 **Sessions:** 92, 93, 95–100, 102–106 (13 sessions; sessions 96–97 were 0-pt maintenance/triage)
