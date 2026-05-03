@@ -53,6 +53,15 @@ test.describe('Public course page — unauthenticated', () => {
     const resp = await page.goto('/courses/race')
     expect(resp?.status()).toBe(404)
   })
+
+  test('breadcrumb links back to course catalog', async ({ page }) => {
+    test.skip(test.info().project.name !== 'desktop')
+    await page.goto('/courses/asa101')
+    const breadcrumb = page.getByRole('link', { name: 'Courses' })
+    await expect(breadcrumb).toBeVisible()
+    const href = await breadcrumb.getAttribute('href')
+    expect(href).toBe('/courses')
+  })
 })
 
 // ─── Full LTSC inbound flow ───────────────────────────────────────────────────

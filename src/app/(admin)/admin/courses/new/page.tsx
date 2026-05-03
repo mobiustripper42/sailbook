@@ -18,7 +18,7 @@ export default async function NewCoursePage() {
   return (
     <div className="max-w-2xl">
       <p className="text-sm text-muted-foreground mb-1">
-        <Link href="/admin/courses" className="hover:underline">Courses</Link>
+        <Link href="/admin/courses" className="hover:underline hover:text-foreground">Courses</Link>
         {' / New'}
       </p>
       <h1 className="text-2xl font-semibold mb-6">New Course</h1>
