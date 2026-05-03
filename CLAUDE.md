@@ -55,11 +55,14 @@ waitlist_entries (notify on spot opening)
 3. **Cut the branch** — once the plan is approved: `git checkout -b task/X.Y-short-description`. Branch name includes the task ID.
 4. **Build it** — implement the feature
 5. **Write the test** — Playwright integration test + pgTAP if RLS-touching
-6. **Run targeted tests** — `npx playwright test tests/foo.spec.ts`. `supabase test db` if RLS-touching. Do NOT run the full suite — that's the user's call.
-7. **Open PR** — `/kill-this` commits, pushes branch, opens PR. Preview URL lands in the PR description.
-8. **Review & ship** — tap the preview URL, address any `@code-review` findings, run full suite if RLS-touching, then `/ship-it` to merge.
+6. **Run targeted tests** — `npx playwright test tests/foo.spec.ts --project=desktop` (and mobile if relevant). `supabase test db` if RLS-touching. Do NOT run the full suite — that's the user's call.
+7. **Mobile screenshot** — confirm 375px viewport passes
+8. **Open PR** — `/kill-this` commits, pushes branch, opens PR. Preview URL lands in the PR description.
+9. **Review & ship** — tap the preview URL, address any `@code-review` findings, run full suite if RLS-touching, then `/ship-it` to merge.
 
-**Full suite (`npx playwright test`) is never run automatically.** `/kill-this` will ask before closing out.
+**No test, no push.**
+
+**Full suite (`npx playwright test`) is never run automatically.** At the end of the session summary, ask: "Did you run the full Playwright suite yet?" and let the user decide.
 
 ## Migration Protocol
 
@@ -158,8 +161,8 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 - Playwright viewports: 375px (mobile), 768px (tablet), 1440px (desktop)
 - Mock external services (Twilio, Resend, Stripe) in test mode
 - `NOTIFICATIONS_ENABLED=false` for test environment
-- **During development:** run only the relevant file — `npx playwright test tests/foo.spec.ts`
-- **Single test:** `npx playwright test -g "test name"`
+- **During development:** run only the relevant file + desktop project — `npx playwright test tests/foo.spec.ts --project=desktop`
+- **Single test:** `npx playwright test -g "test name" --project=desktop`
 - **Before pushing:** user runs the full suite — `npx playwright test` (workers=4 locally, workers=1 in CI — do not override)
 
 ## Session Skills
@@ -186,6 +189,7 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 
 - **Main CC session:** Sonnet by default. Switch to Opus manually when you're stuck on something hard.
 - **Agents:** model is set in each agent's frontmatter. Don't override unless the task warrants it.
+- **New agents:** default to Sonnet. Add `model: opus` frontmatter only for architecture-level agents.
 
 ## PR Workflow
 
@@ -195,13 +199,15 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 - Never have two open PRs with migrations touching the same table — merge one first.
 - Self-approve unless Andy review is explicitly needed.
 
-### PR Review on Mobile
+### PR Review on Mobile (developer notes)
 
-- **GitHub mobile app, not web** — the native app's diff + approve + merge flow is usable.
-- **Tap the Vercel preview URL first** — posted as a comment automatically. 60 seconds of clicking catches more than reading the diff.
-- **Enable auto-merge** — repo Settings → enable auto-merge, then "Enable auto-merge" on each PR.
-- **Branch protection:** require CI green (Vercel build + Playwright). Skip reviewer count for solo dev.
-- **Checklist PR descriptions** — `/kill-this` should populate: migration? RLS change? UI at 375px?
+Doing PR reviews from your phone is tolerable if you structure for it:
+- **GitHub mobile app, not web.** The native app's diff + approve + merge flow is usable. The mobile web is not.
+- **Tap the preview URL first.** Vercel posts it as a comment. 60 seconds of clicking the actual feature catches more than reading the diff would.
+- **Enable auto-merge.** Repo Settings → enable auto-merge, then "Enable auto-merge" on each PR. Checks pass → it merges itself. One less thing to remember to do.
+- **Branch protection:** require CI green (Vercel build + Playwright). Skip reviewer count requirements for solo dev — they add friction with no benefit.
+- **Checklist PR descriptions.** `/kill-this` should populate: does this PR have a migration? RLS change? UI change at 375px? A checkbox list is fast to scan on a small screen.
+- **`gh` CLI on your dev server** is faster than any UI when you're at a keyboard: `gh pr list`, `gh pr view 42 --web`, `gh pr merge 42 --auto`.
 
 ## Workflow Notes
 - **Diagnostic commands** (build, lint, type check, test): run directly — see errors, fix them, don't bother the user.
@@ -216,14 +222,16 @@ For every task — not just bugs — explain the plan and wait for approval befo
 2. Wait for "go", "do it", or equivalent
 3. Do not write code, create files, run tests, or execute any commands until approved
 
+**This includes the full test suite.** The database may be in use. Never run the full `npx playwright test` without telling the user first. Targeted test runs (`npx playwright test tests/foo.spec.ts --project=desktop`) are fine during active development without prior approval.
+
 ## Bug Reports & Questions
-When I report a bug or ask a question:
+When a bug is reported or a question is asked:
 1. Explain the cause and your proposed fix
-2. Wait for my approval before making any changes
-3. Do not edit files, run commands, or implement fixes until I say "go" or "do it"
+2. Wait for approval before making any changes
+3. Do not edit files, run commands, or implement fixes until given the go-ahead
 
 ## Scope Discipline
-Check `docs/SPEC.md` section "Not V2" before adding anything.
+Check `docs/SPEC.md` section "Not V1" before adding anything.
 
 If a task starts feeling bigger than its estimate:
 1. Stop and re-estimate

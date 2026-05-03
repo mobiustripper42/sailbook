@@ -55,11 +55,12 @@ Always check the current date with `date`. Today is relative to when you're invo
 ### Velocity calculation:
 - Parse `session-log.md` for Duration fields to get actual hours per phase
 - Sum effort points from completed tasks in `PROJECT_PLAN.md`
-- **Dev time velocity = active dev hours / effort points** — use this for estimation
+- **Dev time velocity = active dev hours / effort points** — use this for future estimation
 - **Wall clock velocity = total elapsed hours / effort points** — use this for schedule forecasting
+- Session logs should record both when possible. If only wall clock is available, note it.
 - Track per-phase velocity to see if estimates are improving
 - Flag when a phase is trending over estimate by >25%
-- For async schedules (concurrent PRs, short sessions): weekly throughput (pts/week) is the better headline metric
+- For async workflows (concurrent PRs, intermittent sessions): weekly throughput (pts/week) is a better headline metric than hrs/pt
 
 ### End-of-phase update:
 After each phase completes, update the Estimated Effort table in `PROJECT_PLAN.md` with:
