@@ -1,18 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-
-function getPrimaryHome(meta: Record<string, unknown>): string {
-  if (meta.is_admin) return '/admin/dashboard'
-  if (meta.is_instructor) return '/instructor/dashboard'
-  return '/student/dashboard'
-}
+import { getPrimaryHome } from '@/lib/auth/primary-home'
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const meta = (user?.user_metadata ?? {}) as Record<string, unknown>
-  const dashboardHref = getPrimaryHome(meta)
+  const dashboardHref = user ? getPrimaryHome(user.user_metadata ?? {}) : null
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -23,7 +17,7 @@ export default async function PublicLayout({ children }: { children: React.React
             <span className="font-semibold text-sm">SailBook</span>
           </Link>
           <div className="flex items-center gap-3 text-sm">
-            {user ? (
+            {user && dashboardHref ? (
               <Link
                 href={dashboardHref}
                 className="bg-primary text-primary-foreground px-3 py-1.5 rounded-xs font-medium hover:bg-primary/90 transition-colors"

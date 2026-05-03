@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { getPrimaryHome } from '@/lib/auth/primary-home'
 
 const PUBLIC_ROUTES = ['/login', '/register', '/dev', '/forgot-password', '/reset-password', '/register/check-email']
 // PUBLIC_PREFIXES lets unauthenticated users through BUT, unlike PUBLIC_ROUTES,
@@ -10,12 +11,6 @@ const PUBLIC_ROUTES = ['/login', '/register', '/dev', '/forgot-password', '/rese
 // /courses/ covers /courses/* (public browse pages). /courses exact is handled below.
 // /dev/ covers sub-routes like /dev/ltsc (dev-only mock pages).
 const PUBLIC_PREFIXES = ['/invite/', '/auth/', '/courses/', '/dev/']
-
-function getPrimaryHome(meta: Record<string, unknown>): string {
-  if (meta.is_admin) return '/admin/dashboard'
-  if (meta.is_instructor) return '/instructor/dashboard'
-  return '/student/dashboard'
-}
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
