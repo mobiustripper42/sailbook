@@ -45,7 +45,50 @@ Format: prepend newest entry at the top.
 
 **PR:** https://github.com/mobiustripper42/sailbook/pull/24
 
-## Session 127 — 2026-05-03 11:07 [open]
+## Session 127 — 2026-05-03 11:07–15:18 (4.18 hrs)
+**Duration:** 4.18 hrs | **Points:** 19
+**Task:** P8+CX3 workflow fixes, 6.27 restore cancelled enrollment, 6.26 admin courses sortable+search, 6.25 public course catalog, 6.10 breadcrumb audit, 5.4 prerequisite flagging, plus three follow-up fixes (test-side-effect, public-header auth state, plan additions for 6.29 + 6.30)
+
+**Completed:**
+- **P8** + **CX3** — `.claude/skills/its-alive/SKILL.md` and `.claude/skills/kill-this/SKILL.md`: targeted grep on session-log.md; build skip when only docs/config changed
+- **6.27 (PR #21, MERGED)** — `restoreEnrollment` server action with capacity check + missed→expected attendance restore; Restore button on cancelled enrollments in admin course detail; 2 pgTAP + 1 Playwright test. **4 known bugs flagged in PR review** (refund-then-restore guard, capacity-fail-open, cross-course makeup attendance not restored, silent no-op when not cancelled) — deferred as `task/6.27-fixes` follow-up
+- **6.26 (PR #22, MERGED)** — `src/components/admin/courses-list.tsx` (new client component) with text search, status filter pills, sortable columns; default sort `created_at desc`; refactored `src/app/(admin)/admin/courses/page.tsx` to pass data through; redundant View action button removed (course title is the link); 4 Playwright tests
+- **6.25 (PR #23, MERGED)** — `src/app/(public)/courses/page.tsx` (new public catalog at `/courses`); responsive grid (1/2/3 col); short_code + cert_body badges; "Coming soon" badge if no upcoming sessions; "From $X" min pricing; SEO `generateMetadata`; 4 Playwright tests + accessibility.spec.ts coverage; added task 6.28 staging environment; `proxy.ts` aligned with main's tighter `/courses` matching pattern
+- **6.10 (PR #19, MERGED)** — 10 admin breadcrumb pages normalized to `hover:underline hover:text-foreground`; `/courses/[slug]` Courses breadcrumb back to catalog; `proxy.ts` fix for exact `/courses` path passing unauthenticated; 1 new Playwright test
+- **5.4 (PR #20, MERGED)** — `course_type_prerequisites` table + RLS (admin CRUD, authenticated SELECT); admin manager UI on course type edit page; student warning banner on `/student/courses/[id]` (informational, not blocking); ASA 103 → ASA 101 seed link; 8 pgTAP + 3 Playwright tests
+- **PR #25 (MERGED)** — Test side-effect fix in `03_rls_enrollments.sql`: 6.27 left e003 cancelled before SESSION ATTENDANCE block, dropping sam's 4 attendance rows from his RLS view (test 19). Added `UPDATE … SET status='confirmed'` between blocks
+- **PR #26 (MERGED)** — Added tasks 6.29 (admin course-types list polish, 2 pts, low priority) + 6.30 (mobile calendar/list view for students, 5 pts, high priority — primary student surface on phones)
+- **PR #27 (MERGED)** — Public layout `(public)/layout.tsx` was unconditionally rendering Create account / Log in CTAs even for authenticated users. Made async, fetches user, swaps to Dashboard CTA routed by role. Extracted `getPrimaryHome` to `src/lib/auth/primary-home.ts` (was duplicated in proxy.ts). 3 new Playwright tests
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification (external dependency, ongoing carryover from earlier sessions)
+
+**Next Steps:**
+1. **`task/6.27-fixes` follow-up** — address the 4 bugs from PR #21 review: refund-then-restore guard (refuse restore if `payments.status='refunded'`), capacity-check fail-open (treat `count: null` as failure), cross-course makeup attendance restoration (drop the `course_id` filter on the sessions query), silent no-op verification (`.select('id')` after update). 3 pts effort
+2. **6.30 mobile calendar/list view for students** (5 pts, high priority) — primary student-facing surface on mobile, currently a wall of text
+3. **6.18 CI + iOS testing** (5 pts) and pre-launch trio: 6.8 external audit, 6.12 security audit, 6.17 phase close
+4. **6.29 course-types list polish** (2 pts, "if we have time")
+
+**Context:**
+- **Workflow lesson learned (the painful one):** `/kill-this` must run after every committed task to open its PR. Eric is changing the workflow so this can't happen again. Three branches (6.25/6.26/6.27) had to be retroactively kicked through `/kill-this` at the end of session because they'd been committed mid-session without invoking the skill. Cost ~30 min of catch-up at end of session
+- **proxy.ts `/courses` matching** — uses `'/courses/'` (slash-suffix) in PUBLIC_PREFIXES for `/courses/*` AND inline `|| pathname === '/courses'` for the exact catalog path. Keep both in sync if either changes — the bare `/courses` prefix is too broad (matches `/coursesxyz`)
+- **Concurrent session protocol works** — Session 128 ran in a worktree inside the s127 wallclock window for read-the-tape work. Both close cleanly because each was opened via `/its-alive` with the worktree branching. s127 wallclock counts the full window even though some of that time was applied to s128 tooling
+- **Prereq satisfaction rule (5.4)** — any non-cancelled enrollment in a course of the required type counts as satisfying. Lenient by design; flag is informational, admin reconciles. Comment in `src/app/(student)/student/courses/[id]/page.tsx`
+- **pgTAP gotcha** — RLS-blocked DELETE silently filters (no exception, 0 rows). Use `cmp_ok` row-count after the attempt instead of `throws_ok`
+- **Supabase generated types** coerce single-row PostgREST embeds as `T | T[]`. Pages handle with `Array.isArray(x) ? x[0] : x`
+- **Theme decision deferred** — discussed dark default (#1) vs public-only light to match LTSC (#3-light) vs current system-preference. LTSC is white, so #3-light is the right move when revisited. Currently `defaultTheme="system"` in `src/components/theme-provider.tsx`. Theme mode is hard. Game day decision for the LTSC ↔ SailBook color jolt
+- **Public catalog ↔ LTSC integration paths** — three flavors stay open after #23 lands: (1) keep LTSC's WP catalog, links into `/courses/[slug]`, (2) WP dev refreshes LTSC links to use new slugs, (3) drop LTSC catalog entirely, point everything at `/courses`. Decision is Andy's, no code changes required to switch between paths
+- **Course detail header layout gripe (admin)** — Edit `•••` menu placement next to the breadcrumb / title is awkward when the title wraps; eric tried mental options, hated all, leaving as-is. Could become a future "course detail header polish" task if it keeps bothering him
+
+**Code Review:**
+- #19 (6.10): proxy.ts over-broad prefix + stale comment — found and fixed during session
+- #20 (5.4): No bugs/RLS gaps. Cleanup applied: FOR ALL on policy, anon-skip gate, comment satisfaction rule, dropped emoji, mobile coverage, simpler combobox locator
+- #21 (6.27): **4 real bugs flagged in PR body, NOT fixed pre-merge** — captured in Next Steps as `task/6.27-fixes` follow-up branch
+- #22 (6.26): No bugs. A11y nits (aria-sort on headers, aria-pressed on filter pills) and `as unknown as` type-safety smell flagged for follow-up. View button removed mid-review
+- #23 (6.25): Nested-interactive a11y bug (`<Link><Card><Button>`) flagged in PR body — merged anyway, follow-up needed
+- #25, #27: Clean reviews, applied minor cleanups before opening (test-side-effect doc, getPrimaryHome extraction)
+- #26: Docs only, no code review
 
 ## Session 126 — 2026-05-03 04:20–11:03 (6.75 hrs)
 **Duration:** 6.75 hrs | **Points:** 0 (test-only fixes — no plan task)
