@@ -14,7 +14,7 @@ You are executing the session start ritual.
 
 Run `git fetch origin` to refresh remote state. Capture `BRANCH=$(git branch --show-current)`.
 
-**Concurrent session check:** scan `session-log.md` for any heading containing `[open]`. If found:
+**Concurrent session check:** run `grep "^## Session.*\[open\]" session-log.md | head -1`. If output is non-empty, a session is already open:
 - Show the user: "Session N is already open (started YYYY-MM-DD HH:MM). Is this: **(a)** a currently running concurrent session → I'll create a worktree for this new task, or **(b)** a stale/crashed entry → I'll close it and continue here?"
 - Wait for the user's answer.
 - If **(b)** (stale): close the open entry by replacing `[open]` in that heading with a note like `[abandoned]`, then continue below.
