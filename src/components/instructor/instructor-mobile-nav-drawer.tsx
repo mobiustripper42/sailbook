@@ -8,7 +8,7 @@ import { signOut } from '@/app/(auth)/actions'
 import { ThemeToggle } from '@/components/theme-toggle'
 import RoleToggle from '@/components/role-toggle'
 
-export default function InstructorMobileNavDrawer({ name, isStudent }: { name: string; isStudent?: boolean }) {
+export default function InstructorMobileNavDrawer({ name, isStudent, isAdmin }: { name: string; isStudent?: boolean; isAdmin?: boolean }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -89,6 +89,9 @@ export default function InstructorMobileNavDrawer({ name, isStudent }: { name: s
           <p className="text-xs text-muted-foreground truncate">{name}</p>
           {isStudent && (
             <RoleToggle href="/student/dashboard" label="Switch to Student View" />
+          )}
+          {isAdmin && (
+            <RoleToggle href="/admin/dashboard" label="Switch to Admin View" />
           )}
           <div className="flex items-end justify-between mt-1">
             <div className="flex flex-col gap-0.5">

@@ -3,7 +3,34 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 129 — 2026-05-03 15:30 [open]
+## Session 129 — 2026-05-03 15:30–16:50 (1.33 hrs)
+**Duration:** 1.33 hrs | **Points:** 12
+**Task:** 6.29 admin course-types polish, 6.30 student agenda view, 6.31 instructor fixes, plus post-merge bug fixes
+
+**Completed:**
+- **Phase housekeeping** — Closed 4.3, 4.9, 5.9 retroactively; elevated 5.11 (bulk price update) to high priority; wrote retrospectives for Phase 4 and Phase 5
+- **6.29 (PR #29, MERGED)** — `src/components/admin/course-types-list.tsx` (new client component): sortable by name/code/cert_body/max_students/status; name cell links to edit; `•••` DropdownMenu per row (Edit / Manage Prerequisites / Activate-Deactivate); extracted shared `SortableHead<T>` to `src/components/admin/sortable-head.tsx` (removed 3 private copies from courses-list, users-list, course-types-list)
+- **6.30 (PR #28, MERGED)** — Student course browser: agenda-style list view grouping sessions by date with sticky day headers; toggle visible on all viewports (removed mobile detection + hydration flash); `CoursesAgendaList` component; tests updated + new `tests/student-mobile-agenda.spec.ts`
+- **6.31 (PR #30, MERGED)** — Instructor dashboard DEC-007 fix (two-query pattern: course-default + session-level override, same as calendar page); confirmed+completed enrolled count consistency (roster + dashboard); agenda-style list view for instructor/admin calendars (shared `SessionsList` redesign + `SessionsViewSwitcher` updated); admin calendar filters inline with toggle on desktop via `endSlot` prop
+- **Admin self-role bug** — Disabled checkbox on self-edit form submitted `is_admin` as nothing → server was setting it to `false`. Fixed: self-edits now skip `is_admin` in the update, preserving existing DB value
+- **JWT sync** — `updateUserProfile` now calls `adminClient.auth.admin.updateUserById()` after every save; role changes propagate to JWT immediately instead of waiting up to 1hr for token expiry
+- **Role nav toggles** — "Switch to Admin View" added in student + instructor sidebars/mobile drawers; "Switch to Instructor/Student View" added in admin sidebar/drawer; all three views now surface all available role switches for multi-role users
+
+**In Progress:** Nothing
+
+**Blocked:** Twilio Toll-Free Verification (external, carryover)
+
+**Next Steps:**
+1. Re-save own profile via admin UI once to trigger JWT sync and fix admin→instructor redirect
+2. Pre-launch trio: **6.8** (external audit) → **6.12** (security) → **6.17** (phase close)
+3. Post-launch debt: extract `enrollmentStatusLabel` to `src/lib/enrollment-status.ts` (4 copies with drift); `courses-list.tsx` at 217 lines (over 200 limit)
+
+**Context:**
+- JWT sync: `updateUserProfile` merges `{ is_instructor, is_student }` (+ `is_admin` for non-self edits) into `auth.users.raw_user_meta_data` via admin client. Safe: Supabase merges, doesn't replace, so other metadata keys survive.
+- `endSlot` on `SessionsViewSwitcher`: optional `ReactNode` rendered right of toggle in a `flex justify-between` wrapper. Admin calendar passes filters as `endSlot` with `hidden sm:flex`; mobile keeps a separate `sm:hidden` stacked filter row.
+- Bulk price update (5.11): user confirmed a direct SQL script is viable for day-1; task remains open but not blocking launch.
+
+**Code Review:** Not run (post-merge bug fixes committed directly to main)
 
 ## Session 128 — 2026-05-03 13:19–14:15 (0.93 hrs)
 **Duration:** 0.93 hrs | **Points:** 0 (tooling/workflow — no plan task)

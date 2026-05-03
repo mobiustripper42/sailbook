@@ -24,19 +24,20 @@ export async function updateUserProfile(formData: FormData) {
     return { error: 'First name and last name are required.' }
   }
 
-  if (user.id === id && !is_admin) {
-    return { error: "You can't remove your own admin access." }
-  }
-
   const updates: Record<string, unknown> = {
     first_name,
     last_name,
     phone,
     is_active,
-    is_admin,
     is_instructor,
     is_student,
     updated_at: new Date().toISOString(),
+  }
+
+  // Disabled checkboxes don't submit — never allow an admin to remove their own
+  // admin flag via this form path (the UI disables the checkbox anyway).
+  if (user.id !== id) {
+    updates.is_admin = is_admin
   }
 
   // Student-specific fields — only written when the form explicitly includes them
@@ -50,6 +51,14 @@ export async function updateUserProfile(formData: FormData) {
 
   const { error } = await supabase.from('profiles').update(updates).eq('id', id)
   if (error) return { error: error.message }
+
+  // Sync role flags to auth.users.raw_user_meta_data so the middleware JWT
+  // check reflects the new roles immediately (proxy.ts reads user_metadata,
+  // not profiles, to avoid a DB hit per request).
+  const adminClient = createAdminClient()
+  const metaRoles: Record<string, boolean> = { is_instructor, is_student }
+  if (user.id !== id) metaRoles.is_admin = is_admin
+  await adminClient.auth.admin.updateUserById(id, { user_metadata: metaRoles })
 
   revalidatePath('/admin/users')
   revalidatePath('/admin/students')

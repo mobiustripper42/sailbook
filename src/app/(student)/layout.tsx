@@ -24,10 +24,11 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('is_instructor')
+    .select('is_instructor, is_admin')
     .eq('id', user.id)
     .single()
   const isInstructor = (profile as { is_instructor?: boolean } | null)?.is_instructor ?? false
+  const isAdmin = (profile as { is_admin?: boolean } | null)?.is_admin ?? false
 
   return (
     <div className="flex min-h-screen">
@@ -43,6 +44,9 @@ export default async function StudentLayout({ children }: { children: React.Reac
           <p className="text-xs text-muted-foreground truncate">{name}</p>
           {isInstructor && (
             <RoleToggle href="/instructor/dashboard" label="Switch to Instructor View" />
+          )}
+          {isAdmin && (
+            <RoleToggle href="/admin/dashboard" label="Switch to Admin View" />
           )}
           <div className="flex items-end justify-between mt-1">
             <div className="flex flex-col gap-0.5">
@@ -66,7 +70,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         </div>
       </aside>
       <div className="flex-1 min-w-0 flex flex-col">
-        <MobileNavDrawer name={name} isInstructor={isInstructor} />
+        <MobileNavDrawer name={name} isInstructor={isInstructor} isAdmin={isAdmin} />
         <main className="flex-1 bg-background p-4 sm:p-8">
           {children}
         </main>

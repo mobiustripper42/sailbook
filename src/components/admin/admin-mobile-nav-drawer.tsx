@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { signOut } from '@/app/(auth)/actions'
 import { ThemeToggle } from '@/components/theme-toggle'
+import RoleToggle from '@/components/role-toggle'
 
 const links = [
   { href: '/admin/dashboard', label: 'Dashboard' },
@@ -17,7 +18,7 @@ const links = [
   { href: '/admin/notification-preferences', label: 'Notifications' },
 ]
 
-export default function AdminMobileNavDrawer({ name }: { name: string }) {
+export default function AdminMobileNavDrawer({ name, isInstructor, isStudent }: { name: string; isInstructor?: boolean; isStudent?: boolean }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -93,6 +94,12 @@ export default function AdminMobileNavDrawer({ name }: { name: string }) {
 
         <div className="px-4 py-4 border-t">
           <p className="text-xs text-muted-foreground truncate">{name}</p>
+          {isInstructor && (
+            <RoleToggle href="/instructor/dashboard" label="Switch to Instructor View" />
+          )}
+          {isStudent && (
+            <RoleToggle href="/student/dashboard" label="Switch to Student View" />
+          )}
           <div className="flex items-end justify-between mt-1">
             <div className="flex flex-col gap-0.5">
               <Link

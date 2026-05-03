@@ -11,9 +11,11 @@ type View = 'calendar' | 'list'
 export function SessionsViewSwitcher({
   calendar,
   list,
+  endSlot,
 }: {
   calendar: ReactNode
   list: ReactNode
+  endSlot?: ReactNode
 }) {
   const [view, setView] = useState<View>('calendar')
   const [hydrated, setHydrated] = useState(false)
@@ -37,34 +39,37 @@ export function SessionsViewSwitcher({
   return (
     <>
       {hydrated && (
-        <div
-          className="mb-4 inline-flex items-center gap-1 rounded-md border bg-card p-0.5"
-          data-testid="sessions-view-toggle"
-          role="group"
-          aria-label="Session view"
-        >
-          <Button
-            type="button"
-            size="sm"
-            variant={view === 'calendar' ? 'secondary' : 'ghost'}
-            onClick={() => pickView('calendar')}
-            data-testid="view-toggle-calendar"
-            aria-pressed={view === 'calendar'}
-            className={cn('h-7 px-3', view === 'calendar' && 'shadow-sm')}
+        <div className={cn('mb-4', endSlot && 'flex items-center justify-between gap-3')}>
+          <div
+            className="inline-flex items-center gap-1 rounded-md border bg-card p-0.5"
+            data-testid="sessions-view-toggle"
+            role="group"
+            aria-label="Session view"
           >
-            Calendar
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant={view === 'list' ? 'secondary' : 'ghost'}
-            onClick={() => pickView('list')}
-            data-testid="view-toggle-list"
-            aria-pressed={view === 'list'}
-            className={cn('h-7 px-3', view === 'list' && 'shadow-sm')}
-          >
-            List
-          </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={view === 'calendar' ? 'secondary' : 'ghost'}
+              onClick={() => pickView('calendar')}
+              data-testid="view-toggle-calendar"
+              aria-pressed={view === 'calendar'}
+              className={cn('h-7 px-3', view === 'calendar' && 'shadow-sm')}
+            >
+              Calendar
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={view === 'list' ? 'secondary' : 'ghost'}
+              onClick={() => pickView('list')}
+              data-testid="view-toggle-list"
+              aria-pressed={view === 'list'}
+              className={cn('h-7 px-3', view === 'list' && 'shadow-sm')}
+            >
+              List
+            </Button>
+          </div>
+          {endSlot}
         </div>
       )}
 

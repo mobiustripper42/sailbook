@@ -17,7 +17,7 @@ const links = [
   { href: '/student/account', label: 'Account' },
 ]
 
-export default function MobileNavDrawer({ name, isInstructor }: { name: string; isInstructor?: boolean }) {
+export default function MobileNavDrawer({ name, isInstructor, isAdmin }: { name: string; isInstructor?: boolean; isAdmin?: boolean }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -95,6 +95,9 @@ export default function MobileNavDrawer({ name, isInstructor }: { name: string; 
           <p className="text-xs text-muted-foreground truncate">{name}</p>
           {isInstructor && (
             <RoleToggle href="/instructor/dashboard" label="Switch to Instructor View" />
+          )}
+          {isAdmin && (
+            <RoleToggle href="/admin/dashboard" label="Switch to Admin View" />
           )}
           <div className="flex items-end justify-between mt-1">
             <div className="flex flex-col gap-0.5">

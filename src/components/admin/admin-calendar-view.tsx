@@ -45,49 +45,62 @@ export function AdminCalendarView({ sessions }: { sessions: SessionEvent[] }) {
     [sessions, courseTypeId, instructorName],
   )
 
+  const filterSelects = (
+    <>
+      <Select value={courseTypeId} onValueChange={setCourseTypeId}>
+        <SelectTrigger
+          className="w-48"
+          aria-label="Filter by course type"
+          data-testid="filter-course-type"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>All course types</SelectItem>
+          {courseTypes.map(([id, name]) => (
+            <SelectItem key={id} value={id}>
+              {name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select value={instructorName} onValueChange={setInstructorName}>
+        <SelectTrigger
+          className="w-48"
+          aria-label="Filter by instructor"
+          data-testid="filter-instructor"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>All instructors</SelectItem>
+          {instructors.map((n) => (
+            <SelectItem key={n} value={n}>
+              {n}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </>
+  )
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-3" data-testid="calendar-filters">
-        <Select value={courseTypeId} onValueChange={setCourseTypeId}>
-          <SelectTrigger
-            className="w-48"
-            aria-label="Filter by course type"
-            data-testid="filter-course-type"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>All course types</SelectItem>
-            {courseTypes.map(([id, name]) => (
-              <SelectItem key={id} value={id}>
-                {name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={instructorName} onValueChange={setInstructorName}>
-          <SelectTrigger
-            className="w-48"
-            aria-label="Filter by instructor"
-            data-testid="filter-instructor"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>All instructors</SelectItem>
-            {instructors.map((n) => (
-              <SelectItem key={n} value={n}>
-                {n}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Mobile: filters stacked above toggle */}
+      <div className="flex flex-wrap gap-3 sm:hidden" data-testid="calendar-filters">
+        {filterSelects}
       </div>
 
+      {/* Desktop: filters inline with toggle via endSlot */}
       <SessionsViewSwitcher
         calendar={<SessionsCalendar sessions={filtered} />}
         list={<SessionsList sessions={filtered} showInstructor />}
+        endSlot={
+          <div className="hidden sm:flex gap-3" data-testid="calendar-filters-desktop">
+            {filterSelects}
+          </div>
+        }
       />
     </div>
   )
