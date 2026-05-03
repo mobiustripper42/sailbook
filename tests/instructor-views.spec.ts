@@ -132,8 +132,8 @@ test.describe('Instructor dashboard — with sessions', () => {
     // dirty DBs may have multiple rows from prior test runs
     await expect(page.getByText(/\d+ \/ \d+/).first()).toBeVisible();
 
-    // "Roster →" link is present — .first() because dirty DBs accumulate rows
-    await expect(page.getByRole('link', { name: 'Roster →' }).first()).toBeVisible();
+    // Session row links to session detail using course title — .first() for dirty DBs
+    await expect(page.getByRole('link', { name: title }).first()).toBeVisible();
   });
 });
 
