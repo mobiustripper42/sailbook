@@ -16,6 +16,8 @@ Look up the project's build check in `CLAUDE.md §Commands`. Run whatever is def
 
 If `CLAUDE.md §Commands` defines no build step (e.g. a markdown-only repo, a domain project with no software build), skip this step silently — no noise.
 
+If all staged changes are exclusively under `tests/` or `supabase/tests/` paths (check with `git diff --cached --name-only`), skip the build silently — test files are not compiled by the app build pipeline.
+
 If the build fails, fix errors before proceeding. Do not commit broken code.
 
 ## Step 2 — Commit and push branch

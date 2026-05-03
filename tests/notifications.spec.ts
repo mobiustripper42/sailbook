@@ -67,6 +67,10 @@ test.describe('Notification service — mock dispatch', () => {
     })
   })
 
+  // retries: 2 — 5 other spec files DELETE this same buffer in their beforeEach.
+  // When workers run in parallel (local, 4-worker), one of those DELETEs can land
+  // between our two POSTs and corrupt the count. CI is 1-worker so it never hits this.
+  // Real fix: namespace the buffer by ?key= per spec file. Tracked as test infra debt.
   test('Buffer accumulates across calls and clear empties it', { retries: 2 }, async ({ request }) => {
     await request.post(`${BASE}/api/test/notifications`, {
       data: { channel: 'sms', to: '+15555550101', body: 'first' },

@@ -48,7 +48,7 @@ Run `date` to get the current local time. Record it — this is the session star
 
 ## Step 2 — Determine session number
 
-Read `session-log.md`. Scan all `## Session N` headings (open or closed) and find the highest N. The new session number is that N+1. Do not just take the first heading — if a concurrent session is already open, it will be `[open]` at the top and must be counted.
+Run `grep "^## Session" session-log.md | head -5` to find recent session headings. Take the highest N from the results. The new session number is that N+1. Do not read the whole file — the grep output is sufficient. Do not just take the first heading — if a concurrent session is already open, it will be `[open]` at the top and must be counted.
 
 ## Step 3 — Open a session entry (auto-commit + push)
 
