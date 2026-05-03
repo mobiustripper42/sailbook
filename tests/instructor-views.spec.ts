@@ -24,7 +24,10 @@ async function createInstructorCourse(
     await expect(adminPage.getByRole('heading', { name: 'New Course' })).toBeVisible();
 
     await adminPage.getByLabel('Course Type').click();
-    await adminPage.getByRole('option', { name: /ASA 101.*Basic Keelboat/ }).click();
+    // Use Dinghy (not ASA 101) so repeated runs don't accumulate ASA 101
+    // enrollments for pw_student — that pollutes prereq-flagging.spec.ts which
+    // requires pw_student to have NO ASA 101 enrollment to show the warning.
+    await adminPage.getByRole('option', { name: /Dinghy/ }).click();
 
     await adminPage.getByLabel('Title Override').fill(title);
     await adminPage.getByLabel('Capacity').fill('4');
