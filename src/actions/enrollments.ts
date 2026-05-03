@@ -175,6 +175,65 @@ export async function cancelEnrollment(enrollmentId: string, courseId: string) {
   return { error: null }
 }
 
+export async function restoreEnrollment(enrollmentId: string, courseId: string): Promise<{ error: string | null }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (!profile?.is_admin) return { error: 'Unauthorized.' }
+
+  const adminClient = createAdminClient()
+
+  const { data: course } = await adminClient
+    .from('courses')
+    .select('capacity')
+    .eq('id', courseId)
+    .single()
+  if (!course) return { error: 'Course not found.' }
+
+  const { count: confirmedCount } = await adminClient
+    .from('enrollments')
+    .select('id', { count: 'exact', head: true })
+    .eq('course_id', courseId)
+    .eq('status', 'confirmed')
+
+  if (confirmedCount !== null && confirmedCount >= course.capacity) {
+    return { error: 'Course is at capacity — cannot restore enrollment.' }
+  }
+
+  const { error } = await adminClient
+    .from('enrollments')
+    .update({ status: 'confirmed', updated_at: new Date().toISOString() })
+    .eq('id', enrollmentId)
+    .eq('status', 'cancelled')
+
+  if (error) return { error: error.message }
+
+  // Restore attendance for sessions still scheduled
+  const { data: scheduledSessions } = await adminClient
+    .from('sessions')
+    .select('id')
+    .eq('course_id', courseId)
+    .eq('status', 'scheduled')
+
+  if (scheduledSessions && scheduledSessions.length > 0) {
+    await adminClient
+      .from('session_attendance')
+      .update({ status: 'expected', updated_at: new Date().toISOString() })
+      .eq('enrollment_id', enrollmentId)
+      .eq('status', 'missed')
+      .in('session_id', scheduledSessions.map((s) => s.id))
+  }
+
+  revalidatePath(`/admin/courses/${courseId}`)
+  return { error: null }
+}
+
 export async function requestCancellation(enrollmentId: string, courseId: string) {
   const supabase = await createClient()
 

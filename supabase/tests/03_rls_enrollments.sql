@@ -6,7 +6,7 @@
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(20);
+SELECT plan(22);
 
 -- Reuse authenticate() helper (same pattern as 01/02)
 CREATE SCHEMA IF NOT EXISTS tests;
@@ -198,6 +198,54 @@ SELECT is(
 );
 
 RESET ROLE;
+
+-- ============================================================
+-- RESTORE ENROLLMENT
+-- ============================================================
+
+-- Admin: can restore a cancelled enrollment (cancelled → confirmed)
+SELECT tests.authenticate('a1000000-0000-0000-0000-000000000001', p_is_admin => true);
+SET LOCAL ROLE authenticated;
+
+UPDATE public.enrollments SET status = 'cancelled'
+WHERE id = 'e1000000-0000-0000-0000-000000000002';
+
+UPDATE public.enrollments SET status = 'confirmed'
+WHERE id = 'e1000000-0000-0000-0000-000000000002';
+
+SELECT is(
+  (SELECT status FROM public.enrollments WHERE id = 'e1000000-0000-0000-0000-000000000002'),
+  'confirmed',
+  'admin: can restore cancelled enrollment (cancelled → confirmed)'
+);
+
+-- Admin: set e003 to cancelled so student-cannot-restore test has a target
+UPDATE public.enrollments SET status = 'cancelled'
+WHERE id = 'e1000000-0000-0000-0000-000000000003';
+
+RESET ROLE;
+
+-- Student: cannot restore cancelled enrollment (USING restricts to confirmed rows only)
+SELECT tests.authenticate('a1000000-0000-0000-0000-000000000005', p_is_student => true);
+SET LOCAL ROLE authenticated;
+
+UPDATE public.enrollments SET status = 'confirmed'
+WHERE id = 'e1000000-0000-0000-0000-000000000003';
+
+SELECT is(
+  (SELECT status FROM public.enrollments WHERE id = 'e1000000-0000-0000-0000-000000000003'),
+  'cancelled',
+  'student: cannot restore cancelled enrollment (USING restricts to confirmed rows)'
+);
+
+RESET ROLE;
+
+-- Restore e003 back to confirmed before SESSION ATTENDANCE block —
+-- get_student_enrollment_ids excludes cancelled enrollments, so leaving e003
+-- cancelled would drop sam's 4 attendance rows from his RLS view (test 19
+-- expects 8: e001:2 + e003:4 + e004:2).
+UPDATE public.enrollments SET status = 'confirmed'
+WHERE id = 'e1000000-0000-0000-0000-000000000003';
 
 -- ============================================================
 -- SESSION ATTENDANCE

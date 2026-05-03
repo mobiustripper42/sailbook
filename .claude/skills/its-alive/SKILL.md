@@ -70,6 +70,8 @@ Do not fill in any other fields — this is just the timestamp anchor + a clean 
 
 ## Step 4 — Read last session context
 
+Find the last completed session's line number: `grep -n "^## Session" session-log.md | grep -v "\[open\]" | head -1` — capture the line number (e.g. `6`). Then read `session-log.md` from that offset (not from the start) to get just that entry.
+
 From the most recent completed session entry, extract:
 - **Next Steps** — what was planned for the next sitting
 - **In Progress** — anything partially done

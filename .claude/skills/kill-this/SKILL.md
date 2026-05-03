@@ -12,6 +12,8 @@ Run `git branch --show-current` and hold the result as `BRANCH` for all steps be
 
 ## Step 1 — Build check (conditional)
 
+**Docs/config-only skip:** First check if all session changes are docs or config: `{ git diff --name-only --cached; git diff --name-only; git diff --name-only origin/main..HEAD 2>/dev/null; } | sort -u | grep -E '\.(ts|tsx|js|jsx|sql|py|sh)$' | head -1`. If that returns nothing, print "Build skipped — docs/config only" and go straight to Step 2.
+
 Look up the project's build check in `CLAUDE.md §Commands`. Run whatever is defined there (e.g. `npm run build`, `cargo build`, `make`, `supabase db reset`, etc. — whatever the project considers a build verification).
 
 If `CLAUDE.md §Commands` defines no build step (e.g. a markdown-only repo, a domain project with no software build), skip this step silently — no noise.

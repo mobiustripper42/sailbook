@@ -31,6 +31,13 @@ test.describe('Accessibility — public pages', () => {
     expect(issues, formatViolations(issues)).toEqual([]);
   });
 
+  test('public course catalog', async ({ page }) => {
+    await page.goto('/courses');
+    const results = await runAxe(page);
+    const issues = criticalOrSerious(results.violations);
+    expect(issues, formatViolations(issues)).toEqual([]);
+  });
+
   test('public course page', async ({ page }) => {
     // Use ASA 101 — known seed slug
     await page.goto('/courses/asa101');

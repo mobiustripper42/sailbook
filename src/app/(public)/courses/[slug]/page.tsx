@@ -67,6 +67,11 @@ export default async function PublicCoursePage({
   return (
     <div className="space-y-8">
       <div className="space-y-2">
+        <p className="text-sm text-muted-foreground mb-1">
+          <Link href="/courses" className="hover:underline hover:text-foreground">Courses</Link>
+          {' / '}
+          {courseType.name}
+        </p>
         <div className="flex items-center gap-3 flex-wrap">
           <h1 className="text-2xl font-semibold">{courseType.name}</h1>
           {courseType.short_code && (

@@ -27,7 +27,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   return (
     <div className="">
       <p className="text-sm text-muted-foreground mb-1">
-        <Link href="/admin/users" className="hover:underline">Users</Link>
+        <Link href="/admin/users" className="hover:underline hover:text-foreground">Users</Link>
         {' / '}
         {profile.first_name} {profile.last_name}
         {' / Edit'}
