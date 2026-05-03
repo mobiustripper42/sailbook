@@ -97,7 +97,7 @@ export function CoursesAgendaList({ courses }: { courses: CourseCardData[] }) {
       {Array.from(byDate.entries()).map(([date, sessions]) => (
         <div key={date}>
           <div
-            className="sticky top-0 z-10 bg-background py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide border-b mb-1"
+            className="sticky top-0 z-10 bg-background py-1.5 text-sm font-bold text-primary uppercase tracking-wide border-b mb-1"
             data-testid="agenda-day-header"
           >
             {fmtDayHeader(date)}

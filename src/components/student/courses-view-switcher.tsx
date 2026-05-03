@@ -5,41 +5,24 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 const STORAGE_KEY = 'sailbook.courses-view'
-const MOBILE_QUERY = '(max-width: 639px)'
 
 type View = 'calendar' | 'list'
 
 export function CoursesViewSwitcher({
   calendar,
   list,
-  agenda,
 }: {
   calendar: ReactNode
   list: ReactNode
-  agenda?: ReactNode
 }) {
-  // Server renders calendar; client may switch to list after reading
-  // localStorage / matchMedia. Brief flicker on first load is acceptable —
-  // alternative is server-rendering nothing, which kills SSR perf.
   const [view, setView] = useState<View>('calendar')
-  const [isMobile, setIsMobile] = useState(false)
   const [hydrated, setHydrated] = useState(false)
 
-  // Hydration-safe pattern (same as theme-toggle.tsx): read browser state in
-  // an effect after mount. The lint rule discourages setState-in-effect in
-  // general, but reading localStorage / matchMedia is the standard exception.
   useEffect(() => {
-    const mq = window.matchMedia(MOBILE_QUERY)
-    const update = () => setIsMobile(mq.matches)
-    update()
-    mq.addEventListener('change', update)
-
     const saved = window.localStorage.getItem(STORAGE_KEY)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (saved === 'calendar' || saved === 'list') setView(saved)
     setHydrated(true)
-
-    return () => mq.removeEventListener('change', update)
   }, [])
 
   function pickView(next: View) {
@@ -47,18 +30,14 @@ export function CoursesViewSwitcher({
     try {
       window.localStorage.setItem(STORAGE_KEY, next)
     } catch {
-      // localStorage can throw in privacy modes — preference doesn't persist,
-      // but the in-memory toggle still works for the session.
+      // localStorage can throw in privacy modes
     }
   }
 
-  const effectiveView: View = isMobile ? 'list' : view
-
   return (
     <>
-      {/* Toggle hidden on mobile (forced list). Hidden until hydrated to
-          avoid showing a control with the wrong selected state. */}
-      {hydrated && !isMobile && (
+      {/* Hidden until hydrated to avoid rendering with wrong selected state */}
+      {hydrated && (
         <div
           className="mb-4 inline-flex items-center gap-1 rounded-md border bg-card p-0.5"
           data-testid="courses-view-toggle"
@@ -90,12 +69,8 @@ export function CoursesViewSwitcher({
         </div>
       )}
 
-      <div data-testid="courses-view-content" data-active-view={effectiveView}>
-        {effectiveView === 'calendar'
-          ? calendar
-          : isMobile && agenda
-            ? agenda
-            : list}
+      <div data-testid="courses-view-content" data-active-view={view}>
+        {view === 'calendar' ? calendar : list}
       </div>
     </>
   )

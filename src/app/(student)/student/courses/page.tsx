@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { CoursesCardList, type CourseCardData, type CourseSession } from '@/components/student/courses-card-list'
+import { type CourseCardData, type CourseSession } from '@/components/student/courses-card-list'
 import { CoursesAgendaList } from '@/components/student/courses-agenda-list'
 import { CoursesCalendar } from '@/components/student/courses-calendar'
 import { CoursesViewSwitcher } from '@/components/student/courses-view-switcher'
@@ -95,8 +95,7 @@ export default async function CourseBrowsePage() {
 
       <CoursesViewSwitcher
         calendar={<CoursesCalendar courses={cardData} />}
-        list={<CoursesCardList courses={cardData} />}
-        agenda={<CoursesAgendaList courses={cardData} />}
+        list={<CoursesAgendaList courses={cardData} />}
       />
     </div>
   )
