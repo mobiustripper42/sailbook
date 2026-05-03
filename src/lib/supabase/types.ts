@@ -67,6 +67,42 @@ export type Database = {
         }
         Relationships: []
       }
+      course_type_prerequisites: {
+        Row: {
+          course_type_id: string
+          created_at: string
+          id: string
+          required_course_type_id: string
+        }
+        Insert: {
+          course_type_id: string
+          created_at?: string
+          id?: string
+          required_course_type_id: string
+        }
+        Update: {
+          course_type_id?: string
+          created_at?: string
+          id?: string
+          required_course_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_type_prerequisites_course_type_id_fkey"
+            columns: ["course_type_id"]
+            isOneToOne: false
+            referencedRelation: "course_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_type_prerequisites_required_course_type_id_fkey"
+            columns: ["required_course_type_id"]
+            isOneToOne: false
+            referencedRelation: "course_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_types: {
         Row: {
           certification_body: string | null

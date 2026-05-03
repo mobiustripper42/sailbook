@@ -228,6 +228,10 @@ INSERT INTO public.course_types (id, name, short_code, slug, certification_body,
 
 UPDATE public.course_types SET is_drop_in = true WHERE id = 'b1000000-0000-0000-0000-000000000004';
 
+-- ASA 103 requires ASA 101 (prereq flag for testing the warning banner)
+INSERT INTO public.course_type_prerequisites (course_type_id, required_course_type_id) VALUES
+  ('b1000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000001');
+
 -- ============================================================
 -- COURSES
 -- ============================================================

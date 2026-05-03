@@ -31,7 +31,7 @@ export default async function StudentCourseDetailPage({
   const { data: course } = await supabase
     .from('courses')
     .select(`
-      id, title, description, capacity, price, member_price, status,
+      id, title, description, capacity, price, member_price, status, course_type_id,
       course_types ( name, short_code, description, certification_body, is_drop_in ),
       instructor:profiles!courses_instructor_id_fkey ( first_name, last_name )
     `)
@@ -40,6 +40,39 @@ export default async function StudentCourseDetailPage({
     .single()
 
   if (!course) notFound()
+
+  // Prerequisite flagging — show warning if the student has no non-cancelled
+  // enrollment in any course of a required course type. Flag only, not block.
+  const { data: prereqRows } = await supabase
+    .from('course_type_prerequisites')
+    .select('required_course_type_id, required:course_types!course_type_prerequisites_required_course_type_id_fkey(name, short_code)')
+    .eq('course_type_id', course.course_type_id)
+
+  const requiredTypeIds = (prereqRows ?? []).map((r) => r.required_course_type_id)
+  const { data: satisfyingEnrollments } = user && requiredTypeIds.length > 0
+    ? await supabase
+        .from('enrollments')
+        .select('courses!inner(course_type_id)')
+        .eq('student_id', user.id)
+        .neq('status', 'cancelled')
+        .in('courses.course_type_id', requiredTypeIds)
+    : { data: [] }
+
+  const satisfiedTypeIds = new Set(
+    (satisfyingEnrollments ?? []).map((e) => {
+      const c = e.courses as unknown as { course_type_id: string } | { course_type_id: string }[] | null
+      return Array.isArray(c) ? c[0]?.course_type_id : c?.course_type_id
+    }).filter(Boolean) as string[]
+  )
+
+  type PrereqRow = {
+    required_course_type_id: string
+    required: { name: string; short_code: string } | { name: string; short_code: string }[] | null
+  }
+  const missingPrereqs = ((prereqRows ?? []) as PrereqRow[])
+    .filter((r) => !satisfiedTypeIds.has(r.required_course_type_id))
+    .map((r) => Array.isArray(r.required) ? r.required[0] : r.required)
+    .filter((r): r is { name: string; short_code: string } => r != null)
 
   const { data: sessions } = await supabase
     .from('sessions')
@@ -278,6 +311,23 @@ export default async function StudentCourseDetailPage({
           <span className="font-medium">Drop-in session.</span>{' '}
           Pay {displayPrice != null ? `$${displayPrice}` : 'the hold amount'} now to reserve your spot.
           The remaining balance is paid to the captain on the day.
+        </div>
+      )}
+
+      {!isEnrolled && missingPrereqs.length > 0 && (
+        <div
+          data-testid="prereq-warning"
+          className="rounded-xs border border-warning/50 bg-warning/10 px-4 py-3 text-sm text-foreground"
+        >
+          <span className="font-medium">⚠️ Prerequisite not on record.</span>{' '}
+          This course recommends{' '}
+          {missingPrereqs.map((p, i) => (
+            <span key={p.short_code}>
+              {i > 0 && (i === missingPrereqs.length - 1 ? ' and ' : ', ')}
+              <span className="font-medium">{p.name}</span>
+            </span>
+          ))}
+          . You can still enroll — admin will follow up if needed.
         </div>
       )}
 
