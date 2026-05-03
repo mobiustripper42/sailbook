@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { loginAs } from './helpers'
 
 // ─── /dev/ltsc mock page ─────────────────────────────────────────────────────
 
@@ -61,6 +62,37 @@ test.describe('Public course page — unauthenticated', () => {
     await expect(breadcrumb).toBeVisible()
     const href = await breadcrumb.getAttribute('href')
     expect(href).toBe('/courses')
+  })
+
+  test('header shows Create account + Log in when unauthenticated', async ({ page }) => {
+    test.skip(test.info().project.name !== 'desktop')
+    await page.goto('/courses/asa101')
+    const header = page.locator('header')
+    await expect(header.getByRole('link', { name: 'Create account' })).toBeVisible()
+    await expect(header.getByRole('link', { name: 'Log in' })).toBeVisible()
+    await expect(header.getByRole('link', { name: 'Dashboard' })).toHaveCount(0)
+  })
+})
+
+test.describe('Public layout — authenticated header', () => {
+  test('shows Dashboard link instead of Login/Create when student is signed in', async ({ page }) => {
+    test.skip(test.info().project.name !== 'desktop')
+    await loginAs(page, 'pw_student@ltsc.test', '/student/dashboard')
+    await page.goto('/courses/asa101')
+    const header = page.locator('header')
+    const dashboard = header.getByRole('link', { name: 'Dashboard' })
+    await expect(dashboard).toBeVisible()
+    expect(await dashboard.getAttribute('href')).toBe('/student/dashboard')
+    await expect(header.getByRole('link', { name: 'Create account' })).toHaveCount(0)
+    await expect(header.getByRole('link', { name: 'Log in' })).toHaveCount(0)
+  })
+
+  test('routes admin Dashboard CTA to /admin/dashboard', async ({ page }) => {
+    test.skip(test.info().project.name !== 'desktop')
+    await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
+    await page.goto('/courses/asa101')
+    const dashboard = page.locator('header').getByRole('link', { name: 'Dashboard' })
+    expect(await dashboard.getAttribute('href')).toBe('/admin/dashboard')
   })
 })
 
