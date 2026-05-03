@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { verifyCron } from '@/lib/cron-auth'
 
 export async function GET(req: NextRequest) {
-  const cronSecret = process.env.CRON_SECRET
-  if (cronSecret) {
-    const auth = req.headers.get('authorization')
-    if (auth !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-  }
+  const blocked = verifyCron(req)
+  if (blocked) return blocked
 
   const admin = createAdminClient()
 
