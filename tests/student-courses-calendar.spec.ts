@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers';
 
 // 5.10 — student `/student/courses` calendar view.
-// Calendar is the default on tablet+desktop; mobile is forced to list.
+// Calendar is the default on all viewports. Toggle visible everywhere.
+// List view uses agenda layout (CoursesAgendaList) on all viewports.
 // User preference (calendar/list) persists in localStorage.
 
 test.describe('Student courses — view switcher', () => {
@@ -10,21 +11,20 @@ test.describe('Student courses — view switcher', () => {
     await loginAs(page, 'pw_student@ltsc.test', '/student/dashboard');
   });
 
-  test('mobile: list view forced, toggle hidden, calendar not rendered', async ({ page }) => {
+  test('mobile: calendar default, toggle visible, can switch to agenda', async ({ page }) => {
     test.skip(test.info().project.name !== 'mobile');
 
     await page.goto('/student/courses');
-
-    // Wait for hydration so the client component has decided isMobile.
-    // The toggle is conditionally rendered after hydration AND only on non-mobile.
     await page.waitForLoadState('networkidle');
 
-    await expect(page.getByTestId('courses-view-toggle')).toBeHidden();
-    await expect(page.getByTestId('courses-calendar')).toBeHidden();
-    await expect(page.getByTestId('courses-view-content')).toHaveAttribute('data-active-view', 'list');
+    // Toggle is now visible on mobile
+    await expect(page.getByTestId('courses-view-toggle')).toBeVisible();
+    // Calendar is the default view
+    await expect(page.getByTestId('courses-view-content')).toHaveAttribute('data-active-view', 'calendar');
 
-    // List view: at least one card from seed data
-    await expect(page.getByText('ASA 101 - Weekend Intensive (May)')).toBeVisible();
+    // Switch to list → agenda renders
+    await page.getByTestId('view-toggle-list').click();
+    await expect(page.getByTestId('agenda-session-row').first()).toBeVisible();
   });
 
   test('desktop: calendar shown by default, toggle visible', async ({ page }) => {

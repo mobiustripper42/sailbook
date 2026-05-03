@@ -11,6 +11,14 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
+export type CourseSession = {
+  id: string
+  date: string
+  start_time: string
+  end_time: string
+  location: string | null
+}
+
 export type CourseCardData = {
   id: string
   title: string | null
@@ -21,6 +29,7 @@ export type CourseCardData = {
   capacity: number
   price: number | null
   sessionDates: string[]
+  sessions: CourseSession[]
   myStatus: string | null
   myHoldExpiresAt: string | null  // For pending_payment rows; null otherwise
   spotsRemaining: number
