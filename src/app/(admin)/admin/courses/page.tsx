@@ -1,23 +1,15 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/empty-state'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import CoursesList from '@/components/admin/courses-list'
 
 export default async function CoursesPage() {
   const supabase = await createClient()
   const { data: courses, error } = await supabase
     .from('courses')
     .select(`
-      id, title, status, capacity, price,
+      id, title, status, capacity, price, created_at,
       course_types ( name, short_code ),
       instructor:profiles!courses_instructor_id_fkey ( first_name, last_name ),
       sessions ( id ),
@@ -28,7 +20,7 @@ export default async function CoursesPage() {
   if (error) return <div className="text-destructive text-sm">{error.message}</div>
 
   return (
-    <div className="">
+    <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">Courses</h1>
         <Button asChild>
@@ -46,60 +38,7 @@ export default async function CoursesPage() {
           }
         />
       ) : (
-        <div className="rounded-lg border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Course</TableHead>
-                <TableHead className="hidden sm:table-cell">Instructor</TableHead>
-                <TableHead className="hidden md:table-cell">Sessions</TableHead>
-                <TableHead>Enrolled / Cap</TableHead>
-                <TableHead className="hidden sm:table-cell">Price</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-16" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {courses?.map((c) => {
-                const type = c.course_types as unknown as { name: string; short_code: string } | null
-                const instructor = c.instructor as unknown as { first_name: string; last_name: string } | null
-                const sessionCount = Array.isArray(c.sessions) ? c.sessions.length : 0
-                const enrollmentCount = Array.isArray(c.enrollments)
-                  ? c.enrollments.filter((e: { id: string; status: string }) => e.status === 'confirmed').length
-                  : 0
-
-                return (
-                  <TableRow key={c.id}>
-                    <TableCell>
-                      <div>
-                        <Link href={`/admin/courses/${c.id}`} className="font-medium hover:underline underline-offset-2">
-                          {c.title ?? type?.name ?? '—'}
-                        </Link>
-                        {c.title && <p className="text-xs text-muted-foreground">{type?.name}</p>}
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      {instructor ? `${instructor.first_name} ${instructor.last_name}` : '—'}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">{sessionCount}</TableCell>
-                    <TableCell>{enrollmentCount} / {c.capacity}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{c.price != null ? `$${c.price}` : '—'}</TableCell>
-                    <TableCell>
-                      <Badge variant={c.status === 'active' ? 'ok' : 'neutral'}>
-                        {c.status.charAt(0).toUpperCase() + c.status.slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/admin/courses/${c.id}`}>View</Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </div>
+        <CoursesList courses={(courses ?? []) as unknown as Parameters<typeof CoursesList>[0]['courses']} />
       )}
     </div>
   )
