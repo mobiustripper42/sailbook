@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { confirmEnrollment, cancelEnrollment, processRefund } from '@/actions/enrollments'
+import { confirmEnrollment, cancelEnrollment, processRefund, restoreEnrollment } from '@/actions/enrollments'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -38,7 +38,7 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
   )
   const [refundError, setRefundError] = useState<string | null>(null)
 
-  if (optimisticStatus === 'cancelled' || optimisticStatus === 'completed') return null
+  if (optimisticStatus === 'completed') return null
 
   function handle(nextStatus: string, action: () => Promise<{ error: string | null }>) {
     const prevStatus = optimisticStatus
@@ -75,6 +75,24 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
     setRefundDialogOpen(false)
     handle('cancelled', () =>
       processRefund(enrollmentId, courseId, isFullRefund ? undefined : refundCents)
+    )
+  }
+
+  if (optimisticStatus === 'cancelled') {
+    return (
+      <div className="flex flex-col gap-1">
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={pending}
+          onClick={() => handle('confirmed', () => restoreEnrollment(enrollmentId, courseId))}
+        >
+          {pending
+            ? <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            : 'Restore'}
+        </Button>
+        {error && <p className="text-xs text-destructive">{error}</p>}
+      </div>
     )
   }
 
