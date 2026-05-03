@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { EmptyState } from '@/components/empty-state'
 import {
@@ -168,7 +167,6 @@ export default function CoursesList({ courses }: { courses: Course[] }) {
                 <TableHead className="hidden sm:table-cell">Price</TableHead>
                 <SortableHead label="Status" sortKey="status" activeKey={sortKey} dir={sortDir} onClick={toggleSort} />
                 <SortableHead label="Created" sortKey="created_at" activeKey={sortKey} dir={sortDir} onClick={toggleSort} className="hidden md:table-cell" />
-                <TableHead className="w-16" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -204,11 +202,6 @@ export default function CoursesList({ courses }: { courses: Course[] }) {
                     </TableCell>
                     <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
                       {new Date(c.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/admin/courses/${c.id}`}>View</Link>
-                      </Button>
                     </TableCell>
                   </TableRow>
                 )
