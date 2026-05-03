@@ -1,18 +1,10 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { fmtTime } from '@/lib/utils'
+import { fmtTime, fmtDateRelative } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-function fmtDate(d: string) {
-  return new Date(d + 'T12:00:00').toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  })
-}
 
 
 export default async function StudentDashboard() {
@@ -113,7 +105,7 @@ export default async function StudentDashboard() {
                   <p className="font-semibold">
                     {nextSession.course?.title ?? nextSession.course?.course_types?.name ?? '—'}
                   </p>
-                  <p className="text-sm text-muted-foreground">{fmtDate(nextSession.date)}</p>
+                  <p className="text-sm text-muted-foreground">{fmtDateRelative(nextSession.date)}</p>
                   <p className="text-sm text-muted-foreground">
                     {fmtTime(nextSession.start_time)} – {fmtTime(nextSession.end_time)}
                     {nextSession.location ? ` · ${nextSession.location}` : ''}
@@ -170,7 +162,7 @@ export default async function StudentDashboard() {
                     </p>
                   </div>
                   <div className="text-xs text-muted-foreground sm:text-right shrink-0">
-                    <p>{fmtDate(next.date)}</p>
+                    <p>{fmtDateRelative(next.date)}</p>
                     <p>{fmtTime(next.start_time)}</p>
                   </div>
                 </div>

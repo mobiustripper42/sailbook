@@ -20,6 +20,28 @@ export function fmtDateLong(dateStr: string) {
   })
 }
 
+/**
+ * Relative date label for session displays. Falls back to "Wed, May 6" for
+ * anything outside ±1 day so the format is predictable and the day-of-week
+ * is always present for orientation.
+ */
+export function fmtDateRelative(dateStr: string): string {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const target = new Date(dateStr + 'T00:00:00')
+  const diffDays = Math.round((target.getTime() - today.getTime()) / (24 * 60 * 60 * 1000))
+
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Tomorrow'
+  if (diffDays === -1) return 'Yesterday'
+
+  return target.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
 export function fmtTime(t: string) {
   const [h, m] = t.split(':').map(Number)
   const ampm = h < 12 ? 'am' : 'pm'
