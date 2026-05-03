@@ -2,7 +2,8 @@ export const dynamic = 'force-dynamic'
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { CoursesCardList, type CourseCardData } from '@/components/student/courses-card-list'
+import { CoursesCardList, type CourseCardData, type CourseSession } from '@/components/student/courses-card-list'
+import { CoursesAgendaList } from '@/components/student/courses-agenda-list'
 import { CoursesCalendar } from '@/components/student/courses-calendar'
 import { CoursesViewSwitcher } from '@/components/student/courses-view-switcher'
 
@@ -23,7 +24,7 @@ export default async function CourseBrowsePage() {
         id, title, capacity, price,
         course_types ( name, short_code, description ),
         instructor:profiles!courses_instructor_id_fkey ( first_name, last_name ),
-        sessions ( date )
+        sessions ( id, date, start_time, end_time, location )
       `)
       .eq('status', 'active')
       .order('created_at', { ascending: true }),
@@ -44,7 +45,7 @@ export default async function CourseBrowsePage() {
 
   // Hide courses where every session is in the past. Courses with no sessions yet remain visible.
   const visibleCourses = (courses ?? []).filter((c) => {
-    const sessions = (c.sessions as unknown as { date: string }[]) ?? []
+    const sessions = (c.sessions as unknown as CourseSession[]) ?? []
     return sessions.length === 0 || sessions.some((s) => s.date >= today)
   })
 
@@ -64,7 +65,7 @@ export default async function CourseBrowsePage() {
   const cardData: CourseCardData[] = visibleCourses.map((c) => {
     const type = c.course_types as unknown as { name: string; short_code: string; description: string | null } | null
     const instructor = c.instructor as unknown as { first_name: string; last_name: string } | null
-    const sessions = (c.sessions as unknown as { date: string }[]) ?? []
+    const sessions = (c.sessions as unknown as CourseSession[]) ?? []
     const activeEnrollments = countMap.get(c.id) ?? 0
     const spotsRemaining = c.capacity - activeEnrollments
     const enrollment = enrollmentMap.get(c.id) ?? null
@@ -78,6 +79,7 @@ export default async function CourseBrowsePage() {
       capacity: c.capacity,
       price: c.price,
       sessionDates: sessions.map((s) => s.date),
+      sessions,
       myStatus: enrollment?.status ?? null,
       myHoldExpiresAt: enrollment?.holdExpiresAt ?? null,
       spotsRemaining,
@@ -94,6 +96,7 @@ export default async function CourseBrowsePage() {
       <CoursesViewSwitcher
         calendar={<CoursesCalendar courses={cardData} />}
         list={<CoursesCardList courses={cardData} />}
+        agenda={<CoursesAgendaList courses={cardData} />}
       />
     </div>
   )

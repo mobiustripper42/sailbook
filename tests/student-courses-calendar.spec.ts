@@ -23,8 +23,8 @@ test.describe('Student courses — view switcher', () => {
     await expect(page.getByTestId('courses-calendar')).toBeHidden();
     await expect(page.getByTestId('courses-view-content')).toHaveAttribute('data-active-view', 'list');
 
-    // List view: at least one card from seed data
-    await expect(page.getByText('ASA 101 - Weekend Intensive (May)')).toBeVisible();
+    // Mobile renders the agenda view — at least one session row from seed data
+    await expect(page.getByTestId('agenda-session-row').first()).toBeVisible();
   });
 
   test('desktop: calendar shown by default, toggle visible', async ({ page }) => {

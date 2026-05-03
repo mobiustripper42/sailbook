@@ -12,9 +12,11 @@ type View = 'calendar' | 'list'
 export function CoursesViewSwitcher({
   calendar,
   list,
+  agenda,
 }: {
   calendar: ReactNode
   list: ReactNode
+  agenda?: ReactNode
 }) {
   // Server renders calendar; client may switch to list after reading
   // localStorage / matchMedia. Brief flicker on first load is acceptable —
@@ -89,7 +91,11 @@ export function CoursesViewSwitcher({
       )}
 
       <div data-testid="courses-view-content" data-active-view={effectiveView}>
-        {effectiveView === 'calendar' ? calendar : list}
+        {effectiveView === 'calendar'
+          ? calendar
+          : isMobile && agenda
+            ? agenda
+            : list}
       </div>
     </>
   )
