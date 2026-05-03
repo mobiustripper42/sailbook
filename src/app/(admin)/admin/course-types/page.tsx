@@ -1,29 +1,20 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/empty-state'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import CourseTypeActions from '@/components/admin/course-type-actions'
+import CourseTypesList from '@/components/admin/course-types-list'
 
 export default async function CourseTypesPage() {
   const supabase = await createClient()
   const { data: courseTypes, error } = await supabase
     .from('course_types')
-    .select('*')
+    .select('id, name, short_code, certification_body, max_students, min_hours, is_active')
     .order('name')
 
   if (error) return <div className="text-destructive text-sm">{error.message}</div>
 
   return (
-    <div className="">
+    <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">Course Types</h1>
         <Button asChild>
@@ -41,40 +32,7 @@ export default async function CourseTypesPage() {
           }
         />
       ) : (
-        <div className="rounded-lg border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead className="hidden sm:table-cell">Cert Body</TableHead>
-                <TableHead className="hidden md:table-cell">Max Students</TableHead>
-                <TableHead className="hidden md:table-cell">Min Hours</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-24" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {courseTypes?.map((ct) => (
-                <TableRow key={ct.id}>
-                  <TableCell className="font-medium">{ct.name}</TableCell>
-                  <TableCell className="font-mono text-sm">{ct.short_code}</TableCell>
-                  <TableCell className="hidden sm:table-cell">{ct.certification_body ?? '—'}</TableCell>
-                  <TableCell className="hidden md:table-cell">{ct.max_students}</TableCell>
-                  <TableCell className="hidden md:table-cell">{ct.min_hours ?? '—'}</TableCell>
-                  <TableCell>
-                    <Badge variant={ct.is_active ? 'ok' : 'neutral'}>
-                      {ct.is_active ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <CourseTypeActions id={ct.id} isActive={ct.is_active} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <CourseTypesList courseTypes={courseTypes ?? []} />
       )}
     </div>
   )
