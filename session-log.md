@@ -3,7 +3,9 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 123 — 2026-05-03 02:39 [open]
+## Session 124 — 2026-05-03 02:50 [open]
+
+## Session 123 — 2026-05-03 02:39 [abandoned]
 
 ## Session 122 — 2026-05-02 12:55–2026-05-03 02:30 (7.58 hrs, 6 hrs multitasking subtracted)
 **Duration:** 7.58 hrs | **Points:** 18 (6.24 + 6.14 + 6.9 + 6.5 + 6.7)
