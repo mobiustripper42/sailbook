@@ -3,6 +3,48 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 128 — 2026-05-03 13:19–14:15 (0.93 hrs)
+**Duration:** 0.93 hrs | **Points:** 0 (tooling/workflow — no plan task)
+**Task:** /read-the-tape on session 126 (Playwright fix session) + apply all findings
+
+**Completed:**
+- Ran tape-reader on s126 transcript (8505d146); identified P8, CX3, CX4, CX5, CX6, CX7
+- Separately reviewed notifications.spec.ts: confirmed { retries: 2 } is a band-aid on
+  a 6-file shared-buffer race; documented properly, real fix logged as post-launch debt
+- Applied P8: its-alive Step 2 now greps for session headings instead of reading whole file;
+  also fixed concurrent-session check in Step 0 (same gap, missed in original P8 scope)
+- Applied CX3: kill-this skips build when all changes are under tests/ or supabase/tests/;
+  fixed check to use `git diff --name-only HEAD` (not --cached, which has nothing staged yet)
+- Applied CX4: its-dead Step 0 has guard check that bails if no [open] heading found;
+  anchored grep to `^## Session.*\[open\]` to avoid matching [open] in historical prose
+- Added CX4–CX7 as formal known patterns to tape-reader.md
+- Addressed all 5 code review findings in a follow-up commit
+
+**In Progress:** Nothing
+
+**Blocked:** Twilio Toll-Free Verification (external dependency, carryover)
+
+**Next Steps:**
+1. Merge PR #24 (read-the-tape s128 workflow fixes) + /push-seeds after merge
+2. Switch back to main worktree — **6.27 Restore cancelled enrollment (3 pts)** is the
+   highest-priority code task. May 4 launch is TODAY.
+3. Pre-launch trio: 6.8 (external audit) + 6.12 (security) + 6.17 (close-out)
+
+**Context:**
+- tape-reader is workflow-only by default. To audit test quality, prompt it explicitly or
+  do a separate manual read focused on test file diffs.
+- CX3 check uses `git diff --name-only HEAD` not `--cached` — nothing is staged at kill-this
+  Step 1, so --cached would always return empty and skip the build incorrectly.
+- The `[open]` grep must be anchored to `^## Session` or it matches historical log prose
+  that mentions the literal string [open].
+- notifications.spec.ts buffer race: 6 total spec files share the DELETE endpoint; real fix
+  is a ?key= namespace param on the mock API. Post-launch debt.
+
+**Code Review:** 5 findings — 2 bugs (grep anchoring, --cached vs HEAD), 1 consistency gap
+(its-alive concurrent check), 1 description clarity, 1 comment style. All addressed.
+
+**PR:** https://github.com/mobiustripper42/sailbook/pull/24
+
 ## Session 127 — 2026-05-03 11:07 [open]
 
 ## Session 126 — 2026-05-03 04:20–11:03 (6.75 hrs)

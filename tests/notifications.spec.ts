@@ -67,6 +67,9 @@ test.describe('Notification service — mock dispatch', () => {
     })
   })
 
+  // retries: 2 — other spec files that share the notification buffer each DELETE it in their
+  // beforeEach; a DELETE can land between our two POSTs when workers run in parallel (local
+  // 4-worker only — CI is 1-worker and unaffected). Real fix: namespace by ?key= per spec file.
   test('Buffer accumulates across calls and clear empties it', { retries: 2 }, async ({ request }) => {
     await request.post(`${BASE}/api/test/notifications`, {
       data: { channel: 'sms', to: '+15555550101', body: 'first' },

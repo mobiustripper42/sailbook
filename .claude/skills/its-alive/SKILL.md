@@ -14,7 +14,7 @@ You are executing the session start ritual.
 
 Run `git fetch origin` to refresh remote state. Capture `BRANCH=$(git branch --show-current)`.
 
-**Concurrent session check:** run `grep "^## Session.*\[open\]" session-log.md`. If any output is returned:
+**Concurrent session check:** run `grep "^## Session.*\[open\]" session-log.md | head -1`. If output is non-empty, a session is already open:
 - Show the user: "Session N is already open (started YYYY-MM-DD HH:MM). Is this: **(a)** a currently running concurrent session → I'll create a worktree for this new task, or **(b)** a stale/crashed entry → I'll close it and continue here?"
 - Wait for the user's answer.
 - If **(b)** (stale): close the open entry by replacing `[open]` in that heading with a note like `[abandoned]`, then continue below.
@@ -48,7 +48,7 @@ Run `date` to get the current local time. Record it — this is the session star
 
 ## Step 2 — Determine session number
 
-Run `grep "^## Session [0-9]" session-log.md | head -1` — the file is prepend-ordered so the first hit is the highest N. Parse N from the result. The new session number is N+1.
+Run `grep "^## Session" session-log.md | head -5` to find recent session headings. Take the highest N from the results. The new session number is that N+1. Do not read the whole file — the grep output is sufficient. Do not just take the first heading — if a concurrent session is already open, it will be `[open]` at the top and must be counted.
 
 ## Step 3 — Open a session entry (auto-commit + push)
 

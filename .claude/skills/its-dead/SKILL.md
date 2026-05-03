@@ -8,6 +8,8 @@ You are executing the second half of the end-of-session shutdown. The user has r
 
 ## Step 0 — Calculate time and tally points
 
+**Guard check first:** Run `grep "^## Session.*\[open\]" session-log.md | head -1`. If no output, say "No open session entry found — `/its-dead` may have already run for this session. Nothing to do." and stop immediately.
+
 **Time:**
 Run `git log -1 --format="%ci"` to get the most recent commit timestamp — this is the session end time.
 Read the session start time from the open entry at the top of `session-log.md` (it has `[open]` in the heading).
