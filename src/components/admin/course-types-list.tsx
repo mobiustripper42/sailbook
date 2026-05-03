@@ -20,8 +20,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { cn } from '@/lib/utils'
 import { toggleCourseTypeActive } from '@/actions/course-types'
+import { SortableHead } from '@/components/admin/sortable-head'
 
 export type CourseTypeRow = {
   id: string
@@ -171,34 +171,3 @@ export default function CourseTypesList({ courseTypes }: { courseTypes: CourseTy
   )
 }
 
-function SortableHead({
-  label,
-  sortKey,
-  activeKey,
-  dir,
-  onClick,
-  className,
-}: {
-  label: string
-  sortKey: SortKey
-  activeKey: SortKey
-  dir: SortDir
-  onClick: (key: SortKey) => void
-  className?: string
-}) {
-  const isActive = sortKey === activeKey
-  return (
-    <TableHead className={className} aria-sort={isActive ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
-      <button
-        type="button"
-        onClick={() => onClick(sortKey)}
-        className="inline-flex items-center gap-1 text-left hover:text-foreground"
-      >
-        {label}
-        <span className={cn('text-xs', isActive ? 'text-foreground' : 'text-muted-foreground/40')}>
-          {isActive ? (dir === 'asc' ? '↑' : '↓') : '↕'}
-        </span>
-      </button>
-    </TableHead>
-  )
-}

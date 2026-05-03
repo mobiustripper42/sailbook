@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/table'
 import UserRowActions from '@/components/admin/user-row-actions'
 import { cn } from '@/lib/utils'
+import { SortableHead } from '@/components/admin/sortable-head'
 
 type User = {
   id: string
@@ -185,34 +186,3 @@ export default function UsersList({ users }: { users: User[] }) {
   )
 }
 
-function SortableHead({
-  label,
-  sortKey,
-  activeKey,
-  dir,
-  onClick,
-  className,
-}: {
-  label: string
-  sortKey: SortKey
-  activeKey: SortKey
-  dir: SortDir
-  onClick: (key: SortKey) => void
-  className?: string
-}) {
-  const isActive = sortKey === activeKey
-  return (
-    <TableHead className={className} aria-sort={isActive ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
-      <button
-        type="button"
-        onClick={() => onClick(sortKey)}
-        className="inline-flex items-center gap-1 text-left hover:text-foreground"
-      >
-        {label}
-        <span className={cn('text-xs', isActive ? 'text-foreground' : 'text-muted-foreground/40')}>
-          {isActive ? (dir === 'asc' ? '↑' : '↓') : '↕'}
-        </span>
-      </button>
-    </TableHead>
-  )
-}
