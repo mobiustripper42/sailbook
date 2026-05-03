@@ -12,7 +12,7 @@ test.describe('Admin — low enrollment dashboard tile', () => {
   })
 
   test('default seed: tile shows healthy state (minimum_enrollment is NULL on all course types)', async ({ page }) => {
-    await expect(page.getByText('Enrollment Healthy')).toBeVisible()
+    await expect(page.getByText('Enrollment is healthy')).toBeVisible()
   })
 
   test('setting minimum_enrollment above current count flags the dashboard tile', async ({ page }) => {
