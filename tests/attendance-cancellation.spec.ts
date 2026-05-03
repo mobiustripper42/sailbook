@@ -203,17 +203,16 @@ test.describe('Admin — session cancellation + makeup', () => {
     await expect(makeupButton).toBeVisible({ timeout: 10000 });
 
     // Open the makeup form and fill in a makeup date.
-    // Scoped to the form element to avoid any other date inputs on the page.
+    // Scoped to the form containing the Create Makeup button (the form itself
+    // doesn't contain "Schedule Makeup" text — that was on the button pre-click).
     await makeupButton.click();
-    await page
-      .locator('form')
-      .filter({ hasText: 'Schedule Makeup' })
-      .locator('input[name="date"]')
-      .fill('2027-09-22');
-    await page.getByRole('button', { name: 'Create Makeup' }).click();
+    const makeupForm = page.locator('form').filter({ has: page.getByRole('button', { name: 'Create Makeup' }) });
+    await makeupForm.locator('input[name="date"]').fill('2027-09-22');
+    await makeupForm.getByRole('button', { name: 'Create Makeup' }).click();
 
     // After redirect: makeup row shows "Makeup scheduled (1 student)"
-    await expect(page.getByText('Makeup scheduled (1 student)')).toBeVisible({ timeout: 10000 });
+    // Scope to table cell — card view renders the same text but is hidden at desktop.
+    await expect(page.getByRole('cell').filter({ hasText: 'Makeup scheduled (1 student)' })).toBeVisible({ timeout: 10000 });
 
     // pw_student visits the course detail — should see "Missed" badge + "Makeup scheduled" text
     // on the now-cancelled original session row

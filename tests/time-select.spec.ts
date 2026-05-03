@@ -30,8 +30,8 @@ test.describe('TimeSelect — add session form', () => {
     await page.locator('input[name="location"]').fill(`Dock ${id}`)
     await form.getByRole('button', { name: 'Add Session' }).click()
 
-    // Verify session appears — use location as unique identifier per runId()
-    await expect(page.getByText(`Dock ${id}`)).toBeVisible({ timeout: 8000 })
+    // Verify session appears in table — scope to cell to avoid the card-display duplicate
+    await expect(page.getByRole('cell', { name: `Dock ${id}` })).toBeVisible({ timeout: 8000 })
   })
 
   test('admin can edit session time via inline edit row', async ({ page }) => {
@@ -58,6 +58,6 @@ test.describe('TimeSelect — add session form', () => {
     await editRow.getByRole('button', { name: 'Save' }).click()
 
     await expect(editRow).not.toBeVisible({ timeout: 8000 })
-    await expect(page.getByText('6:00pm').first()).toBeVisible()
+    await expect(page.getByRole('cell', { name: /6:00pm/ }).first()).toBeVisible()
   })
 })

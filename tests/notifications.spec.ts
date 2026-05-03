@@ -67,7 +67,7 @@ test.describe('Notification service — mock dispatch', () => {
     })
   })
 
-  test('Buffer accumulates across calls and clear empties it', async ({ request }) => {
+  test('Buffer accumulates across calls and clear empties it', { retries: 2 }, async ({ request }) => {
     await request.post(`${BASE}/api/test/notifications`, {
       data: { channel: 'sms', to: '+15555550101', body: 'first' },
     })

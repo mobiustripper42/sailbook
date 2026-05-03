@@ -213,7 +213,8 @@ test.describe('Unsaved changes guard — user edit form', () => {
   test('cancel after changes shows confirm dialog; dismiss keeps user on edit page', async ({ page }) => {
     await page.goto('/admin/users');
     const row = page.getByRole('row').filter({ hasText: 'PW Instructor' }).first();
-    await row.getByRole('link', { name: 'Edit' }).click();
+    await row.getByRole('button', { name: 'User actions' }).click();
+    await page.getByRole('menuitem', { name: 'Edit' }).click();
     await page.waitForURL(/\/admin\/users\/[0-9a-f-]+\/edit/, { timeout: 5000 });
 
     await page.getByLabel('First Name').fill('Changed');
@@ -227,7 +228,8 @@ test.describe('Unsaved changes guard — user edit form', () => {
   test('cancel after changes shows confirm dialog; accept navigates away', async ({ page }) => {
     await page.goto('/admin/users');
     const row = page.getByRole('row').filter({ hasText: 'PW Instructor' }).first();
-    await row.getByRole('link', { name: 'Edit' }).click();
+    await row.getByRole('button', { name: 'User actions' }).click();
+    await page.getByRole('menuitem', { name: 'Edit' }).click();
     await page.waitForURL(/\/admin\/users\/[0-9a-f-]+\/edit/, { timeout: 5000 });
 
     await page.getByLabel('First Name').fill('Changed');

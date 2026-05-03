@@ -14,6 +14,9 @@ test.describe('Student — browse courses', () => {
 
   test('shows active seed courses on browse page', async ({ page }) => {
     await page.goto('/student/courses');
+    // Wait for the localStorage-driven view switch to complete (SSR defaults to
+    // calendar; useEffect reads 'list' and re-renders — briefly both can be in DOM).
+    await page.waitForSelector('[data-active-view="list"]', { timeout: 5000 });
     await expect(page.getByText('ASA 101 - Weekend Intensive (May)')).toBeVisible();
     await expect(page.getByText('ASA 101 - Evening Series (May)')).toBeVisible();
     await expect(page.getByText('Open Sailing - Jul 1', { exact: true })).toBeVisible();
