@@ -3,7 +3,48 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 122 — 2026-05-02 12:55 [open]
+## Session 122 — 2026-05-02 12:55–2026-05-03 02:30 (7.58 hrs, 6 hrs multitasking subtracted)
+**Duration:** 7.58 hrs | **Points:** 18 (6.24 + 6.14 + 6.9 + 6.5 + 6.7)
+**Task:** Phase 6 polish — five tasks bundled across one long session
+
+**Completed:**
+- **6.24 — Course detail mobile rewrite** (5 pts). PR #14, merged.
+  - Mobile card list (`md:hidden`) replaces session table below `md`. New `SessionCardItem` component (~240 lines) mirrors `SessionRow` actions (Edit / Attendance / Cancel / Delete) inside a `•••` DropdownMenu.
+  - Header redesigned to `[Edit] [⋯]` hybrid (per @architect review). Title + status badge no longer collide at 1208px with long titles. Formalized in **DEC-028** (page-header actions pattern).
+  - Edit / Makeup / Add forms normalized to the same flat-panel style — Makeup had a redundant inner border + heading; Edit had `py-2` margins; Add was already correct. All three now match.
+  - Glyph aligned to `•••` (size="sm") across course-status + session-card triggers; the original `⋯` (size="icon") didn't match the row-level pattern.
+  - Enrollments table wrapped in `overflow-x-auto`; 6 Playwright tests across all viewports.
+- **6.14 — Consolidate profile edit screens** (2 pts). PR #15, merged.
+  - Single `UserEditForm` now covers admin + instructor + student edit pages. Student-only fields (ASA #, experience, member pricing) render conditionally via `is_student` flag + `has_student_fields` form sentinel.
+  - Deleted dead `profile-edit-form.tsx`. Server action `updateUserProfile` extended to read student fields when sentinel is set.
+  - Polish folded onto same PR: copy fix ("Email cannot be changed here." — drop "Supabase Auth" reference), checkbox label trimmed to "Member Pricing", users list refactored to `•••` UserRowActions menu (Edit / Experience / Activate-Deactivate). Name cell is now a Link to Edit. Deleted dead `instructor-actions.tsx`.
+- **6.9 — Admin dashboard redesign** (5 pts). PR #16, merged.
+  - Date subtitle, 4-pill QuickActions row, StatRow with conditional CleanIndicator (subtle dashed border when "Enrollment is healthy").
+  - Sessions card spans full width; Pending + Cancellation in a 2-col grid below. Sessions are day-grouped with `dayHeader()` returning Today / Tomorrow / weekday — wired through to 6.7's util.
+- **6.5 — axe-core accessibility audit** (3 pts). PR #17, merged.
+  - 100+ violations traced to 3 root causes: `--muted-foreground` (0.56 → 0.52), `--warning` (0.68/67 → 0.48/0.16/51), and 4 unlabeled Selects (dev-login-helper, session-instructor-select, two TimeSelect comboboxes).
+  - New `tests/a11y-helpers.ts` injects axe-core from node_modules; new `tests/accessibility.spec.ts` audits 13 pages across all 4 roles.
+- **6.7 — Relative session badges** (3 pts). PR #18, merged.
+  - New `fmtDateRelative` util returns Today / Tomorrow / Yesterday / `Mon, May 5`. 7 unit tests. Used by the dashboard `dayHeader()`.
+- **Backlog adds (no points):** 6.25 public course catalog (5 pts, replaces LTSC `/product-category/course/`), 6.26 admin courses list sortable + search (3 pts, mirrors users list), 6.27 restore cancelled enrollment (3 pts). Two V3 entries: TimeSelect compact mode at <432px, admin enroll student selector typeahead.
+- **Tooling:** Added `/read-the-tape` skill + `@tape-reader` agent for transcript review.
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification pending (carryover from s102).
+
+**Next Steps:**
+1. **6.27 — Restore cancelled enrollment** (3 pts) is the highest-priority Phase 6 task remaining — surfaced today by Eric noticing the unique-constraint trap. Server action + Restore button + capacity check + pgTAP + Playwright. Payment record stays as-is (admin handles re-collection out of band).
+2. Other Phase 6 candidates: **6.25** (public catalog, 5), **6.26** (courses list sort/search, 3), **6.10** (breadcrumb audit, 5), **6.18** (CI + iOS testing, 5), **6.8** (external audit, 2), **6.12** (security audit, 3), **6.17** (close-out, 5).
+3. May 4 launch is tomorrow — **6.8** + **6.12** + **6.17** are the natural pre-launch trio. Everything else can land in V2.5.
+
+**Context:**
+- **DEC-028 — page-header actions pattern.** Single primary action stays as a visible button (Edit); everything else collapses into a `•••` DropdownMenu trigger. Glyph is `•••` (three bullets), `size="sm"`, `align="end"`. Same pattern now in `CourseStatusActions` (page header) and `SessionCardItem` / `UserRowActions` (row level). Triggered by the 4-button squish at 1208px on long course titles.
+- **Conditional fields via form sentinel.** `UserEditForm` reads a hidden `<input name="has_student_fields" value="true">` so the server action knows whether to read student-only fields. Cleaner than role-sniffing inside the action — the form declares its own intent.
+- **`UserRowActions` consolidation.** Three separate links (View / Edit / Activate) collapsed to one menu trigger. Name cell became the primary Edit affordance — taps navigate, swipes still scroll (Link-on-text doesn't fire on long-press or scroll-drag).
+- **a11y root-cause sweep.** When a single audit reports 100+ violations, look for shared root causes before fixing instances. Three CSS variables + four labels closed the whole queue.
+- **Force-push avoidance pattern.** When a rebase rewrites local history but the remote branch is behind, `git reset --hard origin/<branch> && git cherry-pick <new-commit>` produces a fast-forward push without `--force-with-lease`. Used on the 6.14 polish push.
+- **PRs:** #14, #15, #16, #17, #18 — all merged on Eric's phone.
 
 ## Session 121 — 2026-05-02 03:45–11:07 (1.33 hrs, 6 hrs overnight subtracted)
 **Duration:** 1.33 hrs | **Points:** 0 (test debt — unscoped, no plan task)
