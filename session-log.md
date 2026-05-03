@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 129 — 2026-05-03 15:30 [open]
+
 ## Session 128 — 2026-05-03 13:19–14:15 (0.93 hrs)
 **Duration:** 0.93 hrs | **Points:** 0 (tooling/workflow — no plan task)
 **Task:** /read-the-tape on session 126 (Playwright fix session) + apply all findings
