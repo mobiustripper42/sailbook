@@ -6,6 +6,47 @@ Format per entry: velocity, scope changes, what worked, what didn't, forecast up
 
 ---
 
+## Phase 6 — Polish & UX
+**Completed:** 2026-05-03 (close-out, session 130)
+**Sessions:** ~111–130, the long tail of V2 sprint toward May 4 launch
+
+### Velocity
+
+| Metric | Value |
+|--------|-------|
+| Effort points | 58 pts (52 base; session 109 −9, session 122 +11, session 129 +12, session 130 −5; +TBD for 6.19/6.20 not separately accounted) |
+| Projected hours | ~22 hrs (at 0.38 hr/pt) |
+| Actual hours | not separately tracked (interleaved with Phase 4 + 5 sprint sessions) |
+
+### Scope Changes
+- **Cut to V3 (session 109):** 6.0 (LTSC theme tune), 6.6 (Duplicate course), 6.11 (Public landing page), 6.16 (Refund amount visible to student). −9 pts.
+- **Cut to V3 (session 130, this close):** 6.18 (CI + iOS testing, −5), 6.28 (Staging environment, −TBD). Local Playwright + Vercel previews are sufficient for V2; both promote when launch reality demands them.
+- **Closed administratively:** 6.8 — Attention Insight done (heatmaps saved, signal: student 58% / admin 48% clarity, attention lands on intended focal points). WebsiteAuditAI skipped — wrong tool for an auth-walled app.
+- **Promoted from V3:** 6.19 (LTSC public pages), 6.20 (admin/instructor calendars), 6.25 (public course catalog).
+- **Added mid-phase:** 6.26 (admin courses list polish, +3), 6.27 (restore cancelled enrollment, +3), 6.29 (course-types list polish, +2), 6.30 (mobile agenda view, +5), 6.31 (instructor fixes, +5).
+
+### What Worked
+- @ui-reviewer pass at the front of the phase (6.3 / 6.4) caught structural issues before they spread; once axe-core landed (6.5) the accessibility surface stayed clean for the rest of the phase.
+- Splitting mobile responsiveness into per-role passes (6.1 admin, 6.2 instructor) instead of one sweep kept PRs reviewable and let mobile fixes ride along with related work.
+- Architect-driven layout decisions (DEC-028 for course detail header) prevented regressions during the mobile rewrite (6.24).
+- Late tasks (6.25 / 6.26 / 6.29 / 6.30 / 6.31) shipped fast because earlier patterns (UsersList, sortable headers, row `•••` menus, filter pills, agenda lists) were reusable. The polish work compounded.
+- Security audit (6.12) found 0 critical findings — defense-in-depth from earlier RLS work and the `devOnly()`/`createAdminClient()` discipline paid off. Both moderate findings (M1 admin check on `updateUserProfile`, M2 cron secret enforcement) were single-line-class fixes.
+- Attention Insight heatmaps confirmed the dashboards land attention on the right focal points (admin: "No Instructor Assigned" warning; student: welcome → counts → next session). External validation was cheap and reassuring.
+
+### What Didn't Work
+- 6.8 bundled WebsiteAuditAI + Attention Insight as if they were one task. They have different value profiles — Attention Insight worked, WebsiteAuditAI was wrong tool for the surface. Don't bundle external tools by genre.
+- Phase 6 grew from 52 to 70+ raw pts (after promotions and additions, before cuts) because each "just one more polish thing" felt small individually. No per-phase scope budget. For V3, set a + N% growth cap and force re-prioritization above it.
+- Two regressions from sessions 128–129 (agenda view broke browse tests; instructor link copy change broke roster test) weren't caught until the full-suite run after the work shipped. Targeted runs miss cross-feature regressions; full-suite is too expensive to run per-task. No clean answer, but the failure mode is now visible.
+- Test pollution from `createTestCourse` / `createInstructorCourse` always picking ASA 101 went undetected for weeks until the prereq-flagging false-positive surfaced. Test helpers should default to a low-traffic course type that no other test asserts on.
+- 5.11 (Bulk price update) was carried into Phase 6 as "expected day-1 use" then cut at the wire. Either commit early or cut early — carrying open commitments added subtle pressure for no shipping value.
+
+### Forecast Update (as of 2026-05-03, day before launch)
+- May 4 launch criteria all met: app is professional, accessible (axe-core green), navigable (calendar + agenda + breadcrumbs), security-verified.
+- Remaining before go-live: Deployment phase (env vars in Vercel, Supabase prod migrate, auth provider config in Supabase Dashboard, smoke test, then a final V2 retrospective).
+- V3 backlog now sized: 4 from session 109 + 3 from session 130 (5.11, 6.18, 6.28) + 7 from security audit (D1–D7) + the parked V3 ideas at the bottom of `PROJECT_PLAN.md`. First V3 priority pass should happen in the first slow week post-launch.
+
+---
+
 ## Phase 5 — Pricing & Enrollment
 **Completed:** 2026-05-03 (retroactive close)
 **Sessions:** overlapping with Phase 4 and Phase 6 sprint toward May 4 launch
@@ -14,14 +55,14 @@ Format per entry: velocity, scope changes, what worked, what didn't, forecast up
 
 | Metric | Value |
 |--------|-------|
-| Effort points | 39 pts (was 50; −11 for 5.1/5.3/5.5/5.6 cut to V3) |
-| Projected hours | ~13 hrs |
+| Effort points | 31 pts (was 50; −11 for 5.1/5.3/5.5/5.6 + −8 for 5.11 cut to V3) |
+| Projected hours | ~12 hrs |
 | Actual hours | not separately tracked (merged into multi-phase sprint sessions) |
 
 ### Scope Changes
 - **Cut to V3:** 5.1 (per-session pricing override), 5.3 (coupon/promo codes), 5.5 (refund policy enforcement), 5.6 (duplicate same-type enrollment behavior). All safely deferrable.
+- **Cut to V3 (session 130):** 5.11 (bulk price update) — carried forward into Phase 6 then cut at the wire. Single-edit is tolerable for season opener; promote when bulk is needed in earnest.
 - **Added:** 5.2 (Open Sailing drop-in, promoted from V3), 5.4 (prerequisite flagging, promoted), 5.7 (waitlist, promoted), 5.8 (low enrollment warning, promoted).
-- **Carried forward:** 5.11 (bulk price update) — elevated to high priority; expected day-1 use.
 
 ### What Worked
 - Promoting the drop-in model (5.2) early was the right call — it forced a clean DEC-027 with zero schema changes to enrollment/payments.

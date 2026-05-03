@@ -29,8 +29,10 @@ test.describe('Admin calendar', () => {
     await page.goto('/admin/calendar');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.getByTestId('filter-course-type')).toBeVisible();
-    await expect(page.getByTestId('filter-instructor')).toBeVisible();
+    // Filters render in both mobile and desktop containers — scope to desktop to avoid strict mode
+    const desktopFilters = page.getByTestId('calendar-filters-desktop');
+    await expect(desktopFilters.getByTestId('filter-course-type')).toBeVisible();
+    await expect(desktopFilters.getByTestId('filter-instructor')).toBeVisible();
 
     await page.getByTestId('view-toggle-list').click();
     await expect(page.getByTestId('sessions-view-content')).toHaveAttribute('data-active-view', 'list');

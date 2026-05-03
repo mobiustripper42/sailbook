@@ -62,8 +62,9 @@ test.describe('Student cancellation request', () => {
       // Check the courses list badge — filter by full unique title so we don't
       // collide with leftover "Cancel List …" courses from prior runs.
       await studentPage.goto('/student/courses')
-      const courseCard = studentPage.locator('[data-testid="course-card"]').filter({ hasText: title })
-      await expect(courseCard.getByText('Cancellation Requested')).toBeVisible()
+      // Agenda list view — rows not cards; .first() for multi-session courses
+      const courseRow = studentPage.locator('[data-testid="agenda-session-row"]').filter({ hasText: title }).first()
+      await expect(courseRow.getByText('Cancellation Requested')).toBeVisible()
     } finally {
       await studentCtx.close()
     }

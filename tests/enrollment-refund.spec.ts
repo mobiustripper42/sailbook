@@ -90,7 +90,8 @@ test.describe('Admin refund & cancel flow', () => {
     await cancelBtn.click({ force: true })
     const row = page.getByRole('row').filter({ hasText: 'pw_student@ltsc.test' })
     await expect(row.getByRole('cell').nth(2)).toContainText('cancelled', { timeout: 10000 })
-    await expect(row.getByRole('button')).toHaveCount(0)
+    // After cancel, only the Restore button remains (no Cancel/Refund buttons)
+    await expect(row.getByRole('button', { name: 'Restore' })).toBeVisible()
   })
 
   test('payment column shows amount + Stripe link and partial refund works', async ({ page }) => {

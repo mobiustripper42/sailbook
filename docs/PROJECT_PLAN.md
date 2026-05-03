@@ -190,10 +190,10 @@ Rows ordered: completed grouped at top; unfinished below in priority order (high
 | 5.2 | ~~Open Sailing (holding a spot for $11) (then $60+tip to the captain day of) — per-session enrollment + payment~~ | 5 | [x] <!-- completed 2026-05-01 --> DEC-027. `is_drop_in` on `course_type` (not course). One-course-per-night structure means existing enrollment + session_attendance + payments model requires zero schema changes to those tables. Migration: `course_types.is_drop_in BOOLEAN NOT NULL DEFAULT FALSE`. Admin course-type form gains checkbox. Student course detail shows drop-in callout when flag is set. Admin course detail shows "Drop-in" badge. 2 pgTAP + 3 Playwright tests. |
 | 5.7 | ~~Waitlist — full course → join waitlist → notify on opening~~ | 8 | [x] <!-- completed 2026-05-02 --> `waitlist_entries` table with student-own RLS + admin-all + UNIQUE (course_id, student_id); `get_waitlist_position` SECURITY DEFINER RPC. Notify-all-on-spot-opened model (race-to-enroll). `joinWaitlist`/`leaveWaitlist` server actions. `notifyWaitlistSpotOpened` trigger fans out per channel pref and stamps `notified_at`; wired into `cancelEnrollment` with prior-status guard so non-confirmed cancels don't blast the list. Auto-cleanup of waitlist row in admin manual enroll, `confirmEnrollment`, and Stripe webhook. Student waitlist button + position; admin waitlist card. List-view "Course Full" button replaced with clickable "Join waitlist" link to detail page. 14 pgTAP + 4 Playwright tests. |
 | 5.4 | ~~Prerequisite flagging — `course_type_prerequisites` table, admin warning + override~~ | 3 | [x] <!-- completed 2026-05-03 --> Minimum scope: new table + RLS (admin CRUD, authenticated SELECT), admin manager UI on course type edit page, student warning banner on `/student/courses/[id]` (informational, not blocking — any non-cancelled enrollment satisfies). 8 pgTAP + 3 Playwright tests. PR #20. Deferred to V3: justification textbox, admin approval flow, notifications on override. |
-| 5.11 | Bulk price update — multi-select on `/admin/courses` + apply a new price to all selected courses in one action | 8 | **Priority: high.** Single-field bulk edit, narrow scope by design. With 26 ASA 101 + 5 Open Sailing nights in the season, mid-season price changes are otherwise a lot of hand-edits. Expected day-1 use. Multi-field bulk edit is V3. |
+| 5.11 | ~~Bulk price update~~ | 8 | [x] <!-- cut 2026-05-03 --> Cut to V3 in the launch-week scope pass. Andy can edit prices one-at-a-time for season opener; 26 ASA 101 + 5 Open Sailing rows is tolerable for the first month. Promote back when bulk edit is needed in earnest. |
 | 5.9 | ~~End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log~~ | 5 | [x] <!-- closed 2026-05-03 --> Retrospective written in RETROSPECTIVES.md. Phase closed retroactively — all tasks shipped, retrospective skipped at the time due to sprint pace toward May 4 launch. |
 
-**Phase 5 total: 39 pts** (session 109: −11 for 5.1/5.3/5.5/5.6 cut to V3; was 50)
+**Phase 5 total: 31 pts** (session 109: −11 for 5.1/5.3/5.5/5.6 cut to V3; session 130: −8 for 5.11 cut to V3; was 50)
 **Projected hours: ~13 hrs**
 
 **Ejection point:** Pricing is flexible. Enrollment has safety rails. Prerequisite and waitlist systems exist. Low enrollment flagged early.
@@ -225,19 +225,19 @@ Rows ordered: completed grouped at top; unfinished below in priority order (very
 | 6.7 | ~~Relative session badges — "Tomorrow", "This week" instead of "Upcoming"~~ | 3 | [x] <!-- completed 2026-05-02 --> New `fmtDateRelative` util in `src/lib/utils.ts` returns Today / Tomorrow / Yesterday / `Mon, May 5` (weekday + short month + day). Day-grouped session rendering on the new admin dashboard uses it for `dayHeader()`. 7 unit tests. PR #18. |
 | 6.9 | ~~Admin dashboard UX redesign~~ | 5 | [x] <!-- completed 2026-05-02 --> Dashboard restructured: date subtitle, 4-pill QuickActions row, StatRow with conditional CleanIndicator (subtle dashed-border treatment when "Enrollment is healthy"). Sessions card spans full width with day-grouped rows; Pending + Cancellation cards in a 2-col grid below. 6 Playwright tests. PR #16. |
 | 6.10 | ~~Back button / breadcrumb audit — consistent navigation across all roles and views~~ | 5 | [x] <!-- completed 2026-05-03 --> Audit found most pages already had breadcrumbs but admin links lacked `hover:text-foreground`. Sed-normalized 10 admin pages. Added "Courses" breadcrumb back to catalog on `/courses/[slug]` (the only true dead end). Fixed `proxy.ts` so exact `/courses` path passes unauthenticated. PR #19. |
-| 6.18 | CI + iOS testing — GitHub Actions runs Playwright on PRs to main, add iPhone WebKit project (CI-only) | 5 | **Priority: medium** (default). Triggered by Apr 29 mobile bug (missing viewport meta, broke all dropdowns on Android) — desktop tests didn't catch it. Scope: GH Actions workflow with Supabase service container, env secrets, full Playwright run on PR + push to main; add a 4th `iphone` project to `playwright.config.ts` gated to CI (`process.env.CI`); tag the layout/touch-sensitive specs (auth, dropdowns, calendar, payment) so iPhone project only runs those. Decision still open: skip iOS in CI entirely vs full WebKit run vs tagged subset — defer until task starts. Until then, no automated iOS coverage; manual phone test before each demo. |
+| 6.18 | ~~CI + iOS testing~~ | 5 | [x] <!-- cut 2026-05-03 --> Cut to V3. Local Playwright + manual phone test before each demo is the V2 process. Promote when (a) Andy is editing on his own and PRs need automated gating, or (b) we hit a second iOS-only regression. |
 | 6.21 | ~~Sidebar fixed to viewport height — desktop sidebar scrolls with main content instead of staying fixed~~ | 2 | [x] <!-- completed 2026-05-01 --> `sticky top-0 h-screen overflow-y-auto` added to `aside` in admin, instructor, and student layouts. |
 | 6.22 | ~~Form field preservation on server action error — all fields clear when action returns an error, user must re-enter everything~~ | 5 | [x] <!-- completed 2026-05-02 --> 12 components converted from uncontrolled to controlled. register-form switched from `useActionState` action binding to `onSubmit` + `e.preventDefault()` to prevent React 19 `form.reset()` from resetting native `<select>`. 2 Playwright tests. |
 | 6.27 | ~~Restore cancelled enrollment~~ | 3 | [x] <!-- completed 2026-05-03 --> `restoreEnrollment` server action with capacity check; restores `missed→expected` for still-scheduled sessions. Restore button on cancelled enrollments in admin course detail. 2 pgTAP + 1 Playwright. PR #21. **Follow-up needed (`task/6.27-fixes`):** code review flagged 4 admin-only edge-case bugs — refund-then-restore guard (refuse if `payments.status='refunded'`), capacity check fail-open on null count, cross-course makeup attendance not restored (drop course_id filter), silent no-op when row isn't cancelled (`.select('id')` after update). |
-| 6.28 | Setup Staging Environment | TBD | **Priority: high.** Provision a staging environment (Vercel preview + Supabase staging project) to verify prod deployments before go-live. Scope TBD when started. |
+| 6.28 | ~~Setup Staging Environment~~ | TBD | [x] <!-- cut 2026-05-03 --> Cut to V3. Vercel preview deploys (per-PR) cover the "see it before merge" use case for V2. Dedicated staging Supabase project is the right move for V3 before we have real data to protect. |
 | 6.30 | ~~Mobile calendar / list view for students~~ | 5 | [x] <!-- completed 2026-05-03 --> Agenda-style list view grouping sessions by date with sticky day headers. Toggle visible on all viewports (removed mobile detection + hydration flash). `CoursesAgendaList` component. PR #28. |
 | 6.29 | ~~Admin course-types list — sortable + name-as-edit-link + row menu (mirror users / courses pattern)~~ | 2 | [x] <!-- completed 2026-05-03 --> `CourseTypesList` client component with sortable columns, name-as-edit-link, `•••` row menu. Extracted shared `SortableHead<T>` component. PR #29. |
 | 6.31 | ~~Instructor fixes — DEC-007 dashboard, enrolled count, agenda list, admin calendar filter layout, role nav toggles, JWT sync~~ | 5 | [x] <!-- completed 2026-05-03 --> Dashboard DEC-007 two-query fix; confirmed+completed enrolled count; agenda list view for instructor/admin calendars; `endSlot` prop on `SessionsViewSwitcher` for inline filters; admin self-role bug fix; JWT sync via `adminClient.auth.admin.updateUserById()`; role nav toggles across all three layout shells. PR #30. |
-| 6.8 | WebsiteAuditAI + Attention Insight external audit | 2 | **Priority: high but last** (run after the rest of Phase 6 settles). 10-minute external validation at phase boundary. |
-| 6.12 | Security audit (V2 final) — run @security-agent, evaluate findings, fix serious issues, prime V3 backlog | 3 | **Priority: high but last** (run after the rest of Phase 6 settles). Full V2 surface area: payments, notifications, waitlist, prereqs, qualifications. Non-serious findings seed V3 backlog. |
-| 6.17 | End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log | 5 | **Always last.** Full V2 surface area. Final retrospective before handoff. |
+| 6.8 | ~~WebsiteAuditAI + Attention Insight external audit~~ | 2 | [x] <!-- closed 2026-05-03 --> Attention Insight done (heatmaps for student + admin dashboards saved to `docs/admin dashboard.pdf`, `docs/student dashboard.pdf`; signal: student dashboard 58% clarity / admin 48%, both heatmaps land on intended focal points). WebsiteAuditAI skipped — tool can't authenticate past `/login`, so for an internal scheduling app it would only see the marketing surface (which we don't have). Decision noted; not a V3 candidate. |
+| 6.12 | ~~Security audit (V2 final)~~ | 3 | [x] <!-- completed 2026-05-03 --> Manual code review (no @security-agent existed). 0 critical, 2 moderate fixed: M1 admin check on `updateUserProfile` (was relying solely on middleware to gate a service-role action); M2 cron routes now fail-closed in prod when `CRON_SECRET` missing (extracted `verifyCron()` helper). 7 deferred items added to V3 backlog (D1–D7 in `docs/SECURITY_AUDIT_V2.md`). PR #TBD. |
+| 6.17 | ~~End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log~~ | 5 | [x] <!-- completed 2026-05-03 --> Phase 6 retrospective in `docs/RETROSPECTIVES.md`. Full Playwright suite green (519 passed / 373 skipped / 0 fail after the prereq-flagging pollution fix). Lint clean. Code review on PRs cleared. @ui-reviewer pass folded into 6.31's per-PR review. Session log archive deferred to V2 final close (separate retro). |
 
-**Phase 6 total: 63 pts + TBD for 6.19, 6.20** (totals to be reconciled at end of V2 per Eric. Session 109: −9 for 6.0/6.6/6.11/6.16 cut to V3; +TBD for 6.19 LTSC public pages and 6.20 admin/instructor calendars promoted from V3. Session 122: +5 for 6.25 public course catalog (replaces LTSC product page); +3 for 6.26 admin courses list sortable + search; +3 for 6.27 restore cancelled enrollment. Session 127: +TBD for 6.28 staging environment. Session 129: +5 for 6.30 agenda view; +2 for 6.29 course-types polish; +5 for 6.31 instructor fixes.)
+**Phase 6 total: 58 pts + TBD for 6.19, 6.20** (Session 109: −9 for 6.0/6.6/6.11/6.16 cut to V3; +TBD for 6.19 + 6.20 promoted from V3. Session 122: +5 for 6.25; +3 for 6.26; +3 for 6.27. Session 127: +TBD for 6.28 staging. Session 129: +5 for 6.30 agenda; +2 for 6.29; +5 for 6.31. Session 130: −5 for 6.18 cut, −TBD for 6.28 cut.)
 **Projected hours: ~18 hrs + TBD**
 
 **Ejection point:** The app looks and feels professional. Accessible. Navigable. Polished. Security verified.
@@ -284,6 +284,123 @@ Transforms the app from scheduling into a learning management tool.
 
 ---
 
+## Phase 9: Deployment & Launch
+
+Take the May-4-ready app and put it in front of real students. One-time work; no feature scope. Order matters — items below are grouped and roughly sequenced.
+
+**Target go-live:** 2026-05-04 (Mon) or 2026-05-05 (Tue), Andy's call. Block off ~3 hours for the deploy itself + 24 hours of "stay near the laptop" after.
+
+### A. Pre-Deploy Sanity (do day before)
+
+- [ ] **Branch state.** `main` is green: full Playwright suite passes locally (worker=4) and `supabase test db` clean. Lint clean. No open PRs.
+- [ ] **`docs/SECURITY_AUDIT_V2.md` checklist** items 1–5 reviewed (env-var presence, smoke test plan).
+- [ ] **Walk the app cold.** Browse SailBook in an incognito window as anon → student (register flow) → admin. Ten minutes. Note anything ugly.
+- [ ] **Andy walk-through.** Show Andy the dashboard, courses list, manual-enroll flow, refund flow. Get his "ready" or "wait one more day."
+- [ ] **Backup the dev DB** (if there's anything in it worth keeping). `supabase db dump --local > backup-pre-launch.sql`.
+- [ ] **Tag the launch commit.** `git tag v2.0.0-rc1` on the merge commit you intend to deploy. Push the tag.
+
+### B. Supabase Production Project
+
+- [ ] **Project exists** at supabase.com. Note the project ref (`xxxxx.supabase.co`).
+- [ ] **`supabase db push --project-ref <prod>`** applies all migrations cleanly. Verify with `supabase migration list --project-ref <prod>` — last migration matches local.
+- [ ] **Seed real data.** This is NOT `supabase/seed.sql` (that's test fixtures). Create the real Andy admin account via Supabase Dashboard → Authentication → Users → Add user, then set `is_admin = true` in `profiles` via SQL editor. Same for any real instructors at launch.
+- [ ] **Course types loaded.** Either manually via Andy in the admin UI post-launch, OR pre-load via SQL (preferred so course catalog isn't empty on day 1). At minimum: ASA 101, ASA 103, Open Sailing, any others Andy is offering.
+- [ ] **Auth panel: enable email confirmations.** Dashboard → Authentication → Providers → Email → "Confirm email" ON. (`config.toml` does NOT sync this.)
+- [ ] **Auth panel: custom SMTP (Resend).** Dashboard → Authentication → SMTP Settings: host `smtp.resend.com`, port `587`, user `resend`, pass = Resend API key, sender `info@sailbook.live`, sender name `SailBook`. Send the dashboard test email and verify delivery.
+- [ ] **Auth panel: confirmation email template.** Dashboard → Authentication → Email Templates → "Confirm signup". Subject: "Confirm your SailBook account". Body matches `supabase/templates/confirmation.html`. The `{{ .ConfirmationURL }}` token must be preserved verbatim.
+- [ ] **Auth panel: password policy.** Dashboard → Authentication → Policies: minimum length 12, requirements `lower_upper_letters_digits` (matches `supabase/config.toml`).
+- [ ] **Auth panel: Site URL + Redirect URLs.** Dashboard → Authentication → URL Configuration: Site URL = `https://sailbook.live`, Redirect URLs include `https://sailbook.live/auth/callback`.
+- [ ] **Auth panel: Google OAuth.** Dashboard → Authentication → Providers → Google: enable, paste Client ID + Secret. In Google Cloud Console: add `https://<prod-ref>.supabase.co/auth/v1/callback` to Authorized redirect URIs and `https://sailbook.live` to Authorized JavaScript origins.
+- [ ] **Database backups confirmed.** Dashboard → Database → Backups: point-in-time recovery is enabled (Pro plan only — verify the project tier). If on Free tier, accept the daily-snapshot-only risk and document it.
+
+### C. Stripe Live Mode
+
+- [ ] **Toggle from test → live mode** in the Stripe dashboard.
+- [ ] **Live API keys**: copy `sk_live_*` (secret) and `pk_live_*` (publishable). The live publishable key is NOT used by SailBook (Checkout Sessions are server-only) but Andy may want it for receipts/branding later — note it.
+- [ ] **Webhook endpoint live.** Stripe Dashboard → Developers → Webhooks → Add endpoint: URL `https://sailbook.live/api/webhooks/stripe`, event `checkout.session.completed`. Copy the signing secret (`whsec_*`).
+- [ ] **Tax / receipts.** Decide: are we collecting tax via Stripe Tax? (Probably no for V2 — sailing instruction is service revenue and Andy handles tax separately.) Confirm receipts are enabled with sensible branding (Stripe Dashboard → Settings → Branding).
+- [ ] **Refund test.** Issue a $1 test charge to a real card, refund it through the admin UI. Verify it appears in the Stripe dashboard refunds tab.
+
+### D. Notification Providers
+
+- [ ] **Twilio.** Account is on a paid plan (not trial — trial caps to verified-only numbers). Buy a US local number if not already done. Note the Account SID, Auth Token, and From number.
+- [ ] **Twilio: A2P 10DLC registration.** Required for SMS to US carriers since 2023. Can take days to approve. **Start early or accept that SMS may bounce on day 1 until brand+campaign are approved.** If unapproved, fall back to email-only by setting `TWILIO_AUTH_TOKEN=""` and the trigger code will skip SMS.
+- [ ] **Resend.** Domain `sailbook.live` verified (DNS records added: SPF, DKIM, optionally DMARC). Send a test email from the Resend dashboard to confirm.
+- [ ] **`info@sailbook.live`** is a real address that forwards to Andy. Otherwise users replying to confirmation emails go nowhere.
+
+### E. Vercel Project
+
+- [ ] **Project linked** to the GitHub repo. Production branch = `main`. Deploys auto on merge.
+- [ ] **Custom domain `sailbook.live`** added to project. SSL cert provisioned (automatic via Vercel/Let's Encrypt).
+- [ ] **DNS records** at the registrar: A record for apex `sailbook.live` → Vercel IP, CNAME for `www.sailbook.live` → `cname.vercel-dns.com`. Verify via `dig sailbook.live` resolves to Vercel.
+- [ ] **Plan tier:** Hobby is free but rejects sub-daily cron schedules. The `expire-holds` cron needs at least every-15-min cadence to keep payment holds tight — this requires Pro ($20/mo). Decision: upgrade to Pro, OR move `expire-holds` to a pg_cron job inside Supabase (no Vercel dependency for that one). Prod requires one or the other.
+- [ ] **Cron jobs configured** in `vercel.json` (or Vercel Dashboard → Settings → Cron Jobs):
+  - `/api/cron/expire-holds` — every 15 min (or whatever the configured `hold_minutes` margin allows)
+  - `/api/cron/session-reminders` — daily at ~07:00 local (Andy's tz: America/New_York)
+  - `/api/cron/low-enrollment` — daily at ~08:00 local
+- [ ] **Environment variables** (Vercel Dashboard → Settings → Environment Variables, scope = Production):
+  - `NEXT_PUBLIC_SUPABASE_URL` = prod Supabase URL
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = prod anon key
+  - `SUPABASE_SERVICE_ROLE_KEY` = prod service role key (NEVER on `NEXT_PUBLIC_*`)
+  - `NEXT_PUBLIC_SITE_URL` = `https://sailbook.live`
+  - `STRIPE_SECRET_KEY` = `sk_live_*`
+  - `STRIPE_WEBHOOK_SECRET` = `whsec_*` from production webhook
+  - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`
+  - `RESEND_API_KEY`
+  - `NOTIFICATIONS_ENABLED` = `true`
+  - `CRON_SECRET` = a long random string (generate with `openssl rand -hex 32`); must match the `Authorization: Bearer` header Vercel Cron sends
+  - `NEXT_PUBLIC_DEV_MODE` = unset (or `false`) — controls dev login helper visibility
+  - Sanity: `NODE_ENV` and `VERCEL_ENV` are set automatically by Vercel; do NOT override.
+- [ ] **Trigger production deploy** — push to main or click "Redeploy" on the latest deployment in the dashboard. Watch the build log for errors. First prod build often surfaces issues that local dev hides (case-sensitive imports on Linux, missing peer deps, etc.).
+
+### F. Deploy-Day Smoke Tests (run in this order on the live URL)
+
+- [ ] **`https://sailbook.live` loads** the public landing/courses page without errors.
+- [ ] **Anon → public catalog → course detail → "Register & Pay"** prompts login. Click "Register" → fill form → check the inbox arrives → confirmation link works → lands on the original course page.
+- [ ] **Stripe checkout end-to-end with a real card** ($1 course or use Andy's actual card). After payment: enrollment shows as confirmed, payment row inserted, confirmation email arrives.
+- [ ] **Refund the test charge** via admin UI. Verify Stripe dashboard shows the refund.
+- [ ] **Cancel + restore enrollment** flow exercised end-to-end.
+- [ ] **SMS** (if A2P approved) — student preferences set to SMS, trigger any notification (e.g., admin enrolls them manually with notify=on), SMS arrives within 30 sec.
+- [ ] **Cron live-fire test.** From a terminal: `curl -H "Authorization: Bearer $CRON_SECRET" https://sailbook.live/api/cron/expire-holds` returns `{"expired": N}`. Repeat for `session-reminders` and `low-enrollment`. Watch Vercel Dashboard → Settings → Cron Jobs for the next scheduled tick to confirm Vercel is hitting them too.
+- [ ] **Without the auth header** the same routes return 401. (`curl https://sailbook.live/api/cron/expire-holds`)
+- [ ] **Test API routes blocked.** `curl https://sailbook.live/api/test/enroll` returns 403 (devOnly belt-and-suspenders).
+- [ ] **Mobile.** Open the live URL on Andy's actual phone. Tap through the admin dashboard, instructor dashboard, student calendar. Anything ugly gets logged for Phase X follow-up; anything broken is a hotfix candidate.
+
+### G. Operational Setup
+
+- [ ] **Vercel deploy notifications** wired to Andy's email (Vercel Dashboard → Settings → Notifications) so failed deploys don't go silent.
+- [ ] **Supabase project notifications** for hitting plan limits (rows, bandwidth) configured.
+- [ ] **Stripe email alerts** for refunds + disputes go to Andy.
+- [ ] **Status page bookmarks** for Andy: status.vercel.com, status.supabase.com, status.stripe.com, status.twilio.com, status.resend.com. When something breaks, check these first.
+- [ ] **Logging access.** Vercel Dashboard → Deployments → [latest] → Runtime Logs is the production log surface. Andy doesn't need this; Eric should know where it is.
+- [ ] **Error monitoring (V3 backlog).** No Sentry-style integration yet. For V2 launch, Vercel Function Logs + Supabase logs cover the surface. Add proper error reporting in V3 if/when traffic warrants.
+
+### H. Communications
+
+- [ ] **Andy is briefed** on: how to add a course, how to enroll a student manually, how to issue a refund, how to deactivate an instructor, how the cancellation request flow works, how to read the dashboard tiles. 30-minute sit-down.
+- [ ] **Andy has the credentials** he needs: his admin login, Stripe dashboard access (as team member, not the API key), Resend dashboard, Twilio dashboard (or just Andy's account, his choice).
+- [ ] **Existing students notified** (if migrating from old system). If not — you're starting fresh, then no notification needed; new students discover via Andy's existing channels (LTSC, word of mouth, the public course catalog).
+- [ ] **Eric is reachable** for the first 24-48 hours post-launch. Phone, Slack, whatever. Andy needs a hotline for "the button isn't working."
+
+### I. Rollback Plan
+
+- [ ] **Revert path documented.** If the deploy goes sideways: Vercel Dashboard → Deployments → previous build → "Promote to Production" rolls back the app in <60 sec. The DB does NOT roll back; only the app code does.
+- [ ] **Migration rollback.** If a migration breaks prod, the answer is NOT `git revert` — it's a new forward-only migration that fixes the issue. Have a forward-fix template ready.
+- [ ] **Maintenance mode.** Not implemented. If we need to take the app down for an hour: simplest is to swap Vercel domain to a static "back soon" page, OR set a feature flag in the homepage. Decide which approach + write the procedure now, before you need it at 2am.
+- [ ] **"Oh shit" contact list.** Vercel support, Supabase support (Pro tier only), Stripe support — phone numbers / chat URLs saved somewhere Andy and Eric can both find.
+
+### J. Post-Launch (first 7 days)
+
+- [ ] **Monitor daily** — check Vercel Function Logs for errors, Supabase Database → Query Performance for slow queries, Stripe for failed payments.
+- [ ] **Capture every Andy bug report** as a GitHub issue tagged `launch-week`. Triage: hotfix vs Phase 9.5.
+- [ ] **First V3 priority pass** (the slow week post-launch): D1–D7 from security audit, 5.11/6.18/6.28 from V2 cuts, plus whatever the V3 backlog at the bottom of this file holds.
+
+### K. V2 Final Retrospective
+
+- [ ] After the dust settles (~7 days post-launch), write the final V2 retro in `docs/RETROSPECTIVES.md`. Cover: V2 in aggregate (started Apr 11, shipped May 4 / 5), velocity per phase reconciled, what broke / didn't break in launch week, lessons for V3 cadence.
+
+---
+
 ## V3 Ideas (parked)
 
 - Proxy enrollment ("Who are you enrolling?" — Me / Me + someone / Someone else) — requires shopping cart model
@@ -305,6 +422,15 @@ Transforms the app from scheduling into a learning management tool.
 - TimeSelect compact mode at narrow widths — at <432px the hour Select's chevron starts overlapping AM/PM text inside the Edit / Makeup forms (which sit inside the SessionCardItem `border + p-3` wrapper, ~14px less inner width than AddSessionForm at the bottom of the Sessions card). Two paths: (1) tighten the shadcn `SelectTrigger` chevron padding via a TimeSelect-scoped class, or (2) replace the hour shadcn Select with a number-spinner-only component for time fields. ~2 pts. Noted in session 122 — acceptable for V2 launch.
 - Admin enroll student selector — replace shadcn `Select` in `AdminEnrollStudentPanel` with a typeahead/Combobox (cmdk). Current `{last_name}, {first_name} — email` SelectItem format overflows the trigger width when a student is selected, and the dropdown gets unwieldy as the student list grows. A typeahead lets the admin type a name fragment and disambiguates collisions ("John Smith") via email without the trigger having to render the full label. ~3 pts. Noted in session 122 — overrun acceptable for V2 launch.
 
+**From 6.12 security audit (2026-05-03) — see `docs/SECURITY_AUDIT_V2.md` for details:**
+- (D1) `requireAdmin()` helper applied across ~15 admin/instructor server actions (courses, sessions, attendance, instructors, course-types). Defense-in-depth — RLS already blocks unauthorized writes; this turns silent fails into explicit "Unauthorized" errors. ~3 pts.
+- (D2) `npm audit fix --force` — 1 high + 6 moderate vulns (postcss XSS, uuid bounds, svix/resend chain). Breaking — bumps resend to 6.x. Do post-launch. ~2 pts.
+- (D3) Security headers in `next.config.ts` — CSP, HSTS, X-Frame-Options, Referrer-Policy, X-Content-Type-Options. ~2 pts.
+- (D4) Standardize JWT role-flag cast in RLS policies (`'true'::text` vs `::boolean = TRUE`). Cosmetic. ~1 pt.
+- (D5) Rate limiting on Stripe webhook + auth callback. Stripe enforces upstream; Supabase auth has anti-spam. Acceptable as-is. ~3 pts if added.
+- (D6) Notification unsubscribe links — when added, sign with HMAC and scope to user.
+- (D7) Waitlist `created_at` enforcement at RLS layer (currently mitigated by server action). ~1 pt.
+
 **Cut from V2 in session 109 (2026-04-30 priority pass):**
 - (4.7) Instructor profile expansion — availability field + bio/website link. Andy request.
 - (5.1) Member pricing model — `is_member` flag on profiles, checkout uses correct price. Eric noted: solved by discount codes.
@@ -315,6 +441,11 @@ Transforms the app from scheduling into a learning management tool.
 - (6.6) Duplicate course — one-click copy, drop into edit.
 - (6.11) Public landing page + contact form for sailbook.live.
 - (6.16) Show refund amount to student on My Courses + course detail.
+
+**Cut from V2 in session 130 (2026-05-03 launch-week pass):**
+- (5.11) Bulk price update — multi-select on `/admin/courses` + apply a new price to all selected. 8 pts. Single-edit is tolerable for the season opener; bulk needed before mid-season campaigns.
+- (6.18) CI + iOS testing — GitHub Actions Playwright on PRs + iPhone WebKit project. 5 pts. Local Playwright + manual phone test is the V2 process. Promote when Andy edits or after a 2nd iOS-only regression.
+- (6.28) Setup Staging Environment — dedicated staging Supabase project. TBD pts. Vercel preview deploys cover the V2 "see it before merge" need; dedicated staging matters once we have real student data to protect.
 
 ---
 
@@ -327,11 +458,11 @@ Transforms the app from scheduling into a learning management tool.
 | 2 — Payments | 40 | ~15 hrs | App makes money |
 | 3 — Notifications + Auth | 48 | ~18 hrs | Users stay informed, auth hardened, security audited |
 | 4 — Identity | 42 | ~10 hrs | Onboarding is clean (4.7 cut to V3) |
-| 5 — Pricing | 39 | ~13 hrs | Flexible pricing, waitlist, prereqs (5.1/5.3/5.5/5.6 cut to V3) |
-| 6 — Polish | 52 | ~18 hrs | Professional, accessible, navigable, security verified (6.0/6.6/6.11/6.16 cut to V3) |
+| 5 — Pricing | 31 | ~10 hrs | Flexible pricing, waitlist, prereqs (5.1/5.3/5.5/5.6/5.11 cut to V3) |
+| 6 — Polish | 58 | ~22 hrs | Professional, accessible, navigable, security verified (6.0/6.6/6.11/6.16/6.18/6.28 cut to V3) |
 | 7 — Remote Dev Env ✅ | 18 | ~7 hrs | Stable dev box, edit anywhere |
 | 8 — Skills | 40–60 | ~15–23 hrs | Learning management |
-| **Total (0–6)** | **349** | **~123 hrs** | |
+| **Total (0–6)** | **347** | **~123 hrs** | (session 130: −8 for 5.11 cut, −5 for 6.18 cut, +6 reconciliation in Phase 6 Summary row) |
 
 Reconciled in session 109 (2026-04-30). Previous Summary total of 298 had been drifting from section totals for several phases (Phase 1 +7, Phase 2 +2, Phase 4/5/6 changes since). New total matches the sum of section totals.
 
@@ -421,17 +552,4 @@ At the end of every phase:
 
 ## Pre-Launch Checklist
 
-Before go-live (real data, real students):
-
-- [ ] **Vercel cron — live fire test.** The `expire-holds` cron was only tested via curl locally (Hobby tier rejects sub-daily schedules, so `*/1 * * * *` can't be verified in prod without Pro). Before launch: upgrade to Pro or use pg_cron, deploy with a short schedule, watch Vercel dashboard → Settings → Cron Jobs confirm it fires and `expired` count is correct, then set schedule to production value. Do NOT assume curl = prod parity.
-- [ ] Stripe webhook signing secret set in prod env vars
-- [ ] `CRON_SECRET` set in prod env vars (or remove if not needed)
-- [ ] Twilio / Resend credentials set and `NOTIFICATIONS_ENABLED=true`
-- [ ] `supabase db push` applied to prod Supabase project
-- [ ] **Auth: enable email confirmations** in Supabase Dashboard → Authentication → Providers → Email → "Confirm email" on. (config.toml does not sync auth panel settings to remote.)
-- [ ] **Auth: custom SMTP (Resend) configured** in Dashboard → Authentication → SMTP Settings: host `smtp.resend.com`, port `587`, user `resend`, pass = Resend API key, sender `info@sailbook.live`, sender name `SailBook`. Send the dashboard test email to verify.
-- [ ] **Auth: confirmation email template uploaded** in Dashboard → Authentication → Email Templates → "Confirm signup". Subject: "Confirm your SailBook account". Body matches `supabase/templates/confirmation.html`. The `{{ .ConfirmationURL }}` token must be preserved.
-- [ ] **Auth: password policy set** in Dashboard → Authentication → Policies: minimum length 12, requirements `lower_upper_letters_digits`. Match `supabase/config.toml`.
-- [ ] **Auth: Site URL + Redirect URLs** in Dashboard → Authentication → URL Configuration: Site URL = `https://sailbook.live`, Redirect URLs include `https://sailbook.live/auth/callback`.
-- [ ] **Auth: Google OAuth provider** in Dashboard → Authentication → Providers → Google: enable, paste Client ID + Client Secret. In Google Cloud Console, add `https://<prod-supabase-ref>.supabase.co/auth/v1/callback` to Authorized redirect URIs and `https://sailbook.live` to Authorized JavaScript origins.
-- [ ] Smoke test: student registers → confirms email → pays → sees enrollment → admin sees payment status
+Folded into Phase 9 (Deployment & Launch). See above.

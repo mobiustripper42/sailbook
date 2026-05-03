@@ -17,8 +17,9 @@ test.describe('Student — browse courses', () => {
     // Wait for the localStorage-driven view switch to complete (SSR defaults to
     // calendar; useEffect reads 'list' and re-renders — briefly both can be in DOM).
     await page.waitForSelector('[data-active-view="list"]', { timeout: 5000 });
-    await expect(page.getByText('ASA 101 - Weekend Intensive (May)')).toBeVisible();
-    await expect(page.getByText('ASA 101 - Evening Series (May)')).toBeVisible();
+    // In list/agenda view, courses appear once per session — use .first() to avoid strict mode.
+    await expect(page.getByText('ASA 101 - Weekend Intensive (May)').first()).toBeVisible();
+    await expect(page.getByText('ASA 101 - Evening Series (May)').first()).toBeVisible();
     await expect(page.getByText('Open Sailing - Jul 1', { exact: true })).toBeVisible();
   });
 
@@ -35,9 +36,9 @@ test.describe('Student — browse courses', () => {
     // c001 (ASA 101 Weekend May): capacity 4, Sam (confirmed) + Alex (registered).
     // Only confirmed enrollments count → 1 confirmed → 3 spots left.
     // pw_student has no seed enrollment on c001.
-    // Scope to this card — c002 also has 1 confirmed enrollment (same badge text).
-    const c001Card = page.locator('[data-slot="card"]').filter({ hasText: 'ASA 101 - Weekend Intensive (May)' });
-    await expect(c001Card.getByText('3 spots left')).toBeVisible();
+    // Agenda list view shows rows (not cards); use first() since multi-session courses repeat.
+    const c001Row = page.locator('[data-testid="agenda-session-row"]').filter({ hasText: 'ASA 101 - Weekend Intensive (May)' }).first();
+    await expect(c001Row.getByText('3 left')).toBeVisible();
   });
 
   test('active course with all sessions in the past is hidden', async ({ page, browser }) => {
@@ -187,8 +188,8 @@ test.describe('Student — capacity enforcement', () => {
       });
       await loginAs(jordanPage, 'jordan@ltsc.test', '/student/dashboard');
       await jordanPage.goto('/student/courses');
-      const card = jordanPage.locator('[data-slot="card"]').filter({ hasText: title });
-      await expect(card.getByText('Full', { exact: true })).toBeVisible();
+      const row = jordanPage.locator('[data-testid="agenda-session-row"]').filter({ hasText: title }).first();
+      await expect(row.getByText('Full', { exact: true })).toBeVisible();
     } finally {
       await jordanCtx.close();
     }
