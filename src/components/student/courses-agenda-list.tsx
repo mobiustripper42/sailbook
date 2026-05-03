@@ -5,6 +5,7 @@ import { fmtTime } from '@/lib/utils'
 import type { CourseCardData } from './courses-card-list'
 
 type AgendaSession = {
+  sessionId: string
   date: string
   start_time: string
   end_time: string
@@ -29,9 +30,9 @@ function isEffectivelyEnrolled(status: string | null, holdExpiresAt: string | nu
 
 function enrollmentStatusLabel(status: string): string {
   if (status === 'confirmed') return 'Enrolled'
-  if (status === 'registered') return 'Pending'
-  if (status === 'cancel_requested') return 'Cancel req.'
-  if (status === 'pending_payment') return 'Pay pending'
+  if (status === 'registered') return 'Pending confirmation'
+  if (status === 'cancel_requested') return 'Cancellation Requested'
+  if (status === 'pending_payment') return 'Payment Pending'
   return status
 }
 
@@ -58,6 +59,7 @@ export function CoursesAgendaList({ courses }: { courses: CourseCardData[] }) {
     for (const session of course.sessions) {
       if (session.date < today) continue
       allSessions.push({
+        sessionId: session.id,
         date: session.date,
         start_time: session.start_time,
         end_time: session.end_time,
@@ -101,11 +103,11 @@ export function CoursesAgendaList({ courses }: { courses: CourseCardData[] }) {
             {fmtDayHeader(date)}
           </div>
           <div className="divide-y">
-            {sessions.map((s, i) => {
+            {sessions.map((s) => {
               const isEnrolled = isEffectivelyEnrolled(s.myStatus, s.myHoldExpiresAt)
               return (
                 <Link
-                  key={`${s.courseId}-${s.date}-${i}`}
+                  key={s.sessionId}
                   href={`/student/courses/${s.courseId}`}
                   className="flex items-start justify-between gap-3 py-2.5 hover:bg-muted/40 transition-colors -mx-1 px-1"
                   data-testid="agenda-session-row"
@@ -113,7 +115,7 @@ export function CoursesAgendaList({ courses }: { courses: CourseCardData[] }) {
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       {s.shortCode && (
-                        <span className="font-mono text-xs font-semibold text-foreground bg-muted px-1.5 py-0.5 rounded">
+                        <span className="font-mono text-xs font-semibold text-foreground bg-muted px-1.5 py-0.5 rounded-xs">
                           {s.shortCode}
                         </span>
                       )}
