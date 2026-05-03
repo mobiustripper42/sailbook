@@ -3,7 +3,41 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 124 — 2026-05-03 02:50 [open]
+## Session 124 — 2026-05-03 02:50–03:02 (0.2 hrs)
+**Duration:** 0.2 hrs | **Points:** 0 (tooling/workflow — no plan task)
+**Task:** Tape-reader review + workflow fixes (CX1, CX2)
+
+**Completed:**
+- Closed stale Session 123 entry (`[open]` → `[abandoned]`), opened Session 124.
+- Ran `/read-the-tape` on session 122 transcript
+  (`~/.claude/projects/-home-eric-sailbook/41a34226-aaae-44d7-ac33-1e80d72a59aa.jsonl`).
+- Applied two workflow fixes to `CLAUDE.md`:
+  - **CX1** — Never rebase a task branch that already has commits on origin; use
+    GitHub's "Update branch" instead. Prevents the rebase→force-push→deny-list
+    interrupt pattern from session 122.
+  - **CX2** — Curl localhost:3000 before starting `npm run dev`; skip if already up.
+    Avoids 7× redundant server restarts per session.
+
+**In Progress:** Nothing.
+
+**Blocked:** Twilio Toll-Free Verification pending (carryover from s102).
+
+**Next Steps:**
+1. **6.27 — Restore cancelled enrollment** (3 pts) — highest-priority Phase 6 code task.
+   Server action to un-cancel (or unenroll+re-enroll), Restore button in admin enrollments
+   UI, capacity check, pgTAP, Playwright.
+2. Pre-launch trio: **6.8** (external audit, 2 pts) + **6.12** (security audit, 3 pts) +
+   **6.17** (close-out, 5 pts) — May 4 launch is tomorrow.
+3. Launch checklist items (~12 unchecked deployment tasks in PROJECT_PLAN.md).
+
+**Context:**
+- CX1 root cause: model rebased `task/6.14` after user asked to add polish to an open PR.
+  Rebase rewrote history → push rejected → force-push denied → user had to cherry-pick manually.
+  Fix: explicit prohibition in CLAUDE.md.
+- CX2 root cause: no heuristic for "is the dev server already running?" — 7 start/stop cycles
+  in s122. Fix: curl check before start.
+
+**Code Review:** N/A — workflow-only session, no code changes.
 
 ## Session 123 — 2026-05-03 02:39 [abandoned]
 
