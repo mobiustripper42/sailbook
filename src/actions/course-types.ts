@@ -68,3 +68,27 @@ export async function toggleCourseTypeActive(id: string, currentlyActive: boolea
   revalidatePath('/admin/course-types')
   return { error: null }
 }
+
+export async function addPrerequisite(courseTypeId: string, requiredCourseTypeId: string) {
+  if (courseTypeId === requiredCourseTypeId) {
+    return { error: 'A course type cannot require itself.' }
+  }
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('course_type_prerequisites')
+    .insert({ course_type_id: courseTypeId, required_course_type_id: requiredCourseTypeId })
+  if (error) return { error: error.message }
+  revalidatePath(`/admin/course-types/${courseTypeId}/edit`)
+  return { error: null }
+}
+
+export async function removePrerequisite(prerequisiteId: string, courseTypeId: string) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('course_type_prerequisites')
+    .delete()
+    .eq('id', prerequisiteId)
+  if (error) return { error: error.message }
+  revalidatePath(`/admin/course-types/${courseTypeId}/edit`)
+  return { error: null }
+}
