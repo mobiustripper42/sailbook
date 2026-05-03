@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 const STORAGE_KEY = 'sailbook.sessions-view'
-const MOBILE_QUERY = '(max-width: 639px)'
 
 type View = 'calendar' | 'list'
 
@@ -17,21 +16,13 @@ export function SessionsViewSwitcher({
   list: ReactNode
 }) {
   const [view, setView] = useState<View>('calendar')
-  const [isMobile, setIsMobile] = useState(false)
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    const mq = window.matchMedia(MOBILE_QUERY)
-    const update = () => setIsMobile(mq.matches)
-    update()
-    mq.addEventListener('change', update)
-
     const saved = window.localStorage.getItem(STORAGE_KEY)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (saved === 'calendar' || saved === 'list') setView(saved)
     setHydrated(true)
-
-    return () => mq.removeEventListener('change', update)
   }, [])
 
   function pickView(next: View) {
@@ -39,15 +30,13 @@ export function SessionsViewSwitcher({
     try {
       window.localStorage.setItem(STORAGE_KEY, next)
     } catch {
-      // localStorage unavailable in some privacy modes — preference just won't persist
+      // localStorage unavailable in some privacy modes
     }
   }
 
-  const effectiveView: View = isMobile ? 'list' : view
-
   return (
     <>
-      {hydrated && !isMobile && (
+      {hydrated && (
         <div
           className="mb-4 inline-flex items-center gap-1 rounded-md border bg-card p-0.5"
           data-testid="sessions-view-toggle"
@@ -79,8 +68,8 @@ export function SessionsViewSwitcher({
         </div>
       )}
 
-      <div data-testid="sessions-view-content" data-active-view={effectiveView}>
-        {effectiveView === 'calendar' ? calendar : list}
+      <div data-testid="sessions-view-content" data-active-view={view}>
+        {view === 'calendar' ? calendar : list}
       </div>
     </>
   )

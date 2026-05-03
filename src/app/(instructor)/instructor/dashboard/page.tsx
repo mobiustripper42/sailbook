@@ -29,10 +29,10 @@ export default async function InstructorDashboard() {
   const today = new Date().toISOString().slice(0, 10)
   const firstName = user.user_metadata?.first_name as string | undefined
 
-  // Upcoming sessions for courses this instructor is assigned to
-  // Note: session-level instructor override (DEC-007) is Phase 5.2;
-  // for now we scope by courses.instructor_id only.
-  const { data: mySessions } = await supabase
+  // DEC-007: two queries, same pattern as instructor/calendar/page.tsx.
+  // Query 1: sessions where this instructor is the course default and no session-level
+  // override exists (instructor_id IS NULL on the session).
+  const { data: courseSessions, error: e1 } = await supabase
     .from('sessions')
     .select(`
       id, date, start_time, end_time, location, status,
@@ -46,18 +46,47 @@ export default async function InstructorDashboard() {
     .gte('date', today)
     .eq('courses.instructor_id', user.id)
     .eq('courses.status', 'active')
+    .is('instructor_id', null)
     .order('date')
     .order('start_time')
 
-  const rows = (mySessions ?? []) as unknown as SessionRow[]
+  // Query 2: sessions directly assigned to this instructor at the session level.
+  const { data: overrideSessions, error: e2 } = await supabase
+    .from('sessions')
+    .select(`
+      id, date, start_time, end_time, location, status,
+      courses!inner (
+        id, title, capacity,
+        course_types ( name ),
+        enrollments ( student_id, status )
+      )
+    `)
+    .eq('status', 'scheduled')
+    .gte('date', today)
+    .eq('instructor_id', user.id)
+    .eq('courses.status', 'active')
+    .order('date')
+    .order('start_time')
+
+  if (e1) return <div className="text-destructive text-sm">{e1.message}</div>
+  if (e2) return <div className="text-destructive text-sm">{e2.message}</div>
+
+  // Deduplicate and sort
+  const seen = new Set<string>()
+  const rows: SessionRow[] = []
+  for (const s of [...(courseSessions ?? []), ...(overrideSessions ?? [])]) {
+    if (seen.has(s.id)) continue
+    seen.add(s.id)
+    rows.push(s as unknown as SessionRow)
+  }
+  rows.sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time))
 
   const upcomingCount = rows.length
 
-  // Count unique active students across all upcoming sessions
   const studentIds = new Set<string>()
   for (const s of rows) {
     for (const e of s.courses.enrollments) {
-      if (e.status === 'confirmed') studentIds.add(e.student_id)
+      if (e.status === 'confirmed' || e.status === 'completed') studentIds.add(e.student_id)
     }
   }
 
@@ -72,14 +101,12 @@ export default async function InstructorDashboard() {
         <p className="text-sm text-muted-foreground mt-1">Your upcoming schedule.</p>
       </div>
 
-      {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard label="Active Courses" value={courseIds.size} />
         <StatCard label="Upcoming Sessions" value={upcomingCount} />
         <StatCard label="Total Students" value={studentIds.size} />
       </div>
 
-      {/* Upcoming sessions */}
       {rows.length === 0 ? (
         <EmptyState message="No upcoming sessions assigned to you." />
       ) : (
@@ -88,29 +115,26 @@ export default async function InstructorDashboard() {
           <div className="divide-y rounded-lg border">
             {rows.map((s) => {
               const course = s.courses
-              const activeEnrollments = course.enrollments.filter((e) => e.status === 'confirmed').length
+              const confirmedCount = course.enrollments.filter(
+                (e) => e.status === 'confirmed' || e.status === 'completed'
+              ).length
               return (
                 <div key={s.id} className="px-4 py-3 flex items-start justify-between gap-4">
                   <div className="space-y-0.5 min-w-0">
-                    <p className="text-sm font-medium truncate">
+                    <Link
+                      href={`/instructor/sessions/${s.id}`}
+                      className="text-sm font-medium truncate hover:underline underline-offset-2 block"
+                    >
                       {course.title ?? course.course_types?.name ?? '—'}
-                    </p>
+                    </Link>
                     <p className="text-xs text-muted-foreground">
                       {fmtDateRelative(s.date)} · {fmtTime(s.start_time)} – {fmtTime(s.end_time)}
                       {s.location ? ` · ${s.location}` : ''}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs text-muted-foreground">
-                      {activeEnrollments} / {course.capacity}
-                    </span>
-                    <Link
-                      href={`/instructor/sessions/${s.id}`}
-                      className="text-xs text-muted-foreground hover:text-foreground"
-                    >
-                      Roster →
-                    </Link>
-                  </div>
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    {confirmedCount} / {course.capacity}
+                  </span>
                 </div>
               )
             })}
