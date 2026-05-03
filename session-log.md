@@ -3,6 +3,8 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
+## Session 125 — 2026-05-03 03:19 [open]
+
 ## Session 124 — 2026-05-03 02:50–03:02 (0.2 hrs)
 **Duration:** 0.2 hrs | **Points:** 0 (tooling/workflow — no plan task)
 **Task:** Tape-reader review + workflow fixes (CX1, CX2)
