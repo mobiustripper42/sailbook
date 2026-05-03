@@ -240,6 +240,13 @@ SELECT is(
 
 RESET ROLE;
 
+-- Restore e003 back to confirmed before SESSION ATTENDANCE block —
+-- get_student_enrollment_ids excludes cancelled enrollments, so leaving e003
+-- cancelled would drop sam's 4 attendance rows from his RLS view (test 19
+-- expects 8: e001:2 + e003:4 + e004:2).
+UPDATE public.enrollments SET status = 'confirmed'
+WHERE id = 'e1000000-0000-0000-0000-000000000003';
+
 -- ============================================================
 -- SESSION ATTENDANCE
 -- ============================================================
