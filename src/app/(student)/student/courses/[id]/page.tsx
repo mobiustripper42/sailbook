@@ -43,10 +43,15 @@ export default async function StudentCourseDetailPage({
 
   // Prerequisite flagging — show warning if the student has no non-cancelled
   // enrollment in any course of a required course type. Flag only, not block.
-  const { data: prereqRows } = await supabase
-    .from('course_type_prerequisites')
-    .select('required_course_type_id, required:course_types!course_type_prerequisites_required_course_type_id_fkey(name, short_code)')
-    .eq('course_type_id', course.course_type_id)
+  // Satisfaction rule: any non-cancelled enrollment counts (registered,
+  // confirmed, completed, pending_payment, cancel_requested). Lenient by
+  // design — the flag is informational, admins reconcile edge cases.
+  const { data: prereqRows } = user
+    ? await supabase
+        .from('course_type_prerequisites')
+        .select('required_course_type_id, required:course_types!course_type_prerequisites_required_course_type_id_fkey(name, short_code)')
+        .eq('course_type_id', course.course_type_id)
+    : { data: [] }
 
   const requiredTypeIds = (prereqRows ?? []).map((r) => r.required_course_type_id)
   const { data: satisfyingEnrollments } = user && requiredTypeIds.length > 0
@@ -319,7 +324,7 @@ export default async function StudentCourseDetailPage({
           data-testid="prereq-warning"
           className="rounded-xs border border-warning/50 bg-warning/10 px-4 py-3 text-sm text-foreground"
         >
-          <span className="font-medium">⚠️ Prerequisite not on record.</span>{' '}
+          <span className="font-medium">Prerequisite not on record.</span>{' '}
           This course recommends{' '}
           {missingPrereqs.map((p, i) => (
             <span key={p.short_code}>

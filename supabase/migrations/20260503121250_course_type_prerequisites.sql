@@ -19,7 +19,7 @@ CREATE INDEX idx_course_type_prerequisites_course_type
 ALTER TABLE public.course_type_prerequisites ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Admins can do anything with course_type_prerequisites"
-  ON public.course_type_prerequisites TO authenticated
+  ON public.course_type_prerequisites FOR ALL TO authenticated
   USING (((auth.jwt() -> 'user_metadata') ->> 'is_admin') = 'true')
   WITH CHECK (((auth.jwt() -> 'user_metadata') ->> 'is_admin') = 'true');
 

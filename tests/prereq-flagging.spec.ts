@@ -6,12 +6,9 @@ const ASA_101_COURSE_ID = 'c1000000-0000-0000-0000-000000000001'
 const DINGHY_TYPE_ID = 'b1000000-0000-0000-0000-000000000003'
 
 test.describe('Prerequisite flagging — student warning banner', () => {
-  test.beforeEach(({}, testInfo) => {
-    test.skip(testInfo.project.name !== 'desktop', 'desktop-only')
-  })
-
   test('shows warning when student has no prereq on record', async ({ page }) => {
-    // pw_student has no seeded enrollments → missing ASA 101
+    // pw_student has no seeded enrollments → missing ASA 101.
+    // Runs on all viewports (incl. 375px) — banner is mobile-visible UI.
     await loginAs(page, 'pw_student@ltsc.test', '/student/dashboard')
     await page.goto(`/student/courses/${ASA_103_COURSE_ID}`)
     const banner = page.getByTestId('prereq-warning')
@@ -40,7 +37,7 @@ test.describe('Prerequisite flagging — admin manages prereqs', () => {
     await expect(page.getByText('No prerequisites set.')).toBeVisible()
 
     // Add ASA 101 as a prereq
-    await page.getByRole('combobox').filter({ hasText: /Add a prerequisite/i }).click()
+    await page.getByRole('combobox').click()
     await page.getByRole('option', { name: /ASA101/ }).click()
     await page.getByRole('button', { name: 'Add' }).click()
 
