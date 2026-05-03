@@ -32,7 +32,7 @@ export default async function InstructorDashboard() {
   // DEC-007: two queries, same pattern as instructor/calendar/page.tsx.
   // Query 1: sessions where this instructor is the course default and no session-level
   // override exists (instructor_id IS NULL on the session).
-  const { data: courseSessions } = await supabase
+  const { data: courseSessions, error: e1 } = await supabase
     .from('sessions')
     .select(`
       id, date, start_time, end_time, location, status,
@@ -51,7 +51,7 @@ export default async function InstructorDashboard() {
     .order('start_time')
 
   // Query 2: sessions directly assigned to this instructor at the session level.
-  const { data: overrideSessions } = await supabase
+  const { data: overrideSessions, error: e2 } = await supabase
     .from('sessions')
     .select(`
       id, date, start_time, end_time, location, status,
@@ -68,6 +68,9 @@ export default async function InstructorDashboard() {
     .order('date')
     .order('start_time')
 
+  if (e1) return <div className="text-destructive text-sm">{e1.message}</div>
+  if (e2) return <div className="text-destructive text-sm">{e2.message}</div>
+
   // Deduplicate and sort
   const seen = new Set<string>()
   const rows: SessionRow[] = []
@@ -83,7 +86,7 @@ export default async function InstructorDashboard() {
   const studentIds = new Set<string>()
   for (const s of rows) {
     for (const e of s.courses.enrollments) {
-      if (e.status === 'confirmed') studentIds.add(e.student_id)
+      if (e.status === 'confirmed' || e.status === 'completed') studentIds.add(e.student_id)
     }
   }
 
@@ -112,7 +115,9 @@ export default async function InstructorDashboard() {
           <div className="divide-y rounded-lg border">
             {rows.map((s) => {
               const course = s.courses
-              const confirmedCount = course.enrollments.filter((e) => e.status === 'confirmed').length
+              const confirmedCount = course.enrollments.filter(
+                (e) => e.status === 'confirmed' || e.status === 'completed'
+              ).length
               return (
                 <div key={s.id} className="px-4 py-3 flex items-start justify-between gap-4">
                   <div className="space-y-0.5 min-w-0">

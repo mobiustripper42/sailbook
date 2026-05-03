@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { fmtTime } from '@/lib/utils'
+import { cn, fmtTime } from '@/lib/utils'
 import type { SessionEvent } from './sessions-calendar'
 
 function fmtDayHeader(date: string): string {
@@ -56,7 +56,7 @@ export function SessionsList({
                   data-testid="sessions-list-row"
                 >
                   <div className="min-w-0">
-                    <p className={`text-sm font-medium truncate ${isPast ? 'text-muted-foreground' : ''}`}>
+                    <p className={cn('text-sm font-medium truncate', isPast && 'text-muted-foreground')}>
                       {s.label}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
