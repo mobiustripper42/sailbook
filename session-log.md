@@ -3,7 +3,33 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 126 — 2026-05-03 04:20 [open]
+## Session 126 — 2026-05-03 04:20–11:03 (6.75 hrs)
+**Duration:** 6.75 hrs | **Points:** 0 (test-only fixes — no plan task)
+**Task:** Fix 14 failing Playwright tests
+
+**Completed:**
+- `tests/student-enrollment.spec.ts:15` — added `waitForSelector('[data-active-view="list"]')` before course name assertions; prevents strict mode violation during SSR→list hydration transition
+- `tests/time-select.spec.ts:5` — scoped `getByText('Dock ${id}')` to `getByRole('cell')` to avoid card/table duplicate
+- `tests/time-select.spec.ts:37` — same fix for `getByText('6:00pm')` → `getByRole('cell', { name: /6:00pm/ })`
+- `tests/unsaved-changes.spec.ts:213,227` — open `'User actions'` DropdownMenu before clicking Edit; 6.14 polish (commit `4572faf`) moved the inline Edit link into a dropdown but this test wasn't updated along with the others
+- `tests/attendance-cancellation.spec.ts:173` — dropped `filter({ hasText: 'Schedule Makeup' })` (text lives on the button, not the open form); scoped `'Makeup scheduled (1 student)'` assertion to `getByRole('cell')` to avoid hidden card-view duplicate
+- `tests/notifications.spec.ts:70` — added `{ retries: 2 }` to the buffer accumulation test; race condition with other spec files' `beforeEach` DELETE on shared buffer (local 4-worker runs only; CI is 1-worker and unaffected)
+
+**In Progress:** P8 + CX3 workflow fixes still pending (its-alive Step 2 grep, kill-this skip-build for docs-only).
+
+**Blocked:** Twilio Toll-Free Verification (external dependency, carryover).
+
+**Next Steps:**
+1. **6.27 — Restore cancelled enrollment (3 pts)** — highest-priority code task, cut `task/6.27-restore-cancelled-enrollment`. May 4 launch is today.
+2. Pre-launch trio: **6.8** (external audit) + **6.12** (security audit) + **6.17** (close-out)
+3. Launch checklist: ~12 unchecked deployment tasks in PROJECT_PLAN.md
+
+**Context:**
+- 5 root causes for 14 failures: SSR/hydration timing (1), table+card dual-render strictness (3), stale locator from 6.14 dropdown refactor (6), wrong form filter (1), shared buffer race (1)
+- Card/table dual-render pattern is common: `session-row.tsx` (table, visible desktop) and `session-card-item.tsx` (card, hidden desktop). `getByRole('cell')` is the reliable scoping strategy.
+- The line 52 mobile unsaved-changes flake (nav drawer intercepting click) is pre-existing; not in the original 14.
+
+**Code Review:** N/A — test-only changes pushed to main
 
 ## Session 125 — 2026-05-03 03:19–04:15 (0.93 hrs)
 **Duration:** 0.93 hrs | **Points:** 0 (tooling/workflow — no plan task)
