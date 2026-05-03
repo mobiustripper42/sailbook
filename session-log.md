@@ -3,7 +3,33 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 125 — 2026-05-03 03:19 [open]
+## Session 125 — 2026-05-03 03:19–04:15 (0.93 hrs)
+**Duration:** 0.93 hrs | **Points:** 0 (tooling/workflow — no plan task)
+**Task:** Tape-reader review + CX2 seeds backport
+
+**Completed:**
+- Ran `/read-the-tape` on session 124 transcript (2ed1554f).
+  - P8 (latent): `its-alive` Step 2 should use grep instead of vague Read on session-log.md
+  - CX3 (candidate): `kill-this` runs full build even for docs/config-only sessions
+  - Both deferred — user ended session before applying
+- Backported CX2 (curl-before-dev-server) to seeds repo (`dev/claude/CLAUDE.md`)
+  — was missed by prior /push-seeds run; user confirmed it applies to all dev projects
+
+**In Progress:** P8 + CX3 fixes not yet applied to `its-alive` and `kill-this` skills.
+
+**Blocked:** Twilio Toll-Free Verification (carryover from s102, external dependency).
+
+**Next Steps:**
+1. Apply P8 fix to `its-alive` Step 2 — replace vague Read with `grep "^## Session" session-log.md | tail -5`
+2. Apply CX3 fix to `kill-this` Step 1 — skip build when all changed files match docs/config-only pattern
+3. **6.27 — Restore cancelled enrollment (3 pts)** — highest-priority code task, cut `task/6.27-restore-cancelled-enrollment`
+4. Pre-launch trio: 6.8 + 6.12 + 6.17 — May 4 launch is tomorrow
+
+**Context:**
+- CX2 was in sailbook CLAUDE.md but sync-config silently declined the seeds backport last session — worth watching for this pattern in future /push-seeds runs.
+- P8 and CX3 are low-friction fixes, good warmup for next session before diving into 6.27.
+
+**Code Review:** N/A — no application code changed.
 
 ## Session 124 — 2026-05-03 02:50–03:02 (0.2 hrs)
 **Duration:** 0.2 hrs | **Points:** 0 (tooling/workflow — no plan task)
