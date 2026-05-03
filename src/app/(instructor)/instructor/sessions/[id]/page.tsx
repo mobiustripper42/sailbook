@@ -127,6 +127,9 @@ export default async function InstructorSessionRosterPage({
 
   const courseTitle = course.title ?? course.course_types?.name ?? 'Untitled Course'
   const isCancelled = session.status === 'cancelled'
+  const confirmedCount = (enrollments ?? []).filter(
+    (e) => e.status === 'confirmed' || e.status === 'completed'
+  ).length
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -153,7 +156,7 @@ export default async function InstructorSessionRosterPage({
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
           <p className="text-muted-foreground">Enrolled</p>
-          <p className="font-medium">{students.length} / {course.capacity}</p>
+          <p className="font-medium">{confirmedCount} / {course.capacity}</p>
         </div>
         <div>
           <p className="text-muted-foreground">Status</p>
