@@ -3,7 +3,39 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 130 — 2026-05-03 17:28 [open]
+## Session 130 — 2026-05-03 17:28–19:05 (1.58 hrs)
+**Duration:** 1h 35m | **Points:** 10 (6.12: 3 + 6.17: 5 + 6.8: 2)
+**Task:** Close out V2: fix outstanding test failures, run security audit (6.12), close Phase 6 with retrospective, build Phase 9 deployment plan
+**Completed:**
+- Fixed 5 test failures from full-suite run: prereq-flagging across 3 viewports (root cause: `createInstructorCourse` in `tests/instructor-views.spec.ts:27` used ASA 101, accumulated pw_student enrollments that satisfied the ASA 103 prereq → switched to Dinghy, mirrors helpers.ts fix); admin-course-crud + instructor-cascade flakes (passed alone, full-suite contention only). Cleaned 7 polluted ASA 101 enrollments from local DB.
+- Reviewed Attention Insight heatmaps (student + admin dashboards). Student 58% clarity (optimal), admin 48% (moderate density). Both heatmaps land on intended focal points. Dropped WebsiteAuditAI — wrong tool for an auth-walled app.
+- **Task 6.12 — V2 security audit.** Manual code review across auth/RLS/server actions/API routes/payments/notifications/secrets/deps. Three parallel Explore agents cross-checked. 0 critical findings.
+  - **M1 fixed:** `updateUserProfile` (`src/actions/profiles.ts:8`) lacked admin role check before calling `adminClient.auth.admin.updateUserById()` (service role, bypasses RLS). Was protected only by middleware blocking `/admin/*`. Added is_admin check matching pattern in sibling actions.
+  - **M2 fixed:** Cron routes were silently open if `CRON_SECRET` unset in production. Extracted `verifyCron()` helper at `src/lib/cron-auth.ts` that fails closed in prod (mirrors `devOnly()`). All 3 cron routes refactored.
+  - **D1–D7 deferred to V3** in `docs/SECURITY_AUDIT_V2.md` (full report) and PROJECT_PLAN.md V3 backlog.
+- **Phase 6 close.** Cut to V3: 5.11 (Bulk price update, 8 pts), 6.18 (CI + iOS testing, 5 pts), 6.28 (Staging environment, TBD). Closed administratively: 6.8 (Attention Insight done, WebsiteAuditAI skipped). Phase 6 retrospective written in `docs/RETROSPECTIVES.md`. Phase totals: Phase 5 39→31, Phase 6 52→58 (Summary row reconciled).
+- **Phase 9: Deployment & Launch** added to PROJECT_PLAN.md. ~55 concrete checkboxes across A–K: pre-deploy sanity, Supabase prod (incl. 7 dashboard-only auth-panel items), Stripe live, Twilio + Resend (incl. A2P 10DLC warning), Vercel (incl. Hobby vs Pro decision for sub-daily cron), smoke tests, ops setup, comms, rollback, post-launch week, V2 retro.
+- PR #31 opened with 3 commits: 070cdcd (audit + fixes), 3a4dfa4 (Phase 6 close + retro), 637d3a6 (Phase 9 plan). https://github.com/mobiustripper42/sailbook/pull/31
+
+**In Progress:** Nothing — branch is shippable.
+
+**Blocked:** Nothing.
+
+**Next Steps:**
+1. Read `docs/SECURITY_AUDIT_V2.md` and `docs/PROJECT_PLAN.md` Phase 9 section in full
+2. Merge PR #31
+3. Work through Phase 9 checklist (A → K). A2P 10DLC for Twilio is the long-pole item — start it tonight if SMS matters day 1
+4. Launch Mon (May 4) or Tue (May 5)
+5. ~7 days post-launch: write V2 final retrospective in RETROSPECTIVES.md (separate from Phase 6)
+
+**Context:**
+- **Phase numbering:** Deployment is Phase 9 (Phase 7 = completed Remote Dev side quest, Phase 8 = Skills V3 placeholder). Least-disruption choice; the "9" telegraphs critical-path-next.
+- **Test pollution pattern (now fixed twice):** test helpers that create courses must NOT default to a course type that other tests assert on for *absence* (e.g., prereq satisfaction). Switched both `createTestCourse` (helpers.ts) and `createInstructorCourse` (instructor-views.spec.ts) to Dinghy.
+- **Code review surfaced 3 cleanup items** in PR #31 body (not blocking): test files don't send `Authorization` header to crons, so a dev who sets `CRON_SECRET` locally will see test failures; missing `ENROLLMENT_HOLD_MINUTES` in Phase 9 §E env list; the `/api/test/enroll` 403 smoke step might return 405 first since most test routes are POST-only.
+- **Three slightly divergent admin-check shapes** in `src/actions/profiles.ts` — D1 (V3 `requireAdmin()` helper) should explicitly absorb `updateUserProfile`.
+- **No `@security-agent` exists** in `.claude/agents/` despite the PROJECT_PLAN reference. 6.12 was done manually with three parallel Explore agents.
+
+**Code Review:** 4 cleanup-level findings, all non-blocking. Both moderate fixes verified correct under all env-branch combinations. PR body has full details. Verdict from reviewer: "Ship it."
 
 ## Session 129 — 2026-05-03 15:30–16:50 (1.33 hrs)
 **Duration:** 1.33 hrs | **Points:** 12
