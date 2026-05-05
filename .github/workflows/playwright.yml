@@ -29,9 +29,11 @@ jobs:
       ENROLLMENT_HOLD_MINUTES: 15
       CRON_SECRET: ci-cron-secret-not-real
       # Stripe-touching tests skip if these are unset (see tests/payment-e2e.spec.ts).
-      # To run them in CI, set repo secrets STRIPE_SECRET_KEY (test) + STRIPE_WEBHOOK_SECRET (test).
-      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+      # Build step needs the env var present (not empty) — src/lib/stripe.ts throws on missing.
+      # Placeholder is enough for `next build`; real test-mode keys (in repo secrets) only matter
+      # if you want Stripe-touching Playwright tests to actually run in CI.
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'sk_test_placeholder_for_build' }}
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder_for_build' }}
 
     steps:
       - uses: actions/checkout@v4
