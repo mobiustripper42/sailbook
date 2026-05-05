@@ -15,17 +15,57 @@
 
 BEGIN;
 
--- 1. Course type — ASA 101
-INSERT INTO public.course_types (name, short_code, certification_body, description, max_students)
-VALUES (
-  'ASA 101 - Sailing Made Easy',
-  'ASA101',
-  'American Sailing',
-  'Learn to skipper a 20'' – 27'' sloop-rigged keelboat by day, in light to moderate winds and sea conditions. Learn basic sailing terminology, parts and functions, helm commands, basic sail trim, points of sail, buoyage, seamanship and safety including basic navigation rules to avoid collisions and hazards. 2 days.',
-  4
-)
+-- 1. Course types — six ASA classes shown on /sailing-classes.
+--    Slug is required (NOT NULL, no default) and drives the public URL /courses/<slug>.
+--    Only ASA101 has scheduled sessions below; the others render "Coming soon"
+--    on the public catalog until Andy adds courses for them.
+INSERT INTO public.course_types (name, short_code, slug, certification_body, description, max_students)
+VALUES
+  (
+    'ASA 101 - Sailing Made Easy',
+    'ASA101', 'asa101',
+    'American Sailing',
+    'Learn to skipper a 20'' – 27'' sloop-rigged keelboat by day, in light to moderate winds and sea conditions. Learn basic sailing terminology, parts and functions, helm commands, basic sail trim, points of sail, buoyage, seamanship and safety including basic navigation rules to avoid collisions and hazards. 2 days.',
+    4
+  ),
+  (
+    'ASA 102 - Keelboat 2',
+    'ASA102', 'asa102',
+    'American Sailing',
+    'Able to skipper and crew aboard a sloop-rigged keelboat of approximately 20 to 30 feet in length by day in winds up to 20 knots. Depart, sail, and return with control demonstrating teamwork. ASA 101 or equivalent sailing skills & experience.',
+    4
+  ),
+  (
+    'ASA 103 - Coastal Cruising Made Easy',
+    'ASA103', 'asa103',
+    'American Sailing',
+    'Prerequisite: ASA 101. Learn to skipper a sloop-rigged auxiliary powered 25'' – 35'' keelboat by day in moderate winds and sea conditions. Covers cruising sailboat terminology, basic boat systems, auxiliary engine operation, docking procedures, intermediate sail trim, navigation rules, basic coastal navigation, anchoring, weather, safety and seamanship.',
+    4
+  ),
+  (
+    'ASA 104 - Bareboat Cruising Made Easy',
+    'ASA104', 'asa104',
+    'American Sailing',
+    'Prerequisite: ASA 101, 103. Learn how to sail a sloop-rigged, auxiliary powered 30'' – 45'' sailboat during a multi-day cruise upon inland/coastal waters in moderate/heavy winds and sea conditions. Covers provisioning, boat systems, auxiliary engines, advanced sail trim, coastal navigation, anchoring/mooring, docking, emergency operations, weather, and more.',
+    4
+  ),
+  (
+    'ASA 105 - Coastal Navigation',
+    'ASA105', 'asa105',
+    'American Sailing',
+    'Learn the navigational theory and practices for safe navigation of a sailing vessel in coastal and inland waters.',
+    4
+  ),
+  (
+    'ASA 118 - Docking Endorsement',
+    'ASA118', 'asa118',
+    'American Sailing',
+    'Learn basic docking skills for boats with single inboard or outboard engines. Discover the basic theory and hands-on techniques needed to dock and undock boats in an efficient manner and without damage or injury.',
+    4
+  )
 ON CONFLICT (short_code) DO UPDATE
   SET name = EXCLUDED.name,
+      slug = EXCLUDED.slug,
       certification_body = EXCLUDED.certification_body,
       description = EXCLUDED.description,
       max_students = EXCLUDED.max_students,
