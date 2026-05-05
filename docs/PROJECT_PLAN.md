@@ -292,21 +292,21 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 
 ### A. Pre-Deploy Sanity (do day before)
 
-- [ ] **Branch state.** `main` is green: full Playwright suite passes locally (worker=4) and `supabase test db` clean. Lint clean. No open PRs.
-- [ ] **`docs/SECURITY_AUDIT_V2.md` checklist** items 1–5 reviewed (env-var presence, smoke test plan).
-- [ ] **Walk the app cold.** Browse SailBook in an incognito window as anon → student (register flow) → admin. Ten minutes. Note anything ugly.
-- [ ] **Andy walk-through.** Show Andy the dashboard, courses list, manual-enroll flow, refund flow. Get his "ready" or "wait one more day."
-- [ ] **Backup the dev DB** (if there's anything in it worth keeping). `supabase db dump --local > backup-pre-launch.sql`.
-- [ ] **Tag the launch commit.** `git tag v2.0.0-rc1` on the merge commit you intend to deploy. Push the tag.
+- [x] **Branch state.** `main` is green: full Playwright suite passes locally (worker=4) and `supabase test db` clean. Lint clean. No open PRs. *(Session 132: lint fixed in `task/9.A-pre-deploy-cleanup`. pgTAP clean post-reset. Full suite: 13 known-pollution failures, all pass in isolation. PR #33 staging-env work, unrelated.)*
+- [x] **`docs/SECURITY_AUDIT_V2.md` checklist** items 1–5 reviewed (env-var presence, smoke test plan). *(Session 132: items 1–3 verified in Vercel — CRON_SECRET on Prod+Preview, SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SUPABASE_* on Prod only, STRIPE_WEBHOOK_SECRET on all envs. Items 4–5 are post-deploy smoke tests, deferred to §G/§H.)*
+- [x] **Walk the app cold.** Browse SailBook in an incognito window as anon → student (register flow) → admin. Ten minutes. Note anything ugly. *(Session 132: turned up two real issues — public-course pages had no contact path for "I don't see a date I want" → fixed in PR #35; admin login didn't work after flipping `profiles.is_admin = true` because middleware reads `auth.users.raw_user_meta_data` → §B.3 instructions corrected on this branch.)*
+- [~] **Andy walk-through.** Show Andy the dashboard, courses list, manual-enroll flow, refund flow. Get his "ready" or "wait one more day." *(Session 132: deferred until staging environment is up — Eric working on it concurrently.)*
+- [~] **Backup the dev DB** (if there's anything in it worth keeping). `supabase db dump --local > backup-pre-launch.sql`. *(Session 132: skipped — local DB is fixtures only; `supabase/seed.sql` is the source of truth.)*
+- [ ] **Tag the launch commit.** `git tag v2.0.0-rc1` on the merge commit you intend to deploy. Push the tag. *(Session 132: hold until PRs #34 + #35 merge — tag should land on the actual deploy commit.)*
 
 ### B. Supabase Production Project
 
-- [ ] **Project exists** at supabase.com. Note the project ref (`xxxxx.supabase.co`).
-- [ ] **`supabase db push --project-ref <prod>`** applies all migrations cleanly. Verify with `supabase migration list --project-ref <prod>` — last migration matches local.
-- [ ] **Seed real data.** This is NOT `supabase/seed.sql` (that's test fixtures). Create the real Andy admin account via Supabase Dashboard → Authentication → Users → Add user, then set `is_admin = true` in `profiles` via SQL editor. Same for any real instructors at launch.
+- [x] **Project exists** at supabase.com. Note the project ref (`xxxxx.supabase.co`). *(Session 132)*
+- [x] **`supabase db push`** applies all migrations cleanly. Verify with `supabase migration list` — last migration matches local. *(Session 132: prod data wiped via SQL truncate, all 34 migrations re-pushed clean. Note: `--project-ref` flag is ignored; use `supabase link --project-ref <ref>` first, then run plain commands.)*
+- [x] **Seed real data.** This is NOT `supabase/seed.sql` (that's test fixtures). Create the real Andy admin account via Supabase Dashboard → Authentication → Users → Add user. **In the User Metadata field at create time, paste `{"is_admin": true, "is_student": false}`** — the `on_auth_user_created` trigger reads that JSON and writes the matching `profiles` row, so you don't need a separate SQL update. Same pattern for real instructors at launch (use `{"is_instructor": true, "is_student": false}`). If a user was already created without metadata, fix it by updating BOTH places: `UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || '{"is_admin": true}'::jsonb WHERE email = '…';` AND `UPDATE profiles SET is_admin = true WHERE id = (SELECT id FROM auth.users WHERE email = '…');` then have them sign out and back in (role flag lives in the JWT). *(Session 132: Eric's admin seeded; Andy account deferred until staging green-lights.)*
 - [ ] **Course types loaded.** Either manually via Andy in the admin UI post-launch, OR pre-load via SQL (preferred so course catalog isn't empty on day 1). At minimum: ASA 101, ASA 103, Open Sailing, any others Andy is offering.
-- [ ] **Auth panel: enable email confirmations.** Dashboard → Authentication → Providers → Email → "Confirm email" ON. (`config.toml` does NOT sync this.)
-- [ ] **Auth panel: custom SMTP (Resend).** Dashboard → Authentication → SMTP Settings: host `smtp.resend.com`, port `587`, user `resend`, pass = Resend API key, sender `info@sailbook.live`, sender name `SailBook`. Send the dashboard test email and verify delivery.
+- [x] **Auth panel: enable email confirmations.** Dashboard → Authentication → Providers → Email → "Confirm email" ON. (`config.toml` does NOT sync this.) *(Session 132)*
+- [x] **Auth panel: custom SMTP (Resend).** Dashboard → Authentication → SMTP Settings: host `smtp.resend.com`, port `587`, user `resend`, pass = Resend API key, sender `info@sailbook.live`, sender name `SailBook`. Send the dashboard test email and verify delivery. *(Session 132: dashboard "Send test email" button no longer exists; verified instead by real signup — From/sender both correct.)*
 - [ ] **Auth panel: confirmation email template.** Dashboard → Authentication → Email Templates → "Confirm signup". Subject: "Confirm your SailBook account". Body matches `supabase/templates/confirmation.html`. The `{{ .ConfirmationURL }}` token must be preserved verbatim.
 - [ ] **Auth panel: password policy.** Dashboard → Authentication → Policies: minimum length 12, requirements `lower_upper_letters_digits` (matches `supabase/config.toml`).
 - [ ] **Auth panel: Site URL + Redirect URLs.** Dashboard → Authentication → URL Configuration: Site URL = `https://sailbook.live`, Redirect URLs include `https://sailbook.live/auth/callback`.
