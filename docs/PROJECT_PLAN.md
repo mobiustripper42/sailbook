@@ -304,7 +304,7 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 Provisions the staging Supabase project and Vercel Preview env vars so that every PR's auto-deploy hits staging — not production — with isolated test data and Stripe test keys. Without this, Vercel preview deploys would fall through to Production-scoped env vars (or fail to connect).
 
 - [ ] **Create staging Supabase project** at supabase.com → name `sailbook-staging` → free tier → close-to-prod region. Note project ref + anon key + service role key.
-- [ ] **Apply migrations to staging.** From the repo: `supabase link --project-ref <staging-ref>` → `supabase db push`. Verify `supabase migration list --project-ref <staging-ref>` matches local.
+- [ ] **Apply migrations to staging.** From the repo: `supabase link --project-ref <staging-ref>` → `supabase db push`. Verify with `supabase migration list` (operates on the linked project) — last migration matches local.
 - [ ] **Seed staging with demo data.** Either `psql <staging-db-url> -f docs/demo-seed.sql`, or paste the file into the Supabase SQL editor.
 - [ ] **Re-link to prod for the rest of Phase 9.** `supabase link --project-ref <prod-ref>` so subsequent `supabase db push` commands hit prod.
 - [ ] **Vercel Preview-scoped env vars.** Project Settings → Environment Variables → scope = **Preview**:
@@ -335,7 +335,7 @@ Once Section 0 is green, every PR auto-runs Playwright CI + auto-deploys a previ
 ### B. Supabase Production Project
 
 - [ ] **Project exists** at supabase.com. Note the project ref (`xxxxx.supabase.co`).
-- [ ] **`supabase db push --project-ref <prod>`** applies all migrations cleanly. Verify with `supabase migration list --project-ref <prod>` — last migration matches local.
+- [ ] **`supabase link --project-ref <prod>` then `supabase db push`** applies all migrations cleanly. Verify with `supabase migration list` (operates on the linked project) — last migration matches local.
 - [ ] **Seed real data.** This is NOT `supabase/seed.sql` (that's test fixtures). Create the real Andy admin account via Supabase Dashboard → Authentication → Users → Add user, then set `is_admin = true` in `profiles` via SQL editor. Same for any real instructors at launch.
 - [ ] **Course types loaded.** Either manually via Andy in the admin UI post-launch, OR pre-load via SQL (preferred so course catalog isn't empty on day 1). At minimum: ASA 101, ASA 103, Open Sailing, any others Andy is offering.
 - [ ] **Auth panel: enable email confirmations.** Dashboard → Authentication → Providers → Email → "Confirm email" ON. (`config.toml` does NOT sync this.)
