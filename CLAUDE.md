@@ -193,18 +193,19 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 
 ## PR Workflow
 
-Continuous deployment (Option 1): every PR ships on merge. There is no long-lived staging branch. See `docs/STAGING.md` for the full setup and migration workflow.
+Continuous deployment (Option 1): every PR ships on merge. The `staging` branch is a long-lived "always equal to main" pointer that backs `dev-sailbook.vercel.app` (the stable Stripe test webhook URL). See `docs/STAGING.md` for the full setup.
 
-- Each task gets a branch (`git checkout -b task/X.Y-short-description`).
-- Push the branch → opens a PR → Vercel posts a Preview URL → Playwright CI runs against ephemeral local Supabase.
-- Preview URL hits the **staging** Supabase + Stripe test mode. Andy can QA from there.
+- Each task gets a branch off main (`git checkout -b task/X.Y-short-description`). Never branch off `staging`.
+- Push the branch → opens a PR → Vercel posts a per-PR Preview URL → Playwright CI runs against ephemeral local Supabase.
+- Per-PR Preview URLs hit the **staging** Supabase + Stripe test mode. Andy can QA from there.
 - `/kill-this` opens the PR. `/ship-it` merges it. Merge to `main` → production deploys automatically.
+- After every merge to main, `.github/workflows/sync-staging.yml` fast-forwards `staging` to match → `dev-sailbook.vercel.app` rebuilds with current code. Don't push to `staging` directly; the auto-sync will fail with `--ff-only` errors if you do.
 - Migrations: `supabase link --project-ref <staging-ref> && supabase db push` BEFORE merging. After merge: `supabase link --project-ref <prod-ref> && supabase db push`. Never push migrations to prod that haven't run on staging.
 - Keep no more than 3 open PRs at once. Prefer 1.
 - Never have two open PRs with migrations touching the same table — merge one first.
 - Self-approve unless Andy review is explicitly needed.
 
-When batched releases become useful (V3 multi-feature releases), switch to Option 2 (release train) per `docs/STAGING.md`.
+When batched releases become useful (V3 multi-feature releases), switch to Option 2 (release train) — `staging` then accumulates features instead of just tracking main. Until then, treat `staging` as read-only-by-humans.
 
 ### PR Review on Mobile (developer notes)
 
