@@ -321,7 +321,7 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 
 - [ ] **Twilio.** Account is on a paid plan (not trial — trial caps to verified-only numbers). Buy a US local number if not already done. Note the Account SID, Auth Token, and From number.
 - [ ] **Twilio: A2P 10DLC registration.** Required for SMS to US carriers since 2023. Can take days to approve. **Start early or accept that SMS may bounce on day 1 until brand+campaign are approved.** If unapproved, fall back to email-only by setting `TWILIO_AUTH_TOKEN=""` and the trigger code will skip SMS.
-- [ ] **Resend.** Domain `sailbook.live` verified (DNS records added: SPF, DKIM, optionally DMARC). Send a test email from the Resend dashboard to confirm.
+- [x] **Resend.** Domain `sailbook.live` verified (DNS records added: SPF, DKIM, optionally DMARC). Send a test email from the Resend dashboard to confirm. *(Session 132. Two paths use Resend: Supabase Auth via SMTP (set in §B.6) AND app notifications via HTTP API. App-notification path requires `RESEND_API_KEY` and `NOTIFICATIONS_ENABLED=true` env vars on Vercel Production — both added.)*
 - [ ] **`info@sailbook.live`** is a real address that forwards to Andy. Otherwise users replying to confirmation emails go nowhere.
 
 ### E. Vercel Project
