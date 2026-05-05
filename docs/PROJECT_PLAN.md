@@ -301,14 +301,14 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 
 ### Section 0. Staging Environment Setup (do BEFORE Section A)
 
-Provisions the staging Supabase project, the long-lived `staging` branch (which gives Stripe a stable webhook URL), and Vercel Preview env vars so that every PR's auto-deploy hits staging — not production — with isolated test data and Stripe test keys.
+Provisions the staging Supabase project, the long-lived `staging` branch (release-train accumulator), and Vercel Preview env vars. Under the release-train model (Option 2), feature PRs target `staging`, accumulate as a batch, and ship to prod via a single release PR (`staging` → `main`) when Andy approves.
 
 - [ ] **Create staging Supabase project** at supabase.com → name `sailbook-staging` → free tier → close-to-prod region. Note project ref + anon key + service role key.
 - [ ] **Apply migrations to staging.** From the repo: `supabase link --project-ref <staging-ref>` → `supabase db push`. Verify with `supabase migration list` (operates on the linked project) — last migration matches local.
 - [ ] **Seed staging with demo data.** `supabase db reset --linked` (replays migrations + runs `supabase/seed.sql`), or `psql <staging-db-url> -f docs/demo-seed.sql`.
 - [ ] **Re-link to prod for the rest of Phase 9.** `supabase link --project-ref <prod-ref>` so subsequent `supabase db push` commands hit prod.
-- [ ] **Create `staging` git branch as a stable URL holder.** `git checkout main && git pull && git checkout -b staging && git push -u origin staging`. The branch always equals main; `.github/workflows/sync-staging.yml` fast-forwards it on every push to main. Don't push to `staging` directly.
-- [ ] **Vercel custom domain `dev-sailbook.vercel.app` → `staging` branch + Preview env.** Vercel → Settings → Domains → assign the domain to the Preview environment, branch = `staging`. This is the URL the Stripe test webhook will target.
+- [ ] **Create `staging` git branch.** `git checkout main && git pull && git checkout -b staging && git push -u origin staging`. Feature PRs target this branch; release PRs go staging → main.
+- [ ] **Vercel custom domain `dev-sailbook.vercel.app` → `staging` branch + Preview env.** Vercel → Settings → Domains → assign the domain to the Preview environment, branch = `staging`. This is the URL the Stripe test webhook will target and the URL Andy QAs.
 - [ ] **Vercel Preview-scoped env vars.** Project Settings → Environment Variables → scope = **Preview** (NOT "All Environments"):
   - `NEXT_PUBLIC_SUPABASE_URL` = staging Supabase URL (do NOT mark Sensitive — `NEXT_PUBLIC_*` vars ship to the browser anyway)
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = staging anon key (not Sensitive)
@@ -321,11 +321,10 @@ Provisions the staging Supabase project, the long-lived `staging` branch (which 
   - `ENROLLMENT_HOLD_MINUTES` = `15`
   - Twilio + Resend vars: leave empty (notifications off in preview)
 - [ ] **Stripe test webhook endpoint.** Stripe Dashboard → toggle to **Test mode** → Workbench → Webhooks → Add destination → URL = `https://dev-sailbook.vercel.app/api/webhooks/stripe`. Subscribe to `checkout.session.completed` only (the handler ignores other events). Copy `whsec_*` into the Vercel Preview `STRIPE_WEBHOOK_SECRET` above.
-- [ ] **Verify the staging plumbing.** Open a throwaway PR, tap the per-PR Preview URL, register a test user, run a `4242 4242 4242 4242` checkout. Confirm the test user lands in **staging** Supabase `auth.users` (NOT prod) and a `payments` row appears in staging. Then check Stripe Dashboard → webhook deliveries → a `checkout.session.completed` event got 200 from `dev-sailbook.vercel.app`. Close the throwaway PR.
+- [ ] **Verify the staging plumbing.** Cut a throwaway feature branch off main, push it, open a PR with **base = staging**. Tap the per-PR Preview URL, register a test user, run a `4242 4242 4242 4242` checkout. Confirm the test user lands in **staging** Supabase `auth.users` (NOT prod) and a `payments` row appears in staging. Merge the PR → confirm `dev-sailbook.vercel.app` rebuilds and shows the change. Then check Stripe Dashboard → webhook deliveries → a `checkout.session.completed` event got 200 from `dev-sailbook.vercel.app`. Roll back the throwaway change with another PR if you want.
 - [ ] **GitHub Actions secrets.** Repo Settings → Secrets and variables → Actions: add `STRIPE_SECRET_KEY` (`sk_test_*`) and `STRIPE_WEBHOOK_SECRET` (test). Without these, Stripe-touching Playwright tests skip in CI.
-- [ ] **Confirm `sync-staging.yml` runs.** After this branch merges to main, push any small commit to main → check Actions tab → "Sync staging with main" should run green and `staging` branch HEAD should match `main` HEAD.
 
-Once Section 0 is green, every PR auto-runs Playwright CI + auto-deploys a preview against staging, AND `dev-sailbook.vercel.app` always serves current code on staging Supabase for stable webhook testing. Proceed to Section A.
+Once Section 0 is green, the release-train workflow is live: feature PRs to `staging` → batch accumulates → release PR `staging` → `main` → prod ships. See `docs/STAGING.md` for day-to-day details. Proceed to Section A.
 
 ### A. Pre-Deploy Sanity (do day before)
 

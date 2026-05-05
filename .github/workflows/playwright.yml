@@ -2,9 +2,9 @@ name: Playwright
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, staging]
   push:
-    branches: [main]
+    branches: [main, staging]
 
 concurrency:
   group: playwright-${{ github.ref }}

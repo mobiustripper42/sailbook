@@ -193,19 +193,36 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 
 ## PR Workflow
 
-Continuous deployment (Option 1): every PR ships on merge. The `staging` branch is a long-lived "always equal to main" pointer that backs `dev-sailbook.vercel.app` (the stable Stripe test webhook URL). See `docs/STAGING.md` for the full setup.
+Release train (Option 2): feature PRs accumulate in `staging` for Andy to QA as a batch on `dev-sailbook.vercel.app`; a separate release PR (`staging` → `main`) ships the batch to prod. See `docs/STAGING.md` for the full setup.
 
-- Each task gets a branch off main (`git checkout -b task/X.Y-short-description`). Never branch off `staging`.
-- Push the branch → opens a PR → Vercel posts a per-PR Preview URL → Playwright CI runs against ephemeral local Supabase.
-- Per-PR Preview URLs hit the **staging** Supabase + Stripe test mode. Andy can QA from there.
-- `/kill-this` opens the PR. `/ship-it` merges it. Merge to `main` → production deploys automatically.
-- After every merge to main, `.github/workflows/sync-staging.yml` fast-forwards `staging` to match → `dev-sailbook.vercel.app` rebuilds with current code. Don't push to `staging` directly; the auto-sync will fail with `--ff-only` errors if you do.
-- Migrations: `supabase link --project-ref <staging-ref> && supabase db push` BEFORE merging. After merge: `supabase link --project-ref <prod-ref> && supabase db push`. Never push migrations to prod that haven't run on staging.
-- Keep no more than 3 open PRs at once. Prefer 1.
+### Per feature
+
+- Branch off `main`, NOT off `staging`: `git checkout main && git pull && git checkout -b task/X.Y-short-description`.
+- Push the branch and open a PR with **base = `staging`**: `gh pr create --base staging`. (Pick `staging` in the GitHub UI's base dropdown if not using gh.)
+- Vercel posts a per-PR Preview URL (Preview env, staging Supabase, Stripe test mode). Self-test there.
+- Playwright CI runs on the PR against ephemeral local Supabase.
+- When CI is green and self-test passes, merge → the feature lands on `staging` → `dev-sailbook.vercel.app` rebuilds with the accumulated batch.
+- `/kill-this` opens the PR (defaults to base = staging). `/ship-it` merges it.
+
+### Release the batch
+
+- Tell Andy: "QA `dev-sailbook.vercel.app`, this is the next release."
+- Open the release PR: `gh pr create --base main --head staging --title "Release: <date or summary>"`. CI runs once more.
+- After Andy approves and CI is green, merge the release PR. Vercel deploys to production (`sailbook.live`). `staging` and `main` are now equal — continue accumulating the next batch.
+
+### Migrations
+
+- `supabase link --project-ref <staging-ref> && supabase db push` BEFORE merging the feature PR.
+- After the release PR (`staging` → `main`) merges: `supabase link --project-ref <prod-ref> && supabase db push`.
+- Never push migrations to prod that haven't run on staging.
+
+### Rules
+
+- Don't push directly to `staging`. Don't push directly to `main`. Both are PR-only.
+- Don't open feature PRs against `main`. Only the release PR targets `main`.
+- Keep no more than 3 open feature PRs at once. Prefer 1.
 - Never have two open PRs with migrations touching the same table — merge one first.
-- Self-approve unless Andy review is explicitly needed.
-
-When batched releases become useful (V3 multi-feature releases), switch to Option 2 (release train) — `staging` then accumulates features instead of just tracking main. Until then, treat `staging` as read-only-by-humans.
+- Self-approve feature PRs. Andy is the gate on the release PR.
 
 ### PR Review on Mobile (developer notes)
 
