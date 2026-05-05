@@ -315,11 +315,7 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 
 ### C. Stripe Live Mode
 
-- [ ] **Toggle from test → live mode** in the Stripe dashboard.
-- [ ] **Live API keys**: copy `sk_live_*` (secret) and `pk_live_*` (publishable). The live publishable key is NOT used by SailBook (Checkout Sessions are server-only) but Andy may want it for receipts/branding later — note it.
-- [ ] **Webhook endpoint live.** Stripe Dashboard → Developers → Webhooks → Add endpoint: URL `https://sailbook.live/api/webhooks/stripe`, event `checkout.session.completed`. Copy the signing secret (`whsec_*`).
-- [ ] **Tax / receipts.** Decide: are we collecting tax via Stripe Tax? (Probably no for V2 — sailing instruction is service revenue and Andy handles tax separately.) Confirm receipts are enabled with sensible branding (Stripe Dashboard → Settings → Branding).
-- [ ] **Refund test.** Issue a $1 test charge to a real card, refund it through the admin UI. Verify it appears in the Stripe dashboard refunds tab.
+- [~] **All §C items deferred** *(Session 132: Eric does not have LTSC's Stripe live keys — Andy needs to provide them. Until then, prod cannot accept payments. Enrollment + checkout flows will fail at the Stripe step. Mitigations: keep prod in this state for marketing/info viewing only, OR add a "payments coming soon — email to register" banner. Revisit when Andy supplies keys.)*
 
 ### D. Notification Providers
 
