@@ -31,6 +31,8 @@ export default async function PublicCoursePage({
   const { slug } = await params
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+
   const { data: courseType } = await supabase
     .from('course_types')
     .select('id, name, short_code, certification_body, description, is_drop_in')
@@ -149,7 +151,13 @@ export default async function PublicCoursePage({
                         {course.futureSessions.length === 1 ? 'session' : 'sessions'}
                       </p>
                       <Button asChild size="sm">
-                        <Link href={`/login?next=/student/courses/${course.id}`}>
+                        <Link
+                          href={
+                            user
+                              ? `/student/courses/${course.id}`
+                              : `/login?next=/student/courses/${course.id}`
+                          }
+                        >
                           Enroll →
                         </Link>
                       </Button>
