@@ -77,7 +77,7 @@ export async function createTestCourse(
   await expect(page.getByRole('heading', { name: 'New Course' })).toBeVisible();
 
   await page.getByLabel('Course Type').click();
-  await page.getByRole('option', { name: /ASA 101/ }).click();
+  await page.getByRole('option', { name: /Dinghy/ }).click();
 
   // Unique title so we can find the card on the student browse page
   await page.getByLabel('Title Override').fill(title);

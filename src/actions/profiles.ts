@@ -11,6 +11,18 @@ export async function updateUserProfile(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated.' }
 
+  // Admin-only: this action syncs role flags into auth.users metadata via
+  // service-role admin client (line below), which bypasses RLS. Without this
+  // gate, any authenticated user could elevate another user's roles by
+  // POSTing directly to the action endpoint. Middleware blocks /admin/* but
+  // server actions must not rely solely on middleware.
+  const { data: callerProfile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (!callerProfile?.is_admin) return { error: 'Unauthorized.' }
+
   const id = formData.get('id') as string
   const first_name = (formData.get('first_name') as string).trim()
   const last_name = (formData.get('last_name') as string).trim()
