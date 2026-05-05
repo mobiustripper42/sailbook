@@ -311,7 +311,7 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 - [x] **Auth panel: password policy.** Dashboard → Authentication → Policies: minimum length 12, requirements `lower_upper_letters_digits` (matches `supabase/config.toml`). *(Session 132)*
 - [x] **Auth panel: Site URL + Redirect URLs.** Dashboard → Authentication → URL Configuration: Site URL = `https://sailbook.live`, Redirect URLs include `https://sailbook.live/auth/callback`. *(Session 132: verified by fresh signup — confirmation link now resolves correctly to sailbook.live, redirect to /student/dashboard works.)*
 - [x] **Auth panel: Google OAuth.** Dashboard → Authentication → Providers → Google: enable, paste Client ID + Secret. In Google Cloud Console: add `https://<prod-ref>.supabase.co/auth/v1/callback` to Authorized redirect URIs and `https://sailbook.live` to Authorized JavaScript origins. *(Session 132: prod sailbook.live works. Note: `dev-sailbook.vercel.app` Google flow still redirects to localhost — staging/dev env Supabase Site URL not configured. Tracked separately, not a launch blocker.)*
-- [ ] **Database backups confirmed.** Dashboard → Database → Backups: point-in-time recovery is enabled (Pro plan only — verify the project tier). If on Free tier, accept the daily-snapshot-only risk and document it.
+- [x] **Database backups confirmed.** Dashboard → Database → Backups: point-in-time recovery is enabled (Pro plan only — verify the project tier). If on Free tier, accept the daily-snapshot-only risk and document it. *(Session 132: prod is on Free tier — NO backups at all (Free doesn't include daily snapshots either). Risk accepted for launch. Upgrade to Pro tracked as post-launch action below.)*
 
 ### C. Stripe Live Mode
 
@@ -393,6 +393,7 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 
 - [ ] **Monitor daily** — check Vercel Function Logs for errors, Supabase Database → Query Performance for slow queries, Stripe for failed payments.
 - [ ] **Capture every Andy bug report** as a GitHub issue tagged `launch-week`. Triage: hotfix vs Phase 9.5.
+- [ ] **Upgrade prod Supabase to Pro tier** — current Free tier has NO database backups. One unrecoverable misconfiguration or accidental delete = data loss. $25/mo for Pro buys daily backups + 7-day point-in-time recovery + the Vercel cron decision flexibility. Do this within the first week of real customer data.
 - [ ] **Staging Google OAuth** — broken on `dev-sailbook.vercel.app`: OAuth creates the auth.users row but no session is ever established (Last sign-in stays empty). Prod Google OAuth on `sailbook.live` works fine, password auth on staging works fine. Tried: SiteURL fix, env-var verification, cookie clear, full DB reset. Symptom persists. Suspect: per-project auth setting on staging that doesn't auto-confirm OAuth users, or a divergence from prod we haven't found. Workaround during launch: use password auth on staging for Andy walkthrough.
 - [ ] **First V3 priority pass** (the slow week post-launch): D1–D7 from security audit, 5.11/6.18/6.28 from V2 cuts, plus whatever the V3 backlog at the bottom of this file holds.
 
