@@ -9,6 +9,7 @@ const PUBLIC_ROUTES = ['/login', '/register', '/dev', '/forgot-password', '/rese
 // /auth/ covers the email-confirmation callback (/auth/callback) — the user
 // has no session yet at that point and the route handler establishes it.
 // /courses/ covers /courses/* (public browse pages). /courses exact is handled below.
+// /sailing-classes is the LTSC-themed alternate catalog (single page, no sub-routes).
 // /dev/ covers sub-routes like /dev/ltsc (dev-only mock pages).
 const PUBLIC_PREFIXES = ['/invite/', '/auth/', '/courses/', '/dev/']
 
@@ -40,7 +41,7 @@ export async function proxy(request: NextRequest) {
   const meta = (user?.user_metadata ?? {}) as Record<string, unknown>
 
   const isPublicRoute = PUBLIC_ROUTES.includes(pathname)
-  const isPublicPrefix = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p)) || pathname === '/courses'
+  const isPublicPrefix = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p)) || pathname === '/courses' || pathname === '/sailing-classes'
   const isRoot = pathname === '/'
   // API routes handle their own auth — don't redirect to login
   const isApiRoute = pathname.startsWith('/api/')
