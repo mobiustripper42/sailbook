@@ -72,7 +72,7 @@ For preview deploys to receive Stripe webhook events:
 
 1. Stripe Dashboard → toggle to **Test mode** → Developers → Webhooks → Add endpoint
 2. Endpoint URL: `https://<your-vercel-project>.vercel.app/api/webhooks/stripe` — use the production-domain alias if Vercel gives you one for previews, or pick any one preview URL (Stripe webhooks need a stable URL, so prefer the alias)
-3. Events to send: `checkout.session.completed`, `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`
+3. Events to send: `checkout.session.completed` only. The webhook handler ignores everything else (refunds go through `stripe.refunds.create` directly, not via webhook).
 4. Copy the signing secret (`whsec_…`) and paste into Vercel `STRIPE_WEBHOOK_SECRET` (Preview scope)
 
 For production: repeat with **Live mode** + production webhook endpoint at `https://sailbook.app/api/webhooks/stripe`. Paste the live signing secret into Vercel `STRIPE_WEBHOOK_SECRET` (Production scope).
