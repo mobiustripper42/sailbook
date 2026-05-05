@@ -3,7 +3,42 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 131 — 2026-05-04 11:14 [open]
+## Session 131 — 2026-05-04 11:14–2026-05-05 00:58 (13.75 hrs)
+**Duration:** 13h 44m | **Points:** 8 (ad-hoc — LTSC page 5 + Enroll fix 1 + seed update 2)
+**Task:** LTSC `/sailing-classes` marketing page — last task before V2 launch
+
+**Completed:**
+- Built first cut as a re-skin of `/courses` with DB query + LTSC images on each card. User rejected: needed word-for-word LTSC copy with their theme, no DB query.
+- Pivoted to static replica. New route `/sailing-classes` lives outside the `(public)` route group so it gets only the bare root layout — no SailBook header/footer. Hero image (Lake Erie + Cleveland skyline), navy overlay, ALLCAPS tagline, white body, teal REGISTER HERE buttons, 2-col grid on desktop, stacked on mobile.
+- 6 ASA classes hardcoded with verbatim LTSC copy (titles, descriptions, prereqs, prices, bullets). REGISTER HERE → `/courses/asa{101,102,103,104,105,118}`.
+- Downloaded 8 images to `public/sailing-classes/`: hero + ASA 101/103/104 textbook covers + ASA 102/105/118 cert badges + ASA emblem fallback.
+- Proxy updated (`src/proxy.ts`) to allow public access to `/sailing-classes`.
+- **Bug fix discovered while testing:** Enroll button on `/courses/[slug]` always routed through `/login?next=...`. For logged-in users the proxy bounces `/login` to dashboard and drops the `next` param. Page now reads user state server-side and routes logged-in users directly to `/student/courses/X` (`src/app/(public)/courses/[slug]/page.tsx:152`).
+- **Seed update for prod:** `supabase/seeds/2026_season_courses.sql` only had ASA101 — added the other 5 ASA course_types so the LTSC page links resolve. Also fixed an existing latent bug: ASA101 INSERT was missing `slug` (NOT NULL, no default, no trigger) — would have failed on a fresh prod DB. Verified locally with `docker exec ... psql -f` then `curl /courses/asa{101..118}` → all 200.
+- PR #32 merged.
+
+**In Progress:** Nothing.
+
+**Blocked:** Nothing.
+
+**Next Steps:**
+1. Resume Phase 9 deployment checklist (A → K). Section A pre-deploy sanity is the natural starting block.
+2. **Twilio A2P 10DLC** is the long-pole — start that early or accept email-only on day 1.
+3. Run the updated `supabase/seeds/2026_season_courses.sql` against prod after Andy admin profile exists. Edit `ADMIN_EMAIL` at top of script to a real admin email first.
+
+**Context:**
+- **Route group escape:** putting the page at `src/app/sailing-classes/` (not under `(public)`) was the cleanest way to skip the SailBook layout chrome. Next.js child layouts always wrap inside parent layouts within the same group; can't opt out from a child.
+- **Static by design:** no DB query on `/sailing-classes`. That's why slug→register URLs are hardcoded and not data-driven. Trade-off: brittle if prod slugs differ from `asa101..asa118` — mitigated by the seed update this session.
+- **Lazy-load gotcha:** initial cards 5 & 6 (ASA 105/118) screenshotted blank because `next/image` lazy-loads below-fold. Set `loading="eager"` to force first paint. Code review flagged this as bandwidth waste — revisit if/when LCP matters.
+- **Theme divergence:** page hardcodes `bg-white text-slate-900`, ignoring Mira tokens. Intentional for LTSC match; dark-mode users see a flash-of-light marketing page. Acceptable for a single landing.
+- **Image attribution:** all 8 images downloaded from learntosailcleveland.com. ASA textbook covers + cert badges are ASA-supplied and standard across schools. Hero photo is LTSC's own — user OK'd it.
+- **Latent prod-seed bug:** the existing seed (pre-this-session) would have failed on a fresh prod DB because of the missing slug. Now fixed. Worth a one-time check on any other schema additions whose backfills only touched existing rows.
+- **Enroll bug pattern:** any `/login?next=...` link that a logged-in user might click silently drops the `next` param when the proxy bounces them. If we add more entrypoints, route them server-side based on auth state.
+
+**Code Review:** 1 launch-gate finding (slug existence in prod — addressed by seed update), 8 non-blocking cleanup items (theme/dark-mode, proxy cleanup, metadata title brand mix, eager-loading, h2 font inversion, emoji bullet color, no escape hatch, lint apostrophe). All in PR #32 body.
+
+**PR:** https://github.com/mobiustripper42/sailbook/pull/32 (merged)
+
 
 ## Session 130 — 2026-05-03 17:28–19:05 (1.58 hrs)
 **Duration:** 1h 35m | **Points:** 10 (6.12: 3 + 6.17: 5 + 6.8: 2)
