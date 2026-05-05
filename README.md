@@ -181,3 +181,4 @@ npx playwright test tests/foo.spec.ts
 # pgTAP (RLS tests)
 supabase test db
 ```
+
