@@ -225,11 +225,11 @@ Rows ordered: completed grouped at top; unfinished below in priority order (very
 | 6.7 | ~~Relative session badges — "Tomorrow", "This week" instead of "Upcoming"~~ | 3 | [x] <!-- completed 2026-05-02 --> New `fmtDateRelative` util in `src/lib/utils.ts` returns Today / Tomorrow / Yesterday / `Mon, May 5` (weekday + short month + day). Day-grouped session rendering on the new admin dashboard uses it for `dayHeader()`. 7 unit tests. PR #18. |
 | 6.9 | ~~Admin dashboard UX redesign~~ | 5 | [x] <!-- completed 2026-05-02 --> Dashboard restructured: date subtitle, 4-pill QuickActions row, StatRow with conditional CleanIndicator (subtle dashed-border treatment when "Enrollment is healthy"). Sessions card spans full width with day-grouped rows; Pending + Cancellation cards in a 2-col grid below. 6 Playwright tests. PR #16. |
 | 6.10 | ~~Back button / breadcrumb audit — consistent navigation across all roles and views~~ | 5 | [x] <!-- completed 2026-05-03 --> Audit found most pages already had breadcrumbs but admin links lacked `hover:text-foreground`. Sed-normalized 10 admin pages. Added "Courses" breadcrumb back to catalog on `/courses/[slug]` (the only true dead end). Fixed `proxy.ts` so exact `/courses` path passes unauthenticated. PR #19. |
-| 6.18 | CI + iOS testing — GitHub Actions runs Playwright on PRs to main, add iPhone WebKit project (CI-only) | 5 | **Priority: medium** (default). Triggered by Apr 29 mobile bug (missing viewport meta, broke all dropdowns on Android) — desktop tests didn't catch it. Scope: GH Actions workflow with Supabase service container, env secrets, full Playwright run on PR + push to main; add a 4th `iphone` project to `playwright.config.ts` gated to CI (`process.env.CI`); tag the layout/touch-sensitive specs (auth, dropdowns, calendar, payment) so iPhone project only runs those. Decision still open: skip iOS in CI entirely vs full WebKit run vs tagged subset — defer until task starts. Until then, no automated iOS coverage; manual phone test before each demo. |
+| 6.18 | ~~CI + iOS testing~~ | 5 | **CI portion superseded by 9.1.** GH Actions Playwright matrix (desktop/tablet/mobile) added in `.github/workflows/playwright.yml`. iPhone WebKit project deferred as 1-pt follow-up — see Phase 9. |
 | 6.21 | ~~Sidebar fixed to viewport height — desktop sidebar scrolls with main content instead of staying fixed~~ | 2 | [x] <!-- completed 2026-05-01 --> `sticky top-0 h-screen overflow-y-auto` added to `aside` in admin, instructor, and student layouts. |
 | 6.22 | ~~Form field preservation on server action error — all fields clear when action returns an error, user must re-enter everything~~ | 5 | [x] <!-- completed 2026-05-02 --> 12 components converted from uncontrolled to controlled. register-form switched from `useActionState` action binding to `onSubmit` + `e.preventDefault()` to prevent React 19 `form.reset()` from resetting native `<select>`. 2 Playwright tests. |
 | 6.27 | ~~Restore cancelled enrollment~~ | 3 | [x] <!-- completed 2026-05-03 --> `restoreEnrollment` server action with capacity check; restores `missed→expected` for still-scheduled sessions. Restore button on cancelled enrollments in admin course detail. 2 pgTAP + 1 Playwright. PR #21. **Follow-up needed (`task/6.27-fixes`):** code review flagged 4 admin-only edge-case bugs — refund-then-restore guard (refuse if `payments.status='refunded'`), capacity check fail-open on null count, cross-course makeup attendance not restored (drop course_id filter), silent no-op when row isn't cancelled (`.select('id')` after update). |
-| 6.28 | Setup Staging Environment | TBD | **Priority: high.** Provision a staging environment (Vercel preview + Supabase staging project) to verify prod deployments before go-live. Scope TBD when started. |
+| 6.28 | ~~Setup Staging Environment~~ | TBD | **Superseded by 9.1.** Provisioned in Phase 9 via continuous-deployment model (Vercel previews against staging Supabase). See `docs/STAGING.md`. |
 | 6.30 | ~~Mobile calendar / list view for students~~ | 5 | [x] <!-- completed 2026-05-03 --> Agenda-style list view grouping sessions by date with sticky day headers. Toggle visible on all viewports (removed mobile detection + hydration flash). `CoursesAgendaList` component. PR #28. |
 | 6.29 | ~~Admin course-types list — sortable + name-as-edit-link + row menu (mirror users / courses pattern)~~ | 2 | [x] <!-- completed 2026-05-03 --> `CourseTypesList` client component with sortable columns, name-as-edit-link, `•••` row menu. Extracted shared `SortableHead<T>` component. PR #29. |
 | 6.31 | ~~Instructor fixes — DEC-007 dashboard, enrolled count, agenda list, admin calendar filter layout, role nav toggles, JWT sync~~ | 5 | [x] <!-- completed 2026-05-03 --> Dashboard DEC-007 two-query fix; confirmed+completed enrolled count; agenda list view for instructor/admin calendars; `endSlot` prop on `SessionsViewSwitcher` for inline filters; admin self-role bug fix; JWT sync via `adminClient.auth.admin.updateUserById()`; role nav toggles across all three layout shells. PR #30. |
@@ -264,6 +264,18 @@ Move dev off the laptop onto a Hetzner Cloud server, accessed over Tailscale, ed
 - Local Supabase publishable keys are deterministic across machines (same `.env.local` Just Works).
 - Non-interactive SSH doesn't source `.bashrc` — `node`/`supabase` are symlinked into `/usr/local/bin` so plain `ssh host 'cmd'` finds them.
 - Tailscale SSH (`tailscale up --ssh`) is the auth backstop: even if the SSH config is busted, tailnet identity gets you in.
+
+---
+
+## Phase 9: Staging & Deployment Infrastructure
+
+Provision the staging environment and CI gate that gate prod deploys. Continuous deployment model (Option 1): every PR auto-deploys a Vercel preview against staging Supabase + Stripe test mode; merging to `main` ships prod.
+
+| ID | Task | Pts | Status / Notes |
+|----|------|-----|----------------|
+| 9.1 | Staging env + Playwright CI | 5 | **Supersedes 6.18 (CI) and 6.28 (staging env).** Adds `.env.example`, `docs/STAGING.md` runbook, `.github/workflows/playwright.yml` (matrix: desktop/tablet/mobile, ephemeral local Supabase via `supabase start`), CLAUDE.md PR workflow rewritten to Option 1. Out of scope for this task (1-pt follow-ups): iPhone WebKit project, branch protection rules, auto-merge config. Dashboard work (Supabase project provisioning, Vercel env var entry, Stripe test webhook) tracked in `docs/STAGING.md` for the user to execute. |
+
+**Phase 9 total: 5 pts** (excludes user-side dashboard work)
 
 ---
 
@@ -397,12 +409,7 @@ Session 109 already moved the obvious cuts to V3 (4.7, 5.1, 5.3, 5.5, 5.6, 6.0, 
 
 ## Cloud Staging Environment
 
-Not Phase 0. Add when Andy needs to preview V2 features.
-
-- Second Supabase cloud project (free tier)
-- Vercel preview branch pointing to staging Supabase
-- Same migration workflow: `supabase db push --project-ref staging-ref`
-- Seed with demo data for Andy testing
+Implemented in Phase 9 (task 9.1). See `docs/STAGING.md` for setup, workflow, and migration protocol.
 
 ---
 

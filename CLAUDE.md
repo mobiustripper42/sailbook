@@ -193,11 +193,18 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 
 ## PR Workflow
 
+Continuous deployment (Option 1): every PR ships on merge. There is no long-lived staging branch. See `docs/STAGING.md` for the full setup and migration workflow.
+
 - Each task gets a branch (`git checkout -b task/X.Y-short-description`).
-- `/kill-this` opens the PR. `/ship-it` merges it.
+- Push the branch → opens a PR → Vercel posts a Preview URL → Playwright CI runs against ephemeral local Supabase.
+- Preview URL hits the **staging** Supabase + Stripe test mode. Andy can QA from there.
+- `/kill-this` opens the PR. `/ship-it` merges it. Merge to `main` → production deploys automatically.
+- Migrations: `supabase db push --project-ref <staging-ref>` BEFORE merging. After merge: `supabase db push --project-ref <prod-ref>`. Never push migrations to prod that haven't run on staging.
 - Keep no more than 3 open PRs at once. Prefer 1.
 - Never have two open PRs with migrations touching the same table — merge one first.
 - Self-approve unless Andy review is explicitly needed.
+
+When batched releases become useful (V3 multi-feature releases), switch to Option 2 (release train) per `docs/STAGING.md`.
 
 ### PR Review on Mobile (developer notes)
 
