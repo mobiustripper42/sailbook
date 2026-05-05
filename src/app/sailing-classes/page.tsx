@@ -122,9 +122,9 @@ export default function SailingClassesPage() {
 
       <section className="max-w-5xl mx-auto px-6 py-12">
         <p className="text-center text-base sm:text-lg leading-relaxed text-slate-700 max-w-3xl mx-auto">
-          Whether you're a total beginner or want to sharpen your skills, our sailing classes make
+          Whether you&apos;re a total beginner or want to sharpen your skills, our sailing classes make
           learning a breeze. With experienced instructors, a supportive atmosphere, and the best
-          views of Cleveland's skyline, you'll be confidently charting your course in no time.
+          views of Cleveland&apos;s skyline, you&apos;ll be confidently charting your course in no time.
           Dive into sailing classes with us—experience the thrill, freedom, and adventure that
           only the water can offer!
         </p>

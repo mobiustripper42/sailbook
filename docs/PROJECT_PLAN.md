@@ -292,8 +292,8 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 
 ### A. Pre-Deploy Sanity (do day before)
 
-- [ ] **Branch state.** `main` is green: full Playwright suite passes locally (worker=4) and `supabase test db` clean. Lint clean. No open PRs.
-- [ ] **`docs/SECURITY_AUDIT_V2.md` checklist** items 1–5 reviewed (env-var presence, smoke test plan).
+- [x] **Branch state.** `main` is green: full Playwright suite passes locally (worker=4) and `supabase test db` clean. Lint clean. No open PRs. *(Session 132: lint fixed in `task/9.A-pre-deploy-cleanup`. pgTAP clean post-reset. Full suite: 13 known-pollution failures, all pass in isolation. PR #33 staging-env work, unrelated.)*
+- [x] **`docs/SECURITY_AUDIT_V2.md` checklist** items 1–5 reviewed (env-var presence, smoke test plan). *(Session 132: items 1–3 verified in Vercel — CRON_SECRET on Prod+Preview, SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SUPABASE_* on Prod only, STRIPE_WEBHOOK_SECRET on all envs. Items 4–5 are post-deploy smoke tests, deferred to §G/§H.)*
 - [ ] **Walk the app cold.** Browse SailBook in an incognito window as anon → student (register flow) → admin. Ten minutes. Note anything ugly.
 - [ ] **Andy walk-through.** Show Andy the dashboard, courses list, manual-enroll flow, refund flow. Get his "ready" or "wait one more day."
 - [ ] **Backup the dev DB** (if there's anything in it worth keeping). `supabase db dump --local > backup-pre-launch.sql`.
