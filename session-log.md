@@ -3,7 +3,44 @@
 Session summaries for continuity across work sessions.
 Format: prepend newest entry at the top.
 
-## Session 132 — 2026-05-05 01:04 [open]
+## Session 132 — 2026-05-05 01:04–2026-05-06 00:34 (23.5 hrs)
+**Duration:** 23h 30m | **Points:** 10 (ad-hoc — PR #34 lint+6 templates 3 + PR #35 public contact email 2 + PR #38 Phase 9 walkthrough docs + 23h of debugging 5)
+**Task:** Phase 9 launch prep — work top-down through §A–§I with Eric clicking through Vercel/Supabase/Stripe/Resend dashboards
+
+**Completed:**
+- §A pre-deploy sanity: lint fix on `/sailing-classes`, security-audit env-var checks (Vercel Production), cold incognito walkthrough surfaced 2 real issues (contact email gap + admin profile metadata mismatch), `v2.0.0-rc1` tag pushed to origin/main
+- §B Supabase prod: data wiped + 34 migrations re-pushed clean, admin seeded for eric@stoffer.net, 6 SailBook-branded auth email templates added (`recovery`, `magic_link`, `email_change`, `invite`, `reauthentication`) + wired into `supabase/config.toml` + pasted into prod dashboard, custom Resend SMTP, password policy, Site URL + Redirect URLs, Google OAuth (prod works; staging broken — separate post-launch issue), backups acknowledged on Free tier (Pro upgrade tracked as post-launch item)
+- §B.4 2026 season seed run on prod via Supabase SQL Editor — 6 ASA course types + ASA101 weekend courses May–Oct
+- §C Stripe live mode deferred (no LTSC keys yet) — but full sandbox flow validated end-to-end after fixing apex/www canonical (Vercel: apex primary, www → 308) and the `SUPABASE_SERVICE_ROLE_KEY` env-var being wrong (which surfaced as `{"error":"Invalid API key"}` in webhook responses — Supabase error masquerading as Stripe)
+- §D notifications: Resend HTTP API path live (`RESEND_API_KEY` + `NOTIFICATIONS_ENABLED` added), `info@sailbook.live` forwarding done. Twilio + A2P 10DLC still in flight — submitted 2026-04-26, plan email-only fallback at launch
+- §E Vercel: all 7 items verified (Pro tier, daily crons in `vercel.json`, env vars, deploys auto on main merge, apex canonical, SSL, Cloudflare DNS-only/grey-cloud)
+- §I rollback plan: deferred — no formal rollback for V2
+- Two PRs merged earlier in session: #34 (lint fix + plan ticks + 6 email templates + §B.3 wording fix) and #35 (public contact email on `/courses/[slug]` — new `src/lib/contact.ts` helper, env-driven `NEXT_PUBLIC_CONTACT_EMAIL` with fallback, Playwright test passing)
+- UptimeRobot monitor set up against sailbook.live (5 min interval)
+
+**In Progress:** PR #38 (this session's plan ticks) open — needs merge.
+
+**Blocked:** Stripe live keys (Andy delivers), Twilio A2P 10DLC (carrier review).
+
+**Next Steps:**
+1. §F smoke tests — knock out the easy curl ones first (cron auth, `/api/test/*` 403, anon flow), then refund test + cancel/restore via admin UI, then mobile pass on Andy's phone. Most are <2 min each.
+2. §G operational setup — Vercel/Supabase/Stripe alert wiring; bookmarks for Andy. Also add UptimeRobot to §G as "G.7" so it's documented.
+3. §D + §H wait for Andy time: D.1/D.2 Twilio when A2P clears, H.1–H.4 the 30-min Andy briefing.
+4. **Real bug found, not yet fixed:** the Stripe Resume Payment / Pay & Register flow can stamp a NEW `stripe_checkout_session_id` over an enrollment that already has a paid session — webhook for the paid session then can't find the enrollment by session_id and silently 200s. We hit this once but couldn't fully reproduce; not in evidence after the apex/www fix. Worth a defensive change: webhook lookup falls back to `metadata.course_id + metadata.student_id` if session_id doesn't match. File as launch-week issue.
+
+**Context:**
+- **The "Invalid API key" trap:** Stripe webhook delivery showed `{"error":"Invalid API key"}` body with 500 status. Spent ~30 min chasing Stripe key issues. The error was actually from `createAdminClient()` — `SUPABASE_SERVICE_ROLE_KEY` was wrong. Both vendors use the identical error string. Status code is the tell: 500 = our handler errored after accepting the request (Supabase or downstream); 400 = Stripe signature failure.
+- **apex/www canonical mistake:** Vercel started with www as primary → 307 redirect of apex broke Stripe webhook delivery (Stripe doesn't follow webhook redirects). Flipped Vercel to apex-canonical (308 from www → apex), all hardcoded `sailbook.live` references in `src/lib/notifications/templates.ts` already match. **`curl -sI https://sailbook.live/` returning 307 with `location: /login` is NOT the redirect — that's middleware auth-redirect for unauthed root visits.** Test API routes instead: `/api/webhooks/stripe` should return 405, not 307.
+- **Cloudflare must be DNS-only (grey cloud), never proxied** — proxying causes double-CDN / TLS-handshake breakage in front of Vercel.
+- **Supabase API key UI rename:** new dashboard calls them "Publishable" (= anon) and "Secret" (= service_role). Don't say "JWT" — there's a separate JWT Keys page (ECC P-256 signing keys) which is NOT what apps use.
+- **Stripe redoing webhook config:** start clean — delete every endpoint, create one fresh (`https://sailbook.live/api/webhooks/stripe`, event `checkout.session.completed`), copy the new `whsec_*` to `STRIPE_WEBHOOK_SECRET` in Vercel, redeploy. Each endpoint has its own signing secret.
+- **Staging Google OAuth still broken:** auth.users row created, no session ever established. Documented in §J for post-launch.
+- **Latent Resume Payment bug:** see "Next Steps" — enrollment row's session_id can be overwritten by a stray click, orphaning the paid session's webhook.
+- **23.5 hour "session":** session was opened at 01:04 UTC, closed at 00:34 UTC the next day. Real keyboard time was a long stretch with breaks; the open-session window stayed live across calendar days. The pain was real either way.
+
+**Code Review:** PR #38 — 4 cleanup-tier findings, none blocking. PR body has details. Earlier PRs #34 and #35 reviewed at merge time.
+
+**PR:** https://github.com/mobiustripper42/sailbook/pull/38 (open)
 
 ## Session 131 — 2026-05-04 11:14–2026-05-05 00:58 (13.75 hrs)
 **Duration:** 13h 44m | **Points:** 8 (ad-hoc — LTSC page 5 + Enroll fix 1 + seed update 2)
