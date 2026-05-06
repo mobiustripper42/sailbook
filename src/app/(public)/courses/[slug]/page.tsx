@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { fmtDate, fmtTime } from '@/lib/utils'
+import { getContactEmail } from '@/lib/contact'
 import type { Metadata } from 'next'
 
 export async function generateMetadata({
@@ -43,6 +44,7 @@ export default async function PublicCoursePage({
   if (!courseType) notFound()
 
   const today = new Date().toISOString().split('T')[0]
+  const contactEmail = getContactEmail()
 
   const { data: courses } = await supabase
     .from('courses')
@@ -97,11 +99,15 @@ export default async function PublicCoursePage({
       {upcoming.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground text-sm">
-            No upcoming sections are currently scheduled.{' '}
-            <Link href="/login" className="underline hover:text-foreground">
-              Log in
-            </Link>{' '}
-            to stay notified when new sections open.
+            No upcoming sections are currently scheduled. If you don&apos;t see a date you&apos;re
+            looking for, email{' '}
+            <a
+              href={`mailto:${contactEmail}`}
+              className="underline hover:text-foreground"
+            >
+              {contactEmail}
+            </a>
+            .
           </CardContent>
         </Card>
       ) : (
@@ -167,6 +173,16 @@ export default async function PublicCoursePage({
               )
             })}
           </div>
+          <p className="text-sm text-muted-foreground text-center pt-2">
+            Don&apos;t see a date that works? Email{' '}
+            <a
+              href={`mailto:${contactEmail}`}
+              className="underline hover:text-foreground"
+            >
+              {contactEmail}
+            </a>
+            .
+          </p>
         </div>
       )}
 
