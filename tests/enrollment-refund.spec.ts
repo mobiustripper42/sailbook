@@ -96,6 +96,10 @@ test.describe('Admin refund & cancel flow', () => {
 
   test('payment column shows amount + Stripe link and partial refund works', async ({ page }) => {
     test.skip(test.info().project.name === 'mobile', 'Payment/status columns use nth() locators that shift on mobile')
+    test.skip(
+      !process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder'),
+      'Real Stripe keys not configured (or placeholder only)'
+    )
     // Create a real Stripe test PI outside Next.js so processRefund can refund it
     const stripe = stripeClient()
     const pi = await stripe.paymentIntents.create({

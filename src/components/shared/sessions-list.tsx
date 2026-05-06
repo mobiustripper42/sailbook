@@ -19,7 +19,10 @@ export function SessionsList({
 }) {
   if (sessions.length === 0) {
     return (
-      <div className="rounded-lg border px-4 py-8 text-center text-sm text-muted-foreground">
+      <div
+        className="rounded-lg border px-4 py-8 text-center text-sm text-muted-foreground"
+        data-testid="sessions-list"
+      >
         No sessions to show.
       </div>
     )
