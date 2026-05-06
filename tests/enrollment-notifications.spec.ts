@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { createTestCourse, runId } from './helpers'
+import { createTestCourse, cronHeaders, runId } from './helpers'
 
 const BASE = 'http://localhost:3000'
 
@@ -74,7 +74,7 @@ test.describe('3.4 — enrollment notifications', () => {
     // Smoke test only — verifies the route is reachable, auth pass-through works
     // (CRON_SECRET unset in dev), and the trigger function doesn't throw.
     // Deeper threshold-behavior testing belongs to 5.8 when the rules solidify.
-    const resp = await request.get(`${BASE}/api/cron/low-enrollment`)
+    const resp = await request.get(`${BASE}/api/cron/low-enrollment`, { headers: cronHeaders() })
     expect(resp.ok()).toBeTruthy()
     const body = (await resp.json()) as { alerted: number }
     expect(typeof body.alerted).toBe('number')

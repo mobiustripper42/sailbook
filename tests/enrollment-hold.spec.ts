@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { createTestCourse, loginAs } from './helpers'
+import { createTestCourse, cronHeaders, loginAs } from './helpers'
 
 test.describe('enrollment hold expiry', () => {
   test('expired hold: student sees Register & Pay instead of dead-end badge', async ({ browser }) => {
@@ -137,9 +137,8 @@ test.describe('enrollment hold expiry', () => {
     }
 
     // Fire the cron endpoint — verifyCron() requires the bearer when CRON_SECRET is set (CI does)
-    const cronSecret = process.env.CRON_SECRET
     const cronRes = await request.get('http://localhost:3000/api/cron/expire-holds', {
-      headers: cronSecret ? { Authorization: `Bearer ${cronSecret}` } : {},
+      headers: cronHeaders(),
     })
     expect(cronRes.ok()).toBeTruthy()
     const body = await cronRes.json() as { expired: number }

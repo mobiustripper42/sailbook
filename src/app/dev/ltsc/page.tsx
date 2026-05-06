@@ -6,7 +6,8 @@ export default async function LtscMockPage() {
   const allowed =
     process.env.NODE_ENV === 'development' ||
     process.env.VERCEL_ENV === 'preview' ||
-    process.env.CODESPACES === 'true'
+    process.env.CODESPACES === 'true' ||
+    (process.env.CI === 'true' && process.env.NEXT_PUBLIC_DEV_MODE === 'true')
   if (!allowed) notFound()
 
   const supabase = await createClient()

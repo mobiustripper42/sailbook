@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { createEnrolledCourse, runId } from './helpers'
+import { createEnrolledCourse, cronHeaders, runId } from './helpers'
 
 const BASE = 'http://localhost:3000'
 
@@ -133,7 +133,7 @@ test.describe('3.7 — session reminders', () => {
     // Smoke test only — verifies the route is reachable, auth pass-through works
     // (CRON_SECRET unset in dev), and the trigger doesn't throw. Volume here is
     // whatever sessions happen to be exactly 1d/7d out from real "today".
-    const resp = await request.get(`${BASE}/api/cron/session-reminders`)
+    const resp = await request.get(`${BASE}/api/cron/session-reminders`, { headers: cronHeaders() })
     expect(resp.ok()).toBeTruthy()
     const body = (await resp.json()) as { fired: number }
     expect(typeof body.fired).toBe('number')
