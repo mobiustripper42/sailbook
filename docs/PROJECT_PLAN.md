@@ -225,11 +225,11 @@ Rows ordered: completed grouped at top; unfinished below in priority order (very
 | 6.7 | ~~Relative session badges — "Tomorrow", "This week" instead of "Upcoming"~~ | 3 | [x] <!-- completed 2026-05-02 --> New `fmtDateRelative` util in `src/lib/utils.ts` returns Today / Tomorrow / Yesterday / `Mon, May 5` (weekday + short month + day). Day-grouped session rendering on the new admin dashboard uses it for `dayHeader()`. 7 unit tests. PR #18. |
 | 6.9 | ~~Admin dashboard UX redesign~~ | 5 | [x] <!-- completed 2026-05-02 --> Dashboard restructured: date subtitle, 4-pill QuickActions row, StatRow with conditional CleanIndicator (subtle dashed-border treatment when "Enrollment is healthy"). Sessions card spans full width with day-grouped rows; Pending + Cancellation cards in a 2-col grid below. 6 Playwright tests. PR #16. |
 | 6.10 | ~~Back button / breadcrumb audit — consistent navigation across all roles and views~~ | 5 | [x] <!-- completed 2026-05-03 --> Audit found most pages already had breadcrumbs but admin links lacked `hover:text-foreground`. Sed-normalized 10 admin pages. Added "Courses" breadcrumb back to catalog on `/courses/[slug]` (the only true dead end). Fixed `proxy.ts` so exact `/courses` path passes unauthenticated. PR #19. |
-| 6.18 | ~~CI + iOS testing~~ | 5 | [x] <!-- cut 2026-05-03, restored 2026-05-04 in 9.1 --> Original cut to V3 reasoning: "Local Playwright + manual phone test is the V2 process." Restored on session 131 because staging work made the GH Actions wiring trivial (ephemeral local Supabase via `supabase start`, matrix on desktop/tablet/mobile). See `.github/workflows/playwright.yml`. iPhone WebKit project remains a 1-pt V3 follow-up. |
+| 6.18 | ~~CI + iOS testing~~ | 5 | [x] <!-- cut 2026-05-03 --> Cut to V3. Local Playwright + manual phone test before each demo is the V2 process. Promote when (a) Andy is editing on his own and PRs need automated gating, or (b) we hit a second iOS-only regression. |
 | 6.21 | ~~Sidebar fixed to viewport height — desktop sidebar scrolls with main content instead of staying fixed~~ | 2 | [x] <!-- completed 2026-05-01 --> `sticky top-0 h-screen overflow-y-auto` added to `aside` in admin, instructor, and student layouts. |
 | 6.22 | ~~Form field preservation on server action error — all fields clear when action returns an error, user must re-enter everything~~ | 5 | [x] <!-- completed 2026-05-02 --> 12 components converted from uncontrolled to controlled. register-form switched from `useActionState` action binding to `onSubmit` + `e.preventDefault()` to prevent React 19 `form.reset()` from resetting native `<select>`. 2 Playwright tests. |
 | 6.27 | ~~Restore cancelled enrollment~~ | 3 | [x] <!-- completed 2026-05-03 --> `restoreEnrollment` server action with capacity check; restores `missed→expected` for still-scheduled sessions. Restore button on cancelled enrollments in admin course detail. 2 pgTAP + 1 Playwright. PR #21. **Follow-up needed (`task/6.27-fixes`):** code review flagged 4 admin-only edge-case bugs — refund-then-restore guard (refuse if `payments.status='refunded'`), capacity check fail-open on null count, cross-course makeup attendance not restored (drop course_id filter), silent no-op when row isn't cancelled (`.select('id')` after update). |
-| 6.28 | ~~Setup Staging Environment~~ | TBD | [x] <!-- cut 2026-05-03, restored 2026-05-04 in 9.1 --> Original cut to V3 reasoning: "Vercel preview deploys cover V2; dedicated staging Supabase right move for V3 before real data to protect." Restored on session 131 — context-switch between sessions, cut decision was an oversight. Without dedicated staging, Vercel previews would hit prod Supabase + Stripe live keys via Production-scoped env vars (or fail to connect entirely). Now folded into Phase 9 Section L. See `docs/STAGING.md`. |
+| 6.28 | ~~Setup Staging Environment~~ | TBD | [x] <!-- cut 2026-05-03 --> Cut to V3. Vercel preview deploys (per-PR) cover the "see it before merge" use case for V2. Dedicated staging Supabase project is the right move for V3 before we have real data to protect. |
 | 6.30 | ~~Mobile calendar / list view for students~~ | 5 | [x] <!-- completed 2026-05-03 --> Agenda-style list view grouping sessions by date with sticky day headers. Toggle visible on all viewports (removed mobile detection + hydration flash). `CoursesAgendaList` component. PR #28. |
 | 6.29 | ~~Admin course-types list — sortable + name-as-edit-link + row menu (mirror users / courses pattern)~~ | 2 | [x] <!-- completed 2026-05-03 --> `CourseTypesList` client component with sortable columns, name-as-edit-link, `•••` row menu. Extracted shared `SortableHead<T>` component. PR #29. |
 | 6.31 | ~~Instructor fixes — DEC-007 dashboard, enrolled count, agenda list, admin calendar filter layout, role nav toggles, JWT sync~~ | 5 | [x] <!-- completed 2026-05-03 --> Dashboard DEC-007 two-query fix; confirmed+completed enrolled count; agenda list view for instructor/admin calendars; `endSlot` prop on `SessionsViewSwitcher` for inline filters; admin self-role bug fix; JWT sync via `adminClient.auth.admin.updateUserById()`; role nav toggles across all three layout shells. PR #30. |
@@ -237,7 +237,7 @@ Rows ordered: completed grouped at top; unfinished below in priority order (very
 | 6.12 | ~~Security audit (V2 final)~~ | 3 | [x] <!-- completed 2026-05-03 --> Manual code review (no @security-agent existed). 0 critical, 2 moderate fixed: M1 admin check on `updateUserProfile` (was relying solely on middleware to gate a service-role action); M2 cron routes now fail-closed in prod when `CRON_SECRET` missing (extracted `verifyCron()` helper). 7 deferred items added to V3 backlog (D1–D7 in `docs/SECURITY_AUDIT_V2.md`). PR #TBD. |
 | 6.17 | ~~End-of-phase close — @ui-reviewer pass, lint clean, all tests green, all code review resolved, retrospective, archive session log~~ | 5 | [x] <!-- completed 2026-05-03 --> Phase 6 retrospective in `docs/RETROSPECTIVES.md`. Full Playwright suite green (519 passed / 373 skipped / 0 fail after the prereq-flagging pollution fix). Lint clean. Code review on PRs cleared. @ui-reviewer pass folded into 6.31's per-PR review. Session log archive deferred to V2 final close (separate retro). |
 
-**Phase 6 total: 58 pts + TBD for 6.19, 6.20** (Session 109: −9 for 6.0/6.6/6.11/6.16 cut to V3; +TBD for 6.19 + 6.20 promoted from V3. Session 122: +5 for 6.25; +3 for 6.26; +3 for 6.27. Session 127: +TBD for 6.28 staging. Session 129: +5 for 6.30 agenda; +2 for 6.29; +5 for 6.31. Session 130: −5 for 6.18 cut, −TBD for 6.28 cut. Session 131: 6.18 + 6.28 restored into Phase 9 task 9.1, points moved out of Phase 6.)
+**Phase 6 total: 58 pts + TBD for 6.19, 6.20** (Session 109: −9 for 6.0/6.6/6.11/6.16 cut to V3; +TBD for 6.19 + 6.20 promoted from V3. Session 122: +5 for 6.25; +3 for 6.26; +3 for 6.27. Session 127: +TBD for 6.28 staging. Session 129: +5 for 6.30 agenda; +2 for 6.29; +5 for 6.31. Session 130: −5 for 6.18 cut, −TBD for 6.28 cut.)
 **Projected hours: ~18 hrs + TBD**
 
 **Ejection point:** The app looks and feels professional. Accessible. Navigable. Polished. Security verified.
@@ -290,91 +290,51 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 
 **Target go-live:** 2026-05-04 (Mon) or 2026-05-05 (Tue), Andy's call. Block off ~3 hours for the deploy itself + 24 hours of "stay near the laptop" after.
 
-### Tasks
-
-| ID | Task | Pts | Status / Notes |
-|----|------|-----|----------------|
-| 9.1 | Staging env + Playwright CI | 5 | **Restores 6.18 (CI) and 6.28 (staging Supabase) from V2 cuts.** Adds `.env.example` (committed env template), `docs/STAGING.md` (runbook), `.github/workflows/playwright.yml` (matrix CI on PRs to main against ephemeral local Supabase via `supabase start`), CLAUDE.md PR workflow updated. Dashboard work (provision staging Supabase, Vercel Preview env vars, Stripe test webhook) is tracked in **Section 0** below for the user to execute. iPhone WebKit project remains a 1-pt V3 follow-up. |
-| 9.2 | Production deploy + go-live | TBD | Sections A–K below. |
-
-**Phase 9 total: 5 pts (9.1) + TBD (9.2 = launch checklist).** Reconciliation: session 130 had cut 6.18 (−5) and 6.28 (−TBD); session 131 restored both into 9.1. Net change vs session 130 totals: +5 for 9.1.
-
-### Section 0. Staging Environment Setup (do BEFORE Section A)
-
-Provisions the staging Supabase project, the long-lived `staging` branch (release-train accumulator), and Vercel Preview env vars. Under the release-train model (Option 2), feature PRs target `staging`, accumulate as a batch, and ship to prod via a single release PR (`staging` → `main`) when Andy approves.
-
-- [ ] **Create staging Supabase project** at supabase.com → name `sailbook-staging` → free tier → close-to-prod region. Note project ref + anon key + service role key.
-- [ ] **Apply migrations to staging.** From the repo: `supabase link --project-ref <staging-ref>` → `supabase db push`. Verify with `supabase migration list` (operates on the linked project) — last migration matches local.
-- [ ] **Seed staging with demo data.** `supabase db reset --linked` (replays migrations + runs `supabase/seed.sql`), or `psql <staging-db-url> -f docs/demo-seed.sql`.
-- [ ] **Re-link to prod for the rest of Phase 9.** `supabase link --project-ref <prod-ref>` so subsequent `supabase db push` commands hit prod.
-- [ ] **Create `staging` git branch.** `git checkout main && git pull && git checkout -b staging && git push -u origin staging`. Feature PRs target this branch; release PRs go staging → main.
-- [ ] **Vercel custom domain `dev-sailbook.vercel.app` → `staging` branch + Preview env.** Vercel → Settings → Domains → assign the domain to the Preview environment, branch = `staging`. This is the URL the Stripe test webhook will target and the URL Andy QAs.
-- [ ] **Vercel Preview-scoped env vars.** Project Settings → Environment Variables → scope = **Preview** (NOT "All Environments"):
-  - `NEXT_PUBLIC_SUPABASE_URL` = staging Supabase URL (do NOT mark Sensitive — `NEXT_PUBLIC_*` vars ship to the browser anyway)
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = staging anon key (not Sensitive)
-  - `SUPABASE_SERVICE_ROLE_KEY` = staging service role key (Sensitive)
-  - `STRIPE_SECRET_KEY` = `sk_test_*` (Sensitive)
-  - `STRIPE_WEBHOOK_SECRET` = `whsec_*` (Sensitive, fill after webhook setup)
-  - `NOTIFICATIONS_ENABLED` = `false`
-  - `NEXT_PUBLIC_DEV_MODE` = `true`
-  - `CRON_SECRET` = same as prod is fine for solo dev (Sensitive)
-  - `ENROLLMENT_HOLD_MINUTES` = `15`
-  - Twilio + Resend vars: leave empty (notifications off in preview)
-- [ ] **Stripe test webhook endpoint.** Stripe Dashboard → toggle to **Test mode** → Workbench → Webhooks → Add destination → URL = `https://dev-sailbook.vercel.app/api/webhooks/stripe`. Subscribe to `checkout.session.completed` only (the handler ignores other events). Copy `whsec_*` into the Vercel Preview `STRIPE_WEBHOOK_SECRET` above.
-- [ ] **Verify the staging plumbing.** Cut a throwaway feature branch off main, push it, open a PR with **base = staging**. Tap the per-PR Preview URL, register a test user, run a `4242 4242 4242 4242` checkout. Confirm the test user lands in **staging** Supabase `auth.users` (NOT prod) and a `payments` row appears in staging. Merge the PR → confirm `dev-sailbook.vercel.app` rebuilds and shows the change. Then check Stripe Dashboard → webhook deliveries → a `checkout.session.completed` event got 200 from `dev-sailbook.vercel.app`. Roll back the throwaway change with another PR if you want.
-- [ ] **GitHub Actions secrets.** Repo Settings → Secrets and variables → Actions: add `STRIPE_SECRET_KEY` (`sk_test_*`) and `STRIPE_WEBHOOK_SECRET` (test). Without these, Stripe-touching Playwright tests skip in CI.
-
-Once Section 0 is green, the release-train workflow is live: feature PRs to `staging` → batch accumulates → release PR `staging` → `main` → prod ships. See `docs/STAGING.md` for day-to-day details. Proceed to Section A.
-
 ### A. Pre-Deploy Sanity (do day before)
 
-- [ ] **Branch state.** `main` is green: full Playwright suite passes locally (worker=4) and `supabase test db` clean. Lint clean. No open PRs.
-- [ ] **`docs/SECURITY_AUDIT_V2.md` checklist** items 1–5 reviewed (env-var presence, smoke test plan).
-- [ ] **Walk the app cold.** Browse SailBook in an incognito window as anon → student (register flow) → admin. Ten minutes. Note anything ugly.
-- [ ] **Andy walk-through.** Show Andy the dashboard, courses list, manual-enroll flow, refund flow. Get his "ready" or "wait one more day."
-- [ ] **Backup the dev DB** (if there's anything in it worth keeping). `supabase db dump --local > backup-pre-launch.sql`.
-- [ ] **Tag the launch commit.** `git tag v2.0.0-rc1` on the merge commit you intend to deploy. Push the tag.
+- [x] **Branch state.** `main` is green: full Playwright suite passes locally (worker=4) and `supabase test db` clean. Lint clean. No open PRs. *(Session 132: lint fixed in `task/9.A-pre-deploy-cleanup`. pgTAP clean post-reset. Full suite: 13 known-pollution failures, all pass in isolation. PR #33 staging-env work, unrelated.)*
+- [x] **`docs/SECURITY_AUDIT_V2.md` checklist** items 1–5 reviewed (env-var presence, smoke test plan). *(Session 132: items 1–3 verified in Vercel — CRON_SECRET on Prod+Preview, SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SUPABASE_* on Prod only, STRIPE_WEBHOOK_SECRET on all envs. Items 4–5 are post-deploy smoke tests, deferred to §G/§H.)*
+- [x] **Walk the app cold.** Browse SailBook in an incognito window as anon → student (register flow) → admin. Ten minutes. Note anything ugly. *(Session 132: turned up two real issues — public-course pages had no contact path for "I don't see a date I want" → fixed in PR #35; admin login didn't work after flipping `profiles.is_admin = true` because middleware reads `auth.users.raw_user_meta_data` → §B.3 instructions corrected on this branch.)*
+- [~] **Andy walk-through.** Show Andy the dashboard, courses list, manual-enroll flow, refund flow. Get his "ready" or "wait one more day." *(Session 132: deferred until staging environment is up — Eric working on it concurrently.)*
+- [~] **Backup the dev DB** (if there's anything in it worth keeping). `supabase db dump --local > backup-pre-launch.sql`. *(Session 132: skipped — local DB is fixtures only; `supabase/seed.sql` is the source of truth.)*
+- [x] **Tag the launch commit.** `git tag v2.0.0-rc1` on the merge commit you intend to deploy. Push the tag. *(Session 132: tagged on main HEAD after PRs #34, #35, #37 merged.)*
 
 ### B. Supabase Production Project
 
-- [ ] **Project exists** at supabase.com. Note the project ref (`xxxxx.supabase.co`).
-- [ ] **`supabase link --project-ref <prod>` then `supabase db push`** applies all migrations cleanly. Verify with `supabase migration list` (operates on the linked project) — last migration matches local.
-- [ ] **Seed real data.** This is NOT `supabase/seed.sql` (that's test fixtures). Create the real Andy admin account via Supabase Dashboard → Authentication → Users → Add user, then set `is_admin = true` in `profiles` via SQL editor. Same for any real instructors at launch.
-- [ ] **Course types loaded.** Either manually via Andy in the admin UI post-launch, OR pre-load via SQL (preferred so course catalog isn't empty on day 1). At minimum: ASA 101, ASA 103, Open Sailing, any others Andy is offering.
-- [ ] **Auth panel: enable email confirmations.** Dashboard → Authentication → Providers → Email → "Confirm email" ON. (`config.toml` does NOT sync this.)
-- [ ] **Auth panel: custom SMTP (Resend).** Dashboard → Authentication → SMTP Settings: host `smtp.resend.com`, port `587`, user `resend`, pass = Resend API key, sender `info@sailbook.live`, sender name `SailBook`. Send the dashboard test email and verify delivery.
-- [ ] **Auth panel: confirmation email template.** Dashboard → Authentication → Email Templates → "Confirm signup". Subject: "Confirm your SailBook account". Body matches `supabase/templates/confirmation.html`. The `{{ .ConfirmationURL }}` token must be preserved verbatim.
-- [ ] **Auth panel: password policy.** Dashboard → Authentication → Policies: minimum length 12, requirements `lower_upper_letters_digits` (matches `supabase/config.toml`).
-- [ ] **Auth panel: Site URL + Redirect URLs.** Dashboard → Authentication → URL Configuration: Site URL = `https://sailbook.live`, Redirect URLs include `https://sailbook.live/auth/callback`.
-- [ ] **Auth panel: Google OAuth.** Dashboard → Authentication → Providers → Google: enable, paste Client ID + Secret. In Google Cloud Console: add `https://<prod-ref>.supabase.co/auth/v1/callback` to Authorized redirect URIs and `https://sailbook.live` to Authorized JavaScript origins.
-- [ ] **Database backups confirmed.** Dashboard → Database → Backups: point-in-time recovery is enabled (Pro plan only — verify the project tier). If on Free tier, accept the daily-snapshot-only risk and document it.
+- [x] **Project exists** at supabase.com. Note the project ref (`xxxxx.supabase.co`). *(Session 132)*
+- [x] **`supabase db push`** applies all migrations cleanly. Verify with `supabase migration list` — last migration matches local. *(Session 132: prod data wiped via SQL truncate, all 34 migrations re-pushed clean. Note: `--project-ref` flag is ignored; use `supabase link --project-ref <ref>` first, then run plain commands.)*
+- [x] **Seed real data.** This is NOT `supabase/seed.sql` (that's test fixtures). Create the real Andy admin account via Supabase Dashboard → Authentication → Users → Add user. **In the User Metadata field at create time, paste `{"is_admin": true, "is_student": false}`** — the `on_auth_user_created` trigger reads that JSON and writes the matching `profiles` row, so you don't need a separate SQL update. Same pattern for real instructors at launch (use `{"is_instructor": true, "is_student": false}`). If a user was already created without metadata, fix it by updating BOTH places: `UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || '{"is_admin": true}'::jsonb WHERE email = '…';` AND `UPDATE profiles SET is_admin = true WHERE id = (SELECT id FROM auth.users WHERE email = '…');` then have them sign out and back in (role flag lives in the JWT). *(Session 132: Eric's admin seeded; Andy account deferred until staging green-lights.)*
+- [x] **Course types loaded.** Either manually via Andy in the admin UI post-launch, OR pre-load via SQL (preferred so course catalog isn't empty on day 1). At minimum: ASA 101, ASA 103, Open Sailing, any others Andy is offering. *(Session 132: ran `supabase/seeds/2026_season_courses.sql` via Supabase SQL Editor — 6 ASA course types + ASA 101 weekend courses for May–Oct 2026.)*
+- [x] **Auth panel: enable email confirmations.** Dashboard → Authentication → Providers → Email → "Confirm email" ON. (`config.toml` does NOT sync this.) *(Session 132)*
+- [x] **Auth panel: custom SMTP (Resend).** Dashboard → Authentication → SMTP Settings: host `smtp.resend.com`, port `587`, user `resend`, pass = Resend API key, sender `info@sailbook.live`, sender name `SailBook`. Send the dashboard test email and verify delivery. *(Session 132: dashboard "Send test email" button no longer exists; verified instead by real signup — From/sender both correct.)*
+- [x] **Auth panel: confirmation email template.** Dashboard → Authentication → Email Templates → "Confirm signup". Subject: "Confirm your SailBook account". Body matches `supabase/templates/confirmation.html`. The `{{ .ConfirmationURL }}` token must be preserved verbatim. *(Session 132: all 6 templates pasted in — confirmation, recovery, magic_link, email_change, invite, reauthentication.)*
+- [x] **Auth panel: password policy.** Dashboard → Authentication → Policies: minimum length 12, requirements `lower_upper_letters_digits` (matches `supabase/config.toml`). *(Session 132)*
+- [x] **Auth panel: Site URL + Redirect URLs.** Dashboard → Authentication → URL Configuration: Site URL = `https://sailbook.live`, Redirect URLs include `https://sailbook.live/auth/callback`. *(Session 132: verified by fresh signup — confirmation link now resolves correctly to sailbook.live, redirect to /student/dashboard works.)*
+- [x] **Auth panel: Google OAuth.** Dashboard → Authentication → Providers → Google: enable, paste Client ID + Secret. In Google Cloud Console: add `https://<prod-ref>.supabase.co/auth/v1/callback` to Authorized redirect URIs and `https://sailbook.live` to Authorized JavaScript origins. *(Session 132: prod sailbook.live works. Note: `dev-sailbook.vercel.app` Google flow still redirects to localhost — staging/dev env Supabase Site URL not configured. Tracked separately, not a launch blocker.)*
+- [x] **Database backups confirmed.** Dashboard → Database → Backups: point-in-time recovery is enabled (Pro plan only — verify the project tier). If on Free tier, accept the daily-snapshot-only risk and document it. *(Session 132: prod is on Free tier — NO backups at all (Free doesn't include daily snapshots either). Risk accepted for launch. Upgrade to Pro tracked as post-launch action below.)*
 
 ### C. Stripe Live Mode
 
-- [ ] **Toggle from test → live mode** in the Stripe dashboard.
-- [ ] **Live API keys**: copy `sk_live_*` (secret) and `pk_live_*` (publishable). The live publishable key is NOT used by SailBook (Checkout Sessions are server-only) but Andy may want it for receipts/branding later — note it.
-- [ ] **Webhook endpoint live.** Stripe Dashboard → Developers → Webhooks → Add endpoint: URL `https://sailbook.live/api/webhooks/stripe`, event `checkout.session.completed`. Copy the signing secret (`whsec_*`).
-- [ ] **Tax / receipts.** Decide: are we collecting tax via Stripe Tax? (Probably no for V2 — sailing instruction is service revenue and Andy handles tax separately.) Confirm receipts are enabled with sensible branding (Stripe Dashboard → Settings → Branding).
-- [ ] **Refund test.** Issue a $1 test charge to a real card, refund it through the admin UI. Verify it appears in the Stripe dashboard refunds tab.
+- [~] **All §C items deferred** *(Session 132: Eric does not have LTSC's Stripe live keys — Andy needs to provide them. Until then, prod cannot accept payments. Enrollment + checkout flows will fail at the Stripe step. Mitigations: keep prod in this state for marketing/info viewing only, OR add a "payments coming soon — email to register" banner. Revisit when Andy supplies keys.)*
 
 ### D. Notification Providers
 
 - [ ] **Twilio.** Account is on a paid plan (not trial — trial caps to verified-only numbers). Buy a US local number if not already done. Note the Account SID, Auth Token, and From number.
 - [ ] **Twilio: A2P 10DLC registration.** Required for SMS to US carriers since 2023. Can take days to approve. **Start early or accept that SMS may bounce on day 1 until brand+campaign are approved.** If unapproved, fall back to email-only by setting `TWILIO_AUTH_TOKEN=""` and the trigger code will skip SMS.
-- [ ] **Resend.** Domain `sailbook.live` verified (DNS records added: SPF, DKIM, optionally DMARC). Send a test email from the Resend dashboard to confirm.
-- [ ] **`info@sailbook.live`** is a real address that forwards to Andy. Otherwise users replying to confirmation emails go nowhere.
+- [x] **Resend.** Domain `sailbook.live` verified (DNS records added: SPF, DKIM, optionally DMARC). Send a test email from the Resend dashboard to confirm. *(Session 132. Two paths use Resend: Supabase Auth via SMTP (set in §B.6) AND app notifications via HTTP API. App-notification path requires `RESEND_API_KEY` and `NOTIFICATIONS_ENABLED=true` env vars on Vercel Production — both added.)*
+- [x] **`info@sailbook.live`** is a real address that forwards to Andy. Otherwise users replying to confirmation emails go nowhere. *(Session 132: forwards to Eric for now; Andy added when he's onboarded.)*
 
 ### E. Vercel Project
 
-- [ ] **Project linked** to the GitHub repo. Production branch = `main`. Deploys auto on merge.
-- [ ] **Custom domain `sailbook.live`** added to project. SSL cert provisioned (automatic via Vercel/Let's Encrypt).
-- [ ] **DNS records** at the registrar: A record for apex `sailbook.live` → Vercel IP, CNAME for `www.sailbook.live` → `cname.vercel-dns.com`. Verify via `dig sailbook.live` resolves to Vercel.
-- [ ] **Plan tier:** Hobby is free but rejects sub-daily cron schedules. The `expire-holds` cron needs at least every-15-min cadence to keep payment holds tight — this requires Pro ($20/mo). Decision: upgrade to Pro, OR move `expire-holds` to a pg_cron job inside Supabase (no Vercel dependency for that one). Prod requires one or the other.
-- [ ] **Cron jobs configured** in `vercel.json` (or Vercel Dashboard → Settings → Cron Jobs):
+- [x] **Project linked** to the GitHub repo. Production branch = `main`. Deploys auto on merge. *(Session 132)*
+- [x] **Custom domain `sailbook.live`** added to project. SSL cert provisioned (automatic via Vercel/Let's Encrypt). *(Session 132: apex set as primary, www → apex 308 redirect.)*
+- [x] **DNS records** at the registrar: A record for apex `sailbook.live` → Vercel IP, CNAME for `www.sailbook.live` → `cname.vercel-dns.com`. Verify via `dig sailbook.live` resolves to Vercel. *(Session 132: Cloudflare DNS-only / grey-cloud, not proxied.)*
+- [x] **Plan tier:** Hobby is free but rejects sub-daily cron schedules. The `expire-holds` cron needs at least every-15-min cadence to keep payment holds tight — this requires Pro ($20/mo). Decision: upgrade to Pro, OR move `expire-holds` to a pg_cron job inside Supabase (no Vercel dependency for that one). Prod requires one or the other. *(Session 132: on Pro tier; current cron cadence is daily, sub-daily available if needed later.)*
+- [x] **Cron jobs configured** in `vercel.json` (or Vercel Dashboard → Settings → Cron Jobs): *(Session 132: 3 daily crons in vercel.json — expire-holds 5am ET, low-enrollment 9am ET, session-reminders 10am ET.)*
   - `/api/cron/expire-holds` — every 15 min (or whatever the configured `hold_minutes` margin allows)
   - `/api/cron/session-reminders` — daily at ~07:00 local (Andy's tz: America/New_York)
   - `/api/cron/low-enrollment` — daily at ~08:00 local
-- [ ] **Environment variables** (Vercel Dashboard → Settings → Environment Variables, scope = **Production** — NOT "All Environments"; Preview-scope vars were set in Section 0):
+- [x] **Environment variables** (Vercel Dashboard → Settings → Environment Variables, scope = Production): *(Session 132: all set except Twilio (deferred pending A2P) and STRIPE_* using sk_test_*/whsec_* sandbox keys until LTSC live keys arrive.)*
   - `NEXT_PUBLIC_SUPABASE_URL` = prod Supabase URL
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = prod anon key
   - `SUPABASE_SERVICE_ROLE_KEY` = prod service role key (NEVER on `NEXT_PUBLIC_*`)
@@ -387,7 +347,7 @@ Once Section 0 is green, the release-train workflow is live: feature PRs to `sta
   - `CRON_SECRET` = a long random string (generate with `openssl rand -hex 32`); must match the `Authorization: Bearer` header Vercel Cron sends
   - `NEXT_PUBLIC_DEV_MODE` = unset (or `false`) — controls dev login helper visibility
   - Sanity: `NODE_ENV` and `VERCEL_ENV` are set automatically by Vercel; do NOT override.
-- [ ] **Trigger production deploy** — push to main or click "Redeploy" on the latest deployment in the dashboard. Watch the build log for errors. First prod build often surfaces issues that local dev hides (case-sensitive imports on Linux, missing peer deps, etc.).
+- [x] **Trigger production deploy** — push to main or click "Redeploy" on the latest deployment in the dashboard. Watch the build log for errors. First prod build often surfaces issues that local dev hides (case-sensitive imports on Linux, missing peer deps, etc.). *(Session 132: many redeploys done over the course of config troubleshooting; latest build green.)*
 
 ### F. Deploy-Day Smoke Tests (run in this order on the live URL)
 
@@ -418,7 +378,7 @@ Once Section 0 is green, the release-train workflow is live: feature PRs to `sta
 - [ ] **Existing students notified** (if migrating from old system). If not — you're starting fresh, then no notification needed; new students discover via Andy's existing channels (LTSC, word of mouth, the public course catalog).
 - [ ] **Eric is reachable** for the first 24-48 hours post-launch. Phone, Slack, whatever. Andy needs a hotline for "the button isn't working."
 
-### I. Rollback Plan
+### I. Rollback Plan *(deferred — Session 132: Eric decided not to formalize for V2 launch. Ad-hoc only.)*
 
 - [ ] **Revert path documented.** If the deploy goes sideways: Vercel Dashboard → Deployments → previous build → "Promote to Production" rolls back the app in <60 sec. The DB does NOT roll back; only the app code does.
 - [ ] **Migration rollback.** If a migration breaks prod, the answer is NOT `git revert` — it's a new forward-only migration that fixes the issue. Have a forward-fix template ready.
@@ -429,7 +389,9 @@ Once Section 0 is green, the release-train workflow is live: feature PRs to `sta
 
 - [ ] **Monitor daily** — check Vercel Function Logs for errors, Supabase Database → Query Performance for slow queries, Stripe for failed payments.
 - [ ] **Capture every Andy bug report** as a GitHub issue tagged `launch-week`. Triage: hotfix vs Phase 9.5.
-- [ ] **First V3 priority pass** (the slow week post-launch): D1–D7 from security audit, 5.11 from V2 cuts, plus whatever the V3 backlog at the bottom of this file holds. (6.18 + 6.28 absorbed into Phase 9 task 9.1.)
+- [ ] **Upgrade prod Supabase to Pro tier** — current Free tier has NO database backups. One unrecoverable misconfiguration or accidental delete = data loss. $25/mo for Pro buys daily backups + 7-day point-in-time recovery + the Vercel cron decision flexibility. Do this within the first week of real customer data.
+- [ ] **Staging Google OAuth** — broken on `dev-sailbook.vercel.app`: OAuth creates the auth.users row but no session is ever established (Last sign-in stays empty). Prod Google OAuth on `sailbook.live` works fine, password auth on staging works fine. Tried: SiteURL fix, env-var verification, cookie clear, full DB reset. Symptom persists. Suspect: per-project auth setting on staging that doesn't auto-confirm OAuth users, or a divergence from prod we haven't found. Workaround during launch: use password auth on staging for Andy walkthrough.
+- [ ] **First V3 priority pass** (the slow week post-launch): D1–D7 from security audit, 5.11/6.18/6.28 from V2 cuts, plus whatever the V3 backlog at the bottom of this file holds.
 
 ### K. V2 Final Retrospective
 
@@ -480,8 +442,8 @@ Once Section 0 is green, the release-train workflow is live: feature PRs to `sta
 
 **Cut from V2 in session 130 (2026-05-03 launch-week pass):**
 - (5.11) Bulk price update — multi-select on `/admin/courses` + apply a new price to all selected. 8 pts. Single-edit is tolerable for the season opener; bulk needed before mid-season campaigns.
-- ~~(6.18) CI + iOS testing~~ — restored 2026-05-04 in Phase 9 task 9.1. CI portion shipped; iPhone WebKit remains a 1-pt V3 follow-up.
-- ~~(6.28) Setup Staging Environment~~ — restored 2026-05-04 in Phase 9 task 9.1. See `docs/STAGING.md` and Phase 9 Section 0.
+- (6.18) CI + iOS testing — GitHub Actions Playwright on PRs + iPhone WebKit project. 5 pts. Local Playwright + manual phone test is the V2 process. Promote when Andy edits or after a 2nd iOS-only regression.
+- (6.28) Setup Staging Environment — dedicated staging Supabase project. TBD pts. Vercel preview deploys cover the V2 "see it before merge" need; dedicated staging matters once we have real student data to protect.
 
 ---
 
@@ -495,11 +457,10 @@ Once Section 0 is green, the release-train workflow is live: feature PRs to `sta
 | 3 — Notifications + Auth | 48 | ~18 hrs | Users stay informed, auth hardened, security audited |
 | 4 — Identity | 42 | ~10 hrs | Onboarding is clean (4.7 cut to V3) |
 | 5 — Pricing | 31 | ~10 hrs | Flexible pricing, waitlist, prereqs (5.1/5.3/5.5/5.6/5.11 cut to V3) |
-| 6 — Polish | 58 | ~22 hrs | Professional, accessible, navigable, security verified (6.0/6.6/6.11/6.16 cut to V3; 6.18 + 6.28 restored into Phase 9 task 9.1) |
+| 6 — Polish | 58 | ~22 hrs | Professional, accessible, navigable, security verified (6.0/6.6/6.11/6.16/6.18/6.28 cut to V3) |
 | 7 — Remote Dev Env ✅ | 18 | ~7 hrs | Stable dev box, edit anywhere |
 | 8 — Skills | 40–60 | ~15–23 hrs | Learning management |
-| 9 — Deployment | 5 + TBD | ~3 hrs + launch ops | 9.1 staging + CI (5 pts); 9.2 launch checklist (TBD) |
-| **Total (0–6)** | **347** | **~123 hrs** | (session 130: −8 for 5.11 cut, −5 for 6.18 cut, +6 reconciliation in Phase 6 Summary row. Session 131: +5 for 9.1 not reflected here — Phase 9 totaled separately.) |
+| **Total (0–6)** | **347** | **~123 hrs** | (session 130: −8 for 5.11 cut, −5 for 6.18 cut, +6 reconciliation in Phase 6 Summary row) |
 
 Reconciled in session 109 (2026-04-30). Previous Summary total of 298 had been drifting from section totals for several phases (Phase 1 +7, Phase 2 +2, Phase 4/5/6 changes since). New total matches the sum of section totals.
 
@@ -565,7 +526,12 @@ Session 109 already moved the obvious cuts to V3 (4.7, 5.1, 5.3, 5.5, 5.6, 6.0, 
 
 ## Cloud Staging Environment
 
-Implemented in Phase 9 (task 9.1). See `docs/STAGING.md` for setup, workflow, and migration protocol.
+Not Phase 0. Add when Andy needs to preview V2 features.
+
+- Second Supabase cloud project (free tier)
+- Vercel preview branch pointing to staging Supabase
+- Same migration workflow: `supabase db push --project-ref staging-ref`
+- Seed with demo data for Andy testing
 
 ---
 

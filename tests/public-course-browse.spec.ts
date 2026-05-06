@@ -55,6 +55,17 @@ test.describe('Public course page — unauthenticated', () => {
     expect(resp?.status()).toBe(404)
   })
 
+  test('shows mailto contact link for "don\'t see a date" footer', async ({ page }) => {
+    test.skip(test.info().project.name !== 'desktop')
+    await page.goto('/courses/asa101')
+    const contactLink = page.getByRole('link', { name: /info@sailbook\.live|@/ }).filter({
+      has: page.locator('text=@'),
+    }).first()
+    const href = await contactLink.getAttribute('href')
+    expect(href).toMatch(/^mailto:.+@.+/)
+    await expect(page.getByText(/Don.+see a date that works\?/i)).toBeVisible()
+  })
+
   test('breadcrumb links back to course catalog', async ({ page }) => {
     test.skip(test.info().project.name !== 'desktop')
     await page.goto('/courses/asa101')
