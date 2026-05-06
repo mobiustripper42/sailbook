@@ -136,8 +136,11 @@ test.describe('enrollment hold expiry', () => {
       await apiCtx.close()
     }
 
-    // Fire the cron endpoint
-    const cronRes = await request.get('http://localhost:3000/api/cron/expire-holds')
+    // Fire the cron endpoint — verifyCron() requires the bearer when CRON_SECRET is set (CI does)
+    const cronSecret = process.env.CRON_SECRET
+    const cronRes = await request.get('http://localhost:3000/api/cron/expire-holds', {
+      headers: cronSecret ? { Authorization: `Bearer ${cronSecret}` } : {},
+    })
     expect(cronRes.ok()).toBeTruthy()
     const body = await cronRes.json() as { expired: number }
     expect(body.expired).toBeGreaterThanOrEqual(1)
