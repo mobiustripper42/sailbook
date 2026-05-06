@@ -326,15 +326,15 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 
 ### E. Vercel Project
 
-- [ ] **Project linked** to the GitHub repo. Production branch = `main`. Deploys auto on merge.
-- [ ] **Custom domain `sailbook.live`** added to project. SSL cert provisioned (automatic via Vercel/Let's Encrypt).
-- [ ] **DNS records** at the registrar: A record for apex `sailbook.live` → Vercel IP, CNAME for `www.sailbook.live` → `cname.vercel-dns.com`. Verify via `dig sailbook.live` resolves to Vercel.
-- [ ] **Plan tier:** Hobby is free but rejects sub-daily cron schedules. The `expire-holds` cron needs at least every-15-min cadence to keep payment holds tight — this requires Pro ($20/mo). Decision: upgrade to Pro, OR move `expire-holds` to a pg_cron job inside Supabase (no Vercel dependency for that one). Prod requires one or the other.
-- [ ] **Cron jobs configured** in `vercel.json` (or Vercel Dashboard → Settings → Cron Jobs):
+- [x] **Project linked** to the GitHub repo. Production branch = `main`. Deploys auto on merge. *(Session 132)*
+- [x] **Custom domain `sailbook.live`** added to project. SSL cert provisioned (automatic via Vercel/Let's Encrypt). *(Session 132: apex set as primary, www → apex 308 redirect.)*
+- [x] **DNS records** at the registrar: A record for apex `sailbook.live` → Vercel IP, CNAME for `www.sailbook.live` → `cname.vercel-dns.com`. Verify via `dig sailbook.live` resolves to Vercel. *(Session 132: Cloudflare DNS-only / grey-cloud, not proxied.)*
+- [x] **Plan tier:** Hobby is free but rejects sub-daily cron schedules. The `expire-holds` cron needs at least every-15-min cadence to keep payment holds tight — this requires Pro ($20/mo). Decision: upgrade to Pro, OR move `expire-holds` to a pg_cron job inside Supabase (no Vercel dependency for that one). Prod requires one or the other. *(Session 132: on Pro tier; current cron cadence is daily, sub-daily available if needed later.)*
+- [x] **Cron jobs configured** in `vercel.json` (or Vercel Dashboard → Settings → Cron Jobs): *(Session 132: 3 daily crons in vercel.json — expire-holds 5am ET, low-enrollment 9am ET, session-reminders 10am ET.)*
   - `/api/cron/expire-holds` — every 15 min (or whatever the configured `hold_minutes` margin allows)
   - `/api/cron/session-reminders` — daily at ~07:00 local (Andy's tz: America/New_York)
   - `/api/cron/low-enrollment` — daily at ~08:00 local
-- [ ] **Environment variables** (Vercel Dashboard → Settings → Environment Variables, scope = Production):
+- [x] **Environment variables** (Vercel Dashboard → Settings → Environment Variables, scope = Production): *(Session 132: all set except Twilio (deferred pending A2P) and STRIPE_* using sk_test_*/whsec_* sandbox keys until LTSC live keys arrive.)*
   - `NEXT_PUBLIC_SUPABASE_URL` = prod Supabase URL
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = prod anon key
   - `SUPABASE_SERVICE_ROLE_KEY` = prod service role key (NEVER on `NEXT_PUBLIC_*`)
@@ -347,7 +347,7 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
   - `CRON_SECRET` = a long random string (generate with `openssl rand -hex 32`); must match the `Authorization: Bearer` header Vercel Cron sends
   - `NEXT_PUBLIC_DEV_MODE` = unset (or `false`) — controls dev login helper visibility
   - Sanity: `NODE_ENV` and `VERCEL_ENV` are set automatically by Vercel; do NOT override.
-- [ ] **Trigger production deploy** — push to main or click "Redeploy" on the latest deployment in the dashboard. Watch the build log for errors. First prod build often surfaces issues that local dev hides (case-sensitive imports on Linux, missing peer deps, etc.).
+- [x] **Trigger production deploy** — push to main or click "Redeploy" on the latest deployment in the dashboard. Watch the build log for errors. First prod build often surfaces issues that local dev hides (case-sensitive imports on Linux, missing peer deps, etc.). *(Session 132: many redeploys done over the course of config troubleshooting; latest build green.)*
 
 ### F. Deploy-Day Smoke Tests (run in this order on the live URL)
 
