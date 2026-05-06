@@ -378,7 +378,7 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 - [ ] **Existing students notified** (if migrating from old system). If not — you're starting fresh, then no notification needed; new students discover via Andy's existing channels (LTSC, word of mouth, the public course catalog).
 - [ ] **Eric is reachable** for the first 24-48 hours post-launch. Phone, Slack, whatever. Andy needs a hotline for "the button isn't working."
 
-### I. Rollback Plan
+### I. Rollback Plan *(deferred — Session 132: Eric decided not to formalize for V2 launch. Ad-hoc only.)*
 
 - [ ] **Revert path documented.** If the deploy goes sideways: Vercel Dashboard → Deployments → previous build → "Promote to Production" rolls back the app in <60 sec. The DB does NOT roll back; only the app code does.
 - [ ] **Migration rollback.** If a migration breaks prod, the answer is NOT `git revert` — it's a new forward-only migration that fixes the issue. Have a forward-fix template ready.
