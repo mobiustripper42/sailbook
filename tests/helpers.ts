@@ -5,6 +5,16 @@ import { expect } from '@playwright/test';
 export const PASSWORD = 'Sailbook12345';
 
 /**
+ * Returns the Authorization header for /api/cron/* routes when CRON_SECRET is
+ * set in env (CI does this; local dev usually doesn't). Returns empty object
+ * when unset so the spread is safe in both environments.
+ */
+export function cronHeaders(): Record<string, string> {
+  const secret = process.env.CRON_SECRET;
+  return secret ? { Authorization: `Bearer ${secret}` } : {};
+}
+
+/**
  * Log in as any test user and wait for the post-login redirect.
  *
  * Requires a fresh browser context — if the page is already authenticated,

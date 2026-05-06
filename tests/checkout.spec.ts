@@ -15,6 +15,10 @@ import { loginAs, runId, createTestCourse } from './helpers';
 test.describe('Stripe Checkout — initiation', () => {
   test('Register & Pay redirects to Stripe checkout', async ({ page, browser }) => {
     test.skip(test.info().project.name !== 'desktop');
+    test.skip(
+      !process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder'),
+      'Real Stripe keys not configured (or placeholder only)'
+    );
     test.setTimeout(60000);
 
     const title = `PW Checkout ${runId()}`;

@@ -88,6 +88,9 @@ export default function StudentAccountForm({
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
+        <p className="text-xs text-muted-foreground">
+          By providing your phone number you consent to receive SMS messages from Learn to Sail Cleveland (Riverfront Marine) about your enrollment, session reminders, and cancellations. Msg frequency varies. Msg &amp; data rates may apply. Reply STOP to cancel, HELP for help.
+        </p>
       </div>
 
       <div className="space-y-2">

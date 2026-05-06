@@ -30,9 +30,12 @@ test.describe('Full payment chain E2E', () => {
   const PRICE = 150
 
   test.beforeAll(async ({ browser }) => {
+    const stripeKey = process.env.STRIPE_SECRET_KEY
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+    const isPlaceholder = (v: string | undefined) => !v || v.includes('placeholder')
     test.skip(
-      !process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET,
-      'STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET not set'
+      isPlaceholder(stripeKey) || isPlaceholder(webhookSecret),
+      'STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET not set (or placeholder only)'
     )
     test.setTimeout(60000)
     const ctx = await browser.newContext()
