@@ -113,7 +113,11 @@ jobs:
 
       - name: Run pgTAP RLS tests (desktop job only)
         if: matrix.project == 'desktop'
-        run: supabase test db --workdir .
+        run: |
+          # Playwright leaves test data in the DB (extra courses, enrollments, etc.)
+          # which breaks pgTAP row-count assertions. Reset to clean seed state first.
+          supabase db reset --workdir .
+          supabase test db --workdir .
 
       - name: Stop Supabase
         if: always()
