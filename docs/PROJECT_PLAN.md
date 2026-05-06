@@ -297,7 +297,7 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 - [x] **Walk the app cold.** Browse SailBook in an incognito window as anon → student (register flow) → admin. Ten minutes. Note anything ugly. *(Session 132: turned up two real issues — public-course pages had no contact path for "I don't see a date I want" → fixed in PR #35; admin login didn't work after flipping `profiles.is_admin = true` because middleware reads `auth.users.raw_user_meta_data` → §B.3 instructions corrected on this branch.)*
 - [~] **Andy walk-through.** Show Andy the dashboard, courses list, manual-enroll flow, refund flow. Get his "ready" or "wait one more day." *(Session 132: deferred until staging environment is up — Eric working on it concurrently.)*
 - [~] **Backup the dev DB** (if there's anything in it worth keeping). `supabase db dump --local > backup-pre-launch.sql`. *(Session 132: skipped — local DB is fixtures only; `supabase/seed.sql` is the source of truth.)*
-- [ ] **Tag the launch commit.** `git tag v2.0.0-rc1` on the merge commit you intend to deploy. Push the tag. *(Session 132: hold until PRs #34 + #35 merge — tag should land on the actual deploy commit.)*
+- [x] **Tag the launch commit.** `git tag v2.0.0-rc1` on the merge commit you intend to deploy. Push the tag. *(Session 132: tagged on main HEAD after PRs #34, #35, #37 merged.)*
 
 ### B. Supabase Production Project
 
@@ -322,7 +322,7 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 - [ ] **Twilio.** Account is on a paid plan (not trial — trial caps to verified-only numbers). Buy a US local number if not already done. Note the Account SID, Auth Token, and From number.
 - [ ] **Twilio: A2P 10DLC registration.** Required for SMS to US carriers since 2023. Can take days to approve. **Start early or accept that SMS may bounce on day 1 until brand+campaign are approved.** If unapproved, fall back to email-only by setting `TWILIO_AUTH_TOKEN=""` and the trigger code will skip SMS.
 - [x] **Resend.** Domain `sailbook.live` verified (DNS records added: SPF, DKIM, optionally DMARC). Send a test email from the Resend dashboard to confirm. *(Session 132. Two paths use Resend: Supabase Auth via SMTP (set in §B.6) AND app notifications via HTTP API. App-notification path requires `RESEND_API_KEY` and `NOTIFICATIONS_ENABLED=true` env vars on Vercel Production — both added.)*
-- [ ] **`info@sailbook.live`** is a real address that forwards to Andy. Otherwise users replying to confirmation emails go nowhere.
+- [x] **`info@sailbook.live`** is a real address that forwards to Andy. Otherwise users replying to confirmation emails go nowhere. *(Session 132: forwards to Eric for now; Andy added when he's onboarded.)*
 
 ### E. Vercel Project
 
