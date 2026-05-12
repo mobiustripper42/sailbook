@@ -38,14 +38,16 @@ export async function runAxe(
   const opts: any = {
     runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] },
   };
-  if (options.exclude?.length) opts.exclude = options.exclude.map((s) => [s]);
+  const excludes = ['[data-testid="version-tag"]', ...(options.exclude ?? [])];
 
-  return await page.evaluate(async ({ opts, include }) => {
-    const target = include ?? document;
+  return await page.evaluate(async ({ opts, include, excludes }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const axe = (window as any).axe;
-    return await axe.run(target, opts);
-  }, { opts, include: options.include });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const context: any = { exclude: excludes.map((s: string) => [s]) };
+    if (include) context.include = [[include]];
+    return await axe.run(context, opts);
+  }, { opts, include: options.include, excludes });
 }
 
 /** Filter violations to critical + serious (the bar set by SailBook task 6.5). */

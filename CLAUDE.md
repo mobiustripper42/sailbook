@@ -22,13 +22,17 @@ Replaces manual scheduling with a web app where:
 | `docs/SPEC.md` | What we're building — scope, V1 vs V2 vs V3 |
 | `docs/DECISIONS.md` | Why we made each architectural choice |
 | `docs/USER_STORIES.md` | What each role does (AS-*, ST-*, IN-* IDs) |
-| `docs/PROJECT_PLAN.md` | Phases, tasks, estimates, velocity |
+| `docs/PROJECT_PLAN.md` | Phases, scope, velocity table — **written at phase boundaries only** (planning + retro). Current-phase tasks live in GitHub Issues. |
 | `docs/RETROSPECTIVES.md` | Phase-end retrospectives — velocity actuals, scope changes, forecast updates |
 | `docs/AGENTS.md` | Agent and skill specs |
 | `docs/BRAND.md` | Philosophy, visual direction, voice |
 | `docs/sailbook-schema.sql` | Reference schema (migrations are source of truth) |
-| `session-log.md` | Session-to-session continuity log |
-| `VELOCITY_AND_POKER_GUIDE.md` | Estimation method and tracking |
+| `docs/session-log-archive.md` | Legacy archive — pre-V2 sessions (1–133). New sessions write to `sessions/`. |
+| `sessions/*.md` | Per-session files (one per session). Filename: `YYYY-MM-DD-HHMM-<dev>-<slug>.md`. |
+| `CHANGELOG.md` | Release history — auto-maintained by version-bump skills (DEC-007). |
+| `.claude/seeds-version` | Schema version this project was installed at (currently `3`). Read by `/pull-seeds`. |
+| `.claude/project-type` | Project type (`webapp`). Read by `@sync-config` to gate template files (DEC-011). |
+| `docs/VELOCITY_AND_POKER_GUIDE.md` | Estimation method and tracking |
 
 ## Core Data Model
 ```
@@ -169,21 +173,34 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 
 | Skill | When | What |
 |-------|------|------|
-| `/its-alive` | Session start | Stamp time, read context, recommend task |
+| `/its-alive` | Session start | Stamp time, open per-session file in `sessions/`, capture transcript path, read context, recommend task |
 | `/pause-this` | Mid-session break | Build check, commit WIP, note pause |
 | `/restart-this` | Resume from pause | Reload context, continue same session |
-| `/kill-this` | Session end (part 1) | Build check, commit, push branch, open PR, code review, draft log |
+| `/kill-this` | Session end (part 1) | Build check, commit, push branch, open PR (base = `staging`), code review, draft log |
 | `/ship-it` | After PR review passes | Merge PR, push migration if any, record ship time + wall clock |
-| `/its-dead` | Session end (part 2) | Calc time + points, write log, update plan, PM recommendation |
+| `/its-dead` | Session end (part 2) | Calc time + points, finalize session file, branch cleanup, patch-bump `package.json` on `STATE=MERGED` (DEC-007) |
+| `/start-phase` | Phase boundary (start) | Materialize phase tasks from PROJECT_PLAN.md into GitHub Issues with `phase:N` + `points:X` labels |
+| `/retro` | Phase boundary (end) | Mark phase tasks `[x]`, reconcile drift, compute velocity, write retro to RETROSPECTIVES.md, minor-bump version |
+| `/bump-major` | Breaking change | Manually bump major version. CHANGELOG entry + tag (on main) or deferred tag (on staging) |
+| `/promote-staging` | Ship staging to prod | ff-merge `staging` → `main`, tag the release, push both (DEC-008) |
+| `/push-seeds` | After workflow improvements | Backport improvements to seeds via `@sync-config` |
+| `/pull-seeds` | After seeds gets new improvements | Pull template changes — schema-version-gated, applied via `@sync-config` |
+| `/read-the-tape` | After a session worth learning from | Audit JSONL transcript, find anti-patterns, propose skill improvements |
+
+**Dev identity:** `~/.claude/devname` (one-line file with your handle). Set once per machine.
+
+**Task model:** PROJECT_PLAN.md is read at planning, written at retro. Current-phase tasks live as GitHub Issues. Phase ends when its issues close.
 
 ## Agent Workflow
 
 | Agent | Model | When | Purpose |
 |-------|-------|------|---------|
-| @architect | claude-opus-4-6 | Before design decisions, DEC-TBD items | Keep architecture coherent |
+| @architect | Opus | Before design decisions, DEC-TBD items | Keep architecture coherent |
 | @code-review | Sonnet | After every commit (wired into `/kill-this`) | Catch issues early |
-| @pm | Sonnet | Start/end of sessions (via skills) | Track progress, flag risks |
+| @pm | Sonnet | Start/end of sessions (via skills), phase retros | Track progress, flag risks, phase commentary |
 | @ui-reviewer | Sonnet | After UI work, phase boundaries | Design quality |
+| @sync-config | Sonnet | Via `/push-seeds` / `/pull-seeds`, nightly Routine | Classify template diffs, propose backports/forward-ports |
+| @tape-reader | Sonnet | Via `/read-the-tape` | Audit JSONL transcripts for anti-patterns, propose skill improvements |
 
 ## Model Selection
 
@@ -223,6 +240,27 @@ Release train (Option 2): feature PRs accumulate in `staging` for Andy to QA as 
 - Keep no more than 3 open feature PRs at once. Prefer 1.
 - Never have two open PRs with migrations touching the same table — merge one first.
 - Self-approve feature PRs. Andy is the gate on the release PR.
+
+## Versioning (DEC-007)
+
+SailBook carries a SemVer version in `package.json`, mirrored to git tags (`vX.Y.Z`) on `main`. Currently at `2.0.0-rc1` (Phase 9 — Deployment & Launch). Historical: `v1.0.0` (LTSC launch, Phase 5 close).
+
+**Three triggers:**
+- **Patch:** `/its-dead` after every PR merge. CHANGELOG entry derived from PR title.
+- **Minor:** `/retro` at phase close. CHANGELOG entry summarizes the phase.
+- **Major:** `/bump-major` manual. User supplies the breaking-change rationale.
+
+**Tag rule (DEC-007 + DEC-008):** tags only ever apply on `main`. Bumps on `staging` are untagged; the tag lands when `/promote-staging` ff-merges to `main`.
+
+### `<VersionTag />` component
+
+Build-time version display at `src/components/VersionTag.tsx`. Wired into the auth layout (visible on login) and the root layout (fixed footer site-wide). Renders e.g. `v2.0.0-rc1 (a1b2c3)`.
+
+Reads `process.env.NEXT_PUBLIC_APP_VERSION` (forwarded from `npm_package_version` via `next.config.ts`) + `process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA` (Vercel sets automatically). Without the `NEXT_PUBLIC_` prefix forward in `next.config.ts`, client components silently render `v0.0.0`.
+
+### CHANGELOG.md
+
+Auto-maintained by the version-bump skills. Don't edit by hand mid-flow — skills prepend after the `# Changelog` header.
 
 ### PR Review on Mobile (developer notes)
 
