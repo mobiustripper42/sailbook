@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version,
+  },
   allowedDevOrigins: ['192.168.50.202', 'mill-dev', '100.118.147.49'],
   turbopack: {
     root: __dirname,

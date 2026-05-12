@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Nunito_Sans } from "next/font/google";
 import { NavProgress } from "@/components/nav-progress";
 import { ThemeProvider } from "@/components/theme-provider";
+import { VersionTag } from "@/components/VersionTag";
 import "./globals.css";
 
 const nunitoSans = Nunito_Sans({
@@ -41,6 +42,7 @@ export default function RootLayout({
         )}
         <ThemeProvider>
           <NavProgress>{children}</NavProgress>
+          <VersionTag className="fixed bottom-2 right-2 z-50 text-[10px] text-muted-foreground/70 pointer-events-none select-none" />
         </ThemeProvider>
       </body>
     </html>
