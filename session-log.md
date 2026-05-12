@@ -2,6 +2,48 @@
 
 Session summaries for continuity across work sessions.
 
+## Session 134 — 2026-05-06 19:32–23:32 (4.0 hrs)
+**Duration:** 4h 00m | **Points:** 3 (ad-hoc — §F curl checks 1 + §G ops setup 1 + workflow fix + Stripe staging 1)
+**Task:** Phase 9 §F smoke tests + §G operational setup
+
+**Completed:**
+- §F curl checks: `sailbook.live/courses` 200 ✅, all 3 cron routes return 401 without auth ✅, `/api/test/enroll` returns 403 ✅
+- §G: status page bookmarks sent to Andy, logging access noted, error monitoring confirmed V3 backlog
+- Staging Stripe wired (user sorted Stripe Workbench webhook mid-session)
+- Supabase prod upgraded to paid plan
+- Fixed PROJECT_PLAN.md checklist accuracy per code review (Vercel notifications, cron deferral note)
+- Resolved branch/push workflow: both main and staging are now protected (PR + 5 CI checks); all task branches cut from staging going forward
+
+**In Progress:** Nothing.
+
+**Blocked:**
+- F.2 (anon registration): Supabase email rate limit hit; retry next session
+- F.3/F.4 (Stripe e2e + refund): waiting on Andy's live keys
+- F.5 (cancel + restore): not attempted this session
+- F.6 (SMS): A2P still pending — Andy needs to resubmit Twilio form
+- F.10 (mobile): needs Andy's phone
+- G.1 (Vercel → Andy's email): needs Andy on Vercel or team invite
+- G.2 (Supabase alerts): post-Pro upgrade
+- G.3 (Stripe alerts): waiting on Andy's account
+
+**Next Steps:**
+1. Retry F.2 (anon registration) — rate limit should be clear
+2. F.5 — cancel + restore enrollment flow
+3. F.10 — mobile pass on Andy's phone
+4. When Andy delivers Stripe keys: F.3 + F.4 (checkout e2e + refund)
+5. When A2P clears: F.6 (SMS)
+
+**Context:**
+- CRON_SECRET is stored as a Vercel secret and not revealable. To test cron live-fire: set a known temp value in Vercel env vars, curl, restore. Defer until crons show signs of malfunction.
+- Both main and staging now have GitHub Rulesets (PR + 5 checks). Direct push to either branch is rejected. Cut all task branches from staging. Session log commits ride via task/chore PRs.
+- Supabase Free tier caps auth emails at 3/hr — hit this during F.2 testing. Pro removes the cap.
+- Stripe Workbench webhook creation: direct URL is `https://dashboard.stripe.com/test/webhooks`
+
+**Code Review:** Two findings fixed before merge (Vercel notification status incorrectly [x], cron deferral missing actionable path). Clean otherwise.
+
+**PR:** https://github.com/mobiustripper42/sailbook/pull/46
+
+
 ## Session 133 — 2026-05-06 01:13–17:08 (15.92 hrs)
 **Duration:** 15h 55m | **Points:** 10 (ad-hoc — CI debug + setup 5 + GitHub rulesets 2 + Twilio consent fix 2 + CI workflow optimization 1)
 **Task:** Debug CI errors on staging, set up GitHub rulesets, ship Twilio consent fix; Stripe + staging-env pinned for next session
