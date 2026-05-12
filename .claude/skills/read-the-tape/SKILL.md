@@ -8,23 +8,29 @@ You are executing the /read-the-tape skill.
 
 ## Step 1 — Find the transcript
 
-Run `pwd` to get the current working directory.
+**If a session file path is given as the arg** (e.g. `/read-the-tape sessions/2026-05-03-0339-eric-pm-rework.md`):
+Read its YAML frontmatter and pull `transcript:`. Use that path directly. If the field is empty or missing, fall back to the heuristic below.
 
-Find the matching `.claude/projects/` directory:
-```bash
-ls ~/.claude/projects/
+**If a JSONL file path is given as the arg** (e.g. `/read-the-tape ~/.claude/projects/foo/abc123.jsonl`):
+Use it directly.
+
+**No arg — heuristic:**
+
+Compute the project's JSONL directory path via Bash:
+
+```
+echo "$HOME/.claude/projects/$(pwd | tr '/' '-')"
 ```
 
-The directory name is a sanitized version of the path — separators become `--`. Find the entry that corresponds to the current project. If multiple match, pick the closest.
+Capture stdout as `JSONL_DIR`. Then use the **Glob** tool to list the JSONLs:
+- `path: <JSONL_DIR>`
+- `pattern: *.jsonl`
 
-List available sessions:
-```bash
-ls -lt ~/.claude/projects/<matched-dir>/*.jsonl
-```
+Glob returns absolute paths sorted by modification time, newest first. No basename re-prefixing needed — the result is already absolute.
 
-**Selecting the session:**
-- No arg → **second most recently modified JSONL** — the current session's JSONL is always the newest (even if tiny); the one you want to audit is the previous one
-- File path arg → use that path directly
+Default to the **second-newest** JSONL (`result[1]`) — the current session's JSONL is always the newest (being written live); the one to audit is the previous one. If only one JSONL exists, use `result[0]`.
+
+The Glob tool is used in place of `ls *.jsonl` because the Bash form trips two harness validator rules (tree-sitter-bash on `"$VAR"/*.glob`, and a newer rule on `cd "$VAR" && ls 2>/dev/null`). See its-alive Step 5 for the full note.
 
 ## Step 2 — Invoke @tape-reader
 

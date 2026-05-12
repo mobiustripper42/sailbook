@@ -7,7 +7,7 @@ started: 2026-05-03T19:00:24Z
 ended:
 duration:
 points:
-status: open
+status: abandoned
 transcript: /root/.claude/projects/-home-user/e0a24e8d-06f8-47fd-83a0-bc007a5ca544.jsonl
 ---
 

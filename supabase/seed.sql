@@ -317,9 +317,9 @@ INSERT INTO public.courses (id, course_type_id, instructor_id, title, capacity, 
 
 INSERT INTO public.sessions (id, course_id, date, start_time, end_time, location, status) VALUES
 
-  -- ASA 101 Weekend May (c001) — Sat/Sun May 9–10
-  ('d1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', '2026-05-09', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000001', '2026-05-10', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
+  -- ASA 101 Weekend May (c001) — Sat/Sun Sep 12–13 (dates pushed forward to keep sessions in the future)
+  ('d1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', '2026-09-12', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000001', '2026-09-13', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
 
   -- ASA 101 Evening Series May (c002) — 4 Wednesday evenings
   ('d1000000-0000-0000-0000-000000000003', 'c1000000-0000-0000-0000-000000000002', '2026-05-06', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
