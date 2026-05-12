@@ -357,14 +357,14 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 - [~] **Refund the test charge** via admin UI. Verify Stripe dashboard shows the refund. *(Session 134: deferred — depends on live Stripe keys)*
 - [ ] **Cancel + restore enrollment** flow exercised end-to-end.
 - [~] **SMS** (if A2P approved) — student preferences set to SMS, trigger any notification (e.g., admin enrolls them manually with notify=on), SMS arrives within 30 sec. *(Session 134: deferred — A2P still pending)*
-- [~] **Cron live-fire test.** From a terminal: `curl -H "Authorization: Bearer $CRON_SECRET" https://sailbook.live/api/cron/expire-holds` returns `{"expired": N}`. Repeat for `session-reminders` and `low-enrollment`. Watch Vercel Dashboard → Settings → Cron Jobs for the next scheduled tick to confirm Vercel is hitting them too. *(Session 134: CRON_SECRET stored as Vercel secret, not retrievable — revisit if crons malfunction)*
+- [~] **Cron live-fire test.** From a terminal: `curl -H "Authorization: Bearer $CRON_SECRET" https://sailbook.live/api/cron/expire-holds` returns `{"expired": N}`. Repeat for `session-reminders` and `low-enrollment`. Watch Vercel Dashboard → Settings → Cron Jobs for the next scheduled tick to confirm Vercel is hitting them too. *(Session 134: CRON_SECRET stored as Vercel secret, not revealable. To unblock: set a known temp value in Vercel env vars, run the curls, restore. Defer until there's a reason to suspect crons are broken.)*
 - [x] **Without the auth header** the same routes return 401. (`curl https://sailbook.live/api/cron/expire-holds`) *(Session 134: confirmed — all 3 cron routes return 401)*
 - [x] **Test API routes blocked.** `curl https://sailbook.live/api/test/enroll` returns 403 (devOnly belt-and-suspenders). *(Session 134: confirmed)*
 - [ ] **Mobile.** Open the live URL on Andy's actual phone. Tap through the admin dashboard, instructor dashboard, student calendar. Anything ugly gets logged for Phase X follow-up; anything broken is a hotfix candidate.
 
 ### G. Operational Setup
 
-- [x] **Vercel deploy notifications** wired to Andy's email (Vercel Dashboard → Settings → Notifications) so failed deploys don't go silent. *(Session 134: Eric already receives them — sufficient for now)*
+- [~] **Vercel deploy notifications** wired to Andy's email (Vercel Dashboard → Settings → Notifications) so failed deploys don't go silent. *(Session 134: deferred — Eric receives them; Andy's email not yet added. Do when Andy has a Vercel account or via team invite.)*
 - [~] **Supabase project notifications** for hitting plan limits (rows, bandwidth) configured. *(Session 134: deferred — upgrading to Pro tier post-launch; Pro has proper alerting)*
 - [~] **Stripe email alerts** for refunds + disputes go to Andy. *(Session 134: deferred — waiting on Andy's Stripe account access)*
 - [x] **Status page bookmarks** for Andy: status.vercel.com, status.supabase.com, status.stripe.com, status.twilio.com, status.resend.com. When something breaks, check these first. *(Session 134: sent to Andy)*
