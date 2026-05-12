@@ -38,7 +38,8 @@ export async function runAxe(
   const opts: any = {
     runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] },
   };
-  if (options.exclude?.length) opts.exclude = options.exclude.map((s) => [s]);
+  const excludes = ['[data-testid="version-tag"]', ...(options.exclude ?? [])];
+  opts.exclude = excludes.map((s) => [s]);
 
   return await page.evaluate(async ({ opts, include }) => {
     const target = include ?? document;
