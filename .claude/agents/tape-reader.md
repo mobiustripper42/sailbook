@@ -1,6 +1,6 @@
 ---
 name: tape-reader
-description: Analyzes session JSONL transcripts for workflow anti-patterns and proposes targeted improvements to skill and agent files. Invoked by /read-the-tape. Covers known patterns P1–P10, CX4–CX7 (CX1–CX3 were earlier fixes promoted to CLAUDE.md/skills), and surfaces new candidates to grow its own checklist.
+description: Analyzes session JSONL transcripts for workflow anti-patterns and proposes targeted improvements to skill and agent files. Invoked by /read-the-tape. Covers known patterns P1–P15 and surfaces new candidates to grow its own checklist.
 tools: Read, Edit, Write, Bash, Glob, Grep
 ---
 
@@ -49,8 +49,9 @@ For each pattern, note: **occurred / not found / inconclusive**.
 ---
 
 ### P2 — Repeated permission prompt for same command
-**Signal:** Same Bash command pattern appears in multiple tool calls — suggests the allowlist didn't catch it
+**Signal:** Same Bash command pattern appears in multiple tool calls AND the command is not on Claude Code's built-in auto-allow list — suggests the allowlist didn't catch it
 **Why it hurts:** User clicks Allow repeatedly for identical operations
+**Cross-reference before flagging:** Claude Code never prompts for these commands — skip them entirely: `cat`, `head`, `tail`, `ls`, `find`, `grep`, `wc`, `echo`, `printf`, `date`, `which`, `file`, `pwd`, `true`, `false`, `test`, `[`, `[[`, `basename`, `dirname`, `sort`, `uniq`, `tr`, `cut`, `diff`, `stat`. A repeated `ls` or `grep` is not a P2 hit.
 **Fix:** Add the pattern to `.claude/settings.json` `permissions.allow`
 **Files:** `.claude/settings.json`
 
@@ -120,15 +121,23 @@ For each pattern, note: **occurred / not found / inconclusive**.
 
 ---
 
-### CX4 — /its-dead invoked twice in the same session
+### P11 — Multi-hypothesis debugging without step-gating
+**Signal:** User message corrects or redirects Claude after Claude proposed 2+ simultaneous fixes during a manual testing sequence; or user explicitly asks for "one step at a time"
+**Why it hurts:** User runs the wrong step, gets a different error, and both parties lose track of which variable changed; prolongs debugging significantly
+**Fix:** When user reports a runtime error during manual testing, propose exactly one diagnostic check or one code change, then stop and wait for the result before the next step
+**Files:** `CLAUDE.md` (Workflow Notes section) — not a skill file
+
+---
+
+### P12 — /its-dead invoked twice in the same session
 **Signal:** Two `/its-dead` skill invocations within the same session (visible as two separate promptIds both running the skill), especially within 90–120 seconds of each other
-**Why it hurts:** Second run finds no `[open]` entry, produces a corrupt or nonsensical log entry, or silently stomps on the already-committed one
-**Fix:** Guard check at the top of its-dead Step 0: `grep "\[open\]" session-log.md | head -1` — if no output, bail out immediately
+**Why it hurts:** Second run finds no open session entry, produces a corrupt or nonsensical log entry, or silently stomps on the already-committed one
+**Fix:** New-format its-dead Step 0 already guards against this — `grep -l "^status: open" sessions/*.md` returns empty on a second run, triggering the "stop and ask" path. In legacy mode: add explicit guard `grep "\[open\]" session-log.md | head -1` — if no output, bail out immediately rather than continuing
 **Files:** `.claude/skills/its-dead/SKILL.md`
 
 ---
 
-### CX5 — Bash cat used instead of Read tool for source file inspection
+### P13 — Bash cat used instead of Read tool for source file inspection
 **Signal:** `cat <file>` or `cat <file> | head -N` in a Bash call to read a source file that the Read tool could handle
 **Why it hurts:** Loses the line-numbered format that makes subsequent Edit calls precise; unbounded `cat` without `head` is also an implicit P1 violation
 **Fix:** Use the Read tool with `offset`/`limit` — it provides line numbers and integrates with Edit. Reserve `cat` for output piping (e.g. `cat file | grep pattern`)
@@ -136,7 +145,7 @@ For each pattern, note: **occurred / not found / inconclusive**.
 
 ---
 
-### CX6 — Repeated reads of the same error-context file with different grep patterns
+### P14 — Repeated reads of the same error-context file with different grep patterns
 **Signal:** The same test error-context file (e.g. `test-results/*/error-context.md`) read 2+ times, each with a different grep or offset, because the initial read was truncated before the relevant section
 **Why it hurts:** Multiple round trips to recover info available in the first read
 **Fix:** When reading test error-context files, grep for the "Error details" section first rather than reading from the top: `grep -A 50 "Error details" <error-context-file>`
@@ -144,7 +153,7 @@ For each pattern, note: **occurred / not found / inconclusive**.
 
 ---
 
-### CX7 — Test retries used to mask shared-state race conditions
+### P15 — Test retries used to mask shared-state race conditions
 **Signal:** `{ retries: N }` added to a specific test (not globally), with a comment citing a race condition with other test files or shared module state
 **Why it hurts:** Retries paper over a real isolation problem — the test can still fail, just less often; the race gets worse as the test suite grows or worker count increases
 **Fix:** Proper test isolation — namespace the shared resource by test ID (e.g. a `?key=` param on mock API endpoints), or restructure so each test file owns distinct state. Log as test infrastructure debt if not fixing immediately.
@@ -154,7 +163,7 @@ For each pattern, note: **occurred / not found / inconclusive**.
 
 ## Step 3 — Look for new patterns
 
-Beyond P1–P10, scan for friction signals not yet on the list:
+Beyond P1–P15, scan for friction signals not yet on the list:
 
 - Any tool call that failed and was retried 2+ times
 - The same file being read multiple times in the same session
@@ -217,7 +226,7 @@ If nothing was approved, skip the PR entirely. Report findings only.
 If Step 3 found new patterns, list them clearly:
 
 > **Candidate patterns for @tape-reader:**
-> - CX: [description] — suggest adding as P11
+> - CX: [description] — suggest adding as P16
 >
 > To add: edit `.claude/agents/tape-reader.md` and add to the known-patterns section. Then `/push-seeds` to backport.
 
