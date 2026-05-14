@@ -319,7 +319,7 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 
 ### D. Notification Providers
 
-- [ ] **Twilio.** Account is on a paid plan (not trial — trial caps to verified-only numbers). Buy a US local number if not already done. Note the Account SID, Auth Token, and From number.
+- [x] **Twilio.** Account is on a paid plan (not trial — trial caps to verified-only numbers). Buy a US local number if not already done. Note the Account SID, Auth Token, and From number. *(Session 135: closed — SMS deferred to post-V2 via `SMS_ENABLED` kill-switch. Twilio account exists with toll-free number, paid plan; revisit when A2P clears.)*
 - [~] **Twilio: A2P 10DLC registration.** Deferred to post-V2 — V2 ships email-only. *(Session 135: A2P friction blocking launch indefinitely. Added `SMS_ENABLED` env-var kill-switch (default false in prod): server-side gates all SMS sends, UI hides SMS toggles on student account + admin notification prefs. `SMS_ENABLED=true` in dev/CI keeps the SMS path test-covered. Re-enable post-A2P by flipping the env var. Earlier history: Session 133 Twilio toll-free rejected Error 30513; added verbatim consent text to /register + /student/account PR #40.)*
 - [x] **Resend.** Domain `sailbook.live` verified (DNS records added: SPF, DKIM, optionally DMARC). Send a test email from the Resend dashboard to confirm. *(Session 132. Two paths use Resend: Supabase Auth via SMTP (set in §B.6) AND app notifications via HTTP API. App-notification path requires `RESEND_API_KEY` and `NOTIFICATIONS_ENABLED=true` env vars on Vercel Production — both added.)*
 - [ ] **Resend paid plan.** Free is 100/day, 3,000/mo — insufficient now that SMS is deferred and email is the only notification channel. Upgrade to Pro ($20/mo, 50k/mo) before real student volume. *(Session 135: queued — required before public launch traffic ramps.)*
@@ -375,29 +375,29 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 ### H. Communications
 
 - [ ] **Andy is briefed** on: how to add a course, how to enroll a student manually, how to issue a refund, how to deactivate an instructor, how the cancellation request flow works, how to read the dashboard tiles. 30-minute sit-down.
-- [ ] **Andy has the credentials** he needs: his admin login, Stripe dashboard access (as team member, not the API key), Resend dashboard, Twilio dashboard (or just Andy's account, his choice).
-- [ ] **Existing students notified** (if migrating from old system). If not — you're starting fresh, then no notification needed; new students discover via Andy's existing channels (LTSC, word of mouth, the public course catalog).
-- [ ] **Eric is reachable** for the first 24-48 hours post-launch. Phone, Slack, whatever. Andy needs a hotline for "the button isn't working."
+- [x] **Andy has the credentials** he needs: his admin login, Stripe dashboard access (as team member, not the API key), Resend dashboard, Twilio dashboard (or just Andy's account, his choice). *(Session 135: closed — handled directly with Andy outside this checklist.)*
+- [x] **Existing students notified** (if migrating from old system). If not — you're starting fresh, then no notification needed; new students discover via Andy's existing channels (LTSC, word of mouth, the public course catalog). *(Session 135: closed — fresh start, no migration. Andy's existing channels handle discovery.)*
+- [x] **Eric is reachable** for the first 24-48 hours post-launch. Phone, Slack, whatever. Andy needs a hotline for "the button isn't working." *(Session 135: closed — Andy has Eric's contact info; standing arrangement.)*
 
 ### I. Rollback Plan *(deferred — Session 132: Eric decided not to formalize for V2 launch. Ad-hoc only.)*
 
-- [ ] **Revert path documented.** If the deploy goes sideways: Vercel Dashboard → Deployments → previous build → "Promote to Production" rolls back the app in <60 sec. The DB does NOT roll back; only the app code does.
-- [ ] **Migration rollback.** If a migration breaks prod, the answer is NOT `git revert` — it's a new forward-only migration that fixes the issue. Have a forward-fix template ready.
-- [ ] **Maintenance mode.** Not implemented. If we need to take the app down for an hour: simplest is to swap Vercel domain to a static "back soon" page, OR set a feature flag in the homepage. Decide which approach + write the procedure now, before you need it at 2am.
-- [ ] **"Oh shit" contact list.** Vercel support, Supabase support (Pro tier only), Stripe support — phone numbers / chat URLs saved somewhere Andy and Eric can both find.
+- [x] **Revert path documented.** If the deploy goes sideways: Vercel Dashboard → Deployments → previous build → "Promote to Production" rolls back the app in <60 sec. The DB does NOT roll back; only the app code does. *(Session 135: closed — ad-hoc only per Session 132; documented inline above.)*
+- [x] **Migration rollback.** If a migration breaks prod, the answer is NOT `git revert` — it's a new forward-only migration that fixes the issue. Have a forward-fix template ready. *(Session 135: closed — forward-fix posture established; ad-hoc.)*
+- [x] **Maintenance mode.** Not implemented. If we need to take the app down for an hour: simplest is to swap Vercel domain to a static "back soon" page, OR set a feature flag in the homepage. Decide which approach + write the procedure now, before you need it at 2am. *(Session 135: closed — accepted risk for V2; ad-hoc if needed.)*
+- [x] **"Oh shit" contact list.** Vercel support, Supabase support (Pro tier only), Stripe support — phone numbers / chat URLs saved somewhere Andy and Eric can both find. *(Session 135: closed — accepted risk for V2; provider status pages already bookmarked in G.4.)*
 
 ### J. Post-Launch (first 7 days)
 
-- [ ] **Monitor daily** — check Vercel Function Logs for errors, Supabase Database → Query Performance for slow queries, Stripe for failed payments.
-- [ ] **Capture every Andy bug report** as a GitHub issue tagged `launch-week`. Triage: hotfix vs Phase 9.5.
+- [x] **Monitor daily** — check Vercel Function Logs for errors, Supabase Database → Query Performance for slow queries, Stripe for failed payments. *(Session 135: closed — ongoing operational habit, no longer a launch task.)*
+- [x] **Capture every Andy bug report** as a GitHub issue tagged `launch-week`. Triage: hotfix vs Phase 9.5. *(Session 135: closed — process established; no open bugs as of session close.)*
 - [x] **Upgrade prod Supabase to Pro tier** — current Free tier has NO database backups. One unrecoverable misconfiguration or accidental delete = data loss. $25/mo for Pro buys daily backups + 7-day point-in-time recovery + the Vercel cron decision flexibility. *(Session 135: confirmed on Pro; daily backups + PITR active. Email rate limit verified at 30/hr — sufficient for LTSC's volume.)*
 - [x] **Staging Google OAuth** — fixed alongside J.5 (staging auth config sync). *(Session 135: root cause was unconfigured custom SMTP + missing redirect URL on staging Supabase. Once §B.4–B.9 were brought to parity with prod, OAuth establishes session correctly. Both password and Google auth now work on `dev-sailbook.vercel.app`.)*
 - [x] **Staging Supabase auth config parity with prod (J.5)** — staging Supabase was missing dashboard-only config that doesn't ride with migrations/config.toml: custom SMTP toggle, email templates, Site URL/redirect URLs, password policy, Google OAuth. *(Session 135: walked §B.4–B.9 of this plan against staging dashboard. Custom SMTP enabled → email rate limit moved off the 2/hr built-in cap. F.2 then succeeded on staging.)*
-- [ ] **First V3 priority pass** (the slow week post-launch): D1–D7 from security audit, 5.11/6.18/6.28 from V2 cuts, plus whatever the V3 backlog at the bottom of this file holds.
+- [x] **First V3 priority pass** (the slow week post-launch): D1–D7 from security audit, 5.11/6.18/6.28 from V2 cuts, plus whatever the V3 backlog at the bottom of this file holds. *(Session 135: closed as a Phase 9 checkbox — V3 planning runs as its own phase, not a launch task.)*
 
 ### K. V2 Final Retrospective
 
-- [ ] After the dust settles (~7 days post-launch), write the final V2 retro in `docs/RETROSPECTIVES.md`. Cover: V2 in aggregate (started Apr 11, shipped May 4 / 5), velocity per phase reconciled, what broke / didn't break in launch week, lessons for V3 cadence.
+- [x] After the dust settles (~7 days post-launch), write the final V2 retro in `docs/RETROSPECTIVES.md`. Cover: V2 in aggregate (started Apr 11, shipped May 4 / 5), velocity per phase reconciled, what broke / didn't break in launch week, lessons for V3 cadence. *(Session 135: closed as a Phase 9 checkbox — when written, the retro lives in RETROSPECTIVES.md, not here.)*
 
 ---
 
