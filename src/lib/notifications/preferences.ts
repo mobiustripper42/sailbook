@@ -17,6 +17,13 @@ export const ADMIN_NOTIFICATION_EVENTS = [
 export type AdminNotificationEvent = (typeof ADMIN_NOTIFICATION_EVENTS)[number]
 export type NotificationChannel = 'sms' | 'email'
 
+// Global kill-switch for SMS. When unset/false, every "is this channel enabled?"
+// check for `sms` returns false regardless of per-user preference. Email-only
+// launch (V2): A2P 10DLC unapproved, SMS deferred.
+export function isSMSEnabled(): boolean {
+  return process.env.SMS_ENABLED === 'true'
+}
+
 export type AdminNotificationPreferences = {
   [K in AdminNotificationEvent]?: {
     sms?: boolean
@@ -37,6 +44,7 @@ export function isAdminChannelEnabled(
   event: AdminNotificationEvent,
   channel: NotificationChannel,
 ): boolean {
+  if (channel === 'sms' && !isSMSEnabled()) return false
   if (!prefs || typeof prefs !== 'object') return true
   const eventPrefs = (prefs as Record<string, unknown>)[event]
   if (!eventPrefs || typeof eventPrefs !== 'object') return true
@@ -89,6 +97,7 @@ export function isStudentChannelEnabled(
   prefs: unknown,
   channel: NotificationChannel,
 ): boolean {
+  if (channel === 'sms' && !isSMSEnabled()) return false
   if (!prefs || typeof prefs !== 'object') return true
   const block = (prefs as Record<string, unknown>)[STUDENT_GLOBAL_KEY]
   if (!block || typeof block !== 'object') return true
