@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import {
   ADMIN_NOTIFICATION_EVENTS,
   STUDENT_GLOBAL_KEY,
+  isSMSEnabled,
   type AdminNotificationPreferences,
   type StudentNotificationPreferences,
 } from '@/lib/notifications/preferences'
@@ -51,12 +52,18 @@ export async function updateAdminNotificationPreferences(
   if (!profile?.is_admin) return 'Unauthorized.'
 
   const existing = await readExistingPrefs(supabase, user.id)
+  const smsEnabled = isSMSEnabled()
 
   // Each event/channel arrives as a checkbox name; absence = false.
+  // When SMS is globally disabled, the SMS checkbox isn't rendered — preserve
+  // the user's prior sms preference so it isn't silently wiped.
   const adminBlock: AdminNotificationPreferences = {}
   for (const event of ADMIN_NOTIFICATION_EVENTS) {
+    const existingEvent = (existing[event] as { sms?: boolean } | undefined) ?? {}
     adminBlock[event] = {
-      sms: formData.get(`${event}__sms`) === 'on',
+      sms: smsEnabled
+        ? formData.get(`${event}__sms`) === 'on'
+        : existingEvent.sms ?? true,
       email: formData.get(`${event}__email`) === 'on',
     }
   }
@@ -97,10 +104,14 @@ export async function updateStudentNotificationPreferences(
   if (!profile?.is_student) return 'Unauthorized.'
 
   const existing = await readExistingPrefs(supabase, user.id)
+  const smsEnabled = isSMSEnabled()
+  const existingStudent = (existing[STUDENT_GLOBAL_KEY] as { sms?: boolean } | undefined) ?? {}
 
   const studentBlock: StudentNotificationPreferences = {
     [STUDENT_GLOBAL_KEY]: {
-      sms: formData.get('student_sms') === 'on',
+      sms: smsEnabled
+        ? formData.get('student_sms') === 'on'
+        : existingStudent.sms ?? true,
       email: formData.get('student_email') === 'on',
     },
   }

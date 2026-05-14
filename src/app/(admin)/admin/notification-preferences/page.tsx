@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { normalizeAdminPreferences } from '@/lib/notifications/preferences'
+import { isSMSEnabled, normalizeAdminPreferences } from '@/lib/notifications/preferences'
 import NotificationPreferencesForm from '@/components/admin/notification-preferences-form'
 
 export const dynamic = 'force-dynamic'
@@ -30,7 +30,7 @@ export default async function NotificationPreferencesPage() {
         </p>
       </div>
 
-      <NotificationPreferencesForm initialPrefs={initialPrefs} />
+      <NotificationPreferencesForm initialPrefs={initialPrefs} smsEnabled={isSMSEnabled()} />
     </div>
   )
 }

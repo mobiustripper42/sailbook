@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import StudentAccountForm from '@/components/student/student-account-form'
 import NotificationPreferencesSection from '@/components/student/notification-preferences-section'
-import { normalizeStudentPreferences } from '@/lib/notifications/preferences'
+import { isSMSEnabled, normalizeStudentPreferences } from '@/lib/notifications/preferences'
 
 export const metadata = { title: 'SailBook — Account' }
 
@@ -41,9 +41,10 @@ export default async function StudentAccountPage() {
       <StudentAccountForm
         profile={profile}
         experienceCodes={codes ?? []}
+        smsEnabled={isSMSEnabled()}
       />
 
-      <NotificationPreferencesSection initialPrefs={initialNotifPrefs} />
+      <NotificationPreferencesSection initialPrefs={initialNotifPrefs} smsEnabled={isSMSEnabled()} />
     </div>
   )
 }

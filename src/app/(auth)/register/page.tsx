@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { isSMSEnabled } from '@/lib/notifications/preferences'
 import RegisterForm from './register-form'
 
 export default async function RegisterPage() {
@@ -15,7 +16,7 @@ export default async function RegisterPage() {
   // RegisterForm uses useSearchParams() — Suspense bailout required for build.
   return (
     <Suspense>
-      <RegisterForm experienceCodes={codes ?? []} />
+      <RegisterForm experienceCodes={codes ?? []} smsEnabled={isSMSEnabled()} />
     </Suspense>
   )
 }
