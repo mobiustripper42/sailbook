@@ -21,8 +21,10 @@ const EVENT_LABELS: Record<AdminNotificationEvent, { title: string; description:
 
 export default function NotificationPreferencesForm({
   initialPrefs,
+  smsEnabled = false,
 }: {
   initialPrefs: NormalizedPrefs
+  smsEnabled?: boolean
 }) {
   const [state, action, pending] = useActionState(
     updateAdminNotificationPreferences,
@@ -41,20 +43,22 @@ export default function NotificationPreferencesForm({
             <legend className="px-1 text-sm font-medium">{labels.title}</legend>
             <p className="text-xs text-muted-foreground">{labels.description}</p>
             <div className="flex flex-wrap gap-x-6 gap-y-2 pt-2">
-              <Label
-                htmlFor={`${event}__sms`}
-                className="flex items-center gap-2 text-sm font-normal cursor-pointer"
-              >
-                <input
-                  id={`${event}__sms`}
-                  name={`${event}__sms`}
-                  type="checkbox"
-                  checked={prefs[event].sms}
-                  onChange={(e) => setPrefs(p => ({ ...p, [event]: { ...p[event], sms: e.target.checked } }))}
-                  className="size-4 rounded border-input accent-primary"
-                />
-                SMS
-              </Label>
+              {smsEnabled && (
+                <Label
+                  htmlFor={`${event}__sms`}
+                  className="flex items-center gap-2 text-sm font-normal cursor-pointer"
+                >
+                  <input
+                    id={`${event}__sms`}
+                    name={`${event}__sms`}
+                    type="checkbox"
+                    checked={prefs[event].sms}
+                    onChange={(e) => setPrefs(p => ({ ...p, [event]: { ...p[event], sms: e.target.checked } }))}
+                    className="size-4 rounded border-input accent-primary"
+                  />
+                  SMS
+                </Label>
+              )}
               <Label
                 htmlFor={`${event}__email`}
                 className="flex items-center gap-2 text-sm font-normal cursor-pointer"

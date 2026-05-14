@@ -9,8 +9,10 @@ type Prefs = { sms: boolean; email: boolean }
 
 export default function NotificationPreferencesSection({
   initialPrefs,
+  smsEnabled = false,
 }: {
   initialPrefs: Prefs
+  smsEnabled?: boolean
 }) {
   const [state, action, pending] = useActionState(
     updateStudentNotificationPreferences,
@@ -44,20 +46,22 @@ export default function NotificationPreferencesSection({
       {showSuccess && <p className="text-sm text-primary">Preferences saved.</p>}
 
       <div className="space-y-2 rounded-md border p-4">
-        <Label
-          htmlFor="student_sms"
-          className="flex items-center gap-2 text-sm font-normal cursor-pointer"
-        >
-          <input
-            id="student_sms"
-            name="student_sms"
-            type="checkbox"
-            checked={sms}
-            onChange={(e) => setSms(e.target.checked)}
-            className="size-4 rounded border-input accent-primary"
-          />
-          Receive SMS notifications
-        </Label>
+        {smsEnabled && (
+          <Label
+            htmlFor="student_sms"
+            className="flex items-center gap-2 text-sm font-normal cursor-pointer"
+          >
+            <input
+              id="student_sms"
+              name="student_sms"
+              type="checkbox"
+              checked={sms}
+              onChange={(e) => setSms(e.target.checked)}
+              className="size-4 rounded border-input accent-primary"
+            />
+            Receive SMS notifications
+          </Label>
+        )}
         <Label
           htmlFor="student_email"
           className="flex items-center gap-2 text-sm font-normal cursor-pointer"
@@ -72,6 +76,11 @@ export default function NotificationPreferencesSection({
           />
           Receive email notifications
         </Label>
+        {!smsEnabled && (
+          <p className="text-xs text-muted-foreground pt-1">
+            Email only for now — SMS is coming later.
+          </p>
+        )}
       </div>
 
       <Button type="submit" disabled={pending}>

@@ -26,7 +26,7 @@ type ExperienceCode = {
   description: string | null
 }
 
-export default function RegisterForm({ experienceCodes }: { experienceCodes: ExperienceCode[] }) {
+export default function RegisterForm({ experienceCodes, smsEnabled = false }: { experienceCodes: ExperienceCode[]; smsEnabled?: boolean }) {
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const searchParams = useSearchParams()
@@ -118,9 +118,11 @@ export default function RegisterForm({ experienceCodes }: { experienceCodes: Exp
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
-            <p className="text-xs text-muted-foreground">
-              By providing your phone number you consent to receive SMS messages from Learn to Sail Cleveland (Riverfront Marine) about your enrollment, session reminders, and cancellations. Msg frequency varies. Msg &amp; data rates may apply. Reply STOP to cancel, HELP for help.
-            </p>
+            {smsEnabled && (
+              <p className="text-xs text-muted-foreground">
+                By providing your phone number you consent to receive SMS messages from Learn to Sail Cleveland (Riverfront Marine) about your enrollment, session reminders, and cancellations. Msg frequency varies. Msg &amp; data rates may apply. Reply STOP to cancel, HELP for help.
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="experienceLevel">Sailing experience</Label>

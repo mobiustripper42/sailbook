@@ -295,8 +295,8 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 - [x] **Branch state.** `main` is green: full Playwright suite passes locally (worker=4) and `supabase test db` clean. Lint clean. No open PRs. *(Session 132: lint fixed in `task/9.A-pre-deploy-cleanup`. pgTAP clean post-reset. Full suite: 13 known-pollution failures, all pass in isolation. PR #33 staging-env work, unrelated.)*
 - [x] **`docs/SECURITY_AUDIT_V2.md` checklist** items 1–5 reviewed (env-var presence, smoke test plan). *(Session 132: items 1–3 verified in Vercel — CRON_SECRET on Prod+Preview, SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SUPABASE_* on Prod only, STRIPE_WEBHOOK_SECRET on all envs. Items 4–5 are post-deploy smoke tests, deferred to §G/§H.)*
 - [x] **Walk the app cold.** Browse SailBook in an incognito window as anon → student (register flow) → admin. Ten minutes. Note anything ugly. *(Session 132: turned up two real issues — public-course pages had no contact path for "I don't see a date I want" → fixed in PR #35; admin login didn't work after flipping `profiles.is_admin = true` because middleware reads `auth.users.raw_user_meta_data` → §B.3 instructions corrected on this branch.)*
-- [~] **Andy walk-through.** Show Andy the dashboard, courses list, manual-enroll flow, refund flow. Get his "ready" or "wait one more day." *(Session 132: deferred until staging environment is up — Eric working on it concurrently.)*
-- [~] **Backup the dev DB** (if there's anything in it worth keeping). `supabase db dump --local > backup-pre-launch.sql`. *(Session 132: skipped — local DB is fixtures only; `supabase/seed.sql` is the source of truth.)*
+- [x] **Andy walk-through.** Show Andy the dashboard, courses list, manual-enroll flow, refund flow. Get his "ready" or "wait one more day." *(Session 135: closed — same scope as H.1 Andy briefing; tracking on that line.)*
+- [x] **Backup the dev DB** (if there's anything in it worth keeping). `supabase db dump --local > backup-pre-launch.sql`. *(Session 132: skipped — local DB is fixtures only; `supabase/seed.sql` is the source of truth. Session 135: closed.)*
 - [x] **Tag the launch commit.** `git tag v2.0.0-rc1` on the merge commit you intend to deploy. Push the tag. *(Session 132: tagged on main HEAD after PRs #34, #35, #37 merged.)*
 
 ### B. Supabase Production Project
@@ -319,9 +319,10 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 
 ### D. Notification Providers
 
-- [ ] **Twilio.** Account is on a paid plan (not trial — trial caps to verified-only numbers). Buy a US local number if not already done. Note the Account SID, Auth Token, and From number.
-- [ ] **Twilio: A2P 10DLC registration.** Required for SMS to US carriers since 2023. Can take days to approve. **Start early or accept that SMS may bounce on day 1 until brand+campaign are approved.** If unapproved, fall back to email-only by setting `TWILIO_AUTH_TOKEN=""` and the trigger code will skip SMS. *(Session 133: Twilio toll-free verification rejected with Error 30513 — opt-in language insufficient. Fixed by adding verbatim SMS consent text to phone fields on `/register` and `/student/account` (PR #40, deployed). Andy needs to resubmit form with Business Type = "Private Profit", Proof of consent URL = `https://sailbook.live/register`, and the use case description that quotes the consent text verbatim.)*
+- [x] **Twilio.** Account is on a paid plan (not trial — trial caps to verified-only numbers). Buy a US local number if not already done. Note the Account SID, Auth Token, and From number. *(Session 135: closed — SMS deferred to post-V2 via `SMS_ENABLED` kill-switch. Twilio account exists with toll-free number, paid plan; revisit when A2P clears.)*
+- [x] **Twilio: A2P 10DLC registration.** Deferred to post-V2 — V2 ships email-only. *(Session 135: closed as a Phase 9 checkbox — A2P friction blocks indefinitely. `SMS_ENABLED` env-var kill-switch (default false in prod) gates all SMS sends; UI hides SMS toggles + consent text. CI keeps the SMS path test-covered. Re-enable by flipping the env var when A2P clears. Earlier: Session 133 Twilio toll-free rejected Error 30513; consent text on /register + /student/account from PR #40.)*
 - [x] **Resend.** Domain `sailbook.live` verified (DNS records added: SPF, DKIM, optionally DMARC). Send a test email from the Resend dashboard to confirm. *(Session 132. Two paths use Resend: Supabase Auth via SMTP (set in §B.6) AND app notifications via HTTP API. App-notification path requires `RESEND_API_KEY` and `NOTIFICATIONS_ENABLED=true` env vars on Vercel Production — both added.)*
+- [ ] **Resend paid plan.** Free is 100/day, 3,000/mo — insufficient now that SMS is deferred and email is the only notification channel. Upgrade to Pro ($20/mo, 50k/mo) before real student volume. *(Session 135: queued — required before public launch traffic ramps.)*
 - [x] **`info@sailbook.live`** is a real address that forwards to Andy. Otherwise users replying to confirmation emails go nowhere. *(Session 132: forwards to Eric for now; Andy added when he's onboarded.)*
 
 ### E. Vercel Project
@@ -352,21 +353,21 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 ### F. Deploy-Day Smoke Tests (run in this order on the live URL)
 
 - [x] **`https://sailbook.live` loads** the public landing/courses page without errors. *(Session 134: 200 confirmed via curl)*
-- [ ] **Anon → public catalog → course detail → "Register & Pay"** prompts login. Click "Register" → fill form → check the inbox arrives → confirmation link works → lands on the original course page.
+- [x] **Anon → public catalog → course detail → "Register & Pay"** prompts login. Click "Register" → fill form → check the inbox arrives → confirmation link works → lands on the original course page. *(Session 135: walked end-to-end on staging `dev-sailbook.vercel.app`. Confirmation email landed, redirect to original course page worked. Required syncing custom SMTP toggle + Resend creds on staging Supabase first — see J.5.)*
 - [~] **Stripe checkout end-to-end with a real card** ($1 course or use Andy's actual card). After payment: enrollment shows as confirmed, payment row inserted, confirmation email arrives. *(Session 134: deferred — waiting on Andy's live Stripe keys)*
 - [~] **Refund the test charge** via admin UI. Verify Stripe dashboard shows the refund. *(Session 134: deferred — depends on live Stripe keys)*
-- [ ] **Cancel + restore enrollment** flow exercised end-to-end.
-- [~] **SMS** (if A2P approved) — student preferences set to SMS, trigger any notification (e.g., admin enrolls them manually with notify=on), SMS arrives within 30 sec. *(Session 134: deferred — A2P still pending)*
-- [~] **Cron live-fire test.** From a terminal: `curl -H "Authorization: Bearer $CRON_SECRET" https://sailbook.live/api/cron/expire-holds` returns `{"expired": N}`. Repeat for `session-reminders` and `low-enrollment`. Watch Vercel Dashboard → Settings → Cron Jobs for the next scheduled tick to confirm Vercel is hitting them too. *(Session 134: CRON_SECRET stored as Vercel secret, not revealable. To unblock: set a known temp value in Vercel env vars, run the curls, restore. Defer until there's a reason to suspect crons are broken.)*
+- [x] **Cancel + restore enrollment** flow exercised end-to-end. *(Session 135: walked on staging — student cancel → admin Process Refund dialog → Refund & Cancel → status=cancelled → Restore button restores to confirmed. Gap noted: Restore re-flips the enrollment but the refund is irreversible in Stripe; restored student shows confirmed-but-unpaid with no in-app re-bill prompt. Accepted for V2 — Andy handles re-billing offline.)*
+- [x] **SMS** (if A2P approved) — student preferences set to SMS, trigger any notification (e.g., admin enrolls them manually with notify=on), SMS arrives within 30 sec. *(Session 135: closed as a Phase 9 checkbox — SMS path gated off via `SMS_ENABLED`. Re-run this smoke when A2P clears and the env flips.)*
+- [x] **Cron live-fire test.** From a terminal: `curl -H "Authorization: Bearer $CRON_SECRET" https://sailbook.live/api/cron/expire-holds` returns `{"expired": N}`. Repeat for `session-reminders` and `low-enrollment`. Watch Vercel Dashboard → Settings → Cron Jobs for the next scheduled tick to confirm Vercel is hitting them too. *(Session 135: verified passively via Vercel Dashboard → Settings → Cron Jobs run history — successful executions on prod and staging. Skipped the temp-CRON_SECRET juggle since cron history shows green ticks.)*
 - [x] **Without the auth header** the same routes return 401. (`curl https://sailbook.live/api/cron/expire-holds`) *(Session 134: confirmed — all 3 cron routes return 401)*
 - [x] **Test API routes blocked.** `curl https://sailbook.live/api/test/enroll` returns 403 (devOnly belt-and-suspenders). *(Session 134: confirmed)*
 - [ ] **Mobile.** Open the live URL on Andy's actual phone. Tap through the admin dashboard, instructor dashboard, student calendar. Anything ugly gets logged for Phase X follow-up; anything broken is a hotfix candidate.
 
 ### G. Operational Setup
 
-- [~] **Vercel deploy notifications** wired to Andy's email (Vercel Dashboard → Settings → Notifications) so failed deploys don't go silent. *(Session 134: deferred — Eric receives them; Andy's email not yet added. Do when Andy has a Vercel account or via team invite.)*
+- [x] **Vercel deploy notifications** wired to Andy's email (Vercel Dashboard → Settings → Notifications) so failed deploys don't go silent. *(Session 135: closed — Eric receives them; sufficient for V2. Add Andy via team invite later if needed.)*
 - [~] **Supabase project notifications** for hitting plan limits (rows, bandwidth) configured. *(Session 134: deferred — upgrading to Pro tier post-launch; Pro has proper alerting)*
-- [~] **Stripe email alerts** for refunds + disputes go to Andy. *(Session 134: deferred — waiting on Andy's Stripe account access)*
+- [x] **Stripe email alerts** for refunds + disputes go to Andy. *(Session 135: closed — Andy will configure on his Stripe account directly once he provides live keys; not a launch-gate.)*
 - [x] **Status page bookmarks** for Andy: status.vercel.com, status.supabase.com, status.stripe.com, status.twilio.com, status.resend.com. When something breaks, check these first. *(Session 134: sent to Andy)*
 - [x] **Logging access.** Vercel Dashboard → Deployments → [latest] → Runtime Logs is the production log surface. Andy doesn't need this; Eric should know where it is. *(Session 134: noted)*
 - [x] **Error monitoring (V3 backlog).** No Sentry-style integration yet. For V2 launch, Vercel Function Logs + Supabase logs cover the surface. Add proper error reporting in V3 if/when traffic warrants. *(Session 134: confirmed V3 backlog)*
@@ -374,28 +375,29 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 ### H. Communications
 
 - [ ] **Andy is briefed** on: how to add a course, how to enroll a student manually, how to issue a refund, how to deactivate an instructor, how the cancellation request flow works, how to read the dashboard tiles. 30-minute sit-down.
-- [ ] **Andy has the credentials** he needs: his admin login, Stripe dashboard access (as team member, not the API key), Resend dashboard, Twilio dashboard (or just Andy's account, his choice).
-- [ ] **Existing students notified** (if migrating from old system). If not — you're starting fresh, then no notification needed; new students discover via Andy's existing channels (LTSC, word of mouth, the public course catalog).
-- [ ] **Eric is reachable** for the first 24-48 hours post-launch. Phone, Slack, whatever. Andy needs a hotline for "the button isn't working."
+- [x] **Andy has the credentials** he needs: his admin login, Stripe dashboard access (as team member, not the API key), Resend dashboard, Twilio dashboard (or just Andy's account, his choice). *(Session 135: closed — handled directly with Andy outside this checklist.)*
+- [x] **Existing students notified** (if migrating from old system). If not — you're starting fresh, then no notification needed; new students discover via Andy's existing channels (LTSC, word of mouth, the public course catalog). *(Session 135: closed — fresh start, no migration. Andy's existing channels handle discovery.)*
+- [x] **Eric is reachable** for the first 24-48 hours post-launch. Phone, Slack, whatever. Andy needs a hotline for "the button isn't working." *(Session 135: closed — Andy has Eric's contact info; standing arrangement.)*
 
 ### I. Rollback Plan *(deferred — Session 132: Eric decided not to formalize for V2 launch. Ad-hoc only.)*
 
-- [ ] **Revert path documented.** If the deploy goes sideways: Vercel Dashboard → Deployments → previous build → "Promote to Production" rolls back the app in <60 sec. The DB does NOT roll back; only the app code does.
-- [ ] **Migration rollback.** If a migration breaks prod, the answer is NOT `git revert` — it's a new forward-only migration that fixes the issue. Have a forward-fix template ready.
-- [ ] **Maintenance mode.** Not implemented. If we need to take the app down for an hour: simplest is to swap Vercel domain to a static "back soon" page, OR set a feature flag in the homepage. Decide which approach + write the procedure now, before you need it at 2am.
-- [ ] **"Oh shit" contact list.** Vercel support, Supabase support (Pro tier only), Stripe support — phone numbers / chat URLs saved somewhere Andy and Eric can both find.
+- [x] **Revert path documented.** If the deploy goes sideways: Vercel Dashboard → Deployments → previous build → "Promote to Production" rolls back the app in <60 sec. The DB does NOT roll back; only the app code does. *(Session 135: closed — ad-hoc only per Session 132; documented inline above.)*
+- [x] **Migration rollback.** If a migration breaks prod, the answer is NOT `git revert` — it's a new forward-only migration that fixes the issue. Have a forward-fix template ready. *(Session 135: closed — forward-fix posture established; ad-hoc.)*
+- [x] **Maintenance mode.** Not implemented. If we need to take the app down for an hour: simplest is to swap Vercel domain to a static "back soon" page, OR set a feature flag in the homepage. Decide which approach + write the procedure now, before you need it at 2am. *(Session 135: closed — accepted risk for V2; ad-hoc if needed.)*
+- [x] **"Oh shit" contact list.** Vercel support, Supabase support (Pro tier only), Stripe support — phone numbers / chat URLs saved somewhere Andy and Eric can both find. *(Session 135: closed — accepted risk for V2; provider status pages already bookmarked in G.4.)*
 
 ### J. Post-Launch (first 7 days)
 
-- [ ] **Monitor daily** — check Vercel Function Logs for errors, Supabase Database → Query Performance for slow queries, Stripe for failed payments.
-- [ ] **Capture every Andy bug report** as a GitHub issue tagged `launch-week`. Triage: hotfix vs Phase 9.5.
-- [ ] **Upgrade prod Supabase to Pro tier** — current Free tier has NO database backups. One unrecoverable misconfiguration or accidental delete = data loss. $25/mo for Pro buys daily backups + 7-day point-in-time recovery + the Vercel cron decision flexibility. Do this within the first week of real customer data.
-- [ ] **Staging Google OAuth** — broken on `dev-sailbook.vercel.app`: OAuth creates the auth.users row but no session is ever established (Last sign-in stays empty). Prod Google OAuth on `sailbook.live` works fine, password auth on staging works fine. Tried: SiteURL fix, env-var verification, cookie clear, full DB reset. Symptom persists. Suspect: per-project auth setting on staging that doesn't auto-confirm OAuth users, or a divergence from prod we haven't found. Workaround during launch: use password auth on staging for Andy walkthrough.
-- [ ] **First V3 priority pass** (the slow week post-launch): D1–D7 from security audit, 5.11/6.18/6.28 from V2 cuts, plus whatever the V3 backlog at the bottom of this file holds.
+- [x] **Monitor daily** — check Vercel Function Logs for errors, Supabase Database → Query Performance for slow queries, Stripe for failed payments. *(Session 135: closed — ongoing operational habit, no longer a launch task.)*
+- [x] **Capture every Andy bug report** as a GitHub issue tagged `launch-week`. Triage: hotfix vs Phase 9.5. *(Session 135: closed — process established; no open bugs as of session close.)*
+- [x] **Upgrade prod Supabase to Pro tier** — current Free tier has NO database backups. One unrecoverable misconfiguration or accidental delete = data loss. $25/mo for Pro buys daily backups + 7-day point-in-time recovery + the Vercel cron decision flexibility. *(Session 135: confirmed on Pro; daily backups + PITR active. Email rate limit verified at 30/hr — sufficient for LTSC's volume.)*
+- [x] **Staging Google OAuth** — fixed alongside J.5 (staging auth config sync). *(Session 135: root cause was unconfigured custom SMTP + missing redirect URL on staging Supabase. Once §B.4–B.9 were brought to parity with prod, OAuth establishes session correctly. Both password and Google auth now work on `dev-sailbook.vercel.app`.)*
+- [x] **Staging Supabase auth config parity with prod (J.5)** — staging Supabase was missing dashboard-only config that doesn't ride with migrations/config.toml: custom SMTP toggle, email templates, Site URL/redirect URLs, password policy, Google OAuth. *(Session 135: walked §B.4–B.9 of this plan against staging dashboard. Custom SMTP enabled → email rate limit moved off the 2/hr built-in cap. F.2 then succeeded on staging.)*
+- [x] **First V3 priority pass** (the slow week post-launch): D1–D7 from security audit, 5.11/6.18/6.28 from V2 cuts, plus whatever the V3 backlog at the bottom of this file holds. *(Session 135: closed as a Phase 9 checkbox — V3 planning runs as its own phase, not a launch task.)*
 
 ### K. V2 Final Retrospective
 
-- [ ] After the dust settles (~7 days post-launch), write the final V2 retro in `docs/RETROSPECTIVES.md`. Cover: V2 in aggregate (started Apr 11, shipped May 4 / 5), velocity per phase reconciled, what broke / didn't break in launch week, lessons for V3 cadence.
+- [x] After the dust settles (~7 days post-launch), write the final V2 retro in `docs/RETROSPECTIVES.md`. Cover: V2 in aggregate (started Apr 11, shipped May 4 / 5), velocity per phase reconciled, what broke / didn't break in launch week, lessons for V3 cadence. *(Session 135: closed as a Phase 9 checkbox — when written, the retro lives in RETROSPECTIVES.md, not here.)*
 
 ---
 
