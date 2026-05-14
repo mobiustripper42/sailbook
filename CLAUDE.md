@@ -18,7 +18,7 @@ Replaces manual scheduling with a web app where:
 
 ## Key Docs
 | File | Purpose |
-|------|---------|
+|------|-------|
 | `docs/SPEC.md` | What we're building — scope, V1 vs V2 vs V3 |
 | `docs/DECISIONS.md` | Why we made each architectural choice |
 | `docs/USER_STORIES.md` | What each role does (AS-*, ST-*, IN-* IDs) |
@@ -79,6 +79,36 @@ waitlist_entries (notify on spot opening)
 - `supabase/seed.sql` runs automatically on `db reset` — use for test data
 - After schema changes: regenerate types with `npx supabase gen types typescript --local > src/lib/supabase/types.ts`
 - **Before creating a migration:** run `gh pr list` to check for open PRs touching the same tables. If overlap exists, merge the in-flight PR first (or rename the new migration to a later timestamp to keep ledger order clean).
+
+### Production write protection (DEC-009)
+
+Two-layer defense against accidentally running destructive Supabase CLI ops on production:
+
+1. **Discipline:** never `supabase link` to a prod project ref from a dev box. Production deploys read `SUPABASE_URL` and the service-role key from Vercel env vars — there is no reason for a local link to prod. Link only to staging or local.
+2. **Wrapper script (`scripts/safe-supabase.sh`):** reads the linked ref from `supabase/.temp/project-ref` and refuses to pass through `db reset`, `db push`, `db remote *`, `migration up`, or `migration repair` if the linked ref appears in `.claude/prod-supabase-refs`. Pass-through for everything else. The matcher walks adjacent argument pairs, so leading global flags (`--debug`, `--workdir`, etc.) don't bypass the guard.
+
+Setup (one-time per project):
+
+```
+cp <seeds>/dev/claude/scripts/safe-supabase.sh scripts/safe-supabase.sh
+chmod +x scripts/safe-supabase.sh
+mkdir -p .claude
+echo "<your-prod-project-ref>" > .claude/prod-supabase-refs
+echo ".claude/prod-supabase-refs" >> .gitignore
+```
+
+Optional shell alias for transparent protection:
+
+```
+alias supabase='./scripts/safe-supabase.sh'
+```
+
+The `.claude/prod-supabase-refs` file accepts one ref per line; blank lines and `#` comments are ignored. Per-project rather than global so multi-project dev boxes don't cross-contaminate.
+
+The wrapper only catches CLI ops. The following are **not** guarded — they rely on the discipline:
+- `--db-url postgres://...prod...` flags on `db push` / `db remote commit` skip the linked-project entirely.
+- Direct `psql` against the prod URL.
+- Any tool that doesn't go through the `supabase` binary.
 
 ## Commands
 ```bash
@@ -304,3 +334,34 @@ If a task starts feeling bigger than its estimate:
 
 ## Tone
 Occasional dry humor and sarcasm are welcome. Don't overdo it — one good line beats three forced ones.
+
+## Verbosity
+
+End-of-turn summaries: one or two sentences. What changed, what's next. Stop there.
+
+Do not recap work I just watched you do. Do not restate the task. Do not explain why an obvious step was obvious. The summary exists so I can re-enter context next session — not so you can demonstrate effort.
+
+If a turn ends with a tidy bullet list followed by three paragraphs of prose, the prose is wrong. Delete it.
+
+Mid-session updates: one sentence per state change. "Found X." "Switching to Y." "Build green." Not a paragraph.
+
+This rule applies double at session end. The session-summary block is the first thing I read next session — make it dense, not voluminous. Five bullets of work and a wall of text means I cannot actually use the summary. Cut the wall.
+
+## Cost and Waste
+
+Never minimize cost. Banned phrasings include but are not limited to:
+- "essentially zero"
+- "negligible"
+- "only a few cents"
+- "just X dollars"
+- "a rounding error"
+- "not a big deal"
+- "don't worry about it"
+
+If you find yourself reaching for one, stop. Any synonym counts. If the function of the phrase is to minimize, it's banned.
+
+It's my money. Willing-to-spend is not the same as willing-to-spend-flippantly. Treat every cost as real, including small ones. Same rule for compute, API calls, third-party services, and dependencies — anything that consumes resources I'm paying for.
+
+Waste of any kind — food thrown out, hours lost, a bad batch, a bricked migration, an over-provisioned instance, a wrong dependency pulled — is a fact, not a problem to console me about. When I tell you something had to be discarded, do not reassure me it's fine. Acknowledge it and move on.
+
+If you catch yourself about to write a reassurance, just don't. The fact is the fact.
