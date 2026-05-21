@@ -18,7 +18,7 @@ Replaces manual scheduling with a web app where:
 
 ## Key Docs
 | File | Purpose |
-|------|---------|
+|------|-------|
 | `docs/SPEC.md` | What we're building — scope, V1 vs V2 vs V3 |
 | `docs/DECISIONS.md` | Why we made each architectural choice |
 | `docs/USER_STORIES.md` | What each role does (AS-*, ST-*, IN-* IDs) |
@@ -79,6 +79,36 @@ waitlist_entries (notify on spot opening)
 - `supabase/seed.sql` runs automatically on `db reset` — use for test data
 - After schema changes: regenerate types with `npx supabase gen types typescript --local > src/lib/supabase/types.ts`
 - **Before creating a migration:** run `gh pr list` to check for open PRs touching the same tables. If overlap exists, merge the in-flight PR first (or rename the new migration to a later timestamp to keep ledger order clean).
+
+### Production write protection (DEC-009)
+
+Two-layer defense against accidentally running destructive Supabase CLI ops on production:
+
+1. **Discipline:** never `supabase link` to a prod project ref from a dev box. Production deploys read `SUPABASE_URL` and the service-role key from Vercel env vars — there is no reason for a local link to prod. Link only to staging or local.
+2. **Wrapper script (`scripts/safe-supabase.sh`):** reads the linked ref from `supabase/.temp/project-ref` and refuses to pass through `db reset`, `db push`, `db remote *`, `migration up`, or `migration repair` if the linked ref appears in `.claude/prod-supabase-refs`. Pass-through for everything else. The matcher walks adjacent argument pairs, so leading global flags (`--debug`, `--workdir`, etc.) don't bypass the guard.
+
+Setup (one-time per project):
+
+```
+cp <seeds>/dev/claude/scripts/safe-supabase.sh scripts/safe-supabase.sh
+chmod +x scripts/safe-supabase.sh
+mkdir -p .claude
+echo "<your-prod-project-ref>" > .claude/prod-supabase-refs
+echo ".claude/prod-supabase-refs" >> .gitignore
+```
+
+Optional shell alias for transparent protection:
+
+```
+alias supabase='./scripts/safe-supabase.sh'
+```
+
+The `.claude/prod-supabase-refs` file accepts one ref per line; blank lines and `#` comments are ignored. Per-project rather than global so multi-project dev boxes don't cross-contaminate.
+
+The wrapper only catches CLI ops. The following are **not** guarded — they rely on the discipline:
+- `--db-url postgres://...prod...` flags on `db push` / `db remote commit` skip the linked-project entirely.
+- Direct `psql` against the prod URL.
+- Any tool that doesn't go through the `supabase` binary.
 
 ## Commands
 ```bash
@@ -186,6 +216,7 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 | `/push-seeds` | After workflow improvements | Backport improvements to seeds via `@sync-config` |
 | `/pull-seeds` | After seeds gets new improvements | Pull template changes — schema-version-gated, applied via `@sync-config` |
 | `/read-the-tape` | After a session worth learning from | Audit JSONL transcript, find anti-patterns, propose skill improvements |
+| `/doc-consistency-check` | Mid-project, before phase boundaries, or after a session that touched multiple docs | Cross-reference factual claims across `docs/*.md` + root `CLAUDE.md`; flag mismatches + unfilled placeholders. Report-only via @doc-consistency |
 
 **Dev identity:** `~/.claude/devname` (one-line file with your handle). Set once per machine.
 
@@ -194,13 +225,14 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 ## Agent Workflow
 
 | Agent | Model | When | Purpose |
-|-------|-------|------|---------|
+|-------|-------|------|-------|
 | @architect | Opus | Before design decisions, DEC-TBD items | Keep architecture coherent |
 | @code-review | Sonnet | After every commit (wired into `/kill-this`) | Catch issues early |
 | @pm | Sonnet | Start/end of sessions (via skills), phase retros | Track progress, flag risks, phase commentary |
 | @ui-reviewer | Sonnet | After UI work, phase boundaries | Design quality |
 | @sync-config | Sonnet | Via `/push-seeds` / `/pull-seeds`, nightly Routine | Classify template diffs, propose backports/forward-ports |
 | @tape-reader | Sonnet | Via `/read-the-tape` | Audit JSONL transcripts for anti-patterns, propose skill improvements |
+| @doc-consistency | Sonnet | Via `/doc-consistency-check` skill, or ad-hoc | Cross-reference factual claims across project docs; flag mismatches + unfilled placeholders. Report-only |
 
 ## Model Selection
 
@@ -277,6 +309,7 @@ Doing PR reviews from your phone is tolerable if you structure for it:
 - **Environment-changing commands** (npm install, supabase migrations, git push, deploys): output these for the user to run.
 - **Never rebase a task branch that already has commits on origin.** If main has advanced while a PR branch is open, leave the branch as-is — GitHub's "Update branch" button handles this at merge time. Rebasing rewrites remote history and requires a force-push, which is blocked by policy. Use `git merge --ff-only` only if explicitly asked.
 - **Before starting `npm run dev`:** run `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/` first. If it returns 200, skip the start — a server is already up. Only start a new one if the check fails.
+- **JSON parsing in Bash:** Prefer `gh ... --jq '...'` (built-in jq via `gh`) or `jq` over `python3 -c "import json,sys; ..."` one-liners. The python invocations trigger per-pattern permission prompts (each unique argument list is a new allowlist entry), while `gh --jq` runs under the existing `Bash(gh ...)` allowance. For non-`gh` JSON, install/use `jq` directly. Reserve python for cases where the data shape genuinely needs control flow.
 - **Bugs from Andy:** Create a GitHub issue (`gh issue create`), tag `bug`, add to current or next phase.
 
 ## Approval Before Action (all tasks)
@@ -304,3 +337,34 @@ If a task starts feeling bigger than its estimate:
 
 ## Tone
 Occasional dry humor and sarcasm are welcome. Don't overdo it — one good line beats three forced ones.
+
+## Verbosity
+
+End-of-turn summaries: one or two sentences. What changed, what's next. Stop there.
+
+Do not recap work I just watched you do. Do not restate the task. Do not explain why an obvious step was obvious. The summary exists so I can re-enter context next session — not so you can demonstrate effort.
+
+If a turn ends with a tidy bullet list followed by three paragraphs of prose, the prose is wrong. Delete it.
+
+Mid-session updates: one sentence per state change. "Found X." "Switching to Y." "Build green." Not a paragraph.
+
+This rule applies double at session end. The session-summary block is the first thing I read next session — make it dense, not voluminous. Five bullets of work and a wall of text means I cannot actually use the summary. Cut the wall.
+
+## Cost and Waste
+
+Never minimize cost. Banned phrasings include but are not limited to:
+- "essentially zero"
+- "negligible"
+- "only a few cents"
+- "just X dollars"
+- "a rounding error"
+- "not a big deal"
+- "don't worry about it"
+
+If you find yourself reaching for one, stop. Any synonym counts. If the function of the phrase is to minimize, it's banned.
+
+It's my money. Willing-to-spend is not the same as willing-to-spend-flippantly. Treat every cost as real, including small ones. Same rule for compute, API calls, third-party services, and dependencies — anything that consumes resources I'm paying for.
+
+Waste of any kind — food thrown out, hours lost, a bad batch, a bricked migration, an over-provisioned instance, a wrong dependency pulled — is a fact, not a problem to console me about. When I tell you something had to be discarded, do not reassure me it's fine. Acknowledge it and move on.
+
+If you catch yourself about to write a reassurance, just don't. The fact is the fact.
