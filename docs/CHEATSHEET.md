@@ -1,7 +1,7 @@
 SEEDS WORKFLOW CHEATSHEET                                v2026-05-05
 
   /its-alive  ->  [ work ]  ->  /kill-this  ->  /its-dead
-                     ^
+                     ^                              v
                      +--- /pause-this <--- /restart-this
 
 
