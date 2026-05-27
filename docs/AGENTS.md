@@ -227,6 +227,9 @@ Six slash commands manage session lifecycle. Time tracking is automatic.
 | /promote-staging | — | Ship staging to prod | ff-merge `staging` → `main`, tag, push |
 | /sync-config | — | After workflow changes | Backport to seeds |
 | /doc-consistency-check | — | Mid-project, before phase boundaries | Invokes @doc-consistency; cross-refs `docs/*.md` + root `CLAUDE.md` |
+| /push-seeds | — | After workflow improvements | Backport project-side improvements to seeds templates |
+| /pull-seeds | — | After seeds gets new improvements | Pull template changes into this project |
+| /read-the-tape | — | After a session worth learning from | Audit session JSONL for anti-patterns |
 
 **Per-session files:** the workflow uses `sessions/YYYY-MM-DD-HHMM-<dev>-<slug>.md` (one file per session) instead of a single monolithic `session-log.md`. `<dev>` comes from `~/.claude/devname` (one-line file, falls back to `$USER`). The slug is derived from the branch name (`task/X-foo` → `X-foo`, `main` → `main`, etc.). The active JSONL transcript path is captured in the file's frontmatter for later `/read-the-tape` audits.
 
