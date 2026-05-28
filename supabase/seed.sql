@@ -321,11 +321,11 @@ INSERT INTO public.sessions (id, course_id, date, start_time, end_time, location
   ('d1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', '2026-09-12', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
   ('d1000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000001', '2026-09-13', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
 
-  -- ASA 101 Evening Series May (c002) — 4 Wednesday evenings
-  ('d1000000-0000-0000-0000-000000000003', 'c1000000-0000-0000-0000-000000000002', '2026-05-06', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000004', 'c1000000-0000-0000-0000-000000000002', '2026-05-13', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000005', 'c1000000-0000-0000-0000-000000000002', '2026-05-20', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000006', 'c1000000-0000-0000-0000-000000000002', '2026-05-27', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  -- ASA 101 Evening Series May (c002) — 4 Wednesday evenings (dates pushed forward to keep sessions upcoming; first session inside the 14-day low-enrollment lead window)
+  ('d1000000-0000-0000-0000-000000000003', 'c1000000-0000-0000-0000-000000000002', '2026-06-03', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000004', 'c1000000-0000-0000-0000-000000000002', '2026-06-10', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000005', 'c1000000-0000-0000-0000-000000000002', '2026-06-17', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000006', 'c1000000-0000-0000-0000-000000000002', '2026-06-24', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
 
   -- ASA 103 (c003) — no sessions yet
 
