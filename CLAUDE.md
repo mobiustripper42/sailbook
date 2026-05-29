@@ -18,7 +18,7 @@ Replaces manual scheduling with a web app where:
 
 ## Key Docs
 | File | Purpose |
-|------|--------|
+|------|-------|
 | `docs/SPEC.md` | What we're building — scope, V1 vs V2 vs V3 |
 | `docs/DECISIONS.md` | Why we made each architectural choice |
 | `docs/USER_STORIES.md` | What each role does (AS-*, ST-*, IN-* IDs) |
@@ -79,63 +79,6 @@ waitlist_entries (notify on spot opening)
 - `supabase/seed.sql` runs automatically on `db reset` — use for test data
 - After schema changes: regenerate types with `npx supabase gen types typescript --local > src/lib/supabase/types.ts`
 - **Before creating a migration:** run `gh pr list` to check for open PRs touching the same tables. If overlap exists, merge the in-flight PR first (or rename the new migration to a later timestamp to keep ledger order clean).
-
-### Production write protection (DEC-009)
-
-Two-layer defense against accidentally running destructive Supabase CLI ops on production:
-
-1. **Discipline:** never `supabase link` to a prod project ref from a dev box. Production deploys read `SUPABASE_URL` and the service-role key from Vercel env vars — there is no reason for a local link to prod. Link only to staging or local.
-2. **Wrapper script (`scripts/safe-supabase.sh`):** reads the linked ref from `supabase/.temp/project-ref` and refuses to pass through `db reset`, `db push`, `db remote *`, `migration up`, or `migration repair` if the linked ref appears in `.claude/prod-supabase-refs`. Pass-through for everything else. The matcher walks adjacent argument pairs, so leading global flags (`--debug`, `--workdir`, etc.) don't bypass the guard.
-
-Setup (one-time per project):
-
-```
-cp <seeds>/dev/claude/scripts/safe-supabase.sh scripts/safe-supabase.sh
-chmod +x scripts/safe-supabase.sh
-mkdir -p .claude
-echo "<your-prod-project-ref>" > .claude/prod-supabase-refs
-echo ".claude/prod-supabase-refs" >> .gitignore
-```
-
-Optional shell alias for transparent protection:
-
-```
-alias supabase='./scripts/safe-supabase.sh'
-```
-
-The `.claude/prod-supabase-refs` file accepts one ref per line; blank lines and `#` comments are ignored. Per-project rather than global so multi-project dev boxes don't cross-contaminate.
-
-The wrapper only catches CLI ops. The following are **not** guarded — they rely on the discipline:
-- `--db-url postgres://...prod...` flags on `db push` / `db remote commit` skip the linked-project entirely.
-- Direct `psql` against the prod URL.
-- Any tool that doesn't go through the `supabase` binary.
-
-### Cross-environment env-var sync (Supabase ↔ Vercel)
-
-**Vercel env vars and Supabase project refs do not auto-sync.** Projects running separate dev/preview and production Supabase instances must wire Vercel's environment scopes to match: the three vars (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) appear **twice** in Vercel — once per environment scope — with intentionally different values.
-
-When you rotate keys, switch project refs, or otherwise touch these vars, both scopes must stay coherent:
-- Vercel **Production** → matches prod project's URL + keys.
-- Vercel **Preview + Development** → matches dev/preview project's URL + keys, which is what `.env.local` has.
-
-Vercel does not redeploy on env-var change. After updating, trigger a redeploy of `main` (Deployments → ⋯ → Redeploy) or push any commit.
-
-Failure modes:
-- **Undefined values:** `createServerClient()` gets `undefined` for URL or key → `HTTP 500` site-wide. Local `npm run dev` keeps working because it reads `.env.local` directly, masking the regression until someone hits the deployed site.
-- **Swapped projects:** prod points at the dev DB or vice versa. Symptoms: prod login works but shows test fixtures, or real user data appears on a preview URL. Diff-check before assuming everything is wired correctly.
-- **Name typo:** a Vercel-side name like `SUPABASE_ANON_KEY` instead of `NEXT_PUBLIC_SUPABASE_ANON_KEY` produces the same 500 even when the value is correct.
-
-Diff-check ritual after any rotation:
-
-```bash
-vercel env pull --environment=production .env.production.tmp
-vercel env pull --environment=preview    .env.preview.tmp
-# Preview should match .env.local:
-diff <(grep -E "SUPABASE" .env.local       | sort) \
-     <(grep -E "SUPABASE" .env.preview.tmp | sort)
-# Production should NOT match .env.local — confirm it references the prod project ref:
-grep "SUPABASE_URL" .env.production.tmp
-```
 
 ## Commands
 ```bash
@@ -243,7 +186,6 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 | `/push-seeds` | After workflow improvements | Backport improvements to seeds via `@sync-config` |
 | `/pull-seeds` | After seeds gets new improvements | Pull template changes — schema-version-gated, applied via `@sync-config` |
 | `/read-the-tape` | After a session worth learning from | Audit JSONL transcript, find anti-patterns, propose skill improvements |
-| `/doc-consistency-check` | Mid-project, before phase boundaries, or after a session that touched multiple docs | Cross-reference factual claims across `docs/*.md` + root `CLAUDE.md`; flag mismatches + unfilled placeholders. Report-only via @doc-consistency |
 
 **Dev identity:** `~/.claude/devname` (one-line file with your handle). Set once per machine.
 
@@ -252,14 +194,13 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 ## Agent Workflow
 
 | Agent | Model | When | Purpose |
-|-------|-------|------|---------|
+|-------|-------|------|-------|
 | @architect | Opus | Before design decisions, DEC-TBD items | Keep architecture coherent |
 | @code-review | Sonnet | After every commit (wired into `/kill-this`) | Catch issues early |
 | @pm | Sonnet | Start/end of sessions (via skills), phase retros | Track progress, flag risks, phase commentary |
 | @ui-reviewer | Sonnet | After UI work, phase boundaries | Design quality |
 | @sync-config | Sonnet | Via `/push-seeds` / `/pull-seeds`, nightly Routine | Classify template diffs, propose backports/forward-ports |
 | @tape-reader | Sonnet | Via `/read-the-tape` | Audit JSONL transcripts for anti-patterns, propose skill improvements |
-| @doc-consistency | Sonnet | Via `/doc-consistency-check` skill, or ad-hoc | Cross-reference factual claims across project docs; flag mismatches + unfilled placeholders. Report-only |
 
 ## Model Selection
 
@@ -336,18 +277,15 @@ Doing PR reviews from your phone is tolerable if you structure for it:
 - **Environment-changing commands** (npm install, supabase migrations, git push, deploys): output these for the user to run.
 - **Never rebase a task branch that already has commits on origin.** If main has advanced while a PR branch is open, leave the branch as-is — GitHub's "Update branch" button handles this at merge time. Rebasing rewrites remote history and requires a force-push, which is blocked by policy. Use `git merge --ff-only` only if explicitly asked.
 - **Before starting `npm run dev`:** run `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/` first. If it returns 200, skip the start — a server is already up. Only start a new one if the check fails.
-- **Debugging CI failures:** Before any multi-step local debug (spawning servers, reading cookies, modifying middleware), confirm the environment is functional: "Can you run `npx playwright test` locally right now? What env vars are set?" One environmental check before any code change.
-- **Stale `next start` on port 3001:** Playwright's webServer config reuses an existing server on port 3001 when one is running. A `next start` left over from an earlier debug run will serve the previous build's bundle to every test in the new run, producing phantom failures. Before the first targeted `npx playwright test` invocation in a session — especially after build changes — kill any orphan: `lsof -ti:3001 | xargs -r kill -9` (or `pkill -f "next start"`). Re-check with `lsof -ti:3001` — empty output means the port is clean. Do this once per session, not per test run.
-- **No `source .envrc` for `npx playwright test`:** Playwright reads `.env.local` via `dotenv` in `playwright.config.ts` — it does not need `.envrc`. The `source .envrc &&` prefix is for CLI tools that need project-specific tokens (e.g. `supabase db push` when the global CLI is authed to a different account). Prefixing test commands with `source .envrc &&` triggers a permission prompt per invocation (the leading `source` falls outside `Bash(npx *)`), and each variation — different spec, project, or pipe target — is a new prompt. Run tests bare: `npx playwright test tests/foo.spec.ts --project=desktop`.
-- **Supabase OAuth redirect URLs — use `/**` not `/*`:** When adding allowed redirect URLs in the Supabase Dashboard (Authentication → URL Configuration → Redirect URLs), use a double-star glob (`https://[your-domain]/**`), not single-star. `/*` matches only one path segment — so `/auth/callback` fails to match — and Supabase silently falls back to Site URL on a non-match, landing the user on `/?code=...` with the callback route never running. The symptom is "auth almost works" but OAuth codes don't get exchanged.
-- **JSON parsing in Bash:** Prefer `gh ... --jq '...'` (built-in jq via `gh`) or `jq` over `python3 -c "import json,sys; ..."` one-liners. The python invocations trigger per-pattern permission prompts (each unique argument list is a new allowlist entry), while `gh --jq` runs under the existing `Bash(gh ...)` allowance. For non-`gh` JSON, install/use `jq` directly. Reserve python for cases where the data shape genuinely needs control flow.
 - **Bugs from Andy:** Create a GitHub issue (`gh issue create`), tag `bug`, add to current or next phase.
 
 ## Approval Before Action (all tasks)
+
 For every task — not just bugs — explain the plan and wait for approval before doing anything:
 1. State what files you'll create or modify and why
-2. Wait for "go", "do it", or equivalent
-3. Do not write code, create files, run tests, or execute any commands until approved
+2. List commands you'll run, especially commits, pushes, package installs, anything touching production
+3. Wait for "go", "do it", or equivalent
+4. Do not edit files or run commands until approved
 
 **This includes the full test suite.** The database may be in use. Never run the full `npx playwright test` without telling the user first. Targeted test runs (`npx playwright test tests/foo.spec.ts --project=desktop`) are fine during active development without prior approval.
 
@@ -369,6 +307,12 @@ If a task starts feeling bigger than its estimate:
 ## Tone
 Occasional dry humor and sarcasm are welcome. Don't overdo it — one good line beats three forced ones.
 
+## Response Length
+
+Default to the shortest response that fully answers — usually 2–5 sentences. No preamble, no restating the question, no closing offers to help further. No reflexive "let me know if you need more" or "happy to expand." Do offer concrete follow-ups when they'd save a future round-trip. Length is requested explicitly ("expand," "give me the long version"), never the default.
+
+Be meticulous and skip disclaimers.
+
 ## Verbosity
 
 End-of-turn summaries: one or two sentences. What changed, what's next. Stop there.
@@ -380,22 +324,3 @@ If a turn ends with a tidy bullet list followed by three paragraphs of prose, th
 Mid-session updates: one sentence per state change. "Found X." "Switching to Y." "Build green." Not a paragraph.
 
 This rule applies double at session end. The session-summary block is the first thing I read next session — make it dense, not voluminous. Five bullets of work and a wall of text means I cannot actually use the summary. Cut the wall.
-
-## Cost and Waste
-
-Never minimize cost. Banned phrasings include but are not limited to:
-- "essentially zero"
-- "negligible"
-- "only a few cents"
-- "just X dollars"
-- "a rounding error"
-- "not a big deal"
-- "don't worry about it"
-
-If you find yourself reaching for one, stop. Any synonym counts. If the function of the phrase is to minimize, it's banned.
-
-It's my money. Willing-to-spend is not the same as willing-to-spend-flippantly. Treat every cost as real, including small ones. Same rule for compute, API calls, third-party services, and dependencies — anything that consumes resources I'm paying for.
-
-Waste of any kind — food thrown out, hours lost, a bad batch, a bricked migration, an over-provisioned instance, a wrong dependency pulled — is a fact, not a problem to console me about. When I tell you something had to be discarded, do not reassure me it's fine. Acknowledge it and move on.
-
-If you catch yourself about to write a reassurance, just don't. The fact is the fact.
