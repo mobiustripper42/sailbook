@@ -1,7 +1,7 @@
 # SailBook — Claude Code Agents & Skills
 
 ## Overview
-Several agents and slash-command skills support the development workflow. All run as Claude Code sessions, subagents, or slash commands. None are blocking — if one creates friction, drop it and revisit later. The summary table at the end of this doc is the canonical list — the per-skill sections below cover the original session-lifecycle set; newer skills (`/start-phase`, `/retro`, `/bump-major`, `/promote-staging`, etc.) are documented in their own `SKILL.md` files under `.claude/skills/`.
+Four agents and six session skills support the development workflow. All run as Claude Code sessions, subagents, or slash commands. None are blocking — if one creates friction, drop it and revisit later. The summary table at the end of this doc is the canonical list — the per-skill sections below cover the original session-lifecycle set; newer skills (`/start-phase`, `/retro`, `/bump-major`, `/promote-staging`, etc.) are documented in their own `SKILL.md` files under `.claude/skills/`.
 
 ---
 
@@ -213,19 +213,18 @@ Six slash commands manage session lifecycle. Time tracking is automatic.
 | @code-review | Sonnet | After commits, optional | Catch issues early |
 | @pm | Sonnet | Start/end of sessions | Track progress, flag risks |
 | @ui-reviewer | Sonnet | After UI work, phase boundaries | Design quality |
-| @doc-consistency | Sonnet | Via `/doc-consistency-check`, mid-project, before phase boundaries | Cross-reference facts across docs; flag mismatches + placeholders. Report-only |
 | @sync-config | Sonnet | Via /sync-config | Classify template diffs |
-| @tape-reader | Sonnet | Via `/read-the-tape` | Audit JSONL transcripts for anti-patterns, propose skill improvements |
+| @doc-consistency | Sonnet | Via `/doc-consistency-check`, mid-project, before phase boundaries | Cross-reference facts across docs; flag mismatches + placeholders. Report-only |
 | /its-alive | — | Session start | Branch check, timestamp, briefing |
 | /pause-this | — | Mid-session break | Safe pause with commit |
 | /restart-this | — | Resume from pause | Reload context |
 | /kill-this | — | Session end (part 1) | Verification + draft |
 | /its-dead | — | Session end (part 2) | Finalize, PM, branch cleanup |
+| /sync-config | — | After workflow changes | Backport to seeds |
 | /start-phase | — | Phase boundary (start) | Materialize phase as Issues |
 | /retro | — | Phase boundary (end) | Close out phase, write retro, bump minor version |
 | /bump-major | — | Breaking change | Manual major version bump |
 | /promote-staging | — | Ship staging to prod | ff-merge `staging` → `main`, tag, push |
-| /sync-config | — | After workflow changes | Backport to seeds |
 | /doc-consistency-check | — | Mid-project, before phase boundaries | Invokes @doc-consistency; cross-refs `docs/*.md` + root `CLAUDE.md` |
 | /push-seeds | — | After workflow improvements | Backport project-side improvements to seeds templates |
 | /pull-seeds | — | After seeds gets new improvements | Pull template changes into this project |
