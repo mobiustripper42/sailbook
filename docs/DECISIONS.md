@@ -159,6 +159,11 @@
 **Test pattern:** Status transitions are no longer queryable as buttons. Use the `clickCourseAction(page, name)` helper in `tests/helpers.ts` which opens the menu, clicks the menu item, and waits for the trigger to re-enable after the server action.
 **Revisit if:** A second page-header collapses actions into a menu — extract a shared `PageActionsMenu` (or equivalent) component instead of inlining the DropdownMenu twice.
 
+## DEC-029: Production-branch deploy model (2026-06-24)
+**Decision:** Replace the staging release-train (never recorded as a DEC — it lived only in `CLAUDE.md` + `docs/STAGING.md`) with the seeds workflow's production-branch model (seeds `DEC-S022`). `main` is the always-active trunk: feature PRs merge straight into `main`; there is no `staging` branch. A long-lived `production` branch is a deploy pointer — Vercel's Production Branch is set to `production`, while `main` drives the dev/preview deploy (`dev-sailbook.vercel.app`). `/promote-production` ff-merges `main` → `production` to ship prod (`sailbook.live`); it is deploy-only, since the release is already version-bumped + tagged on `main` by `/retro` / `/bump-major`. Tags apply on `main` at bump time and the promotion carries the tagged commit (supersedes the old "tag at `/promote-staging`" rule).
+**Why:** Single school, single dev — the staging accumulator added a release-PR ceremony with no payoff. Keeping `main` always-shippable and making "deploy" a one-command ff-merge removes a branch and a ritual. Migrated from seeds schema v3 → v4 on 2026-06-24: `/promote-staging` removed, `/promote-production` added, `.claude/seeds-version` bumped to `4`.
+**Revisit if:** SailBook grows past a single tenant/season and needs a genuine multi-environment promotion pipeline again.
+
 ## V2 Decisions (to be resolved during build)
 
 | ID | Decision | When | Who | Status |

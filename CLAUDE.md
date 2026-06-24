@@ -176,13 +176,13 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 | `/its-alive` | Session start | Stamp time, open per-session file in `sessions/`, capture transcript path, read context, recommend task |
 | `/pause-this` | Mid-session break | Build check, commit WIP, note pause |
 | `/restart-this` | Resume from pause | Reload context, continue same session |
-| `/kill-this` | Session end (part 1) | Build check, commit, push branch, open PR (base = `staging`), code review, draft log |
+| `/kill-this` | Session end (part 1) | Build check, commit, push branch, open PR (base = `main`), code review, draft log |
 | `/ship-it` | After PR review passes | Merge PR, push migration if any, record ship time + wall clock |
 | `/its-dead` | Session end (part 2) | Calc time + points, finalize session file, branch cleanup, patch-bump `package.json` on `STATE=MERGED` (DEC-007) |
 | `/start-phase` | Phase boundary (start) | Materialize phase tasks from PROJECT_PLAN.md into GitHub Issues with `phase:N` + `points:X` labels |
 | `/retro` | Phase boundary (end) | Mark phase tasks `[x]`, reconcile drift, compute velocity, write retro to RETROSPECTIVES.md, minor-bump version |
-| `/bump-major` | Breaking change | Manually bump major version. CHANGELOG entry + tag (on main) or deferred tag (on staging) |
-| `/promote-staging` | Ship staging to prod | ff-merge `staging` → `main`, tag the release, push both (DEC-008) |
+| `/bump-major` | Breaking change | Manually bump major version. CHANGELOG entry + tag on `main` |
+| `/promote-production` | Ship `main` to prod | ff-merge `main` → `production` (deploy-only; release already tagged on `main`) (DEC-029) |
 | `/push-seeds` | After workflow improvements | Backport improvements to seeds via `@sync-config` |
 | `/pull-seeds` | After seeds gets new improvements | Pull template changes — schema-version-gated, applied via `@sync-config` |
 | `/read-the-tape` | After a session worth learning from | Audit JSONL transcript, find anti-patterns, propose skill improvements |
@@ -210,36 +210,35 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 
 ## PR Workflow
 
-Release train (Option 2): feature PRs accumulate in `staging` for Andy to QA as a batch on `dev-sailbook.vercel.app`; a separate release PR (`staging` → `main`) ships the batch to prod. See `docs/STAGING.md` for the full setup.
+Production-branch model (DEC-029): `main` is the always-active trunk — feature PRs merge straight into it. A long-lived `production` branch is a deploy pointer the host (Vercel) watches; `/promote-production` ff-merges `main` → `production` to ship. See `docs/DEPLOYMENT.md` for the full setup.
 
 ### Per feature
 
-- Branch off `main`, NOT off `staging`: `git checkout main && git pull && git checkout -b task/X.Y-short-description`.
-- Push the branch and open a PR with **base = `staging`**: `gh pr create --base staging`. (Pick `staging` in the GitHub UI's base dropdown if not using gh.)
+- Branch off `main`: `git checkout main && git pull && git checkout -b task/X.Y-short-description`.
+- Push the branch and open a PR with **base = `main`**: `gh pr create --base main`.
 - Vercel posts a per-PR Preview URL (Preview env, staging Supabase, Stripe test mode). Self-test there.
 - Playwright CI runs on the PR against ephemeral local Supabase.
-- When CI is green and self-test passes, merge → the feature lands on `staging` → `dev-sailbook.vercel.app` rebuilds with the accumulated batch.
-- `/kill-this` opens the PR (defaults to base = staging). `/ship-it` merges it.
+- When CI is green and self-test passes, merge → the feature lands on `main` → the `main` preview deploy (`dev-sailbook.vercel.app`) rebuilds.
+- `/kill-this` opens the PR (base = `main`).
 
-### Release the batch
+### Ship to production
 
-- Tell Andy: "QA `dev-sailbook.vercel.app`, this is the next release."
-- Open the release PR: `gh pr create --base main --head staging --title "Release: <date or summary>"`. CI runs once more.
-- After Andy approves and CI is green, merge the release PR. Vercel deploys to production (`sailbook.live`). `staging` and `main` are now equal — continue accumulating the next batch.
+- Before promoting, tell Andy to QA the `main` preview (`dev-sailbook.vercel.app`). When he's good to go:
+- Run `/promote-production`: it ff-merges `main` → `production` and pushes. Vercel deploys `production` to prod (`sailbook.live`).
+- The release was already version-bumped + tagged on `main` (`/retro` / `/bump-major`); promotion is deploy-only and carries the tagged commit. `/promote-production` does not tag.
 
 ### Migrations
 
-- `supabase link --project-ref <staging-ref> && supabase db push` BEFORE merging the feature PR.
-- After the release PR (`staging` → `main`) merges: `supabase link --project-ref <prod-ref> && supabase db push`.
+- `supabase link --project-ref <staging-ref> && supabase db push` BEFORE merging the feature PR (applies to the staging/preview Supabase).
+- After `/promote-production` ships to prod: `supabase link --project-ref <prod-ref> && supabase db push`.
 - Never push migrations to prod that haven't run on staging.
 
 ### Rules
 
-- Don't push directly to `staging`. Don't push directly to `main`. Both are PR-only.
-- Don't open feature PRs against `main`. Only the release PR targets `main`.
+- Don't push directly to `main` or `production`. `main` is PR-only; `production` only moves via `/promote-production`.
 - Keep no more than 3 open feature PRs at once. Prefer 1.
 - Never have two open PRs with migrations touching the same table — merge one first.
-- Self-approve feature PRs. Andy is the gate on the release PR.
+- Self-approve feature PRs.
 
 ## Versioning (DEC-007)
 
@@ -250,7 +249,7 @@ SailBook carries a SemVer version in `package.json`, mirrored to git tags (`vX.Y
 - **Minor:** `/retro` at phase close. CHANGELOG entry summarizes the phase.
 - **Major:** `/bump-major` manual. User supplies the breaking-change rationale.
 
-**Tag rule (DEC-007 + DEC-008):** tags only ever apply on `main`. Bumps on `staging` are untagged; the tag lands when `/promote-staging` ff-merges to `main`.
+**Tag rule (DEC-029):** tags are applied on `main` at bump time (`/retro`, `/bump-major`). `/promote-production` ff-merges the already-tagged `main` into `production` to deploy — it does not tag.
 
 ### `<VersionTag />` component
 
