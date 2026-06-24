@@ -15,7 +15,7 @@ Run `[ -f package.json ] || echo "missing"`. If `package.json` is missing at the
 ```
 WORKING_BRANCH=main
 ```
-The active trunk is always `main` (DEC-S022); a `production` branch, if present, only moves at `/promote-production`.
+The active trunk is always `main` (DEC-S022). `production` (if any) only moves at `/promote-production`.
 
 `BRANCH=$(git branch --show-current)`.
 
