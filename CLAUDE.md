@@ -18,7 +18,7 @@ Replaces manual scheduling with a web app where:
 
 ## Key Docs
 | File | Purpose |
-|------|---------|
+|------|-------|
 | `docs/SPEC.md` | What we're building — scope, V1 vs V2 vs V3 |
 | `docs/DECISIONS.md` | Why we made each architectural choice |
 | `docs/USER_STORIES.md` | What each role does (AS-*, ST-*, IN-* IDs) |
@@ -194,7 +194,7 @@ npx supabase gen types typescript --local > src/lib/supabase/types.ts
 ## Agent Workflow
 
 | Agent | Model | When | Purpose |
-|-------|-------|------|---------|
+|-------|-------|------|-------|
 | @architect | Opus | Before design decisions, DEC-TBD items | Keep architecture coherent |
 | @code-review | Sonnet | After every commit (wired into `/kill-this`) | Catch issues early |
 | @pm | Sonnet | Start/end of sessions (via skills), phase retros | Track progress, flag risks, phase commentary |
@@ -280,10 +280,12 @@ Doing PR reviews from your phone is tolerable if you structure for it:
 - **Bugs from Andy:** Create a GitHub issue (`gh issue create`), tag `bug`, add to current or next phase.
 
 ## Approval Before Action (all tasks)
+
 For every task — not just bugs — explain the plan and wait for approval before doing anything:
 1. State what files you'll create or modify and why
-2. Wait for "go", "do it", or equivalent
-3. Do not write code, create files, run tests, or execute any commands until approved
+2. List commands you'll run, especially commits, pushes, package installs, anything touching production
+3. Wait for "go", "do it", or equivalent
+4. Do not edit files or run commands until approved
 
 **This includes the full test suite.** The database may be in use. Never run the full `npx playwright test` without telling the user first. Targeted test runs (`npx playwright test tests/foo.spec.ts --project=desktop`) are fine during active development without prior approval.
 
@@ -304,3 +306,21 @@ If a task starts feeling bigger than its estimate:
 
 ## Tone
 Occasional dry humor and sarcasm are welcome. Don't overdo it — one good line beats three forced ones.
+
+## Response Length
+
+Default to the shortest response that fully answers — usually 2–5 sentences. No preamble, no restating the question, no closing offers to help further. No reflexive "let me know if you need more" or "happy to expand." Do offer concrete follow-ups when they'd save a future round-trip. Length is requested explicitly ("expand," "give me the long version"), never the default.
+
+Be meticulous and skip disclaimers.
+
+## Verbosity
+
+End-of-turn summaries: one or two sentences. What changed, what's next. Stop there.
+
+Do not recap work I just watched you do. Do not restate the task. Do not explain why an obvious step was obvious. The summary exists so I can re-enter context next session — not so you can demonstrate effort.
+
+If a turn ends with a tidy bullet list followed by three paragraphs of prose, the prose is wrong. Delete it.
+
+Mid-session updates: one sentence per state change. "Found X." "Switching to Y." "Build green." Not a paragraph.
+
+This rule applies double at session end. The session-summary block is the first thing I read next session — make it dense, not voluminous. Five bullets of work and a wall of text means I cannot actually use the summary. Cut the wall.
