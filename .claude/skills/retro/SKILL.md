@@ -227,9 +227,9 @@ git push origin <BRANCH>
 
 Run only if `package.json` exists at the repo root (dev-project signal — DEC-007).
 
-Resolve working branch:
+Resolve working branch — always the active trunk (DEC-S022):
 ```
-git show-ref --verify --quiet refs/remotes/origin/staging && WORKING_BRANCH=staging || WORKING_BRANCH=main
+WORKING_BRANCH=main
 ```
 
 If `BRANCH != $WORKING_BRANCH`: STOP. Tell the user "Switch to `$WORKING_BRANCH` and re-run /retro." Wait.
@@ -260,7 +260,7 @@ c. **Commit + tag (main only):**
    [ -f package-lock.json ] && git add package-lock.json
    git commit -m "Bump version to v<NEW_VERSION> (PR #<N>)"
    ```
-   If `$WORKING_BRANCH = main`: `git tag "v<NEW_VERSION>"`. On `staging`: skip the tag — `/promote-staging` tags later.
+   Tag the trunk: `git tag "v<NEW_VERSION>"`. (Promotion to `production` carries the tagged commit; `/promote-production` does not tag.)
 
 ### Step 8.3 — Minor-bump at phase close
 
