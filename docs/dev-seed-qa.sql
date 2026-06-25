@@ -224,38 +224,40 @@ INSERT INTO courses (id, course_type_id, instructor_id, title, capacity, price, 
 
 -- ============================================================
 -- SESSIONS
--- Dates: upcoming = May 2026, past = March 2026
+-- Dates anchored to current_date (offsets, not literals) so the QA timeline
+-- stays valid whenever this fixture is loaded. Mirrors supabase/seed.sql +
+-- docs/demo-seed.sql offsets. Course titles keep static month labels (display-only).
 -- ============================================================
 
 INSERT INTO sessions (id, course_id, date, start_time, end_time, location, status) VALUES
 
-  -- ASA 101 Weekend Intensive (c001) — 2 upcoming sessions
-  ('d0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', '2026-05-09', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
-  ('d0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001', '2026-05-10', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
+  -- ASA 101 Weekend Intensive (c001) — 2 upcoming sessions (Sat/Sun, ~6 weeks out)
+  ('d0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', current_date + 40, '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
+  ('d0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001', current_date + 41, '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
 
-  -- ASA 101 Evening Series (c002) — 3 upcoming + 1 cancelled (makeup test)
-  ('d0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002', '2026-05-06', '18:00', '21:00', 'Edgewater Marina, Dock B', 'cancelled'),
-  ('d0000000-0000-0000-0000-000000000004', 'c0000000-0000-0000-0000-000000000002', '2026-05-13', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('d0000000-0000-0000-0000-000000000005', 'c0000000-0000-0000-0000-000000000002', '2026-05-20', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('d0000000-0000-0000-0000-000000000006', 'c0000000-0000-0000-0000-000000000002', '2026-05-27', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  -- ASA 101 Evening Series (c002) — 3 upcoming + 1 cancelled opener (makeup test). Weekly cadence.
+  ('d0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002', current_date + 5, '18:00', '21:00', 'Edgewater Marina, Dock B', 'cancelled'),
+  ('d0000000-0000-0000-0000-000000000004', 'c0000000-0000-0000-0000-000000000002', current_date + 12, '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d0000000-0000-0000-0000-000000000005', 'c0000000-0000-0000-0000-000000000002', current_date + 19, '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d0000000-0000-0000-0000-000000000006', 'c0000000-0000-0000-0000-000000000002', current_date + 26, '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
 
   -- ASA 103 (c003) — no sessions yet (tests "no sessions scheduled" empty state)
 
   -- Dinghy draft (c004) — 1 session (shouldn't matter, draft not visible)
-  ('d0000000-0000-0000-0000-000000000007', 'c0000000-0000-0000-0000-000000000004', '2026-06-07', '10:00', '14:00', null, 'scheduled'),
+  ('d0000000-0000-0000-0000-000000000007', 'c0000000-0000-0000-0000-000000000004', current_date + 10, '10:00', '14:00', null, 'scheduled'),
 
-  -- Cancelled Open Sailing (c005) — 1 cancelled session
-  ('d0000000-0000-0000-0000-000000000008', 'c0000000-0000-0000-0000-000000000005', '2026-04-12', '09:00', '12:00', 'Edgewater Marina, Dock A', 'cancelled'),
+  -- Cancelled Open Sailing (c005) — 1 cancelled session (early-season, in the past)
+  ('d0000000-0000-0000-0000-000000000008', 'c0000000-0000-0000-0000-000000000005', current_date - 20, '09:00', '12:00', 'Edgewater Marina, Dock A', 'cancelled'),
 
-  -- ASA 101 March (c006) — 2 completed past sessions
-  ('d0000000-0000-0000-0000-000000000009', 'c0000000-0000-0000-0000-000000000006', '2026-03-14', '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed'),
-  ('d0000000-0000-0000-0000-000000000010', 'c0000000-0000-0000-0000-000000000006', '2026-03-15', '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed');
+  -- ASA 101 March (c006) — 2 completed past sessions (~11–12 weeks ago)
+  ('d0000000-0000-0000-0000-000000000009', 'c0000000-0000-0000-0000-000000000006', current_date - 80, '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed'),
+  ('d0000000-0000-0000-0000-000000000010', 'c0000000-0000-0000-0000-000000000006', current_date - 79, '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed');
 
 -- Set cancel reason on d003 (can't include in INSERT — column not in the insert list)
 UPDATE sessions SET cancel_reason = 'Weather — thunderstorm warning' WHERE id = 'd0000000-0000-0000-0000-000000000003';
 
--- Session-level instructor override (5.2 test): d002 (c001 May 10) assigned to Sarah.
--- d001 (May 9) stays NULL → "Course default" (Dave). d002 (May 10) shows Sarah as override.
+-- Session-level instructor override (5.2 test): d002 (c001 Sunday session) assigned to Sarah.
+-- d001 (Saturday session) stays NULL → "Course default" (Dave). d002 shows Sarah as override.
 UPDATE sessions SET instructor_id = 'a0000000-0000-0000-0000-000000000003' WHERE id = 'd0000000-0000-0000-0000-000000000002';
 
 -- ============================================================
@@ -353,12 +355,12 @@ WHERE session_id = 'd0000000-0000-0000-0000-000000000003'
 --   c005 Open Sailing April         cancelled
 --   c006 ASA 101 March              completed    past sessions, Eve enrolled
 --
--- Sessions (d-series UUIDs)
---   d001-d002  c001 Weekend (May 9-10) — d001 instructor=NULL (course default=Dave), d002 instructor=Sarah (override)
---   d003-d006  c002 Evening (May 6 CANCELLED, 13, 20, 27)
---   d007       c004 Dinghy draft (Jun 7)
---   d008       c005 Open Sailing cancelled (Apr 12)
---   d009-d010  c006 March completed (Mar 14-15)
+-- Sessions (d-series UUIDs; dates = current_date offsets)
+--   d001-d002  c001 Weekend (Sat/Sun, +40/+41) — d001 instructor=NULL (course default=Dave), d002 instructor=Sarah (override)
+--   d003-d006  c002 Evening (+5 CANCELLED, +12, +19, +26)
+--   d007       c004 Dinghy draft (+10)
+--   d008       c005 Open Sailing cancelled (-20)
+--   d009-d010  c006 completed (-80/-79)
 --
 -- Enrollments (e-series UUIDs)
 --   e001 Alice→c001  e002 Alice→c002  e003 Bob→c002  e004 Sarah→c002

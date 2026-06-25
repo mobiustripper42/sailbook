@@ -58,11 +58,11 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 
 ### 3.3 — Cancel session flow
 
-**Setup:** Use seed data as-is. ASA 101 Evening Series (c002) has 4 sessions with 4 enrolled students. First session (d003, May 6) has Alice marked as `attended`, everyone else `expected`.
+**Setup:** Use seed data as-is. ASA 101 Evening Series (c002) has 4 sessions with 4 enrolled students. The opening session (d003) has Alice marked as `attended`, everyone else `expected`.
 
 **Cancel a session with reason**
 - [ x] Go to `/admin/courses/<c002-id>` → sessions table
-- [ x] Click "Cancel" on the May 6 session (d003)
+- [ x] Click "Cancel" on the opening session (d003)
 - [ x] Browser prompt appears asking for reason → enter "weather"
 - [ x] Session status badge changes to red "cancelled"
 - [ x] Hover over the cancelled badge → tooltip shows "weather"
@@ -77,7 +77,7 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
   - Carol (e005) flipped to `missed` (was `expected`)
 
 **Cancel a session without reason**
-- [ X] Click "Cancel" on another scheduled session (e.g. May 13, d004)
+- [ X] Click "Cancel" on another scheduled session (e.g. d004)
 - [ X] Leave reason blank (just press OK on the prompt)
 - [ X] Session shows cancelled badge, no tooltip text
 - [ X] All `expected` attendance records for that session flipped to `missed`
@@ -196,7 +196,7 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 - [ x] No alert banner, no missed badges
 
 **Session details**
-- [ x] Each session row shows formatted date (e.g. "May 6"), time range, and location
+- [ x] Each session row shows its formatted date, time range, and location
 - [ x] Sessions within a course sorted by date ascending
 - [ x] Courses with missed sessions sort before courses without
 
@@ -256,21 +256,21 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 - Login: `alice@ltsc.test`
 - Navigate: Student Courses → "ASA 101 — Evening Series"
 - [X ] Schedule table has **Status** and **Attendance** columns
-- [X ] May 6 row is dimmed (opacity), date has strikethrough, shows **"Cancelled"** outline badge
-- [X ] May 13, 20, 27 rows are normal styling, Status column is empty
+- [X ] The cancelled opener (d003) row is dimmed (opacity), date has strikethrough, shows **"Cancelled"** outline badge
+- [X ] The other three rows (d004–d006) are normal styling, Status column is empty
 - [X ] Sessions count in stats shows **"4 (1 cancelled)"**
 
 **Attendance badges — mixed statuses (Alice → c002)**
 Same page as above:
-- [X ] May 6 (cancelled session): **"Attended"** badge (default/dark variant) — Alice attended before cancel
-- [X ] May 13, 20, 27: **"Upcoming"** outline badges
+- [X ] Cancelled opener (d003): **"Attended"** badge (default/dark variant) — Alice attended before cancel
+- [X ] The other three sessions (d004–d006): **"Upcoming"** outline badges
 - [X ] No "Needs makeup" text on any row (Alice isn't missed)
 
 **Needs makeup indicator (Bob → c002)**
 - Login: `bob@ltsc.test`
 - Navigate: Student Courses → "ASA 101 — Evening Series"
-- [X ] May 6: **"Missed"** destructive badge + **"Needs makeup"** red text
-- [X ] May 13, 20, 27: **"Upcoming"** outline badges
+- [X ] Cancelled opener (d003): **"Missed"** destructive badge + **"Needs makeup"** red text
+- [X ] The other three sessions (d004–d006): **"Upcoming"** outline badges
 
 **No attendance column when not enrolled (Dan → c001)**
 - Login: `dan@ltsc.test`
@@ -289,8 +289,8 @@ Same page as above:
 **Excused status preserved (Sarah → c002)**
 - Login: `sarah@ltsc.test`
 - Navigate: Student Courses → "ASA 101 — Evening Series"
-- [X] May 6: **"Excused"** secondary badge (no "Needs makeup" text)
-- [X ] May 13, 20, 27: **"Upcoming"** outline badges
+- [X] Cancelled opener (d003): **"Excused"** secondary badge (no "Needs makeup" text)
+- [X ] The other three sessions (d004–d006): **"Upcoming"** outline badges
 
 **Completed course 404 (Eve)**
 - Login: `eve@ltsc.test`
@@ -338,13 +338,13 @@ RESET request.jwt.claims;
 
 **Dave's stat cards**
 - [X] Active Courses: **1** (c001 Weekend Intensive — c004 Dinghy is draft, excluded)
-- [X ] Upcoming Sessions: **2** (d001 May 9, d002 May 10)
+- [X ] Upcoming Sessions: **2** (d001, d002 — the two Weekend Intensive sessions)
 - [X ] Total Students: **1** (Alice in c001 — Bob's cancelled enrollment excluded)
 
 **Dave's upcoming sessions list**
 - [X ] 2 session rows displayed, sorted by date
-- [X ] Row 1: "ASA 101 — Weekend Intensive" · Saturday, May 9 · 8:00 AM – 4:00 PM · Edgewater Marina, Dock A · badge "1 / 4"
-- [X ] Row 2: "ASA 101 — Weekend Intensive" · Sunday, May 10 · 8:00 AM – 4:00 PM · Edgewater Marina, Dock A · badge "1 / 4"
+- [X ] Row 1 (d001): "ASA 101 — Weekend Intensive" · first weekend day · 8:00 AM – 4:00 PM · Edgewater Marina, Dock A · badge "1 / 4"
+- [X ] Row 2 (d002): "ASA 101 — Weekend Intensive" · next day · 8:00 AM – 4:00 PM · Edgewater Marina, Dock A · badge "1 / 4"
 - [X ] Each row has "Roster →" link (will 404 until task 4.2 — just verify it renders)
 - [X ] No Dinghy Sailing Intro row (c004 is draft, not shown)
 
@@ -354,15 +354,15 @@ RESET request.jwt.claims;
 
 **Sarah's stat cards**
 - [ X] Active Courses: **1** (c002 Evening Series)
-- [ X] Upcoming Sessions: **3** (d004 May 13, d005 May 20, d006 May 27 — d003 is cancelled, filtered out)
+- [ X] Upcoming Sessions: **3** (d004, d005, d006 — d003, the cancelled opener, is filtered out)
 - [ X] Total Students: **4** (Alice, Bob, Sarah herself, Carol — all non-cancelled enrollments)
 
 **Sarah's upcoming sessions list**
 - [ X] 3 session rows, all "ASA 101 — Evening Series"
-- [ X] Row 1: Wednesday, May 13 · 6:00 PM – 9:00 PM · Edgewater Marina, Dock B · badge "4 / 4"
-- [ X] Row 2: Wednesday, May 20 · same time/location · badge "4 / 4"
-- [ X] Row 3: Wednesday, May 27 · same time/location · badge "4 / 4"
-- [ X] Cancelled session d003 (May 6) does NOT appear in the list
+- [ X] Row 1 (d004): 6:00 PM – 9:00 PM · Edgewater Marina, Dock B · badge "4 / 4"
+- [ X] Row 2 (d005): same time/location · badge "4 / 4"
+- [ X] Row 3 (d006): same time/location · badge "4 / 4"
+- [ X] Cancelled session d003 does NOT appear in the list
 
 **Empty state**
 - [X ] If an instructor has no upcoming scheduled sessions, shows: "No upcoming sessions assigned to you."
@@ -385,12 +385,12 @@ RESET request.jwt.claims;
 
 **Navigate from dashboard (Sarah → c002 session d004)**
 - [X ] Log in as sarah@ltsc.test → dashboard shows 3 upcoming sessions
-- [X ] Click "Roster →" on the May 13 session (d004) → `/instructor/sessions/<d004-id>` loads
+- [X ] Click "Roster →" on the second Evening Series session (d004) → `/instructor/sessions/<d004-id>` loads
 - [X ] Back link "← Back to dashboard" works
 
 **Session header**
 - [ X] Title: "ASA 101 — Evening Series"
-- [ X] Date/time: "Wed, May 13 · 6:00pm – 9:00pm · Edgewater Marina, Dock B"
+- [ X] Date/time line shows d004's date · 6:00pm – 9:00pm · Edgewater Marina, Dock B
 - [X ] Enrolled: "4 / 4"
 - [X ] Status: "scheduled"
 
@@ -408,7 +408,7 @@ RESET request.jwt.claims;
 - [ X] Carol: "Missed" badge + "Needs makeup" text
 
 **Dave's roster — c001 session d001**
-- [X] Log in as dave@ltsc.test → click "Roster →" on May 9 session
+- [X] Log in as dave@ltsc.test → click "Roster →" on the first Weekend session (d001)
 - [X ] 1 student row: Student, Alice — "Upcoming" badge
 - [X ] Bob does NOT appear (his enrollment e006 is cancelled)
 - [X ] Enrolled shows "1 / 4"
@@ -430,17 +430,17 @@ RESET request.jwt.claims;
 **Prerequisites:** Seed data loaded (Carol's d003 attendance has `makeup_session_id = d004`). Login: sarah@ltsc.test / Sailbook12345.
 
 **Makeup badge on roster (Sarah → d004)**
-- [X ] Log in as sarah@ltsc.test → dashboard → click "Roster →" on May 13 session (d004)
-- [X ] Carol's row shows "Makeup from Wednesday, May 6, 2026" badge (secondary/gray variant) next to her name
+- [X ] Log in as sarah@ltsc.test → dashboard → click "Roster →" on the second Evening Series session (d004)
+- [X ] Carol's row shows a "Makeup from …" badge (secondary/gray variant) next to her name — the date names the cancelled opener (d003)
 - [X ] Other students (Alice, Bob, Sarah) do NOT show a makeup badge
 - [X ] Attendance column still works normally — all 4 students show "Upcoming" badge
 
 **No makeup badges on other sessions**
-- [X ] Navigate to d005 (May 20) roster → no makeup badges on any student
-- [X ] Navigate to d006 (May 27) roster → no makeup badges on any student
+- [X ] Navigate to d005 roster → no makeup badges on any student
+- [X ] Navigate to d006 roster → no makeup badges on any student
 
 **No false positives on cancelled session (d003)**
-- [X ] Navigate to d003 (May 6, cancelled) roster → no "Makeup from..." badges on any student (d003 is not anyone's makeup destination)
+- [X ] Navigate to d003 (cancelled opener) roster → no "Makeup from..." badges on any student (d003 is not anyone's makeup destination)
 
 **Edge cases**
 - [X ] Session with no makeup students (d001/d002 in c001) → no badges, roster unchanged from 4.2
@@ -461,7 +461,7 @@ RESET request.jwt.claims;
 - [X ] Dashboard shows Dave's courses/sessions (same as 4.1 — no regression)
 
 **Instructor can read roster with student profiles (sarah@ltsc.test)**
-- [X ] Log in as sarah@ltsc.test → dashboard → click "Roster →" on May 13 (d004)
+- [X ] Log in as sarah@ltsc.test → dashboard → click "Roster →" on the second Evening Series session (d004)
 - [X ] Student names and emails load correctly (not null/blank) — this verifies the new profiles policy
 - [X ] All 4 students visible: Alice, Bob, Sarah, Carol
 
@@ -819,8 +819,8 @@ RESET request.jwt.claims;
 
 **Seed state to know:**
 - c001 (ASA 101 Weekend Intensive): course instructor = Dave
-  - d001 (May 9): no session override → displays "Course default"
-  - d002 (May 10): session instructor = Sarah → displays "Sarah Instructor"
+  - d001 (first weekend day): no session override → displays "Course default"
+  - d002 (next day): session instructor = Sarah → displays "Sarah Instructor"
 
 ---
 
@@ -828,30 +828,30 @@ RESET request.jwt.claims;
 
 - [x ] Go to `/admin/courses` → open "ASA 101 — Weekend Intensive" (c001)
 - [x ] Sessions table Instructor column shows dropdowns, not plain text
-- [x ] d001 (May 9) dropdown shows "Course default" selected
-- [x ] d002 (May 10) dropdown shows "Sarah Instructor" selected
+- [x ] d001 dropdown shows "Course default" selected
+- [x ] d002 dropdown shows "Sarah Instructor" selected
 - [x ] Dropdown options include "Course default", "Dave Instructor", "Sarah Instructor"
 
 **Override an instructor**
 
-- [x] On d001 (May 9), change dropdown from "Course default" to "Dave Instructor"
+- [x] On d001, change dropdown from "Course default" to "Dave Instructor"
 - [x ] Dropdown updates immediately (optimistic)
 - [x ] Reload the page → d001 still shows "Dave Instructor" (persisted)
 
 **Clear an override (set back to course default)**
 
-- [x ] On d002 (May 10), change dropdown from "Sarah Instructor" to "Course default"
+- [x ] On d002, change dropdown from "Sarah Instructor" to "Course default"
 - [x ] Reload the page → d002 shows "Course default"
 - [x ] Check via SQL: `SELECT instructor_id FROM sessions WHERE id = 'd0000000-0000-0000-0000-000000000002'` → `NULL`
 
 **Attendance page — override instructor displayed**
 
-- [x ] Navigate to attendance for d002 (May 10) while it has Sarah as session override
+- [x ] Navigate to attendance for d002 while it has Sarah as session override
 - [x ] Header line shows "Sarah Instructor" (not Dave, not blank)
 
 **Attendance page — course default fallback**
 
-- [x ] Navigate to attendance for d001 (May 9) with no session override (instructor_id = NULL)
+- [x ] Navigate to attendance for d001 with no session override (instructor_id = NULL)
 - [ x] Header line shows "Dave Instructor" (the course-level default)
 
 **Course with no instructor assigned (c003 — ASA 103)**
@@ -886,8 +886,8 @@ LEFT JOIN profiles ci ON c.instructor_id = ci.id
 WHERE s.course_id = 'c0000000-0000-0000-0000-000000000001'
 ORDER BY s.date;
 -- Expected:
---   d001 (May 9):  instructor_id = NULL,  session_instructor = NULL,  course_instructor = "Dave Instructor"
---   d002 (May 10): instructor_id = Sarah's UUID, session_instructor = "Sarah Instructor", course_instructor = "Dave Instructor"
+--   d001:  instructor_id = NULL,  session_instructor = NULL,  course_instructor = "Dave Instructor"
+--   d002: instructor_id = Sarah's UUID, session_instructor = "Sarah Instructor", course_instructor = "Dave Instructor"
 
 -- ============================================================
 -- TEST 2: Admin can update session instructor_id
@@ -948,8 +948,8 @@ LEFT JOIN profiles course_default ON c.instructor_id = course_default.id
 WHERE s.course_id = 'c0000000-0000-0000-0000-000000000001'
 ORDER BY s.date;
 -- Expected:
---   d001 (May 9):  "Dave Instructor"   (NULL override → course default)
---   d002 (May 10): "Sarah Instructor"  (session-level override wins)
+--   d001:  "Dave Instructor"   (NULL override → course default)
+--   d002: "Sarah Instructor"  (session-level override wins)
 ```
 
 ---
