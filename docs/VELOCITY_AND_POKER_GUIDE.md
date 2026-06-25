@@ -16,7 +16,7 @@ Two lifetime rates come out of it:
 - **points / calendar-week** — realized pace, *including* idle weeks. This is your honest clearance rate.
 - **points / active-week** — intensity in the weeks you actually shipped something.
 
-This is the metric *after* three failed attempts (DEC-013 → S015 → S024) to measure "active hours per point" by reconstructing keyboard time from the session transcript. That metric is **retired** — the transcript lives on an unreachable path for nearly every web/Desktop session, so the number rotted by default. For a solo + Claude shop the insight was that effort-hours aren't even the scarce quantity: Claude does the labor, so what you actually care about is *calendar clearance rate* and *estimate stability*. Both are measurable from GitHub forever. (Full autopsy: DEC-S026.)
+This is the metric *after* three failed attempts (DEC-S013 → S015 → S024) to measure "active hours per point" by reconstructing keyboard time from the session transcript. That metric is **retired** — the transcript lives on an unreachable path for nearly every web/Desktop session, so the number rotted by default. For a solo + Claude shop the insight was that effort-hours aren't even the scarce quantity: Claude does the labor, so what you actually care about is *calendar clearance rate* and *estimate stability*. Both are measurable from GitHub forever. (Full autopsy: DEC-S026.)
 
 ### Where it comes from — you don't log anything
 

@@ -1,12 +1,12 @@
 ---
 name: retro
-description: Phase-end retrospective. Closes the current phase. Under DEC-013 retro owns the phase velocity math; under DEC-S026 that math is throughput (points per calendar week) computed from GitHub issue `closedAt` dates + `points:N` labels, plus an estimate-calibration tally — no session transcript is read. Marks PROJECT_PLAN.md `[x]`, reconciles drift, writes RETROSPECTIVES.md, runs version bumps (patch per merged PR + minor at phase close on dev projects), prompts retro notes. Optionally chains into `/start-phase`.
+description: Phase-end retrospective. Closes the current phase. Under DEC-S013 retro owns the phase velocity math; under DEC-S026 that math is throughput (points per calendar week) computed from GitHub issue `closedAt` dates + `points:N` labels, plus an estimate-calibration tally — no session transcript is read. Marks PROJECT_PLAN.md `[x]`, reconciles drift, writes RETROSPECTIVES.md, runs version bumps (patch per merged PR + minor at phase close on dev projects), prompts retro notes. Optionally chains into `/start-phase`.
 tools: Read, Edit, Write, Bash, Glob, Grep, Agent
 ---
 
 You are running the phase-end retrospective. Work for this phase is complete (or you've decided to call it done and move scope).
 
-Under DEC-013 this skill **owns the phase velocity math** that used to live in `/its-dead` and **all version bumps** (patch per merge + minor at close). Under DEC-S026 that velocity math is **throughput + estimate calibration**, computed from GitHub issue dates + `points:N` labels — the transcript-based `active = wall − breaks` model is retired. Session files are atomic event logs; GitHub is the velocity data source.
+Under DEC-S013 this skill **owns the phase velocity math** that used to live in `/its-dead` and **all version bumps** (patch per merge + minor at close). Under DEC-S026 that velocity math is **throughput + estimate calibration**, computed from GitHub issue dates + `points:N` labels — the transcript-based `active = wall − breaks` model is retired. Session files are atomic event logs; GitHub is the velocity data source.
 
 ## Step 0 — Identify the current phase
 
@@ -174,7 +174,7 @@ Read `docs/RETROSPECTIVES.md` first (Edit requires a prior Read). If it doesn't 
 
 ## Step 7 — Commit (sessions branch updates are read-only here)
 
-Session files were already finalized by `/its-dead` and are not modified by this skill — DEC-013 atomicity.
+Session files were already finalized by `/its-dead` and are not modified by this skill — DEC-S013 atomicity.
 
 ```
 git add docs/PROJECT_PLAN.md docs/RETROSPECTIVES.md
@@ -182,9 +182,9 @@ git commit -m "Phase <N> retro — <points> pts, throughput <pts/wk or burst>, d
 git push origin <BRANCH>
 ```
 
-## Step 8 — Version bumps (dev projects only — DEC-013 moved patch bumps from `/its-dead` here)
+## Step 8 — Version bumps (dev projects only — DEC-S013 moved patch bumps from `/its-dead` here)
 
-Run only if `package.json` exists at the repo root (dev-project signal — DEC-007).
+Run only if `package.json` exists at the repo root (dev-project signal — DEC-S007).
 
 Resolve working branch — always the active trunk (DEC-S022):
 ```
@@ -270,7 +270,7 @@ Version: v<NEW_VERSION>  (dev projects only; skipped if no package.json)
 
 ## Notes
 
-- **Session files are read-only here.** Retro reads them; never writes. DEC-013 atomicity.
+- **Session files are read-only here.** Retro reads them; never writes. DEC-S013 atomicity.
 - **No transcript is read anywhere.** DEC-S026 retired break inference and `active = wall − breaks` — the model whose `breaks = 0 → active = wall_clock` fallback was the bug that triggered the change.
 - **GitHub IS the velocity data source now.** Step 2 reads issue `createdAt`/`closedAt` + `points:N` labels — that's the throughput input. `gh` is also used for issue accounting (Step 1), the points cross-check (Step 3), and version bumps (Step 8). If `gh` is down, Step 2 can't compute throughput; note it and let the user rerun. Don't guess.
 - **The headline is throughput (points / calendar week), never reported without the calibration tally.** There is no `active`, `wall/pt`, `dev_time`, or `review_time` — all retired by DEC-S026. `wall_clock` survives only as the `/its-dead` on-screen gut-check.
