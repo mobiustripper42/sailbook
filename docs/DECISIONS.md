@@ -164,6 +164,12 @@
 **Why:** Single school, single dev — the staging accumulator added a release-PR ceremony with no payoff. Keeping `main` always-shippable and making "deploy" a one-command ff-merge removes a branch and a ritual. Migrated from seeds schema v3 → v4 on 2026-06-24: `/promote-staging` removed, `/promote-production` added, `.claude/seeds-version` bumped to `4`.
 **Revisit if:** SailBook grows past a single tenant/season and needs a genuine multi-environment promotion pipeline again.
 
+## DEC-030: Sessions branch excluded from Vercel deploys via Ignored Build Step (2026-06-25)
+**Decision:** The orphan `sessions` branch (DEC-S014 — per-session log files committed via `.sessions-worktree/` by `/its-alive`, `/kill-this`, `/its-dead`) must not trigger Vercel deployments on push. Gate it with a Vercel **dashboard** Ignored Build Step (Project → Settings → Git → Ignored Build Step): `bash -c '[ -f package.json ] && exit 1 || exit 0'`. No root `package.json` on the orphan branch → exit 0 → build skipped; every real branch carries `package.json` → exit 1 → build proceeds. Branch-name-agnostic, applies project-wide.
+**Why:** Each session pushes `sessions` 2–3×; ungated, every push spends a Vercel build (and, lacking `package.json`, fails). `git.deploymentEnabled` / `ignoreCommand` in `vercel.json` do **not** work here — Vercel reads that config from the *pushed* branch, and the orphan `sessions` branch carries no `vercel.json`, so a setting on `main` never applies to it. The dashboard Ignored Build Step runs project-wide regardless of branch contents, which is why it's the only reliable gate. Same setup as `~/muster`.
+**Caveat:** The Ignored Build Step is a Vercel project setting, not version-controlled — it must be set once per project in the dashboard. Recorded here so it survives a project re-link or dashboard reset.
+**Revisit if:** Vercel adds per-branch deploy gating that reads the production branch's `vercel.json` (would let us version-control this).
+
 ## V2 Decisions (to be resolved during build)
 
 | ID | Decision | When | Who | Status |
