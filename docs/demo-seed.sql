@@ -15,13 +15,13 @@
 --   Alex Rivera    — student, pending enrollment (shows in admin alert)
 --   Jordan Park    — student, not yet enrolled (use for live demo enrollment)
 --
--- Courses
---   ASA 101 Weekend May         active  2/4  Mike  May 9–10
---   ASA 101 Evening Series May  active  1/4  Chris  May 6, 13, 20, 27
---   ASA 103 Coastal June        active  0/4  (no instructor — triggers admin warning)
---   ASA 101 April Weekend       completed    Mike  Apr 4–5, Sam+Jordan attended
---   Dinghy Sailing for Adults   draft        Lisa  (not visible to students)
---   Open Sailing July           active  1/8  Mike  5 Wednesdays in July @ 5:30–9pm
+-- Courses (session dates are anchored to current_date — see SESSIONS block below)
+--   ASA 101 Weekend Intensive   active  2/4  Mike   upcoming Sat/Sun pair (~6 weeks out)
+--   ASA 101 Evening Series      active  1/4  Chris  4 weekly evenings; first ~5 days out (starting-soon tile)
+--   ASA 103 Coastal Cruising    active  0/4  (no instructor — triggers admin warning)
+--   ASA 101 April Weekend       completed    Mike   past weekend, Sam+Jordan attended
+--   Dinghy Sailing for Adults   draft        Lisa   (not visible to students)
+--   Open Sailing                active  1/8  Mike   5 weekly upcoming evenings @ 5:30–9pm
 
 -- ============================================================
 -- USERS  (auth.users + profiles)
@@ -216,31 +216,35 @@ INSERT INTO courses (id, course_type_id, instructor_id, title, capacity, price, 
 
 INSERT INTO sessions (id, course_id, date, start_time, end_time, location, status) VALUES
 
-  -- ASA 101 Weekend May (c001) — Sat/Sun May 9–10
-  ('d1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', '2026-05-09', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000001', '2026-05-10', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
+  -- Dates anchored to current_date so the demo timeline (past / starting-soon / upcoming)
+  -- stays current on any load date — never hardcode literal dates here again (issue #70).
+  -- Mirrors supabase/seed.sql offsets; titles keep their static month labels (display-only).
 
-  -- ASA 101 Evening Series May (c002) — 4 Wednesday evenings
-  ('d1000000-0000-0000-0000-000000000003', 'c1000000-0000-0000-0000-000000000002', '2026-05-06', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000004', 'c1000000-0000-0000-0000-000000000002', '2026-05-13', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000005', 'c1000000-0000-0000-0000-000000000002', '2026-05-20', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000006', 'c1000000-0000-0000-0000-000000000002', '2026-05-27', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  -- ASA 101 Weekend Intensive (c001) — upcoming Sat/Sun pair
+  ('d1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', current_date + 40, '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000001', current_date + 41, '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
+
+  -- ASA 101 Evening Series (c002) — 4 weekly evenings; first inside the 14-day low-enrollment lead window
+  ('d1000000-0000-0000-0000-000000000003', 'c1000000-0000-0000-0000-000000000002', current_date + 5, '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000004', 'c1000000-0000-0000-0000-000000000002', current_date + 12, '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000005', 'c1000000-0000-0000-0000-000000000002', current_date + 19, '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000006', 'c1000000-0000-0000-0000-000000000002', current_date + 26, '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
 
   -- ASA 103 (c003) — no sessions yet
 
-  -- ASA 101 April Weekend (c004) — completed, Apr 4–5
-  ('d1000000-0000-0000-0000-000000000007', 'c1000000-0000-0000-0000-000000000004', '2026-04-04', '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed'),
-  ('d1000000-0000-0000-0000-000000000008', 'c1000000-0000-0000-0000-000000000004', '2026-04-05', '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed'),
+  -- ASA 101 April Weekend (c004) — completed; sessions in the past
+  ('d1000000-0000-0000-0000-000000000007', 'c1000000-0000-0000-0000-000000000004', current_date - 80, '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed'),
+  ('d1000000-0000-0000-0000-000000000008', 'c1000000-0000-0000-0000-000000000004', current_date - 79, '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed'),
 
   -- Dinghy Sailing for Adults (c005) — draft, one session planned
-  ('d1000000-0000-0000-0000-000000000009', 'c1000000-0000-0000-0000-000000000005', '2026-06-06', '10:00', '14:00', null, 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000009', 'c1000000-0000-0000-0000-000000000005', current_date + 10, '10:00', '14:00', null, 'scheduled'),
 
-  -- Open Sailing July (c006) — 5 Wednesday evenings
-  ('d1000000-0000-0000-0000-000000000010', 'c1000000-0000-0000-0000-000000000006', '2026-07-01', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000011', 'c1000000-0000-0000-0000-000000000006', '2026-07-08', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000012', 'c1000000-0000-0000-0000-000000000006', '2026-07-15', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000013', 'c1000000-0000-0000-0000-000000000006', '2026-07-22', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000014', 'c1000000-0000-0000-0000-000000000006', '2026-07-29', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled');
+  -- Open Sailing (c006) — 5 weekly upcoming evenings
+  ('d1000000-0000-0000-0000-000000000010', 'c1000000-0000-0000-0000-000000000006', current_date + 7, '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000011', 'c1000000-0000-0000-0000-000000000006', current_date + 14, '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000012', 'c1000000-0000-0000-0000-000000000006', current_date + 21, '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000013', 'c1000000-0000-0000-0000-000000000006', current_date + 28, '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000014', 'c1000000-0000-0000-0000-000000000006', current_date + 35, '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled');
 
 -- ============================================================
 -- ENROLLMENTS
@@ -306,27 +310,27 @@ INSERT INTO session_attendance (session_id, enrollment_id, status) VALUES
 -- ============================================================
 -- Logins (all password: qwert12345)
 --   andy@ltsc.test   → admin
---   mike@ltsc.test   → instructor (ASA 101 Weekend + April + Open Sailing July)
+--   mike@ltsc.test   → instructor (ASA 101 Weekend Intensive + April + Open Sailing)
 --   lisa@ltsc.test   → instructor (Dinghy draft, unassigned otherwise)
 --   chris@ltsc.test  → instructor + student (teaches Evening Series, enrolled in Open Sailing)
---   sam@ltsc.test    → student (confirmed in Weekend May + Evening May, completed April)
---   alex@ltsc.test   → student (pending/registered in Weekend May — shows in admin alert)
+--   sam@ltsc.test    → student (confirmed in Weekend Intensive + Evening Series, completed April)
+--   alex@ltsc.test   → student (pending/registered in Weekend Intensive — shows in admin alert)
 --   jordan@ltsc.test → student (no current enrollments — use for live demo enrollment)
 --
--- Courses
---   c001  ASA 101 Weekend May        active    2/4  Mike    May 9-10
---   c002  ASA 101 Evening Series May active    1/4  Chris   May 6, 13, 20, 27
---   c003  ASA 103 Coastal June       active    0/4  NONE    no sessions yet
---   c004  ASA 101 April Weekend      completed 2/4  Mike    Apr 4-5 (history)
---   c005  Dinghy Sailing for Adults  draft     0/6  Lisa    Jun 6 (not visible to students)
---   c006  Open Sailing July          active    1/8  Mike    Jul 1, 8, 15, 22, 29 @ 17:30
+-- Courses (session dates relative to load date — current_date offsets)
+--   c001  ASA 101 Weekend Intensive  active    2/4  Mike    upcoming Sat/Sun pair (+40/+41d)
+--   c002  ASA 101 Evening Series     active    1/4  Chris   4 weekly evenings, first +5d (starting-soon)
+--   c003  ASA 103 Coastal Cruising   active    0/4  NONE    no sessions yet
+--   c004  ASA 101 April Weekend      completed 2/4  Mike    past weekend, -80/-79d (history)
+--   c005  Dinghy Sailing for Adults  draft     0/6  Lisa    +10d (not visible to students)
+--   c006  Open Sailing               active    1/8  Mike    5 weekly evenings, +7..+35d @ 17:30
 --
--- Sessions
---   d001-d002  c001 Weekend May (May 9-10)
---   d003-d006  c002 Evening May (May 6, 13, 20, 27)
---   d007-d008  c004 April completed (Apr 4-5)
---   d009       c005 Dinghy draft (Jun 6)
---   d010-d014  c006 Open Sailing July (Jul 1, 8, 15, 22, 29)
+-- Sessions (offsets from current_date)
+--   d001-d002  c001 Weekend Intensive (+40, +41)
+--   d003-d006  c002 Evening Series (+5, +12, +19, +26)
+--   d007-d008  c004 April completed (-80, -79)
+--   d009       c005 Dinghy draft (+10)
+--   d010-d014  c006 Open Sailing (+7, +14, +21, +28, +35)
 --
 -- Enrollments
 --   e001  Sam  → c001 (confirmed)
@@ -341,5 +345,5 @@ INSERT INTO session_attendance (session_id, enrollment_id, status) VALUES
 --   Alex c001: 2 expected
 --   Sam c002: 4 expected
 --   Sam c004: 2 attended (completed)
---   Jordan c004: Apr 4 attended, Apr 5 missed (realistic history)
---   Chris c006: 5 expected (Open Sailing July)
+--   Jordan c004: day 1 attended, day 2 missed (realistic history)
+--   Chris c006: 5 expected (Open Sailing)

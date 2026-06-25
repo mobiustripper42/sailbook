@@ -317,31 +317,43 @@ INSERT INTO public.courses (id, course_type_id, instructor_id, title, capacity, 
 
 INSERT INTO public.sessions (id, course_id, date, start_time, end_time, location, status) VALUES
 
-  -- ASA 101 Weekend May (c001) — Sat/Sun Sep 12–13 (dates pushed forward to keep sessions in the future)
-  ('d1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', '2026-09-12', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000001', '2026-09-13', '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
+  -- Dates are anchored to current_date so the relative timeline (past / starting-soon /
+  -- upcoming) holds on any run date — never hardcode literal calendar dates here again
+  -- (issue #70: a fixed date silently lapses into the past and reddens CI with no code change).
+  -- The one offset that drives a flag — c002's first session at +5 — sits well inside the
+  -- 14-day low-enrollment lead window and clear of the day-0 visibility boundary, so it can't
+  -- race the app's JS `new Date()` math. Both sides compute a UTC calendar day (DB `current_date`
+  -- resolves in the session TZ, UTC on a stock Supabase container; the app uses toISOString),
+  -- so this holds as long as the DB session timezone is UTC or near it. The Open Sailing offsets
+  -- land on 7-day multiples but drive no flag, so the boundary is irrelevant for them.
+  -- Titles keep their static "(May)"/"Jul 1" labels — display-only, no logic reads them.
 
-  -- ASA 101 Evening Series May (c002) — 4 Wednesday evenings (dates pushed forward to keep sessions upcoming; first session inside the 14-day low-enrollment lead window)
-  ('d1000000-0000-0000-0000-000000000003', 'c1000000-0000-0000-0000-000000000002', '2026-06-03', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000004', 'c1000000-0000-0000-0000-000000000002', '2026-06-10', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000005', 'c1000000-0000-0000-0000-000000000002', '2026-06-17', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000006', 'c1000000-0000-0000-0000-000000000002', '2026-06-24', '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  -- ASA 101 Weekend Intensive (c001) — upcoming Sat/Sun pair, outside the 14-day lead window
+  ('d1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', current_date + 40, '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000001', current_date + 41, '08:00', '16:00', 'Edgewater Marina, Dock A', 'scheduled'),
+
+  -- ASA 101 Evening Series (c002) — 4 weekly evenings; first session inside the 14-day
+  -- low-enrollment lead window so the "starting soon" dashboard tile fires (admin-low-enrollment.spec.ts)
+  ('d1000000-0000-0000-0000-000000000003', 'c1000000-0000-0000-0000-000000000002', current_date + 5, '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000004', 'c1000000-0000-0000-0000-000000000002', current_date + 12, '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000005', 'c1000000-0000-0000-0000-000000000002', current_date + 19, '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000006', 'c1000000-0000-0000-0000-000000000002', current_date + 26, '18:00', '21:00', 'Edgewater Marina, Dock B', 'scheduled'),
 
   -- ASA 103 (c003) — no sessions yet
 
-  -- ASA 101 April Weekend (c004) — completed, Apr 4–5
-  ('d1000000-0000-0000-0000-000000000007', 'c1000000-0000-0000-0000-000000000004', '2026-04-04', '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed'),
-  ('d1000000-0000-0000-0000-000000000008', 'c1000000-0000-0000-0000-000000000004', '2026-04-05', '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed'),
+  -- ASA 101 April Weekend (c004) — completed; sessions in the past
+  ('d1000000-0000-0000-0000-000000000007', 'c1000000-0000-0000-0000-000000000004', current_date - 80, '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed'),
+  ('d1000000-0000-0000-0000-000000000008', 'c1000000-0000-0000-0000-000000000004', current_date - 79, '08:00', '16:00', 'Edgewater Marina, Dock A', 'completed'),
 
-  -- Dinghy Sailing for Adults (c005) — draft, one session planned
-  ('d1000000-0000-0000-0000-000000000009', 'c1000000-0000-0000-0000-000000000005', '2026-06-06', '10:00', '14:00', null, 'scheduled'),
+  -- Dinghy Sailing for Adults (c005) — draft, one session planned (hidden from students regardless)
+  ('d1000000-0000-0000-0000-000000000009', 'c1000000-0000-0000-0000-000000000005', current_date + 10, '10:00', '14:00', null, 'scheduled'),
 
-  -- Open Sailing — one session per course (c006–c010), each its own Wednesday evening
-  ('d1000000-0000-0000-0000-000000000010', 'c1000000-0000-0000-0000-000000000006', '2026-07-01', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000011', 'c1000000-0000-0000-0000-000000000007', '2026-07-08', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000012', 'c1000000-0000-0000-0000-000000000008', '2026-07-15', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000013', 'c1000000-0000-0000-0000-000000000009', '2026-07-22', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
-  ('d1000000-0000-0000-0000-000000000014', 'c1000000-0000-0000-0000-000000000010', '2026-07-29', '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled');
+  -- Open Sailing — one session per course (c006–c010), each a weekly upcoming evening
+  ('d1000000-0000-0000-0000-000000000010', 'c1000000-0000-0000-0000-000000000006', current_date + 7, '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000011', 'c1000000-0000-0000-0000-000000000007', current_date + 14, '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000012', 'c1000000-0000-0000-0000-000000000008', current_date + 21, '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000013', 'c1000000-0000-0000-0000-000000000009', current_date + 28, '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled'),
+  ('d1000000-0000-0000-0000-000000000014', 'c1000000-0000-0000-0000-000000000010', current_date + 35, '17:30', '21:00', 'Edgewater Marina, North Wall', 'scheduled');
 
 -- ============================================================
 -- ENROLLMENTS

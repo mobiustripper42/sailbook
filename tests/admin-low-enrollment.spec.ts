@@ -16,9 +16,10 @@ test.describe('Admin — low enrollment dashboard tile', () => {
   })
 
   test('setting minimum_enrollment above current count flags the dashboard tile', async ({ page }) => {
-    // Set ASA 101's minimum to an impossible value. ASA 101 has at least one
-    // active course (c001 — May 9-10) inside the default 14-day lead window
-    // from 2026-04-29.
+    // Set ASA 101's minimum to an impossible value. ASA 101 has an active
+    // course (c002 Evening Series) whose first session is seeded ~5 days out —
+    // inside the default 14-day lead window — so the "starting soon" tile fires.
+    // Seed dates are anchored to current_date (issue #70), so this holds on any run date.
     await page.goto(`/admin/course-types/${ASA_101_ID}/edit`)
     await page.getByLabel('Minimum Enrollment').fill('99')
     await page.getByRole('button', { name: 'Save Changes' }).click()

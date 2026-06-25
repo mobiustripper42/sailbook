@@ -131,16 +131,16 @@ export default function DevPage() {
             </WalkthroughPart>
 
             <WalkthroughPart number={6} title="Taking Attendance" account="andy@ltsc.test">
-              <Step n={1}>Go to <strong>Courses → ASA 101 Weekend May → Session: May 9</strong>.</Step>
+              <Step n={1}>Go to <strong>Courses → ASA 101 Weekend Intensive → first session</strong>.</Step>
               <Step n={2}>The attendance roster shows Sam Davies and Alex Rivera, both <em>Expected</em>.</Step>
               <Step n={3}>Mark Sam as <strong>Attended</strong> and Alex as <strong>Missed</strong>. Changes save immediately.</Step>
               <Step n={4}>For completed history: open <strong>ASA 101 April Weekend</strong>. Sam attended both days. Jordan attended Day 1 and missed Day 2.</Step>
             </WalkthroughPart>
 
             <WalkthroughPart number={7} title="Cancelling a Session &amp; Scheduling a Makeup" account="andy@ltsc.test">
-              <Step n={1}>Go to <strong>Courses → ASA 101 Evening Series May → Session: May 6</strong>.</Step>
+              <Step n={1}>Go to <strong>Courses → ASA 101 Evening Series → first session</strong>.</Step>
               <Step n={2}>Click <strong>Cancel Session</strong>. Enter a reason (e.g., &ldquo;Weather — thunderstorms&rdquo;). Confirm.</Step>
-              <Step n={3}>Sam&apos;s attendance for May 6 automatically flips to <em>Missed</em>.</Step>
+              <Step n={3}>Sam&apos;s attendance for that session automatically flips to <em>Missed</em>.</Step>
               <Step n={4}>On the session detail (or course detail), click <strong>Schedule Makeup</strong>. Set a date and time for the makeup session.</Step>
               <Step n={5}>Students with a missed session for that date are automatically linked to the makeup.</Step>
             </WalkthroughPart>
@@ -162,7 +162,7 @@ export default function DevPage() {
             <WalkthroughPart number={1} title="Student Dashboard" account="sam@ltsc.test">
               <Step n={1}>Log in as Sam Davies. You land on <strong>/student/dashboard</strong>.</Step>
               <Step n={2}>Stat cards show: enrolled courses, upcoming sessions, and next session date.</Step>
-              <Step n={3}>The upcoming sessions list shows the ASA 101 Weekend (May 9–10) and Evening Series (May 6, 13, 20, 27).</Step>
+              <Step n={3}>The upcoming sessions list shows the ASA 101 Weekend Intensive (2 sessions) and Evening Series (4 weekly sessions).</Step>
             </WalkthroughPart>
 
             <WalkthroughPart number={2} title="Browsing &amp; Enrolling" account="jordan@ltsc.test">
@@ -193,12 +193,12 @@ export default function DevPage() {
             <WalkthroughPart number={1} title="Instructor Dashboard" account="mike@ltsc.test">
               <Step n={1}>Log in as Mike Theriault. You land on <strong>/instructor/dashboard</strong>.</Step>
               <Step n={2}>Stat cards show upcoming sessions count and total enrolled students across Mike&apos;s courses.</Step>
-              <Step n={3}>Upcoming sessions list shows <strong>ASA 101 Weekend May 9</strong> and <strong>May 10</strong>.</Step>
+              <Step n={3}>Upcoming sessions list shows both <strong>ASA 101 Weekend Intensive</strong> sessions.</Step>
               <Step n={4}>Each row has a <em>Roster</em> link — click it to go to the full enrollment and attendance view for that session.</Step>
             </WalkthroughPart>
 
             <WalkthroughPart number={2} title="Session Roster" account="mike@ltsc.test">
-              <Step n={1}>From the dashboard, click <strong>Roster</strong> on the May 9 session.</Step>
+              <Step n={1}>From the dashboard, click <strong>Roster</strong> on the first Weekend Intensive session.</Step>
               <Step n={2}>The roster lists Sam Davies and Alex Rivera, each with current attendance status (<em>Expected</em>).</Step>
               <Step n={3}>If any student is making up a missed session from another course, a <em>Makeup</em> badge appears on their row.</Step>
             </WalkthroughPart>
