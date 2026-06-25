@@ -320,8 +320,12 @@ INSERT INTO public.sessions (id, course_id, date, start_time, end_time, location
   -- Dates are anchored to current_date so the relative timeline (past / starting-soon /
   -- upcoming) holds on any run date — never hardcode literal calendar dates here again
   -- (issue #70: a fixed date silently lapses into the past and reddens CI with no code change).
-  -- Offsets deliberately avoid the 0/7/14-day boundaries where app-side JS `new Date()`
-  -- window math (visibility, 14-day low-enrollment lead) could race the DB `current_date`.
+  -- The one offset that drives a flag — c002's first session at +5 — sits well inside the
+  -- 14-day low-enrollment lead window and clear of the day-0 visibility boundary, so it can't
+  -- race the app's JS `new Date()` math. Both sides compute a UTC calendar day (DB `current_date`
+  -- resolves in the session TZ, UTC on a stock Supabase container; the app uses toISOString),
+  -- so this holds as long as the DB session timezone is UTC or near it. The Open Sailing offsets
+  -- land on 7-day multiples but drive no flag, so the boundary is irrelevant for them.
   -- Titles keep their static "(May)"/"Jul 1" labels — display-only, no logic reads them.
 
   -- ASA 101 Weekend Intensive (c001) — upcoming Sat/Sun pair, outside the 14-day lead window
