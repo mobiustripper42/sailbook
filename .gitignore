@@ -44,6 +44,9 @@ yarn-error.log*
 # claude code local settings (machine-specific)
 .claude/settings.local.json
 
+# sessions worktree (orphan `sessions` branch checked out here — DEC-S014)
+.sessions-worktree/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
