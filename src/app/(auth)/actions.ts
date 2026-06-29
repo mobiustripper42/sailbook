@@ -178,6 +178,12 @@ function isOtpAccountMissing(error: {
   )
 }
 
+// Input-format check only. This is safe to surface because it's independent of
+// whether the account exists — everything AFTER the send is swallowed.
+function isValidEmail(email: string): boolean {
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)
+}
+
 export async function requestEmailCode(
   _: unknown,
   formData: FormData,
@@ -186,6 +192,7 @@ export async function requestEmailCode(
 
   const email = (formData.get('email') as string)?.trim()
   if (!email) return { ok: false, error: 'Enter your email.' }
+  if (!isValidEmail(email)) return { ok: false, error: 'Enter a valid email address.' }
 
   const supabase = await createClient()
   const { error } = await supabase.auth.signInWithOtp({
@@ -193,10 +200,15 @@ export async function requestEmailCode(
     options: { shouldCreateUser: false },
   })
 
-  // Swallow the no-account case (enumeration-safe); surface everything else
-  // (malformed email, rate limiting, etc.).
+  // Enumeration safety: NEVER surface a send-side error. They vary by whether the
+  // account exists — an unknown email short-circuits at a 422 (no account), while a
+  // real one can hit the per-user resend throttle (429) — so surfacing either leaks
+  // existence. Always return the identical "code on its way" state. Only the
+  // pre-send input-format checks above are surfaced. We still log the unexpected
+  // errors (anything that isn't the no-account case) so a misconfigured project —
+  // email OTP globally disabled, SMTP down — isn't silently masked for everyone.
   if (error && !isOtpAccountMissing(error)) {
-    return { ok: false, error: error.message }
+    console.error('requestEmailCode: unexpected signInWithOtp error:', error.message)
   }
 
   return { ok: true, error: null }
