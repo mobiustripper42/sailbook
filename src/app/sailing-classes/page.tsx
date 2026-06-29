@@ -16,10 +16,23 @@ type Course = {
   durationPrice: string
   bullets?: string[]
   image: string
+  imageClassName?: string
   registerHref: string
 }
 
 const courses: Course[] = [
+  {
+    code: 'Open Sailing',
+    subtitle: 'No Experience Needed',
+    description:
+      "Learn the basics, take the tiller, and find out if the water's calling. Three hours, a certified instructor, and a sailboat. Open Sailing is a genuine first step onto the water. Wherever you are on your sailing journey, we'll meet you there and help you get to the next step.",
+    durationPrice: '3 Hours – $70',
+    image: '/sailing-classes/open-sailing.jpg',
+    // 4:3 photo in a square frame — fill it like the (square) ASA images, biased
+    // left to keep the skyline + crew and trim only the open water on the right.
+    imageClassName: 'object-cover object-left',
+    registerHref: '/courses/open',
+  },
   {
     code: 'ASA101',
     subtitle: 'Sailing Made Easy',
@@ -141,7 +154,7 @@ export default function SailingClassesPage() {
                   fill
                   sizes="(max-width: 768px) 100vw, 260px"
                   loading="eager"
-                  className="object-contain"
+                  className={c.imageClassName ?? 'object-contain'}
                 />
               </div>
 
