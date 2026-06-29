@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { safeNextPath } from '@/lib/auth/safe-next'
 import { friendlyPasswordError, validatePassword } from '@/lib/auth/password-rules'
+import { redirectForRole } from '@/lib/auth/role-redirect'
 import { redirect } from 'next/navigation'
 
 export async function login(_: unknown, formData: FormData) {
@@ -18,10 +19,7 @@ export async function login(_: unknown, formData: FormData) {
   const safeNext = safeNextPath(formData.get('next') as string | null)
   if (safeNext) redirect(safeNext)
 
-  const meta = (data.user?.user_metadata ?? {}) as Record<string, unknown>
-  if (meta.is_admin) redirect('/admin/dashboard')
-  if (meta.is_instructor) redirect('/instructor/dashboard')
-  redirect('/student/dashboard')
+  redirectForRole(data.user?.user_metadata as Record<string, unknown>)
 }
 
 export async function register(_: unknown, formData: FormData) {
@@ -121,10 +119,7 @@ export async function updatePassword(_: unknown, formData: FormData) {
 
   if (error) return { error: friendlyPasswordError(error.message) }
 
-  const meta = (user?.user_metadata ?? {}) as Record<string, unknown>
-  if (meta.is_admin) redirect('/admin/dashboard')
-  if (meta.is_instructor) redirect('/instructor/dashboard')
-  redirect('/student/dashboard')
+  redirectForRole(user?.user_metadata as Record<string, unknown>)
 }
 
 // Logged-in password change. Distinct from updatePassword (recovery flow):
@@ -160,4 +155,76 @@ export async function changePassword(_: unknown, formData: FormData): Promise<st
   if (updateError) return friendlyPasswordError(updateError.message)
 
   return null
+}
+
+// ── Email one-time-code sign-in (DEC-031) ──────────────────────────────────
+// Flag-gated, sign-in only for existing accounts (`shouldCreateUser: false`),
+// so it never creates users or captures profile — registration stays the sole
+// signup path. The flag is hard-checked server-side here, independent of
+// whatever the client chooses to render.
+const EMAIL_CODE_ENABLED = process.env.NEXT_PUBLIC_EMAIL_CODE_AUTH === 'true'
+
+// With `shouldCreateUser: false`, an unknown email makes Supabase reject the
+// request (HTTP 422 / "Signups not allowed for otp"). Surfacing that would turn
+// the form into an account-enumeration oracle, so we detect it and report
+// success anyway — the UI must look identical whether or not the email exists.
+function isOtpAccountMissing(error: {
+  code?: string
+  status?: number
+  message: string
+}): boolean {
+  return (
+    error.code === 'otp_disabled' || /signups?\s+not\s+allowed/i.test(error.message)
+  )
+}
+
+export async function requestEmailCode(
+  _: unknown,
+  formData: FormData,
+): Promise<{ ok: boolean; error: string | null }> {
+  if (!EMAIL_CODE_ENABLED) return { ok: false, error: 'Code sign-in is not available.' }
+
+  const email = (formData.get('email') as string)?.trim()
+  if (!email) return { ok: false, error: 'Enter your email.' }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: false },
+  })
+
+  // Swallow the no-account case (enumeration-safe); surface everything else
+  // (malformed email, rate limiting, etc.).
+  if (error && !isOtpAccountMissing(error)) {
+    return { ok: false, error: error.message }
+  }
+
+  return { ok: true, error: null }
+}
+
+export async function verifyEmailCode(
+  _: unknown,
+  formData: FormData,
+): Promise<{ error: string | null }> {
+  if (!EMAIL_CODE_ENABLED) return { error: 'Code sign-in is not available.' }
+
+  const email = (formData.get('email') as string)?.trim()
+  const token = (formData.get('token') as string)?.trim()
+  if (!email || !token) return { error: 'Enter the 6-digit code from your email.' }
+
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'email',
+  })
+
+  if (error) {
+    return { error: 'That code is invalid or has expired. Request a new one.' }
+  }
+
+  const safeNext = safeNextPath(formData.get('next') as string | null)
+  if (safeNext) redirect(safeNext)
+
+  redirectForRole(data.user?.user_metadata as Record<string, unknown>)
 }

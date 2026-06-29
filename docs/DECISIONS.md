@@ -170,6 +170,16 @@
 **Caveat:** The Ignored Build Step is a Vercel project setting, not version-controlled — it must be set once per project in the dashboard. Recorded here so it survives a project re-link or dashboard reset.
 **Revisit if:** Vercel adds per-branch deploy gating that reads the production branch's `vercel.json` (would let us version-control this).
 
+## DEC-031: Email one-time-code sign-in via Supabase native OTP (2026-06-29)
+**Decision:** Add email 6-digit-code sign-in alongside email/password + Google OAuth, flag-gated (`NEXT_PUBLIC_EMAIL_CODE_AUTH`, dark by default), available to all roles. Uses Supabase `signInWithOtp({ shouldCreateUser: false })` + `verifyOtp({ type: 'email' })` — sign-in only for existing accounts; never creates users, never captures profile. Registration stays the sole signup/profile-capture path. No magic link — codes only, via the repurposed (previously unused) Magic Link email template now emitting `{{ .Token }}`. Phase 1 of a longer passwordless-only north star; phase 1 is purely additive.
+**Why:** Lowers the password barrier for all roles without touching the data model. `shouldCreateUser: false` keeps it additive and zero-DB-impact: no `auth.users` insert, no `handle_new_user`, no new RLS. Supabase covers enumeration safety, send rate-limits, and verification brute-force caps natively — no hand-rolled OTP store needed (cf. `~/muster`, which predates Supabase and hand-rolls all of it). The request action swallows the `shouldCreateUser:false` "no account" 422 and reports success regardless, so the UI can't be used as an account-enumeration oracle.
+**Interactions:**
+- **DEC-024** (admin-created students are passwordless `auth.users` rows): when the flag is on, those accounts gain a working login path via code — the intended realization of the Phase-4 "link admin-created student to login" capability. DEC-024's "the student cannot log in" is now conditional on this flag.
+- **Invites** (`accept_invite`): unaffected — invites grant roles to an already-signed-in user and are orthogonal to sign-in method. Not-yet-registered invitees still bootstrap via registration/Google first; `shouldCreateUser:false` keeps codes out of the onboarding path.
+- **DEC-023** (Resend/Zoho mail split): untouched — OTP rides Supabase Auth's SMTP (same channel as confirmation/recovery), not the app's Resend notification path.
+**Gating to enable (config, not code):** Magic Link template updated to `{{ .Token }}` in the staging + prod dashboards (`config.toml` does not sync templates to remote); auth `email_sent` rate limit raised above the built-in-sender default of 2/hr; confirm auth SMTP delivers in prod before flipping the flag. @architect reviewed and approved.
+**Revisit if:** We move students fully passwordless (phase 2) — that removes password fields + reset/change-password and forces a profile-capture step for first-time code signups (`shouldCreateUser:true`).
+
 ## V2 Decisions (to be resolved during build)
 
 | ID | Decision | When | Who | Status |
