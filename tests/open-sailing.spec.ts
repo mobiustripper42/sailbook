@@ -58,11 +58,16 @@ test.describe('Open Sailing drop-in', () => {
     await expect(page.getByText('Drop-in')).toBeVisible()
   })
 
-  test('student course detail shows drop-in callout', async ({ page }) => {
+  test('student course detail shows the deposit callout, not the course price', async ({ page }) => {
     await loginAs(page, 'pw_student@ltsc.test', '/student/dashboard')
     await page.goto(`/student/courses/${courseId}`)
-    await expect(page.getByText(/Pay \$11 now to reserve your spot/)).toBeVisible()
+    // Alert advertises the flat deposit (DROP_IN_DEPOSIT=20 in CI), with the
+    // {DROP_IN_DEPOSIT} token substituted as currency — not the $11 course price.
+    await expect(page.getByText(/Pay \$20\.00 now to reserve your spot/)).toBeVisible()
     await expect(page.getByText(/balance is paid to the captain/)).toBeVisible()
+    await expect(page.getByText(/Pay \$11 now/)).toHaveCount(0)
+    // The Price stat still shows the admin-set course price.
+    await expect(page.getByText('$11', { exact: true }).first()).toBeVisible()
   })
 
   test('admin can create a course type with is_drop_in checked', async ({ page }) => {

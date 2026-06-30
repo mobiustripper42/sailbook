@@ -150,6 +150,7 @@
 **Decision:** Drop-in courses (Open Sailing) reuse the existing `enrollments` + `session_attendance` + `payments` model without schema changes to those tables. `is_drop_in` flag lives on `course_type` (not `course`). Each Open Sailing night is its own course with exactly one session. The hold amount is the course `price` — no separate field. Enrollment lifecycle (`pending_payment → confirmed → cancelled`) is identical to regular course enrollment. Attendance is seeded for the one session on webhook confirmation, identical to the existing path.
 **Why:** "Drop-in" is a property of what Open Sailing IS, not a per-course toggle — `course_type` is the right level. One-course-per-night means `UNIQUE(course_id, student_id)` on enrollments remains correct for independent Monday + Thursday bookings. No new table needed because "all sessions in a one-session course" and "the single session the student picked" are the same thing.
 **What `is_drop_in` gates:** Student-facing callout ("pay $X now, balance to captain on the day"), admin "Drop-in" badge on course detail. Not the payment flow — the hold amount is just the course price.
+**Superseded in part by DEC-032 (2026-06-30):** the payment flow now charges a flat configurable deposit (`DROP_IN_DEPOSIT`), not the course `price`; `is_drop_in` gates the charge amount. The rest of DEC-027 (model reuse, one-course-per-night, lifecycle, attendance) stands.
 **Revisit if:** Open Sailing moves to a season-pass or multi-session-booking model.
 
 ## DEC-028: Page-header actions — visible primary + `•••` overflow menu (2026-05-02)
@@ -179,6 +180,12 @@
 - **DEC-023** (Resend/Zoho mail split): untouched — OTP rides Supabase Auth's SMTP (same channel as confirmation/recovery), not the app's Resend notification path.
 **Gating to enable (config, not code):** Magic Link template updated to `{{ .Token }}` in the staging + prod dashboards (`config.toml` does not sync templates to remote); auth `email_sent` rate limit raised above the built-in-sender default of 2/hr; confirm auth SMTP delivers in prod before flipping the flag. @architect reviewed and approved.
 **Revisit if:** We move students fully passwordless (phase 2) — that removes password fields + reset/change-password and forces a profile-capture step for first-time code signups (`shouldCreateUser:true`).
+
+## DEC-032: Drop-in courses charge a flat deposit, not the course price (2026-06-30)
+**Decision:** Drop-in course types advertise their full admin-set `price` but collect only a flat, configurable **deposit** at checkout (env `DROP_IN_DEPOSIT`, USD; no member discount). The balance is paid to the captain on the day. The student reservation alert copy is configurable (`DROP_IN_ALERT_TEXT`, with a `{DROP_IN_DEPOSIT}` token rendered as currency); the course-detail **Price** stat still shows the full course price. `is_drop_in` now gates the **charge amount** in `createCheckoutSession` (deposit, flat) in addition to the callout + admin badge. Config is server-only env (no schema change), matching the `ENROLLMENT_HOLD_MINUTES` precedent; `codes` was considered but has no admin editor, so it offers no advantage over env for a singleton scalar + copy string.
+**Supersedes:** DEC-027's "the hold amount is the course `price` — no separate field" and "`is_drop_in` … not the payment flow." The rest of DEC-027 (model reuse, one-course-per-night, enrollment lifecycle, attendance seeding) is unchanged. A missing/invalid `DROP_IN_DEPOSIT` makes drop-in checkout error clearly rather than charge $0.
+**Why:** Andy's actual drop-in pricing is a small deposit to reserve a spot, with the balance collected in person — charging the full course price up front was wrong. The webhook already records Stripe `amount_total`, so the payment record reflects the deposit with no further change.
+**Revisit if:** Drop-in pricing needs per-course deposits (move to a column or `codes` with an admin editor) or a refundable-deposit / auth-hold flow.
 
 ## V2 Decisions (to be resolved during build)
 

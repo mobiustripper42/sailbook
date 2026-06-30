@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/table'
 import { fmtDateLong, fmtTime } from '@/lib/utils'
 import { attendanceStatusConfig } from '@/lib/attendance'
+import { dropInAlertText } from '@/lib/drop-in'
 import type { AttendanceStatus } from '@/lib/attendance'
 import EnrollButton from '@/components/student/enroll-button'
 import CancelEnrollmentButton from '@/components/student/cancel-enrollment-button'
@@ -158,6 +159,9 @@ export default async function StudentCourseDetailPage({
     certification_body: string | null
     is_drop_in: boolean
   } | null
+  // Drop-in courses show a deposit-based reservation notice (DROP_IN_ALERT_TEXT)
+  // instead of the course price; the Price stat above still shows the full price.
+  const dropInAlert = type?.is_drop_in ? dropInAlertText() : null
   const instructor = course.instructor as unknown as { first_name: string; last_name: string } | null
 
   const spotsRemaining = course.capacity - (activeEnrollments ?? 0)
@@ -311,11 +315,10 @@ export default async function StudentCourseDetailPage({
         </CardContent>
       </Card>
 
-      {type?.is_drop_in && (
+      {dropInAlert && (
         <div className="rounded-xs border border-warning/50 bg-warning/10 px-4 py-3 text-sm text-foreground">
           <span className="font-medium">Drop-in session.</span>{' '}
-          Pay {displayPrice != null ? `$${displayPrice}` : 'the hold amount'} now to reserve your spot.
-          The remaining balance is paid to the captain on the day.
+          {dropInAlert}
         </div>
       )}
 
