@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
+import { getDropInDeposit } from '@/lib/drop-in'
 
 export async function enrollInCourse(courseId: string) {
   const supabase = await createClient()
@@ -102,7 +103,7 @@ export async function createCheckoutSession(
   // Load course
   const { data: course } = await supabase
     .from('courses')
-    .select('id, title, status, capacity, price, member_price')
+    .select('id, title, status, capacity, price, member_price, course_types(is_drop_in)')
     .eq('id', courseId)
     .single()
 
@@ -110,7 +111,18 @@ export async function createCheckoutSession(
     return { error: 'This course is not available for enrollment.' }
   }
 
-  if (course.price == null) {
+  // Drop-in courses charge a flat deposit (DROP_IN_DEPOSIT), not the course price
+  // and not the member price. Validate early so a misconfigured deposit errors
+  // clearly instead of charging $0 or the wrong amount.
+  const isDropIn =
+    (course.course_types as unknown as { is_drop_in: boolean } | null)?.is_drop_in ?? false
+  const dropInDeposit = isDropIn ? getDropInDeposit() : null
+
+  if (isDropIn) {
+    if (dropInDeposit == null) {
+      return { error: 'Drop-in deposit is not configured. Please contact the school to enroll.' }
+    }
+  } else if (course.price == null) {
     return { error: 'This course does not have a price set. Contact the school to enroll.' }
   }
 
@@ -188,7 +200,10 @@ export async function createCheckoutSession(
   const holdExpiry = new Date(now.getTime() + holdMinutes * 60 * 1000)
 
   const isMember = (profile?.is_member ?? false) && (profile?.is_student ?? false)
-  const chargePrice = (isMember && course.member_price != null) ? course.member_price : course.price
+  // Drop-in: flat deposit, no member discount. Otherwise the member or list price.
+  const chargeAmount = isDropIn
+    ? dropInDeposit!
+    : ((isMember && course.member_price != null) ? course.member_price : course.price!)
 
   // Create Stripe Checkout Session
   const checkoutSession = await stripe.checkout.sessions.create({
@@ -200,7 +215,7 @@ export async function createCheckoutSession(
         price_data: {
           currency: 'usd',
           product_data: { name: course.title ?? 'Course Enrollment' },
-          unit_amount: Math.round(chargePrice * 100),
+          unit_amount: Math.round(chargeAmount * 100),
         },
         quantity: 1,
       },
