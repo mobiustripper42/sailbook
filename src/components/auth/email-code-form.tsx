@@ -1,10 +1,11 @@
 'use client'
 
-import { useActionState, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { requestEmailCode, verifyEmailCode } from '@/app/(auth)/actions'
+import { requestEmailCode } from '@/app/(auth)/actions'
+import CodeEntryStep from '@/components/auth/code-entry-step'
 
 /**
  * Two-step email one-time-code sign-in (DEC-031). Step 1 requests a 6-digit
@@ -19,10 +20,6 @@ export default function EmailCodeForm({ next }: { next?: string }) {
   const [step, setStep] = useState<'email' | 'code'>('email')
   const [requestError, setRequestError] = useState<string | null>(null)
   const [requestPending, startRequest] = useTransition()
-  const [verifyState, verifyAction, verifyPending] = useActionState(
-    verifyEmailCode,
-    null,
-  )
 
   // Advance to code entry in the submit handler (not an effect). `ok` only
   // means "request accepted" — the response is identical whether or not the
@@ -41,41 +38,18 @@ export default function EmailCodeForm({ next }: { next?: string }) {
 
   if (step === 'code') {
     return (
-      <form action={verifyAction} className="space-y-3">
-        <input type="hidden" name="email" value={email} />
-        {next ? <input type="hidden" name="next" value={next} /> : null}
-        <p className="text-sm text-muted-foreground">
-          If an account exists for{' '}
-          <span className="font-medium text-foreground">{email}</span>, a 6-digit
-          code is on its way. Enter it below.
-        </p>
-        <div className="space-y-2">
-          <Label htmlFor="token">6-digit code</Label>
-          <Input
-            id="token"
-            name="token"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            pattern="[0-9]*"
-            maxLength={6}
-            required
-            autoFocus
-          />
-        </div>
-        {verifyState?.error ? (
-          <p className="text-sm text-destructive">{verifyState.error}</p>
-        ) : null}
-        <Button type="submit" className="w-full" disabled={verifyPending}>
-          {verifyPending ? 'Verifying…' : 'Sign in'}
-        </Button>
-        <button
-          type="button"
-          onClick={() => setStep('email')}
-          className="w-full text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
-        >
-          Use a different email
-        </button>
-      </form>
+      <CodeEntryStep
+        email={email}
+        next={next}
+        intro={
+          <>
+            If an account exists for{' '}
+            <span className="font-medium text-foreground">{email}</span>, a
+            6-digit code is on its way. Enter it below.
+          </>
+        }
+        onBack={() => setStep('email')}
+      />
     )
   }
 
