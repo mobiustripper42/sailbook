@@ -240,3 +240,50 @@ export async function verifyEmailCode(
 
   redirectForRole(data.user?.user_metadata as Record<string, unknown>)
 }
+
+// Passwordless registration (DEC-033, phase 2). `shouldCreateUser: true` creates
+// the account and rides the profile in `data` to the `handle_new_user` trigger —
+// identical fields to the password `register` action above. GoTrue emails the
+// 6-digit code via the Confirm-signup template; the user verifies it with the
+// shared `verifyEmailCode` (no separate verify action). An already-registered
+// email just gets a sign-in code instead — so, like `requestEmailCode`, every
+// send-side result is swallowed (logged, never surfaced) to stay enumeration-safe;
+// only pre-send input-format errors are returned. Hard-gated on the same flag.
+export async function requestRegisterCode(
+  _: unknown,
+  formData: FormData,
+): Promise<{ ok: boolean; error: string | null }> {
+  if (!EMAIL_CODE_ENABLED) return { ok: false, error: 'Code sign-up is not available.' }
+
+  const email = (formData.get('email') as string)?.trim()
+  if (!email) return { ok: false, error: 'Enter your email.' }
+  if (!isValidEmail(email)) return { ok: false, error: 'Enter a valid email address.' }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: true,
+      // Profile fields only — NO role flags. handle_new_user defaults a new
+      // account to is_student=true / is_admin=is_instructor=false on INSERT, so
+      // they're unneeded here. Omitting them also closes a privilege-downgrade
+      // vector: if GoTrue ever applied `data` to an EXISTING user on a sign-in
+      // OTP, an `is_admin:false` here could clobber an admin's flags at request
+      // time, pre-verification (the re-stamp trigger only fills NULLs, not an
+      // explicit false). With no role flags in the payload, that's impossible.
+      data: {
+        first_name: formData.get('firstName') as string,
+        last_name: formData.get('lastName') as string,
+        phone: (formData.get('phone') as string)?.trim() || '',
+        experience_level: (formData.get('experienceLevel') as string) || '',
+        instructor_notes: (formData.get('instructorNotes') as string)?.trim() || '',
+      },
+    },
+  })
+
+  if (error) {
+    console.error('requestRegisterCode: signInWithOtp error:', error.message)
+  }
+
+  return { ok: true, error: null }
+}

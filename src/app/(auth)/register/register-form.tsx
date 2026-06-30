@@ -15,10 +15,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { register } from '../actions'
+import { register, requestRegisterCode } from '../actions'
 import { safeNextPath } from '@/lib/auth/safe-next'
 import { PASSWORD_MIN_LENGTH, PASSWORD_RULES_HELP } from '@/lib/auth/password-rules'
 import GoogleSignInButton from '@/components/auth/google-sign-in-button'
+import CodeEntryStep from '@/components/auth/code-entry-step'
 
 type ExperienceCode = {
   value: string
@@ -26,9 +27,15 @@ type ExperienceCode = {
   description: string | null
 }
 
+// Build-inlined client-side, same as the login page reads it (DEC-033). On →
+// registration is passwordless (request a code, then verify); off → today's
+// password sign-up. Login + password recovery are unaffected either way.
+const PASSWORDLESS = process.env.NEXT_PUBLIC_EMAIL_CODE_AUTH === 'true'
+
 export default function RegisterForm({ experienceCodes, smsEnabled = false }: { experienceCodes: ExperienceCode[]; smsEnabled?: boolean }) {
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+  const [step, setStep] = useState<'form' | 'code'>('form')
   const searchParams = useSearchParams()
   const next = safeNextPath(searchParams.get('next')) ?? undefined
 
@@ -49,9 +56,44 @@ export default function RegisterForm({ experienceCodes, smsEnabled = false }: { 
     const formData = new FormData(e.currentTarget)
     setError(null)
     startTransition(async () => {
-      const result = await register(null, formData)
-      if (result?.error) setError(result.error)
+      if (PASSWORDLESS) {
+        // Passwordless: create the account + email a code, then verify.
+        const result = await requestRegisterCode(null, formData)
+        if (result.ok) setStep('code')
+        else setError(result.error)
+      } else {
+        const result = await register(null, formData)
+        if (result?.error) setError(result.error)
+      }
     })
+  }
+
+  // Passwordless step 2 — verify the emailed code (shared with login).
+  if (PASSWORDLESS && step === 'code') {
+    return (
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>Check your email</CardTitle>
+          <CardDescription>Enter your code to finish signing up</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CodeEntryStep
+            email={email}
+            next={next}
+            intro={
+              <>
+                We&rsquo;ve emailed a 6-digit code to{' '}
+                <span className="font-medium text-foreground">{email}</span>. Enter
+                it to finish creating your account.
+              </>
+            }
+            onBack={() => setStep('form')}
+            backLabel="Edit details"
+            submitLabel="Create account"
+          />
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -153,24 +195,28 @@ export default function RegisterForm({ experienceCodes, smsEnabled = false }: { 
               className="resize-none"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              required
-              autoComplete="new-password"
-              minLength={PASSWORD_MIN_LENGTH}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">{PASSWORD_RULES_HELP}</p>
-          </div>
+          {!PASSWORDLESS && (
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                required
+                autoComplete="new-password"
+                minLength={PASSWORD_MIN_LENGTH}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">{PASSWORD_RULES_HELP}</p>
+            </div>
+          )}
         </CardContent>
         <CardFooter className="flex flex-col gap-3 pt-4">
           <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? 'Creating account…' : 'Create account'}
+            {pending
+              ? PASSWORDLESS ? 'Sending…' : 'Creating account…'
+              : PASSWORDLESS ? 'Email me a code' : 'Create account'}
           </Button>
           <p className="text-sm text-muted-foreground text-center">
             Already have an account?{' '}
