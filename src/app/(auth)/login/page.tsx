@@ -18,6 +18,7 @@ import {
 import { login } from "../actions";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import GoogleSignInButton from "@/components/auth/google-sign-in-button";
+import EmailCodeForm from "@/components/auth/email-code-form";
 import DevLoginHelper from "@/components/dev-login-helper";
 
 export default function LoginPage() {
@@ -55,6 +56,9 @@ function LoginPageContent() {
       </CardHeader>
       <CardContent className="space-y-4 pb-0">
         <GoogleSignInButton next={next} />
+        {process.env.NEXT_PUBLIC_EMAIL_CODE_AUTH === "true" ? (
+          <EmailCodeForm next={next} />
+        ) : null}
         <div className="flex items-center gap-3 py-1">
           <div className="h-px flex-1 bg-border" />
           <span className="text-xs text-muted-foreground">or</span>
