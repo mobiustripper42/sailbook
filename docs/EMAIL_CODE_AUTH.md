@@ -16,12 +16,10 @@ hidden and inert until these steps are done. Do them per Supabase project
 1. **Swap the email template.** Dashboard → **Authentication → Emails → Templates
    → Magic Link**:
    - Subject: `Your SailBook sign-in code`
-   - Body: must contain `{{ .Token }}` and **no** `{{ .ConfirmationURL }}`. Minimum:
-     ```html
-     <p>Your sign-in code: <strong>{{ .Token }}</strong></p>
-     <p>It expires shortly.</p>
-     ```
-     Or paste the branded version from `supabase/templates/magic_link.html`.
+   - Body: **paste the full contents of `supabase/templates/magic_link.html`** —
+     the branded template (card layout, Nunito Sans, styled code box) that matches
+     the other SailBook emails. The only hard requirement is that it contains
+     `{{ .Token }}` and **no** `{{ .ConfirmationURL }}`.
    - Save. Takes effect immediately — no redeploy.
 
 2. **Raise the send rate limit.** Dashboard → Authentication → Rate Limits →
