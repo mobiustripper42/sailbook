@@ -264,10 +264,14 @@ export async function requestRegisterCode(
     email,
     options: {
       shouldCreateUser: true,
+      // Profile fields only — NO role flags. handle_new_user defaults a new
+      // account to is_student=true / is_admin=is_instructor=false on INSERT, so
+      // they're unneeded here. Omitting them also closes a privilege-downgrade
+      // vector: if GoTrue ever applied `data` to an EXISTING user on a sign-in
+      // OTP, an `is_admin:false` here could clobber an admin's flags at request
+      // time, pre-verification (the re-stamp trigger only fills NULLs, not an
+      // explicit false). With no role flags in the payload, that's impossible.
       data: {
-        is_admin: false,
-        is_instructor: false,
-        is_student: true,
         first_name: formData.get('firstName') as string,
         last_name: formData.get('lastName') as string,
         phone: (formData.get('phone') as string)?.trim() || '',
