@@ -20,6 +20,9 @@ hidden and inert until these steps are done. Do them per Supabase project
      the branded template (card layout, Nunito Sans, styled code box) that matches
      the other SailBook emails. The only hard requirement is that it contains
      `{{ .Token }}` and **no** `{{ .ConfirmationURL }}`.
+   - **Email OTP Length: 6.** Some projects default to **8** — set it to 6 to match
+     the sign-in form's 6-digit input (Authentication → Providers → Email → *Email
+     OTP Length*). `config.toml` already pins 6, but that's local-only.
    - Save. Takes effect immediately — no redeploy.
 
 2. **Raise the send rate limit.** Dashboard → Authentication → Rate Limits →
