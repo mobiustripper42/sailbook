@@ -130,17 +130,42 @@ git push -u origin task/9.X-short-description
 #    gh pr create --base main   (or /kill-this)
 #    Vercel posts a per-PR Preview URL. Playwright CI runs against ephemeral local Supabase.
 
-# 4. Self-test on the per-PR URL.
+# 4. Self-test on the per-PR URL for anything that doesn't round-trip through
+#    an external redirect (UI, non-auth server actions). See "QA a branch on
+#    dev-sailbook.vercel.app" below for auth / OAuth / Stripe checkout flows —
+#    those redirect to whatever NEXT_PUBLIC_SITE_URL is set to, which is the
+#    same fixed domain for every per-PR preview, not the per-PR URL itself.
 
 # 5. When CI is green and you've self-tested, merge the PR.
 #    The feature lands on main. dev-sailbook.vercel.app rebuilds.
 ```
 
+### QA a branch on dev-sailbook.vercel.app
+
+`dev-sailbook.vercel.app` is the one domain with working Google OAuth (Supabase staging
+Site URL / Redirect URLs are configured for it — session 135, PROJECT_PLAN.md §J) and the
+one `NEXT_PUBLIC_SITE_URL` value every preview build shares. Per-PR preview URLs can't
+replicate that (Google's Authorized JavaScript origins requires an exact, pre-registered
+origin — no wildcards, no per-branch registration), so full auth/checkout QA happens by
+repointing this domain at the branch under test rather than using the per-PR URL:
+
+1. Vercel Dashboard → Settings → Domains → `dev-sailbook.vercel.app` → Edit → Git Branch →
+   select the branch under test → Save. The domain now serves that branch's deployment.
+2. QA at `dev-sailbook.vercel.app` — register, Google sign-in, Stripe test checkout
+   (`4242 4242 4242 4242`) all work against staging Supabase.
+3. Repoint the Git Branch back to `main` when done (before someone else needs it, and
+   always before `/promote-production` — see below).
+
+One QA slot at a time. Fine for a solo dev; if this project ever gets a second concurrent
+QA'er, that's the point to reconsider per-PR previews (with their own OAuth-capable Google
+client + wildcard Supabase redirect entry) rather than trading turns on one domain.
+
 ### Ship to production
 
 ```bash
-# 1. Tell Andy: "QA dev-sailbook.vercel.app, this is the next release."
-#    (Fix-forward on more PRs to main if he finds anything.)
+# 1. Repoint dev-sailbook.vercel.app's Git Branch to `main` (see above) and QA it —
+#    the actual release candidate, not a feature branch. Tell Andy it's ready to look at.
+#    (Fix-forward on more PRs to main if he finds anything, then re-QA.)
 
 # 2. When main is green-lit, ship it:
 /promote-production
@@ -151,6 +176,11 @@ git push -u origin task/9.X-short-description
 ```
 
 There is no release PR and no "reset" step — `production` simply fast-forwards to `main`'s tagged HEAD.
+
+**Do not run `/promote-production` without QA'ing `dev-sailbook.vercel.app` first** — confirm its
+Git Branch is pointed at `main` (not still parked on a feature branch from earlier QA) and that
+you've actually looked at it since the last merge. Promoting without this is what issue #99 was
+filed over.
 
 ## Migration workflow
 
@@ -203,6 +233,8 @@ supabase link --project-ref <prod-ref>   # restore prod link
 ## Troubleshooting
 
 **Preview URL hits prod Supabase** — Vercel env vars are scoped to All Environments instead of Preview-only. Re-scope, redeploy.
+
+**Registered/reset/checkout on a per-PR preview redirects to `dev-sailbook.vercel.app` instead of the per-PR URL** — expected, not a bug. `NEXT_PUBLIC_SITE_URL` is one shared Preview-scope value; every preview build's redirect links point there. Use the "QA a branch on dev-sailbook.vercel.app" flow above for anything that redirects.
 
 **`sailbook.live` deploying from `main` instead of `production`** — Vercel Production Branch wasn't repointed. Settings → Git → Production Branch → set to `production` (DEC-029).
 
