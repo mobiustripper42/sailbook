@@ -193,6 +193,11 @@
 **Gating to enable (config, not code):** the **Confirm-signup** email template must emit `{{ .Token }}` — a *new* signup sends the confirmation template, NOT Magic Link, so DEC-031's Magic Link fix doesn't cover it. Done in `supabase/templates/confirmation.html` (keeps `{{ .ConfirmationURL }}` too, so both flag states work) and must be applied to the staging + prod dashboard "Confirm signup" templates (`config.toml` doesn't sync to remote). Plus the DEC-031 enablement (Magic Link template, OTP length, the flag). No schema change, no migration, no new RLS — `handle_new_user` already does the insert.
 **Revisit if:** We retire the password/recovery surface (separate unit), or add a change-email feature (re-check the reauth path).
 
+## DEC-034: Preview QA via repointing dev-sailbook.vercel.app, not per-PR previews (2026-07-01)
+**Decision:** Full auth/OAuth/Stripe-checkout QA of a feature branch happens by repointing `dev-sailbook.vercel.app`'s Vercel Git Branch assignment (Settings → Domains → Edit) to that branch, QA'ing there, then repointing back to `main` — not by relying on each PR's own ephemeral Vercel preview URL. Gated `/promote-production` (Step 0.5) on this having happened for the promoted commit.
+**Why:** Google's OAuth "Authorized JavaScript origins" field requires an exact, pre-registered origin — no wildcards, no per-branch registration — so a new hostname per PR can never support Google sign-in. `dev-sailbook.vercel.app` already has working Google OAuth (Supabase staging Site URL/Redirect URLs configured for it, fixed session 135) and is the one `NEXT_PUBLIC_SITE_URL` value every preview build shares, so per-PR preview URLs already redirect auth/checkout flows there regardless — repointing just makes that the point, instead of an accidental landing spot. Filed against issue #99 after a session where PRs were merged and promoted straight to production because preview QA felt unusable.
+**Revisit if:** A second concurrent QA'er needs the domain at the same time (one QA slot today), or per-PR OAuth becomes worth the cost of a wildcard Supabase Redirect URL entry + verifying Google's origin-matching behavior against it.
+
 ## V2 Decisions (to be resolved during build)
 
 | ID | Decision | When | Who | Status |
