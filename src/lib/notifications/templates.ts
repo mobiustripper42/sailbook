@@ -29,6 +29,10 @@ export type LowEnrollmentWarningData = {
   capacity: number
 }
 
+export type LowEnrollmentDigestData = {
+  courses: LowEnrollmentWarningData[]
+}
+
 export type SessionCancellationData = {
   studentFirstName: string
   courseTitle: string
@@ -56,6 +60,12 @@ export type SessionReminderData = {
   sessionStart: string | null
   sessionLocation: string | null
   leadTimeLabel: string             // "tomorrow" or "in 1 week" — drives wording
+}
+
+export type SessionReminderDigestData = {
+  studentFirstName: string
+  leadTimeLabel: string              // shared across all sessions — one digest per lead-time slot
+  sessions: Omit<SessionReminderData, 'studentFirstName' | 'leadTimeLabel'>[]
 }
 
 export type WaitlistSpotOpenedData = {
@@ -189,30 +199,75 @@ export function adminEnrollmentAlert(data: AdminEnrollmentAlertData): Rendered {
   return { smsBody, emailSubject, emailText, emailHtml }
 }
 
-export function lowEnrollmentWarning(data: LowEnrollmentWarningData): Rendered {
-  const dateStr = formatDate(data.firstSessionDate)
+// One digest per admin per cron run, listing every qualifying course — not
+// one send per course. A single-course digest renders byte-identical to the
+// old per-course lowEnrollmentWarning(), so existing single-item behavior
+// (and its wording) is unchanged.
+export function lowEnrollmentDigest(data: LowEnrollmentDigestData): Rendered {
+  const { courses } = data
+
+  if (courses.length === 1) {
+    const [c] = courses
+    const dateStr = formatDate(c.firstSessionDate)
+
+    const smsBody =
+      `SailBook: ${c.courseTitle} starts ${dateStr} ` +
+      `(${c.daysUntilStart} days) with only ${c.enrolledCount}/${c.capacity} enrolled.`
+
+    const emailSubject = `Low enrollment: ${c.courseTitle}`
+
+    const emailText = [
+      `${c.courseTitle} is below half capacity with the start date approaching.`,
+      ``,
+      `Start date: ${dateStr} (${c.daysUntilStart} days out)`,
+      `Enrolled: ${c.enrolledCount} of ${c.capacity}`,
+      ``,
+      `Admin view: https://sailbook.live/admin/courses`,
+    ].join('\n')
+
+    const emailHtml = `
+<p><strong>${esc(c.courseTitle)}</strong> is below half capacity with the start date approaching.</p>
+<p>
+  <strong>Start date:</strong> ${esc(dateStr)} (${esc(c.daysUntilStart)} days out)<br>
+  <strong>Enrolled:</strong> ${esc(c.enrolledCount)} of ${esc(c.capacity)}
+</p>
+<p><a href="https://sailbook.live/admin/courses">Admin view</a></p>`.trim()
+
+    return { smsBody, emailSubject, emailText, emailHtml }
+  }
 
   const smsBody =
-    `SailBook: ${data.courseTitle} starts ${dateStr} ` +
-    `(${data.daysUntilStart} days) with only ${data.enrolledCount}/${data.capacity} enrolled.`
+    `SailBook: ${courses.length} courses below half capacity — ` +
+    courses
+      .map((c) => `${c.courseTitle} starts ${formatDate(c.firstSessionDate)} (${c.daysUntilStart}d, ${c.enrolledCount}/${c.capacity} enrolled)`)
+      .join('; ') +
+    '.'
 
-  const emailSubject = `Low enrollment: ${data.courseTitle}`
+  const emailSubject = `Low enrollment: ${courses.length} courses`
 
   const emailText = [
-    `${data.courseTitle} is below half capacity with the start date approaching.`,
+    `${courses.length} courses are below half capacity with the start date approaching.`,
     ``,
-    `Start date: ${dateStr} (${data.daysUntilStart} days out)`,
-    `Enrolled: ${data.enrolledCount} of ${data.capacity}`,
+    ...courses.flatMap((c) => [
+      c.courseTitle,
+      `  Start date: ${formatDate(c.firstSessionDate)} (${c.daysUntilStart} days out)`,
+      `  Enrolled: ${c.enrolledCount} of ${c.capacity}`,
+    ]),
     ``,
     `Admin view: https://sailbook.live/admin/courses`,
   ].join('\n')
 
   const emailHtml = `
-<p><strong>${esc(data.courseTitle)}</strong> is below half capacity with the start date approaching.</p>
-<p>
-  <strong>Start date:</strong> ${esc(dateStr)} (${esc(data.daysUntilStart)} days out)<br>
-  <strong>Enrolled:</strong> ${esc(data.enrolledCount)} of ${esc(data.capacity)}
-</p>
+<p>${esc(courses.length)} courses are below half capacity with the start date approaching.</p>
+${courses
+  .map(
+    (c) => `<p>
+  <strong>${esc(c.courseTitle)}</strong><br>
+  Start date: ${esc(formatDate(c.firstSessionDate))} (${esc(c.daysUntilStart)} days out)<br>
+  Enrolled: ${esc(c.enrolledCount)} of ${esc(c.capacity)}
+</p>`,
+  )
+  .join('')}
 <p><a href="https://sailbook.live/admin/courses">Admin view</a></p>`.trim()
 
   return { smsBody, emailSubject, emailText, emailHtml }
@@ -308,29 +363,82 @@ export function makeupAssignment(data: MakeupAssignmentData): Rendered {
   return { smsBody, emailSubject, emailText, emailHtml }
 }
 
-export function sessionReminder(data: SessionReminderData): Rendered {
-  const dateStr = formatDate(data.sessionDate)
-  const timeStr = formatTime(data.sessionStart)
-  const when = data.sessionDate ? `${dateStr}${timeStr ? ` at ${timeStr}` : ''}` : 'TBD'
-  const where = data.sessionLocation ?? 'TBD'
+function describeSession(s: Omit<SessionReminderData, 'studentFirstName' | 'leadTimeLabel'>) {
+  const dateStr = formatDate(s.sessionDate)
+  const timeStr = formatTime(s.sessionStart)
+  const when = s.sessionDate ? `${dateStr}${timeStr ? ` at ${timeStr}` : ''}` : 'TBD'
+  const where = s.sessionLocation ?? 'TBD'
+  return { when, where }
+}
 
-  // Same STOP disclosure rationale as enrollmentConfirmation.
-  // "on {when} ({where})" — same formatting choice as sessionCancellation
-  // to avoid the "at {time} at {location}" double-at issue.
+// One digest per student per lead-time slot, listing every qualifying
+// session — not one send per session. A single-session digest renders
+// byte-identical to the old per-session sessionReminder(), so existing
+// single-item behavior (and its wording) is unchanged.
+export function sessionReminderDigest(data: SessionReminderDigestData): Rendered {
+  const { studentFirstName, leadTimeLabel, sessions } = data
+
+  if (sessions.length === 1) {
+    const [s] = sessions
+    const { when, where } = describeSession(s)
+
+    // Same STOP disclosure rationale as enrollmentConfirmation.
+    // "on {when} ({where})" — same formatting choice as sessionCancellation
+    // to avoid the "at {time} at {location}" double-at issue.
+    const smsBody =
+      `SailBook reminder: Hi ${studentFirstName}, your ${s.courseTitle} session ` +
+      `is ${leadTimeLabel} on ${when} (${where}). ` +
+      `Schedule: sailbook.live/student/courses. Reply STOP to opt out.`
+
+    const emailSubject = `Reminder: ${s.courseTitle} ${leadTimeLabel}`
+
+    const emailText = [
+      `Hi ${studentFirstName},`,
+      ``,
+      `Reminder — your ${s.courseTitle} session is ${leadTimeLabel}.`,
+      ``,
+      `Session: ${when}`,
+      `Location: ${where}`,
+      ``,
+      `View your schedule: https://sailbook.live/student/courses`,
+      ``,
+      `— Learn to Sail Cleveland`,
+    ].join('\n')
+
+    const emailHtml = `
+<p>Hi ${esc(studentFirstName)},</p>
+<p>Reminder — your <strong>${esc(s.courseTitle)}</strong> session is ${esc(leadTimeLabel)}.</p>
+<p>
+  <strong>Session:</strong> ${esc(when)}<br>
+  <strong>Location:</strong> ${esc(where)}
+</p>
+<p><a href="https://sailbook.live/student/courses">View your schedule</a></p>
+<p>— Learn to Sail Cleveland</p>`.trim()
+
+    return { smsBody, emailSubject, emailText, emailHtml }
+  }
+
   const smsBody =
-    `SailBook reminder: Hi ${data.studentFirstName}, your ${data.courseTitle} session ` +
-    `is ${data.leadTimeLabel} on ${when} (${where}). ` +
-    `Schedule: sailbook.live/student/courses. Reply STOP to opt out.`
+    `SailBook reminder: Hi ${studentFirstName}, you have ${sessions.length} sessions ${leadTimeLabel} — ` +
+    sessions
+      .map((s) => {
+        const { when, where } = describeSession(s)
+        return `${s.courseTitle} on ${when} (${where})`
+      })
+      .join('; ') +
+    `. Schedule: sailbook.live/student/courses. Reply STOP to opt out.`
 
-  const emailSubject = `Reminder: ${data.courseTitle} ${data.leadTimeLabel}`
+  const emailSubject = `Reminder: ${sessions.length} sessions ${leadTimeLabel}`
 
   const emailText = [
-    `Hi ${data.studentFirstName},`,
+    `Hi ${studentFirstName},`,
     ``,
-    `Reminder — your ${data.courseTitle} session is ${data.leadTimeLabel}.`,
+    `Reminder — you have ${sessions.length} sessions ${leadTimeLabel}.`,
     ``,
-    `Session: ${when}`,
-    `Location: ${where}`,
+    ...sessions.flatMap((s) => {
+      const { when, where } = describeSession(s)
+      return [s.courseTitle, `  Session: ${when}`, `  Location: ${where}`]
+    }),
     ``,
     `View your schedule: https://sailbook.live/student/courses`,
     ``,
@@ -338,12 +446,18 @@ export function sessionReminder(data: SessionReminderData): Rendered {
   ].join('\n')
 
   const emailHtml = `
-<p>Hi ${esc(data.studentFirstName)},</p>
-<p>Reminder — your <strong>${esc(data.courseTitle)}</strong> session is ${esc(data.leadTimeLabel)}.</p>
-<p>
-  <strong>Session:</strong> ${esc(when)}<br>
-  <strong>Location:</strong> ${esc(where)}
-</p>
+<p>Hi ${esc(studentFirstName)},</p>
+<p>Reminder — you have ${esc(sessions.length)} sessions ${esc(leadTimeLabel)}.</p>
+${sessions
+  .map((s) => {
+    const { when, where } = describeSession(s)
+    return `<p>
+  <strong>${esc(s.courseTitle)}</strong><br>
+  Session: ${esc(when)}<br>
+  Location: ${esc(where)}
+</p>`
+  })
+  .join('')}
 <p><a href="https://sailbook.live/student/courses">View your schedule</a></p>
 <p>— Learn to Sail Cleveland</p>`.trim()
 
