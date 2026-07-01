@@ -37,6 +37,18 @@ test.describe('Auth — role routing', () => {
   });
 });
 
+test.describe('Auth — VersionTag', () => {
+  test('login page renders exactly one VersionTag', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.getByTestId('version-tag')).toHaveCount(1);
+  });
+
+  test('register page renders exactly one VersionTag', async ({ page }) => {
+    await page.goto('/register');
+    await expect(page.getByTestId('version-tag')).toHaveCount(1);
+  });
+});
+
 test.describe('Auth — unauthenticated access', () => {
   test('unauthenticated user visiting / is redirected to /login', async ({ page }) => {
     await page.goto('/');
