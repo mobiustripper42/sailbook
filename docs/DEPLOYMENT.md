@@ -71,7 +71,7 @@ Used by the `main` preview and all per-PR previews.
 | `NEXT_PUBLIC_SUPABASE_URL` | staging Supabase URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | staging anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | staging service role key |
-| `NEXT_PUBLIC_SITE_URL` | leave unset — Vercel auto-injects per-preview URL via `VERCEL_URL`, the app falls back to that |
+| `NEXT_PUBLIC_SITE_URL` | `https://dev-sailbook.vercel.app` — set explicitly. The app has no `VERCEL_URL` fallback, so every preview build (including per-PR ones) sends auth/checkout redirects here regardless of which URL you're actually viewing (see "QA a branch on dev-sailbook.vercel.app" below) |
 | `NEXT_PUBLIC_DEV_MODE` | `true` |
 | `STRIPE_SECRET_KEY` | `sk_test_…` |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_…` from the staging webhook (see step 3) |
@@ -137,7 +137,9 @@ git push -u origin task/9.X-short-description
 #    same fixed domain for every per-PR preview, not the per-PR URL itself.
 
 # 5. When CI is green and you've self-tested, merge the PR.
-#    The feature lands on main. dev-sailbook.vercel.app rebuilds.
+#    The feature lands on main. dev-sailbook.vercel.app rebuilds —
+#    UNLESS its Git Branch is currently parked on a QA branch (see below),
+#    in which case main's build won't show up there until it's repointed back.
 ```
 
 ### QA a branch on dev-sailbook.vercel.app
