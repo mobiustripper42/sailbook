@@ -2,7 +2,7 @@
 
 **V1 shipped:** April 9, 2026 (v1.0.0)
 **V2 planning:** April 11, 2026
-**Deadline:** May 15, 2026 (Simply Sailing season opener — hard) — Phases 0–2 (payments live) is the critical path
+**Deadline:** May 15, 2026 (Learn to Sail Cleveland season opener — hard) — Phases 0–2 (payments live) is the critical path
 
 ---
 

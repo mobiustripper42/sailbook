@@ -4,7 +4,7 @@
 SailBook
 
 ## Tagline
-Scheduling for Simply Sailing (internal tool — no public marketing needed yet)
+Scheduling for Learn to Sail Cleveland (internal tool — no public marketing needed yet)
 
 ## Philosophy
 

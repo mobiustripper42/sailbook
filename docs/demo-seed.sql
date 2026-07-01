@@ -1,5 +1,5 @@
 -- SailBook Demo Seed Data
--- Realistic Simply Sailing data for the product owner walkthrough.
+-- Realistic Learn to Sail Cleveland data for the product owner walkthrough.
 -- All demo users share password: qwert12345
 -- Fixed UUIDs — safe to reference in queries / re-run after wipe.
 --

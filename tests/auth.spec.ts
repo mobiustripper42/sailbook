@@ -38,15 +38,14 @@ test.describe('Auth — role routing', () => {
 });
 
 test.describe('Auth — VersionTag', () => {
-  test('login page renders exactly one VersionTag', async ({ page }) => {
-    await page.goto('/login');
-    await expect(page.getByTestId('version-tag')).toHaveCount(1);
-  });
+  const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/register/check-email'];
 
-  test('register page renders exactly one VersionTag', async ({ page }) => {
-    await page.goto('/register');
-    await expect(page.getByTestId('version-tag')).toHaveCount(1);
-  });
+  for (const route of authRoutes) {
+    test(`${route} renders exactly one VersionTag`, async ({ page }) => {
+      await page.goto(route);
+      await expect(page.getByTestId('version-tag')).toHaveCount(1);
+    });
+  }
 });
 
 test.describe('Auth — unauthenticated access', () => {

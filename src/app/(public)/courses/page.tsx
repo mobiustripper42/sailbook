@@ -7,7 +7,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Courses | SailBook',
-  description: 'Browse sailing courses offered by Simply Sailing.',
+  description: 'Browse sailing courses offered by Learn to Sail Cleveland.',
 }
 
 export default async function PublicCourseCatalogPage() {
@@ -61,7 +61,7 @@ export default async function PublicCourseCatalogPage() {
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold">Courses</h1>
         <p className="text-muted-foreground text-sm">
-          Sailing courses offered by Simply Sailing.
+          Sailing courses offered by Learn to Sail Cleveland.
         </p>
       </div>
 

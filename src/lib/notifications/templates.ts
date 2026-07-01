@@ -139,7 +139,7 @@ export function enrollmentConfirmation(data: EnrollmentConfirmationData): Render
     ``,
     `View your schedule: https://sailbook.live/student/courses`,
     ``,
-    `— Simply Sailing`,
+    `— Learn to Sail Cleveland`,
   ].filter((l): l is string => l !== null)
 
   const emailText = lines.join('\n')
@@ -153,7 +153,7 @@ export function enrollmentConfirmation(data: EnrollmentConfirmationData): Render
   ${data.amountDollars !== null ? `<br><strong>Amount:</strong> ${esc(dollars(data.amountDollars))}` : ''}
 </p>
 <p><a href="https://sailbook.live/student/courses">View your schedule</a></p>
-<p>— Simply Sailing</p>`.trim()
+<p>— Learn to Sail Cleveland</p>`.trim()
 
   return { smsBody, emailSubject, emailText, emailHtml }
 }
@@ -246,7 +246,7 @@ export function sessionCancellation(data: SessionCancellationData): Rendered {
     ``,
     `View your schedule: https://sailbook.live/student/courses`,
     ``,
-    `— Simply Sailing`,
+    `— Learn to Sail Cleveland`,
   ].filter((l): l is string => l !== null)
 
   const emailText = lines.join('\n')
@@ -260,7 +260,7 @@ export function sessionCancellation(data: SessionCancellationData): Rendered {
   ${data.cancelReason ? `<br><strong>Reason:</strong> ${esc(data.cancelReason)}` : ''}
 </p>
 <p><a href="https://sailbook.live/student/courses">View your schedule</a></p>
-<p>— Simply Sailing</p>`.trim()
+<p>— Learn to Sail Cleveland</p>`.trim()
 
   return { smsBody, emailSubject, emailText, emailHtml }
 }
@@ -292,7 +292,7 @@ export function makeupAssignment(data: MakeupAssignmentData): Rendered {
     ``,
     `View your schedule: https://sailbook.live/student/courses`,
     ``,
-    `— Simply Sailing`,
+    `— Learn to Sail Cleveland`,
   ].join('\n')
 
   const emailHtml = `
@@ -303,7 +303,7 @@ export function makeupAssignment(data: MakeupAssignmentData): Rendered {
   <strong>Location:</strong> ${esc(makeupWhere)}
 </p>
 <p><a href="https://sailbook.live/student/courses">View your schedule</a></p>
-<p>— Simply Sailing</p>`.trim()
+<p>— Learn to Sail Cleveland</p>`.trim()
 
   return { smsBody, emailSubject, emailText, emailHtml }
 }
@@ -334,7 +334,7 @@ export function sessionReminder(data: SessionReminderData): Rendered {
     ``,
     `View your schedule: https://sailbook.live/student/courses`,
     ``,
-    `— Simply Sailing`,
+    `— Learn to Sail Cleveland`,
   ].join('\n')
 
   const emailHtml = `
@@ -345,7 +345,7 @@ export function sessionReminder(data: SessionReminderData): Rendered {
   <strong>Location:</strong> ${esc(where)}
 </p>
 <p><a href="https://sailbook.live/student/courses">View your schedule</a></p>
-<p>— Simply Sailing</p>`.trim()
+<p>— Learn to Sail Cleveland</p>`.trim()
 
   return { smsBody, emailSubject, emailText, emailHtml }
 }
@@ -371,7 +371,7 @@ export function waitlistSpotOpened(data: WaitlistSpotOpenedData): Rendered {
     ``,
     `Heads up — everyone on the waitlist was notified at the same time. First to enroll gets the spot.`,
     ``,
-    `— Simply Sailing`,
+    `— Learn to Sail Cleveland`,
   ].join('\n')
 
   const emailHtml = `
@@ -379,7 +379,7 @@ export function waitlistSpotOpened(data: WaitlistSpotOpenedData): Rendered {
 <p>A spot just opened in <strong>${esc(data.courseTitle)}</strong>.</p>
 <p><a href="${esc(enrollUrl)}">Register here</a></p>
 <p>Heads up — everyone on the waitlist was notified at the same time. First to enroll gets the spot.</p>
-<p>— Simply Sailing</p>`.trim()
+<p>— Learn to Sail Cleveland</p>`.trim()
 
   return { smsBody, emailSubject, emailText, emailHtml }
 }

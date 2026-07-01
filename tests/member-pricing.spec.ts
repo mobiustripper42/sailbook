@@ -36,7 +36,7 @@ test.describe('Member pricing', () => {
     await expect(page.getByText('Member price applied')).not.toBeVisible()
   })
 
-  test('admin can mark student as Simply Sailing member', async ({ page }) => {
+  test('admin can mark student as Learn to Sail Cleveland member', async ({ page }) => {
     test.setTimeout(30000)
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
     await page.goto('/admin/users')
