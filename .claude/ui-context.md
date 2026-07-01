@@ -2,7 +2,7 @@
 
 The design-system reference `@ui-reviewer` checks surfaces against (DEC-S019). Sources: `docs/BRAND.md` (philosophy, voice), the Mira theme preset, and the live tokens in `app/globals.css`. Nothing here syncs from seeds — it's project-owned.
 
-SailBook is a sailing school scheduling app for Simply Sailing. Aesthetic priorities: **clarity first, personality second. Function over form. No nautical kitsch.**
+SailBook is a sailing school scheduling app for Learn to Sail Cleveland. Aesthetic priorities: **clarity first, personality second. Function over form. No nautical kitsch.**
 
 ## Active Theme
 

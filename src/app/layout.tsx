@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     default: 'SailBook',
     template: '%s',
   },
-  description: "Course scheduling for Simply Sailing",
+  description: "Course scheduling for Learn to Sail Cleveland",
   icons: {
     icon: '/favicon.svg',
   },

@@ -47,7 +47,7 @@ function LoginPageContent() {
         </div>
         <Image
           src="/logo.png"
-          alt="Simply Sailing"
+          alt="Learn to Sail Cleveland"
           width={80}
           height={80}
           className="h-20 w-auto"

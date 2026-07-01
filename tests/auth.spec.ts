@@ -37,6 +37,17 @@ test.describe('Auth — role routing', () => {
   });
 });
 
+test.describe('Auth — VersionTag', () => {
+  const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/register/check-email'];
+
+  for (const route of authRoutes) {
+    test(`${route} renders exactly one VersionTag`, async ({ page }) => {
+      await page.goto(route);
+      await expect(page.getByTestId('version-tag')).toHaveCount(1);
+    });
+  }
+});
+
 test.describe('Auth — unauthenticated access', () => {
   test('unauthenticated user visiting / is redirected to /login', async ({ page }) => {
     await page.goto('/');

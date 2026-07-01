@@ -1,6 +1,6 @@
 # SailBook
 
-Scheduling, enrollment, and payment management for Simply Sailing.
+Scheduling, enrollment, and payment management for Learn to Sail Cleveland.
 
 ## Dev Setup
 

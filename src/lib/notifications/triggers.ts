@@ -15,10 +15,10 @@ import { isAdminChannelEnabled, isStudentChannelEnabled } from './preferences'
 import {
   adminEnrollmentAlert,
   enrollmentConfirmation,
-  lowEnrollmentWarning,
+  lowEnrollmentDigest,
   makeupAssignment,
   sessionCancellation,
-  sessionReminder,
+  sessionReminderDigest,
   waitlistSpotOpened,
 } from './templates'
 
@@ -391,40 +391,39 @@ export async function notifyLowEnrollmentCourses(): Promise<number> {
   }
   if (!admins || admins.length === 0) return 0
 
-  let alertedCount = 0
-
-  for (const course of lowCourses) {
-    const courseTitle = await resolveCourseTitle(admin, {
-      title: course.title,
-      course_type_id: course.course_type_id,
-    })
-
-    const rendered = lowEnrollmentWarning({
-      courseTitle,
+  // Collect every qualifying course first, then send one digest per admin —
+  // not one send per course. Preference gate is checked once per admin, not
+  // once per course.
+  const courses = await Promise.all(
+    lowCourses.map(async (course) => ({
+      courseTitle: await resolveCourseTitle(admin, {
+        title: course.title,
+        course_type_id: course.course_type_id,
+      }),
       firstSessionDate: course.firstSessionDate,
       daysUntilStart: course.daysUntilStart,
       enrolledCount: course.enrolled,
       capacity: course.capacity,
-    })
+    })),
+  )
 
-    await Promise.all(
-      admins.flatMap((a) => {
-        const prefs = a.notification_preferences
-        const sends: Promise<void>[] = []
-        if (isAdminChannelEnabled(prefs, 'admin_low_enrollment', 'sms')) {
-          sends.push(trySMS(a.phone, rendered.smsBody))
-        }
-        if (isAdminChannelEnabled(prefs, 'admin_low_enrollment', 'email')) {
-          sends.push(tryEmail(a.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml))
-        }
-        return sends
-      }),
-    )
+  const rendered = lowEnrollmentDigest({ courses })
 
-    alertedCount++
-  }
+  await Promise.all(
+    admins.flatMap((a) => {
+      const prefs = a.notification_preferences
+      const sends: Promise<void>[] = []
+      if (isAdminChannelEnabled(prefs, 'admin_low_enrollment', 'sms')) {
+        sends.push(trySMS(a.phone, rendered.smsBody))
+      }
+      if (isAdminChannelEnabled(prefs, 'admin_low_enrollment', 'email')) {
+        sends.push(tryEmail(a.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml))
+      }
+      return sends
+    }),
+  )
 
-  return alertedCount
+  return courses.length
 }
 
 // Reminder lead times — fired by the daily session-reminders cron.
@@ -486,6 +485,23 @@ export async function notifyUpcomingSessionReminders(
   }
   if (!sessions || sessions.length === 0) return 0
 
+  type StudentInfo = {
+    first_name: string
+    email: string
+    phone: string | null
+    notification_preferences: unknown
+  }
+  type SessionInfo = {
+    courseTitle: string
+    sessionDate: string | null
+    sessionStart: string | null
+    sessionLocation: string | null
+  }
+  // One digest per (student, lead-time slot) — not one send per session. A
+  // student with sessions across multiple courses landing in the same slot
+  // gets everything grouped here before any send happens.
+  const groups = new Map<string, { label: string; student: StudentInfo; sessions: SessionInfo[] }>()
+
   let firedCount = 0
 
   for (const session of sessions) {
@@ -522,41 +538,46 @@ export async function notifyUpcomingSessionReminders(
 
     const courseTitle = await resolveCourseTitle(admin, courseResult.data)
 
-    await Promise.all(
-      attendance.flatMap((a) => {
-        const enrollment = a.enrollments as unknown as {
-          student: {
-            first_name: string
-            email: string
-            phone: string | null
-            notification_preferences: unknown
-          } | null
-        } | null
-        const student = enrollment?.student
-        if (!student) return []
+    for (const a of attendance) {
+      const enrollment = a.enrollments as unknown as { student: StudentInfo | null } | null
+      const student = enrollment?.student
+      if (!student) continue
 
-        const rendered = sessionReminder({
-          studentFirstName: student.first_name,
-          courseTitle,
-          sessionDate: session.date,
-          sessionStart: session.start_time,
-          sessionLocation: session.location,
-          leadTimeLabel: slot.label,
-        })
-        const prefs = student.notification_preferences
-        const sends: Promise<void>[] = []
-        if (isStudentChannelEnabled(prefs, 'sms')) {
-          sends.push(trySMS(student.phone, rendered.smsBody))
-        }
-        if (isStudentChannelEnabled(prefs, 'email')) {
-          sends.push(tryEmail(student.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml))
-        }
-        return sends
-      }),
-    )
+      const key = `${student.email}::${slot.label}`
+      let group = groups.get(key)
+      if (!group) {
+        group = { label: slot.label, student, sessions: [] }
+        groups.set(key, group)
+      }
+      group.sessions.push({
+        courseTitle,
+        sessionDate: session.date,
+        sessionStart: session.start_time,
+        sessionLocation: session.location,
+      })
+    }
 
     firedCount++
   }
+
+  await Promise.all(
+    Array.from(groups.values()).flatMap((group) => {
+      const rendered = sessionReminderDigest({
+        studentFirstName: group.student.first_name,
+        leadTimeLabel: group.label,
+        sessions: group.sessions,
+      })
+      const prefs = group.student.notification_preferences
+      const sends: Promise<void>[] = []
+      if (isStudentChannelEnabled(prefs, 'sms')) {
+        sends.push(trySMS(group.student.phone, rendered.smsBody))
+      }
+      if (isStudentChannelEnabled(prefs, 'email')) {
+        sends.push(tryEmail(group.student.email, rendered.emailSubject, rendered.emailText, rendered.emailHtml))
+      }
+      return sends
+    }),
+  )
 
   return firedCount
 }

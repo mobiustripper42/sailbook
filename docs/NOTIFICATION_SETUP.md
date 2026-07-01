@@ -36,7 +36,7 @@ Two viable paths. Pick one for V1; nothing stops you from buying a second number
 
 **Local 216 (Cleveland) — alternative:**
 - Console → Phone Numbers → Manage → Buy a number → leave **Local** selected
-- Area code 216 reads better to Simply Sailing students than a random one.
+- Area code 216 reads better to Learn to Sail Cleveland students than a random one.
 - Cost: ~$1.15/mo for the number.
 - Requires A2P 10DLC registration before sending business messages reliably: Brand registration ($4 one-time) + Campaign registration (~$10/mo). Total carrier fees ~$14/mo on top of usage.
 - Pick this path later if local presence matters more than the monthly fee — easy to add a second number once volume justifies it.

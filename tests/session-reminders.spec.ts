@@ -39,14 +39,16 @@ test.describe('3.7 — session reminders', () => {
       entries: { channel: 'sms' | 'email'; to: string; subject?: string; body: string }[]
     }
 
-    // Scope by title — earlier seed/test courses can also land on the
-    // referenceDate's target dates and produce reminders.
+    // Scope by title in the BODY, not the subject — earlier seed/test courses
+    // sharing pw_student's fixed 2027-09-15 fixture date land in the same
+    // digest (#103), so the subject may read "N sessions" instead of naming
+    // this specific course. The body always lists every qualifying course.
     const studentEmail = entries.find(
       (e) =>
         e.channel === 'email' &&
         e.to === 'pw_student@ltsc.test' &&
         e.subject?.includes('Reminder:') &&
-        e.subject?.includes(title),
+        e.body?.includes(title),
     )
     expect(studentEmail).toBeDefined()
     expect(studentEmail!.body).toContain(title)
@@ -69,12 +71,15 @@ test.describe('3.7 — session reminders', () => {
       entries: { channel: 'sms' | 'email'; to: string; subject?: string; body: string }[]
     }
 
+    // Same body-based scoping as the 7-day test above — subject may
+    // aggregate ("N sessions") once other pw_student fixture courses share
+    // this reference date.
     const studentEmail = entries.find(
       (e) =>
         e.channel === 'email' &&
         e.to === 'pw_student@ltsc.test' &&
         e.subject?.includes('Reminder:') &&
-        e.subject?.includes(title),
+        e.body?.includes(title),
     )
     expect(studentEmail).toBeDefined()
     expect(studentEmail!.body).toContain(title)
@@ -138,5 +143,38 @@ test.describe('3.7 — session reminders', () => {
     const body = (await resp.json()) as { fired: number }
     expect(typeof body.fired).toBe('number')
     expect(body.fired).toBeGreaterThanOrEqual(0)
+  })
+
+  // #103 — a student with sessions in two different courses landing on the
+  // same lead-time date gets ONE digest email listing both, not two separate
+  // emails. Both createEnrolledCourse calls use the fixed 2027-09-15 session
+  // date and enroll the same pw_student@ltsc.test fixture.
+  test('same student, two courses, same lead-time date → one digest email listing both', async ({ browser, request }) => {
+    test.setTimeout(120000)
+
+    const titleA = `Digest7dA-${runId()}`
+    const titleB = `Digest7dB-${runId()}`
+    await createEnrolledCourse(browser, { title: titleA })
+    await createEnrolledCourse(browser, { title: titleB })
+
+    const resp = await request.post(`${BASE}/api/test/run-session-reminders`, {
+      data: { referenceDate: ONE_WEEK_BEFORE },
+    })
+    expect(resp.ok()).toBeTruthy()
+
+    const log = await request.get(`${BASE}/api/test/notifications`)
+    const { entries } = (await log.json()) as {
+      entries: { channel: 'sms' | 'email'; to: string; subject?: string; body: string }[]
+    }
+
+    // Regardless of how many other pw_student fixture courses share this
+    // reference date (accumulated by other tests/runs), there must be
+    // exactly ONE digest email for this slot — not one per course.
+    const studentEmails = entries.filter(
+      (e) => e.channel === 'email' && e.to === 'pw_student@ltsc.test' && e.subject?.includes('in 1 week'),
+    )
+    expect(studentEmails).toHaveLength(1)
+    expect(studentEmails[0].body).toContain(titleA)
+    expect(studentEmails[0].body).toContain(titleB)
   })
 })

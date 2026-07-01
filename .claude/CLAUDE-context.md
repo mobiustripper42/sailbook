@@ -4,7 +4,7 @@ Everything specific to **this** project. The seeds-managed `CLAUDE.md` shell rea
 
 ## What We're Building
 
-Scheduling, enrollment, and payment management system for Simply Sailing. Single school, single season. Replaces manual scheduling with a web app.
+Scheduling, enrollment, and payment management system for Learn to Sail Cleveland. Single school, single season. Replaces manual scheduling with a web app.
 
 Roles:
 - **Admin (Andy)** — manages course types, courses, sessions, enrollments, attendance, makeups, payments, refunds, and notifications.
