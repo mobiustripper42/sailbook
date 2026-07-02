@@ -14,6 +14,7 @@ import {
 import { fmtDateLong, fmtTime } from '@/lib/utils'
 import { attendanceStatusConfig } from '@/lib/attendance'
 import { dropInAlertText } from '@/lib/drop-in'
+import { getCreditBalanceCents } from '@/lib/credit'
 import type { AttendanceStatus } from '@/lib/attendance'
 import EnrollButton from '@/components/student/enroll-button'
 import CancelEnrollmentButton from '@/components/student/cancel-enrollment-button'
@@ -151,6 +152,8 @@ export default async function StudentCourseDetailPage({
 
   const isMember = myProfile?.is_member ?? false
   const displayPrice = (isMember && course.member_price != null) ? course.member_price : course.price
+
+  const creditBalanceCents = user ? await getCreditBalanceCents(supabase, user.id) : 0
 
   const type = course.course_types as unknown as {
     name: string
@@ -375,7 +378,14 @@ export default async function StudentCourseDetailPage({
             position={waitlistPosition ?? null}
           />
         ) : (
-          <EnrollButton courseId={id} />
+          <div className="space-y-2">
+            <EnrollButton courseId={id} />
+            {creditBalanceCents > 0 && (
+              <p className="text-sm text-muted-foreground">
+                You have ${(creditBalanceCents / 100).toFixed(2)} account credit — it&apos;ll be applied automatically at checkout.
+              </p>
+            )}
+          </div>
         )}
       </div>
     </div>

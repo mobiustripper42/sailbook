@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { notifyEnrollmentConfirmed } from '@/lib/notifications/triggers'
+import { confirmEnrollment } from '@/lib/enrollment-confirm'
 import type Stripe from 'stripe'
 
 export async function POST(req: NextRequest) {
@@ -55,20 +55,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true })
   }
 
-  const { error: updateErr } = await admin
-    .from('enrollments')
-    .update({
-      status: 'confirmed',
-      hold_expires_at: null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', enrollment.id)
-
-  if (updateErr) {
-    console.error('Webhook: failed to confirm enrollment:', updateErr.message)
-    return NextResponse.json({ error: updateErr.message }, { status: 500 })
-  }
-
   const { error: paymentErr } = await admin.from('payments').insert({
     enrollment_id: enrollment.id,
     student_id: enrollment.student_id,
@@ -85,45 +71,29 @@ export async function POST(req: NextRequest) {
     console.error('Webhook: failed to record payment:', paymentErr.message)
   }
 
-  const { data: sessions, error: sessionsErr } = await admin
-    .from('sessions')
-    .select('id')
-    .eq('course_id', enrollment.course_id)
-
-  if (sessionsErr) {
-    console.error('Webhook: failed to fetch sessions for attendance:', sessionsErr.message)
-  }
-
-  if (sessions && sessions.length > 0) {
-    const { error: attendanceErr } = await admin.from('session_attendance').upsert(
-      sessions.map((s) => ({
-        session_id: s.id,
-        enrollment_id: enrollment.id,
-        status: 'expected' as const,
-      })),
-      { onConflict: 'session_id,enrollment_id' }
-    )
-
-    if (attendanceErr) {
-      // Non-fatal: attendance records can be created by admin if needed
-      console.error('Webhook: failed to create attendance records:', attendanceErr.message)
+  // #107 — partial credit applied at checkout. Only redeem after Stripe has
+  // actually confirmed the remainder was paid; a failed/abandoned checkout
+  // must never burn the student's credit.
+  const creditAppliedCents = Number(session.metadata?.credit_applied_cents ?? 0)
+  if (creditAppliedCents > 0) {
+    const { error: redeemErr } = await admin.from('credit_ledger').insert({
+      student_id: enrollment.student_id,
+      amount_cents: -creditAppliedCents,
+      reason: `Applied to enrollment: ${session.metadata?.course_id ?? enrollment.course_id}`,
+      enrollment_id: enrollment.id,
+    })
+    if (redeemErr) {
+      // Non-fatal: enrollment is confirmed and paid. Credit redemption can be
+      // reconciled manually — the amount is fully recorded in this log line.
+      console.error(
+        `Webhook: failed to redeem credit_ledger (student ${enrollment.student_id}, ` +
+          `${creditAppliedCents} cents, enrollment ${enrollment.id}):`,
+        redeemErr.message,
+      )
     }
   }
 
-  // If this student happened to be on the waitlist for this course, drop the
-  // entry. Best-effort — failure is non-fatal.
-  const { error: waitlistErr } = await admin
-    .from('waitlist_entries')
-    .delete()
-    .eq('course_id', enrollment.course_id)
-    .eq('student_id', enrollment.student_id)
-  if (waitlistErr) {
-    console.error('Webhook: failed to clear waitlist entry:', waitlistErr.message)
-  }
-
-  // Fire-and-await: trigger swallows its own errors, so a notification
-  // failure can't 500 the webhook (Stripe would then retry the whole flow).
-  await notifyEnrollmentConfirmed(enrollment.id)
+  await confirmEnrollment(admin, enrollment)
 
   return NextResponse.json({ received: true })
 }

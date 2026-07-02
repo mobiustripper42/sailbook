@@ -3,8 +3,11 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { getDropInDeposit } from '@/lib/drop-in'
+import { getCreditBalanceCents } from '@/lib/credit'
+import { confirmEnrollment } from '@/lib/enrollment-confirm'
 
 export async function enrollInCourse(courseId: string) {
   const supabase = await createClient()
@@ -204,8 +207,71 @@ export async function createCheckoutSession(
   const chargeAmount = isDropIn
     ? dropInDeposit!
     : ((isMember && course.member_price != null) ? course.member_price : course.price!)
+  const priceCents = Math.round(chargeAmount * 100)
 
-  // Create Stripe Checkout Session
+  // #107 — apply any account credit toward this charge before creating a
+  // Stripe session. Credit is spent here (not at signup), so the balance
+  // read must be fresh for every checkout attempt.
+  const creditBalanceCents = await getCreditBalanceCents(supabase, user.id)
+  const creditAppliedCents = Math.min(creditBalanceCents, priceCents)
+  const remainingCents = priceCents - creditAppliedCents
+
+  if (remainingCents <= 0) {
+    // Credit fully covers the charge — skip Stripe entirely. No payments
+    // row: payments is a Stripe transaction log (per its own migration
+    // comment), and no Stripe transaction happened here. The credit_ledger
+    // redemption row is the audit trail, same as issuance (#106, DEC-035).
+    const admin = createAdminClient()
+
+    let enrollmentId: string
+    if (existing) {
+      const { error: updateErr } = await admin
+        .from('enrollments')
+        .update({
+          status: 'confirmed',
+          hold_expires_at: null,
+          stripe_checkout_session_id: null,
+          enrolled_at: now.toISOString(),
+        })
+        .eq('id', existing.id)
+      if (updateErr) return { error: updateErr.message }
+      enrollmentId = existing.id
+    } else {
+      const { data: inserted, error: insertErr } = await admin
+        .from('enrollments')
+        .insert({
+          course_id: courseId,
+          student_id: user.id,
+          status: 'confirmed',
+        })
+        .select('id')
+        .single()
+      if (insertErr) return { error: insertErr.message }
+      enrollmentId = inserted.id
+    }
+
+    if (creditAppliedCents > 0) {
+      const { error: redeemErr } = await admin.from('credit_ledger').insert({
+        student_id: user.id,
+        amount_cents: -creditAppliedCents,
+        reason: `Applied to enrollment: ${course.title ?? courseId}`,
+        enrollment_id: enrollmentId,
+      })
+      if (redeemErr) return { error: redeemErr.message }
+    }
+
+    await confirmEnrollment(admin, { id: enrollmentId, student_id: user.id, course_id: courseId })
+
+    revalidatePath(`/student/courses/${courseId}`)
+    // Relative path — this is an in-app redirect, not a handoff to Stripe, so
+    // there's no reason to resolve it against NEXT_PUBLIC_SITE_URL (which can
+    // point at a dev-only forwarded port that has nothing to do with the
+    // origin actually serving this request).
+    return { url: '/student/checkout/success' }
+  }
+
+  // Create Stripe Checkout Session for the remainder (full price if no
+  // credit applied)
   const checkoutSession = await stripe.checkout.sessions.create({
     customer: stripeCustomerId,
     payment_method_types: ['card'],
@@ -215,7 +281,7 @@ export async function createCheckoutSession(
         price_data: {
           currency: 'usd',
           product_data: { name: course.title ?? 'Course Enrollment' },
-          unit_amount: Math.round(chargeAmount * 100),
+          unit_amount: remainingCents,
         },
         quantity: 1,
       },
@@ -227,6 +293,10 @@ export async function createCheckoutSession(
     metadata: {
       course_id: courseId,
       student_id: user.id,
+      // #107 — redeemed by the webhook only after Stripe confirms this
+      // remainder was actually paid; a failed/abandoned checkout must never
+      // burn the student's credit. Stripe metadata values are strings.
+      credit_applied_cents: String(creditAppliedCents),
     },
   })
 
