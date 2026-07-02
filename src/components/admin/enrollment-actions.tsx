@@ -45,6 +45,14 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
 
   if (optimisticStatus === 'completed') return null
 
+  // Refund/credit resolve the payment directly from a confirmed enrollment
+  // too, not just after the student requests cancellation — admin-initiated
+  // cancellations (weather, capacity, etc.) never go through cancel_requested
+  // at all. Whenever a payment exists, force an explicit refund-or-credit
+  // choice rather than offering a silent no-refund cancel.
+  const showPaymentResolution =
+    (optimisticStatus === 'cancel_requested' || optimisticStatus === 'confirmed') && payment
+
   function handle(nextStatus: string, action: () => Promise<{ error: string | null }>) {
     const prevStatus = optimisticStatus
     setError(null)
@@ -136,7 +144,7 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
           </Button>
         )}
 
-        {optimisticStatus === 'cancel_requested' && payment ? (
+        {showPaymentResolution ? (
           <AlertDialog open={refundDialogOpen} onOpenChange={setRefundDialogOpen}>
             <AlertDialogTrigger asChild>
               <Button size="sm" variant="ghost" disabled={pending}>
@@ -181,7 +189,7 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
           </AlertDialog>
         ) : null}
 
-        {optimisticStatus === 'cancel_requested' && payment ? (
+        {showPaymentResolution ? (
           <AlertDialog open={creditDialogOpen} onOpenChange={setCreditDialogOpen}>
             <AlertDialogTrigger asChild>
               <Button size="sm" variant="ghost" disabled={pending}>
@@ -239,7 +247,7 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
           </Button>
         ) : null}
 
-        {optimisticStatus !== 'cancel_requested' && (
+        {!showPaymentResolution && optimisticStatus !== 'cancel_requested' && (
           <Button
             size="sm"
             variant="ghost"

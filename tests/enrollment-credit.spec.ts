@@ -94,6 +94,62 @@ test.describe('Admin issue-credit & cancel flow', () => {
     await expect(page.getByText(`Account credit: $${afterDollars}`)).toBeVisible({ timeout: 15000 })
   })
 
+  test('admin can issue credit directly from a confirmed enrollment (no student request needed)', async ({ page, request, browser }) => {
+    test.skip(test.info().project.name === 'mobile', 'Status/payment columns use nth() locators that shift on mobile')
+    test.setTimeout(60000)
+
+    // Admin-initiated cancellation (weather, capacity, etc.) never goes
+    // through cancel_requested — the student never asked. #106's whole point
+    // was an admin judgment call, so this path must work from 'confirmed' too.
+    const adminCtx = await browser.newContext()
+    const adminPage = await adminCtx.newPage()
+    let confirmedCourseId: string
+    try {
+      confirmedCourseId = await createTestCourse(adminPage, {
+        capacity: 6,
+        title: `Confirmed Credit Test ${runId()}`,
+        price: 250,
+      })
+    } finally {
+      await adminCtx.close()
+    }
+
+    const r = await request.post('http://localhost:3000/api/test/enroll', {
+      data: { courseId: confirmedCourseId, studentEmail: 'pw_student2@ltsc.test' },
+    })
+    expect(r.ok()).toBeTruthy()
+    const confirmedEnrollmentId = ((await r.json()) as { enrollmentId: string }).enrollmentId
+
+    const seed = await request.post('http://localhost:3000/api/test/set-cancel-requested', {
+      data: {
+        enrollmentId: confirmedEnrollmentId,
+        stripePaymentIntentId: `pi_test_confirmed_credit_${runId()}`,
+        amountCents: 25000,
+        status: 'confirmed',
+      },
+    })
+    expect(seed.ok()).toBeTruthy()
+
+    await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
+    await page.goto(`/admin/courses/${confirmedCourseId}`)
+    const row = page.getByRole('row').filter({ hasText: 'pw_student2@ltsc.test' })
+    await expect(row).toBeVisible()
+    await expect(row.getByRole('cell').nth(2)).toContainText('Enrolled')
+
+    // Both actions are already offered — no "Request Cancellation" needed
+    await expect(row.getByRole('button', { name: 'Process Refund' })).toBeVisible()
+    await expect(row.getByRole('button', { name: 'Issue Credit' })).toBeVisible()
+    // The old silent no-refund shortcut is NOT offered when a payment exists
+    await expect(row.getByRole('button', { name: 'Cancel', exact: true })).toHaveCount(0)
+
+    await row.getByRole('button', { name: 'Issue Credit' }).click({ force: true })
+    await page.getByLabel('Credit amount (USD)').fill('25.00')
+    await page.getByRole('button', { name: 'Issue Credit & Cancel' }).click({ force: true })
+
+    await expect(row.getByRole('cell').nth(2)).toContainText('cancelled', { timeout: 15000 })
+    await expect(row.getByRole('cell').nth(3)).toContainText('$25.00 credit')
+  })
+
   test('no student-facing credit request UI exists', async ({ page }) => {
     // Student can request cancellation, but never chooses refund vs. credit —
     // that's an admin-only decision (#106).
