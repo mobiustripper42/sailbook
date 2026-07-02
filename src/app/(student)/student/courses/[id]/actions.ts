@@ -7,7 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { getDropInDeposit } from '@/lib/drop-in'
 import { getCreditBalanceCents } from '@/lib/credit'
-import { confirmEnrollment } from '@/lib/enrollment-confirm'
+import { confirmWithFullCredit } from '@/lib/enrollment-confirm'
 
 export async function enrollInCourse(courseId: string) {
   const supabase = await createClient()
@@ -223,44 +223,14 @@ export async function createCheckoutSession(
     // redemption row is the audit trail, same as issuance (#106, DEC-035).
     const admin = createAdminClient()
 
-    let enrollmentId: string
-    if (existing) {
-      const { error: updateErr } = await admin
-        .from('enrollments')
-        .update({
-          status: 'confirmed',
-          hold_expires_at: null,
-          stripe_checkout_session_id: null,
-          enrolled_at: now.toISOString(),
-        })
-        .eq('id', existing.id)
-      if (updateErr) return { error: updateErr.message }
-      enrollmentId = existing.id
-    } else {
-      const { data: inserted, error: insertErr } = await admin
-        .from('enrollments')
-        .insert({
-          course_id: courseId,
-          student_id: user.id,
-          status: 'confirmed',
-        })
-        .select('id')
-        .single()
-      if (insertErr) return { error: insertErr.message }
-      enrollmentId = inserted.id
-    }
-
-    if (creditAppliedCents > 0) {
-      const { error: redeemErr } = await admin.from('credit_ledger').insert({
-        student_id: user.id,
-        amount_cents: -creditAppliedCents,
-        reason: `Applied to enrollment: ${course.title ?? courseId}`,
-        enrollment_id: enrollmentId,
-      })
-      if (redeemErr) return { error: redeemErr.message }
-    }
-
-    await confirmEnrollment(admin, { id: enrollmentId, student_id: user.id, course_id: courseId })
+    const { error: creditErr } = await confirmWithFullCredit(admin, {
+      existingEnrollmentId: existing?.id ?? null,
+      courseId,
+      studentId: user.id,
+      creditAppliedCents,
+      courseTitle: course.title,
+    })
+    if (creditErr) return { error: creditErr }
 
     revalidatePath(`/student/courses/${courseId}`)
     // Relative path — this is an in-app redirect, not a handoff to Stripe, so

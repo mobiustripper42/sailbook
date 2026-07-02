@@ -22,6 +22,12 @@ test.describe('#107 — credit applied at checkout', () => {
   test.describe.configure({ mode: 'serial' })
 
   test('credit fully covers the price — no Stripe charge, enrollment confirms directly', async ({ page, request }) => {
+    // desktop and mobile projects both run this whole file independently and
+    // concurrently (mode: 'serial' only orders tests *within* one project's
+    // run) — two projects redeeming the same pw_student credit balance at
+    // the same time is a self-inflicted race, not a real bug. Desktop-only,
+    // matching the next test's existing convention.
+    test.skip(test.info().project.name === 'mobile', 'Shared credit-balance fixture races against the desktop project run — desktop only')
     test.setTimeout(60000)
 
     const price = 100

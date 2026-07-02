@@ -67,7 +67,16 @@ export async function POST(req: NextRequest) {
   })
 
   if (paymentErr) {
-    // Non-fatal: enrollment is confirmed. Payment record can be reconciled manually.
+    // 23505 = unique_violation on payments_stripe_checkout_session_id_unique
+    // (added specifically to reject duplicate concurrent webhook deliveries
+    // for the same session). That's our "already processed" signal — a
+    // genuinely concurrent duplicate delivery must stop here, not fall
+    // through and double-redeem credit_ledger below.
+    if (paymentErr.code === '23505') {
+      return NextResponse.json({ received: true })
+    }
+    // Any other failure: non-fatal, enrollment still gets confirmed below.
+    // Payment record can be reconciled manually.
     console.error('Webhook: failed to record payment:', paymentErr.message)
   }
 

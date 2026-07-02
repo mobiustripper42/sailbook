@@ -69,3 +69,59 @@ export async function confirmEnrollment(
   // from a notification failure.
   await notifyEnrollmentConfirmed(enrollment.id)
 }
+
+// #107 — the zero-charge checkout path (credit fully covers the price, no
+// Stripe involved at all). Debits credit_ledger BEFORE flipping the
+// enrollment to 'confirmed' — the reverse order is a real bug: if the ledger
+// insert fails after status is already 'confirmed', the student ends up
+// enrolled with nothing actually deducted. The webhook's equivalent
+// (route.ts) already does payment-record-before-status-flip; this mirrors
+// that. The credit_ledger_prevent_overdraw trigger (migration
+// 20260702171443) is what actually closes the race between reading the
+// balance and writing this debit — this function alone can't.
+export async function confirmWithFullCredit(
+  admin: AdminClient,
+  params: {
+    existingEnrollmentId: string | null
+    courseId: string
+    studentId: string
+    creditAppliedCents: number
+    courseTitle: string | null
+  },
+): Promise<{ error: string | null; enrollmentId: string | null }> {
+  let enrollmentId: string
+
+  if (params.existingEnrollmentId) {
+    // Leave status untouched until the debit is secured — confirmEnrollment
+    // below does the final 'confirmed' flip regardless of the prior status.
+    enrollmentId = params.existingEnrollmentId
+  } else {
+    const { data: inserted, error: insertErr } = await admin
+      .from('enrollments')
+      .insert({
+        course_id: params.courseId,
+        student_id: params.studentId,
+        status: 'pending_payment',
+      })
+      .select('id')
+      .single()
+    if (insertErr) return { error: insertErr.message, enrollmentId: null }
+    enrollmentId = inserted.id
+  }
+
+  if (params.creditAppliedCents > 0) {
+    const { error: redeemErr } = await admin.from('credit_ledger').insert({
+      student_id: params.studentId,
+      amount_cents: -params.creditAppliedCents,
+      reason: `Applied to enrollment: ${params.courseTitle ?? params.courseId}`,
+      enrollment_id: enrollmentId,
+    })
+    // Fatal — nothing was actually paid via Stripe on this path, so a failed
+    // debit must not leave the enrollment confirmed. The DB trigger rejects
+    // this the same way if the balance can't cover it (concurrent overdraw).
+    if (redeemErr) return { error: redeemErr.message, enrollmentId: null }
+  }
+
+  await confirmEnrollment(admin, { id: enrollmentId, student_id: params.studentId, course_id: params.courseId })
+  return { error: null, enrollmentId }
+}
