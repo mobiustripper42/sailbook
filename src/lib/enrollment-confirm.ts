@@ -122,6 +122,25 @@ export async function confirmWithFullCredit(
     if (redeemErr) return { error: redeemErr.message, enrollmentId: null }
   }
 
+  // Architect review: payments is the settlement record for every confirmed
+  // enrollment regardless of rail — DEC-025 already established this for
+  // cash/check/venmo. Without a row here, a student who fully covers a
+  // course with credit can never have that specific enrollment
+  // refunded/credited later (processRefund/issueCredit both require a
+  // 'succeeded' payments row and would find none) — breaking exactly the
+  // #108 transfer-by-composition scenario this feature exists for, on its
+  // second hop.
+  const { error: paymentErr } = await admin.from('payments').insert({
+    enrollment_id: enrollmentId,
+    student_id: params.studentId,
+    amount_cents: params.creditAppliedCents,
+    payment_method: 'credit',
+    status: 'succeeded',
+  })
+  if (paymentErr) {
+    console.error('confirmWithFullCredit: failed to record payments row:', paymentErr.message)
+  }
+
   await confirmEnrollment(admin, { id: enrollmentId, student_id: params.studentId, course_id: params.courseId })
   return { error: null, enrollmentId }
 }

@@ -66,6 +66,57 @@ test.describe('#107 — credit applied at checkout', () => {
     }
   })
 
+  // DEC-036 (@architect review, not the original build) — a fully-credit-
+  // covered enrollment must still get a `payments` row, or a *second* hop of
+  // the #108 transfer-by-composition pattern (cancel-with-credit, re-enroll,
+  // that destination course later needs cancelling too) breaks: processRefund
+  // and issueCredit both require a 'succeeded' payments row and find none.
+  test('a fully-credit-covered enrollment can itself be refunded or credited later', async ({ page, request }) => {
+    test.skip(test.info().project.name === 'mobile', 'Shared credit-balance fixture races against the desktop project run — desktop only')
+    test.setTimeout(60000)
+
+    const price = 80
+    const courseId = await createTestCourse(page, {
+      capacity: 4,
+      title: `Second Hop Test ${runId()}`,
+      price,
+    })
+
+    const seed = await request.post(`${BASE}/api/test/seed-credit`, {
+      data: { studentEmail: 'pw_student@ltsc.test', amountCents: 8000, absolute: true },
+    })
+    expect(seed.ok()).toBeTruthy()
+
+    const studentCtx = await page.context().browser()!.newContext()
+    const studentPage = await studentCtx.newPage()
+    try {
+      await loginAs(studentPage, 'pw_student@ltsc.test', '/student/dashboard')
+      await studentPage.goto(`/student/courses/${courseId}`)
+      await studentPage.getByRole('button', { name: 'Register & Pay' }).click()
+      await studentPage.waitForURL('**/student/checkout/success', { timeout: 15000 })
+    } finally {
+      await studentCtx.close()
+    }
+
+    // Admin sees a real settlement record — Process Refund / Issue Credit are
+    // both offered directly from 'confirmed', same as any other paid enrollment.
+    // `page` is already admin-authenticated from createTestCourse above —
+    // re-visiting /login on an authenticated context redirects to the
+    // dashboard instead of showing the form (loginAs's own documented gotcha).
+    await page.goto(`/admin/courses/${courseId}`)
+    const row = page.getByRole('row').filter({ hasText: 'pw_student@ltsc.test' })
+    await expect(row).toBeVisible()
+    await expect(row.getByRole('cell').nth(3)).toContainText('$80.00')
+    await expect(row.getByRole('button', { name: 'Process Refund' })).toBeVisible()
+    await expect(row.getByRole('button', { name: 'Issue Credit' })).toBeVisible()
+
+    // Complete the second hop: credit it back (mirrors #108's actual scenario)
+    await row.getByRole('button', { name: 'Issue Credit' }).click({ force: true })
+    await page.getByRole('button', { name: 'Issue Credit & Cancel' }).click({ force: true })
+    await expect(row.getByRole('cell').nth(2)).toContainText('cancelled', { timeout: 15000 })
+    await expect(row.getByRole('cell').nth(3)).toContainText('$80.00 credit')
+  })
+
   test('partial credit — Stripe charges the remainder, credit fully redeemed on webhook', async ({ page, request }) => {
     const stripeKey = process.env.STRIPE_SECRET_KEY
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
