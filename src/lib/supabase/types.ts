@@ -224,6 +224,58 @@ export type Database = {
           },
         ]
       }
+      credit_ledger: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          enrollment_id: string | null
+          id: string
+          issued_by: string | null
+          reason: string | null
+          student_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          enrollment_id?: string | null
+          id?: string
+          issued_by?: string | null
+          reason?: string | null
+          student_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          enrollment_id?: string | null
+          id?: string
+          issued_by?: string | null
+          reason?: string | null
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_ledger_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_ledger_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_ledger_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enrollments: {
         Row: {
           course_id: string

@@ -1,13 +1,18 @@
 /**
- * DEV/TEST ONLY — sets an enrollment to cancel_requested and optionally seeds
- * a payment row. Pass a real Stripe test PI id via stripePaymentIntentId when
- * you want the full refund flow exercised end-to-end.
+ * DEV/TEST ONLY — sets an enrollment's status (cancel_requested by default)
+ * and optionally seeds a payment row. Pass a real Stripe test PI id via
+ * stripePaymentIntentId when you want the full refund flow exercised
+ * end-to-end.
  *
  * POST /api/test/set-cancel-requested
  * Body: {
  *   enrollmentId: string
  *   stripePaymentIntentId?: string   // if provided, inserts a succeeded payment row
  *   amountCents?: number             // defaults to 25000
+ *   status?: string                  // defaults to 'cancel_requested'; pass
+ *                                     // 'confirmed' to seed a payment on a
+ *                                     // still-confirmed enrollment (#106
+ *                                     // admin-initiated refund/credit path)
  * }
  * Returns: { enrollmentId }
  *
@@ -26,10 +31,12 @@ export async function POST(req: NextRequest) {
     enrollmentId,
     stripePaymentIntentId,
     amountCents = 25000,
+    status = 'cancel_requested',
   } = await req.json() as {
     enrollmentId: string
     stripePaymentIntentId?: string
     amountCents?: number
+    status?: string
   }
 
   if (!enrollmentId) {
@@ -67,7 +74,7 @@ export async function POST(req: NextRequest) {
 
   const { error: updateErr } = await admin
     .from('enrollments')
-    .update({ status: 'cancel_requested', updated_at: new Date().toISOString() })
+    .update({ status, updated_at: new Date().toISOString() })
     .eq('id', enrollmentId)
 
   if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
