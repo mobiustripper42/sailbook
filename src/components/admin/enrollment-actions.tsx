@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { confirmEnrollment, cancelEnrollment, processRefund, restoreEnrollment } from '@/actions/enrollments'
+import { confirmEnrollment, cancelEnrollment, processRefund, issueCredit, restoreEnrollment } from '@/actions/enrollments'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -37,6 +37,11 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
     payment ? (payment.amountCents / 100).toFixed(2) : '0.00'
   )
   const [refundError, setRefundError] = useState<string | null>(null)
+  const [creditDialogOpen, setCreditDialogOpen] = useState(false)
+  const [creditAmount, setCreditAmount] = useState(
+    payment ? (payment.amountCents / 100).toFixed(2) : '0.00'
+  )
+  const [creditError, setCreditError] = useState<string | null>(null)
 
   if (optimisticStatus === 'completed') return null
 
@@ -75,6 +80,26 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
     setRefundDialogOpen(false)
     handle('cancelled', () =>
       processRefund(enrollmentId, courseId, isFullRefund ? undefined : refundCents)
+    )
+  }
+
+  function handleCredit() {
+    setCreditError(null)
+    const dollars = parseFloat(creditAmount)
+    if (isNaN(dollars) || dollars <= 0) {
+      setCreditError('Enter a valid amount.')
+      return
+    }
+    const maxDollars = payment ? payment.amountCents / 100 : 0
+    if (dollars > maxDollars) {
+      setCreditError(`Cannot exceed original charge of $${maxDollars.toFixed(2)}.`)
+      return
+    }
+    const creditCents = Math.round(dollars * 100)
+    const isFullCredit = payment && creditCents === payment.amountCents
+    setCreditDialogOpen(false)
+    handle('cancelled', () =>
+      issueCredit(enrollmentId, courseId, isFullCredit ? undefined : creditCents)
     )
   }
 
@@ -150,6 +175,53 @@ export default function EnrollmentActions({ enrollmentId, courseId, status, paym
                   {pending
                     ? <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
                     : 'Refund & Cancel'}
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        ) : null}
+
+        {optimisticStatus === 'cancel_requested' && payment ? (
+          <AlertDialog open={creditDialogOpen} onOpenChange={setCreditDialogOpen}>
+            <AlertDialogTrigger asChild>
+              <Button size="sm" variant="ghost" disabled={pending}>
+                Issue Credit
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Issue Credit &amp; Cancel</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Original charge: ${(payment.amountCents / 100).toFixed(2)}. No refund is
+                  processed — this amount is credited to the student&apos;s account instead,
+                  redeemable on a future course. Enter the credit amount — leave as-is for
+                  full credit.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="py-2 space-y-1">
+                <Label htmlFor="credit-amount">Credit amount (USD)</Label>
+                <Input
+                  id="credit-amount"
+                  type="number"
+                  min="0.01"
+                  max={(payment.amountCents / 100).toFixed(2)}
+                  step="0.01"
+                  value={creditAmount}
+                  onChange={(e) => {
+                    setCreditAmount(e.target.value)
+                    setCreditError(null)
+                  }}
+                />
+                {creditError && (
+                  <p className="text-xs text-destructive">{creditError}</p>
+                )}
+              </div>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <Button onClick={handleCredit} disabled={pending}>
+                  {pending
+                    ? <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    : 'Issue Credit & Cancel'}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>

@@ -332,3 +332,77 @@ export async function processRefund(
   // Cancel the enrollment and flip attendance records
   return cancelEnrollment(enrollmentId, courseId)
 }
+
+// #106 — admin-only alternative to processRefund: instead of a Stripe/manual
+// refund, credit the amount to the student's account (never expires, no
+// self-service student request — same trust model as processRefund). No
+// money moves; the school keeps the cash and the student gets a redeemable
+// balance (#107 spends it at a future checkout).
+export async function issueCredit(
+  enrollmentId: string,
+  courseId: string,
+  creditAmountCents?: number,
+): Promise<{ error: string | null }> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized.' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (!profile?.is_admin) return { error: 'Unauthorized.' }
+
+  const { data: enrollment } = await supabase
+    .from('enrollments')
+    .select('student_id')
+    .eq('id', enrollmentId)
+    .maybeSingle()
+  if (!enrollment) return { error: 'Enrollment not found.' }
+
+  const { data: payment } = await supabase
+    .from('payments')
+    .select('id, amount_cents, status')
+    .eq('enrollment_id', enrollmentId)
+    .eq('status', 'succeeded')
+    .maybeSingle()
+  if (!payment) return { error: 'No payment found to credit.' }
+
+  const amountToCredit = creditAmountCents ?? payment.amount_cents
+  if (amountToCredit <= 0 || amountToCredit > payment.amount_cents) {
+    return { error: 'Credit amount must be between $0.01 and the original charge.' }
+  }
+
+  const { data: course } = await supabase
+    .from('courses')
+    .select('title')
+    .eq('id', courseId)
+    .maybeSingle()
+
+  const { error: ledgerErr } = await supabase.from('credit_ledger').insert({
+    student_id: enrollment.student_id,
+    amount_cents: amountToCredit,
+    reason: `Cancelled: ${course?.title ?? 'course'}`,
+    enrollment_id: enrollmentId,
+    issued_by: user.id,
+  })
+  if (ledgerErr) return { error: ledgerErr.message }
+
+  // No Stripe call — the school keeps the cash. Reuse refund_amount_cents to
+  // record how much of this payment was credited back (same "money left
+  // this payment record" semantics as a refund, just a different destination).
+  const { error: updateErr } = await supabase
+    .from('payments')
+    .update({
+      status: 'credited',
+      refund_amount_cents: amountToCredit,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', payment.id)
+  if (updateErr) return { error: updateErr.message }
+
+  // Cancel the enrollment and flip attendance records
+  return cancelEnrollment(enrollmentId, courseId)
+}

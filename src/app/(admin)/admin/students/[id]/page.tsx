@@ -23,6 +23,12 @@ export default async function AdminStudentViewPage({
 
   const { data: courses, error } = await fetchStudentHistory(supabase, id)
 
+  const { data: creditRows } = await supabase
+    .from('credit_ledger')
+    .select('amount_cents')
+    .eq('student_id', id)
+  const creditBalanceCents = (creditRows ?? []).reduce((sum, r) => sum + r.amount_cents, 0)
+
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
@@ -48,6 +54,11 @@ export default async function AdminStudentViewPage({
           {profile.asa_number && <p>ASA #: {profile.asa_number}</p>}
           {profile.experience_level && (
             <p className="capitalize">Experience: {profile.experience_level}</p>
+          )}
+          {creditBalanceCents > 0 && (
+            <p className="text-foreground font-medium">
+              Account credit: ${(creditBalanceCents / 100).toFixed(2)}
+            </p>
           )}
         </div>
       </div>
