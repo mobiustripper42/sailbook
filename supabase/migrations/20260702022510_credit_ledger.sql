@@ -29,15 +29,24 @@ CREATE INDEX idx_credit_ledger_student ON public.credit_ledger(student_id);
 -- ============================================================
 ALTER TABLE public.credit_ledger ENABLE ROW LEVEL SECURITY;
 
--- Admins: full access (issue credit, read all balances/history)
-CREATE POLICY "Admin full access on credit_ledger"
+-- Admins: issue credit + read all balances/history. INSERT + SELECT only —
+-- deliberately no UPDATE/DELETE. The ledger's whole design premise is
+-- immutable rows (balance = SUM, never a mutable column); granting write
+-- access to existing rows would let a stray UPDATE silently rewrite
+-- financial history with nothing to catch it.
+CREATE POLICY "Admin insert credit_ledger"
   ON public.credit_ledger
-  FOR ALL
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    (auth.jwt() -> 'user_metadata' ->> 'is_admin')::boolean = TRUE
+  );
+
+CREATE POLICY "Admin read all credit_ledger"
+  ON public.credit_ledger
+  FOR SELECT
   TO authenticated
   USING (
-    (auth.jwt() -> 'user_metadata' ->> 'is_admin')::boolean = TRUE
-  )
-  WITH CHECK (
     (auth.jwt() -> 'user_metadata' ->> 'is_admin')::boolean = TRUE
   );
 

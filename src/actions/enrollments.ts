@@ -401,7 +401,11 @@ export async function issueCredit(
       updated_at: new Date().toISOString(),
     })
     .eq('id', payment.id)
-  if (updateErr) return { error: updateErr.message }
+
+  if (updateErr) {
+    console.error('issueCredit: ledger row created but payment update failed', updateErr)
+    return { error: updateErr.message }
+  }
 
   // Cancel the enrollment and flip attendance records
   return cancelEnrollment(enrollmentId, courseId)

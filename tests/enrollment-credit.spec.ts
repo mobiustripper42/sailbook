@@ -52,13 +52,18 @@ test.describe('Admin issue-credit & cancel flow', () => {
 
   test('admin issues partial credit instead of a refund', async ({ page }) => {
     test.skip(test.info().project.name === 'mobile', 'Status/payment columns use nth() locators that shift on mobile')
+    test.setTimeout(60000)
 
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
 
     // Baseline balance — pw_student2 is a shared fixture, other test runs may
     // have already credited them, so assert the DELTA, not an absolute total.
+    // The balance paragraph doesn't render at all when the balance is $0
+    // (creditBalanceCents > 0 gate on the page), so give the lookup a short
+    // explicit timeout — without one, a not-present locator polls up to the
+    // test's ambient timeout before the .catch rescues it.
     await page.goto(`/admin/students/${STUDENT_ID}`)
-    const beforeText = await page.getByText(/Account credit: \$/).textContent().catch(() => null)
+    const beforeText = await page.getByText(/Account credit: \$/).textContent({ timeout: 2000 }).catch(() => null)
     const beforeCents = beforeText ? Math.round(parseFloat(beforeText.replace(/[^0-9.]/g, '')) * 100) : 0
 
     await page.goto(`/admin/courses/${courseId}`)

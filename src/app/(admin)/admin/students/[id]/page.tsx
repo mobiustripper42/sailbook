@@ -23,10 +23,11 @@ export default async function AdminStudentViewPage({
 
   const { data: courses, error } = await fetchStudentHistory(supabase, id)
 
-  const { data: creditRows } = await supabase
+  const { data: creditRows, error: creditError } = await supabase
     .from('credit_ledger')
     .select('amount_cents')
     .eq('student_id', id)
+  if (creditError) console.error('AdminStudentViewPage: credit_ledger lookup failed', creditError)
   const creditBalanceCents = (creditRows ?? []).reduce((sum, r) => sum + r.amount_cents, 0)
 
   return (
