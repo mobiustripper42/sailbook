@@ -101,6 +101,8 @@ The migration **discipline** lives in the shell's `## Migration Protocol`. This 
 - After `/promote-production` ships `main` → `production`: apply to **prod** Supabase: `supabase link --project-ref <prod-ref> && supabase db push`.
 - Never push a migration to prod that hasn't run on staging.
 
+**Pre-promote QA gate.** `main` deploys to `dev-sailbook.vercel.app`, the shared QA environment for auth/OAuth/Stripe-checkout flows — Google OAuth and checkout redirects only work reliably on this fixed domain, not arbitrary per-PR preview URLs (see `docs/DEPLOYMENT.md`, "QA a branch on dev-sailbook.vercel.app"). Before running `/promote-production`, confirm `dev-sailbook.vercel.app` was QA'd against this release: Git Branch repointed to `main`, and actually looked at since the last merge. Promoting without this QA is what caused issue #99. This is SailBook's answer to the generic Step 0.5 QA-confirm gate in the `promote-production` skill.
+
 **Production write protection (DEC-S009) — recommended hardening.** SailBook does not yet ship `scripts/safe-supabase.sh`. Until it does, the discipline is the guard: only `supabase link` to staging or local from a dev box; the explicit prod push above is the single sanctioned exception. To adopt the wrapper, copy `dev/claude/scripts/safe-supabase.sh` from seeds and list the prod ref in `.claude/prod-supabase-refs` (gitignored).
 
 ## Conventions
