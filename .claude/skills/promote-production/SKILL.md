@@ -20,14 +20,13 @@ git status --porcelain
 ```
 If non-empty, STOP. Tell the user: "Uncommitted changes — commit, stash, or discard before promoting." Wait.
 
-## Step 0.5 — Confirm preview QA happened
+## Step 0.5 — Confirm the release was QA'd
 
-`main` deploys to `dev-sailbook.vercel.app`, the shared QA environment for auth/OAuth/Stripe-checkout
-flows (per `docs/DEPLOYMENT.md`, "QA a branch on dev-sailbook.vercel.app" — Google OAuth and checkout
-redirects only work reliably on this fixed domain, not arbitrary per-PR preview URLs). Ask the user:
-**"Has dev-sailbook.vercel.app been QA'd against this release — Git Branch repointed to `main`, and
-actually looked at since the last merge? (yes/no)"** If no, STOP and tell them to do that first (issue
-#99 was filed over promoting without this). Do not proceed on an unconfirmed answer.
+If the project deploys the trunk (`main`) to a shared staging or preview environment before production, confirm it was actually QA'd against **this** release before promoting. The environment and what to check are project-specific — they live in `.claude/CLAUDE-context.md` (`## Migration Protocol (project)`) or `docs/DEPLOYMENT.md`. Ask the user:
+
+**"Has the staging/preview environment been QA'd against this release since the last merge? (yes/no)"**
+
+If no, STOP and tell them to QA first. Do not proceed on an unconfirmed answer. If the project deploys straight to production with no separate staging surface, skip this step.
 
 ## Step 1 — Sync local refs
 
