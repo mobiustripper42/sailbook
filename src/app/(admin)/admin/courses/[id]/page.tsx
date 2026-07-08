@@ -90,7 +90,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         .from('payments')
         .select('enrollment_id, amount_cents, refund_amount_cents, stripe_payment_intent_id, status')
         .in('enrollment_id', enrollmentIds)
-        .in('status', ['succeeded', 'refunded', 'credited'])
+        .in('status', ['succeeded', 'refunded'])
     : { data: [] }
 
   const paymentByEnrollment = new Map(
@@ -249,17 +249,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                       <TableCell className="hidden sm:table-cell text-sm">
                         {payment ? (
                           <span className="flex items-center gap-1.5">
-                            <span className={payment.status === 'refunded' || payment.status === 'credited' ? 'text-muted-foreground line-through' : ''}>
+                            <span className={payment.status === 'refunded' ? 'text-muted-foreground line-through' : ''}>
                               ${(payment.amount_cents / 100).toFixed(2)}
                             </span>
                             {payment.status === 'refunded' && payment.refund_amount_cents != null && (
                               <span className="text-muted-foreground">
                                 −${(payment.refund_amount_cents / 100).toFixed(2)}
-                              </span>
-                            )}
-                            {payment.status === 'credited' && payment.refund_amount_cents != null && (
-                              <span className="text-muted-foreground">
-                                ${(payment.refund_amount_cents / 100).toFixed(2)} credit
                               </span>
                             )}
                             {payment.stripe_payment_intent_id && (
