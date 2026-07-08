@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import StudentAccountForm from '@/components/student/student-account-form'
 import NotificationPreferencesSection from '@/components/student/notification-preferences-section'
 import { isSMSEnabled, normalizeStudentPreferences } from '@/lib/notifications/preferences'
+import { getCreditBalanceCents } from '@/lib/credit'
 
 export const metadata = { title: 'SailBook — Account' }
 
@@ -28,6 +29,7 @@ export default async function StudentAccountPage() {
   if (!profile) redirect('/login')
 
   const initialNotifPrefs = normalizeStudentPreferences(profile.notification_preferences)
+  const creditBalanceCents = await getCreditBalanceCents(supabase, user.id)
 
   return (
     <div className="space-y-8 max-w-3xl">
@@ -36,6 +38,11 @@ export default async function StudentAccountPage() {
         <p className="text-sm text-muted-foreground">
           Update your name, contact info, and sailing background.
         </p>
+        {creditBalanceCents > 0 && (
+          <p className="text-sm text-foreground font-medium pt-1">
+            Account credit: ${(creditBalanceCents / 100).toFixed(2)}
+          </p>
+        )}
       </div>
 
       <StudentAccountForm

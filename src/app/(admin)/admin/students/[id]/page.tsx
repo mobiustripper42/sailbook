@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { fetchStudentHistory } from '@/lib/student-history'
+import { getCreditBalanceCents } from '@/lib/credit'
 import StudentHistoryList from '@/components/student/student-history-list'
 
 export default async function AdminStudentViewPage({
@@ -23,12 +24,7 @@ export default async function AdminStudentViewPage({
 
   const { data: courses, error } = await fetchStudentHistory(supabase, id)
 
-  const { data: creditRows, error: creditError } = await supabase
-    .from('credit_ledger')
-    .select('amount_cents')
-    .eq('student_id', id)
-  if (creditError) console.error('AdminStudentViewPage: credit_ledger lookup failed', creditError)
-  const creditBalanceCents = (creditRows ?? []).reduce((sum, r) => sum + r.amount_cents, 0)
+  const creditBalanceCents = await getCreditBalanceCents(supabase, id)
 
   return (
     <div className="space-y-6 max-w-3xl">

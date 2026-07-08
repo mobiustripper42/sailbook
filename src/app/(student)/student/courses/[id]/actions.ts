@@ -3,8 +3,11 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { getDropInDeposit } from '@/lib/drop-in'
+import { getCreditBalanceCents } from '@/lib/credit'
+import { confirmWithFullCredit } from '@/lib/enrollment-confirm'
 
 export async function enrollInCourse(courseId: string) {
   const supabase = await createClient()
@@ -204,8 +207,41 @@ export async function createCheckoutSession(
   const chargeAmount = isDropIn
     ? dropInDeposit!
     : ((isMember && course.member_price != null) ? course.member_price : course.price!)
+  const priceCents = Math.round(chargeAmount * 100)
 
-  // Create Stripe Checkout Session
+  // #107 — apply any account credit toward this charge before creating a
+  // Stripe session. Credit is spent here (not at signup), so the balance
+  // read must be fresh for every checkout attempt.
+  const creditBalanceCents = await getCreditBalanceCents(supabase, user.id)
+  const creditAppliedCents = Math.min(creditBalanceCents, priceCents)
+  const remainingCents = priceCents - creditAppliedCents
+
+  if (remainingCents <= 0) {
+    // Credit fully covers the charge — skip Stripe entirely. No payments
+    // row: payments is a Stripe transaction log (per its own migration
+    // comment), and no Stripe transaction happened here. The credit_ledger
+    // redemption row is the audit trail, same as issuance (#106, DEC-035).
+    const admin = createAdminClient()
+
+    const { error: creditErr } = await confirmWithFullCredit(admin, {
+      existingEnrollmentId: existing?.id ?? null,
+      courseId,
+      studentId: user.id,
+      creditAppliedCents,
+      courseTitle: course.title,
+    })
+    if (creditErr) return { error: creditErr }
+
+    revalidatePath(`/student/courses/${courseId}`)
+    // Relative path — this is an in-app redirect, not a handoff to Stripe, so
+    // there's no reason to resolve it against NEXT_PUBLIC_SITE_URL (which can
+    // point at a dev-only forwarded port that has nothing to do with the
+    // origin actually serving this request).
+    return { url: '/student/checkout/success' }
+  }
+
+  // Create Stripe Checkout Session for the remainder (full price if no
+  // credit applied)
   const checkoutSession = await stripe.checkout.sessions.create({
     customer: stripeCustomerId,
     payment_method_types: ['card'],
@@ -215,7 +251,7 @@ export async function createCheckoutSession(
         price_data: {
           currency: 'usd',
           product_data: { name: course.title ?? 'Course Enrollment' },
-          unit_amount: Math.round(chargeAmount * 100),
+          unit_amount: remainingCents,
         },
         quantity: 1,
       },
@@ -227,6 +263,10 @@ export async function createCheckoutSession(
     metadata: {
       course_id: courseId,
       student_id: user.id,
+      // #107 — redeemed by the webhook only after Stripe confirms this
+      // remainder was actually paid; a failed/abandoned checkout must never
+      // burn the student's credit. Stripe metadata values are strings.
+      credit_applied_cents: String(creditAppliedCents),
     },
   })
 
