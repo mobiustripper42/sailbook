@@ -31,6 +31,23 @@ test.describe('Admin: create student', () => {
     await expect(page.getByRole('row').filter({ hasText: `Ghost ${id}` })).toBeVisible()
   })
 
+  test('phone is required — omitting it blocks the Add Student submit', async ({ page }) => {
+    await loginAs(page, ADMIN_EMAIL, '/admin/dashboard')
+    await page.goto('/admin/students/new')
+
+    await page.getByLabel('First name').fill('NoPhone')
+    await page.getByLabel('Last name').fill(runId())
+    await page.getByLabel('Email').fill(`nophone-${runId()}@test.invalid`)
+    // Phone deliberately left blank
+
+    await page.getByRole('button', { name: 'Create Student' }).click()
+
+    // Native `required` validation blocks the submit — we stay on the form and
+    // the phone field reports invalid.
+    await expect(page.getByRole('heading', { name: 'Add Student' })).toBeVisible()
+    await expect(page.getByLabel('Phone')).toHaveJSProperty('validity.valid', false)
+  })
+
   test('duplicate email shows an error', async ({ page }) => {
     await loginAs(page, ADMIN_EMAIL, '/admin/dashboard')
     await page.goto('/admin/students/new')
@@ -39,6 +56,9 @@ test.describe('Admin: create student', () => {
     await page.getByLabel('First name').fill('Dupe')
     await page.getByLabel('Last name').fill('Test')
     await page.getByLabel('Email').fill('pw_student@ltsc.test')
+    // Phone is required (#129) — fill it so the submit reaches the server-side
+    // duplicate-email check rather than being blocked by native validation.
+    await page.getByLabel('Phone').fill('555-000-0000')
 
     await page.getByRole('button', { name: 'Create Student' }).click()
 

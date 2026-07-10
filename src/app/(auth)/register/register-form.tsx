@@ -156,6 +156,7 @@ export default function RegisterForm({ experienceCodes, smsEnabled = false }: { 
               id="phone"
               name="phone"
               type="tel"
+              required
               autoComplete="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}

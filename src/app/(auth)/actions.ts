@@ -37,6 +37,10 @@ export async function register(_: unknown, formData: FormData) {
 
   const next = safeNextPath(formData.get('next') as string | null) ?? '/student/dashboard'
 
+  // Phone is required for students so the school can reach them about sessions,
+  // cancellations, and ASA book shipments (#129).
+  if (!phone) return { error: 'Phone number is required.' }
+
   // Mirror the Supabase password policy server-side for a clearer error path.
   const passwordError = validatePassword(password)
   if (passwordError) return { error: passwordError }
@@ -259,6 +263,10 @@ export async function requestRegisterCode(
   if (!email) return { ok: false, error: 'Enter your email.' }
   if (!isValidEmail(email)) return { ok: false, error: 'Enter a valid email address.' }
 
+  // Phone is required for students (#129) — matches the password-path register().
+  const phone = (formData.get('phone') as string)?.trim() || ''
+  if (!phone) return { ok: false, error: 'Phone number is required.' }
+
   const supabase = await createClient()
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -274,7 +282,7 @@ export async function requestRegisterCode(
       data: {
         first_name: formData.get('firstName') as string,
         last_name: formData.get('lastName') as string,
-        phone: (formData.get('phone') as string)?.trim() || '',
+        phone,
         experience_level: (formData.get('experienceLevel') as string) || '',
         instructor_notes: (formData.get('instructorNotes') as string)?.trim() || '',
       },

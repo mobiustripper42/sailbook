@@ -36,6 +36,11 @@ export async function updateUserProfile(formData: FormData) {
     return { error: 'First name and last name are required.' }
   }
 
+  // Students must have a phone on file (#129); other roles may leave it blank.
+  if (is_student && !phone) {
+    return { error: 'Phone number is required for students.' }
+  }
+
   const updates: Record<string, unknown> = {
     first_name,
     last_name,
@@ -191,8 +196,9 @@ export async function createAdminStudent(
   const asa_number = (formData.get('asa_number') as string)?.trim() || null
 
   if (!first_name || !last_name || !email) return 'First name, last name, and email are required.'
+  if (!phone) return 'Phone number is required.'
   if (first_name.length > 100 || last_name.length > 100) return 'Name must be 100 characters or fewer.'
-  if (phone && phone.length > 30) return 'Phone must be 30 characters or fewer.'
+  if (phone.length > 30) return 'Phone must be 30 characters or fewer.'
   if (asa_number && asa_number.length > 20) return 'ASA number must be 20 characters or fewer.'
 
   const adminClient = createAdminClient()

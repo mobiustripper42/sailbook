@@ -48,6 +48,25 @@ test.describe('Auth — VersionTag', () => {
   }
 });
 
+test.describe('Auth — registration', () => {
+  test('phone field is required (#129)', async ({ page }) => {
+    await page.goto('/register');
+
+    const phone = page.getByLabel('Phone');
+    await expect(phone).toHaveAttribute('required', '');
+
+    // Fill name + email, leave phone blank. Native required validation must
+    // block the submit regardless of the passwordless flag / password field.
+    await page.getByLabel('First name').fill('No');
+    await page.getByLabel('Last name').fill('Phone');
+    await page.getByLabel('Email').fill(`nophone-${Date.now()}@test.invalid`);
+    await page.getByRole('button', { name: /create account|email me a code/i }).click();
+
+    await expect(page).toHaveURL(/\/register/);
+    await expect(phone).toHaveJSProperty('validity.valid', false);
+  });
+});
+
 test.describe('Auth — unauthenticated access', () => {
   test('unauthenticated user visiting / is redirected to /login', async ({ page }) => {
     await page.goto('/');
