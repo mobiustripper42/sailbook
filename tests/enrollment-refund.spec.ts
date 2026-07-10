@@ -151,4 +151,74 @@ test.describe('Admin refund & cancel flow', () => {
     await expect(row.getByRole('cell').nth(3)).toContainText('$250.00')
     await expect(row.getByRole('cell').nth(3)).toContainText('$50.00')
   })
+
+  // Admin-initiated cancellations (weather, capacity, etc.) never go through
+  // cancel_requested — the student never asked. Refund must be resolvable
+  // directly from a confirmed enrollment too, not gated on a student request.
+  test('admin can process a refund directly from a confirmed enrollment (no student request needed)', async ({ page, request, browser }) => {
+    test.skip(test.info().project.name === 'mobile', 'Status/payment columns use nth() locators that shift on mobile')
+    test.skip(
+      !process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder'),
+      'Real Stripe keys not configured (or placeholder only) — processRefund calls stripe.refunds.create against a real PI'
+    )
+    test.setTimeout(60000)
+
+    const adminCtx = await browser.newContext()
+    const adminPage = await adminCtx.newPage()
+    let confirmedCourseId: string
+    try {
+      confirmedCourseId = await createTestCourse(adminPage, {
+        capacity: 6,
+        title: `Confirmed Refund Test ${runId()}`,
+        price: 250,
+      })
+    } finally {
+      await adminCtx.close()
+    }
+
+    const r = await request.post('http://localhost:3000/api/test/enroll', {
+      data: { courseId: confirmedCourseId, studentEmail: 'pw_student2@ltsc.test' },
+    })
+    expect(r.ok()).toBeTruthy()
+    const confirmedEnrollmentId = ((await r.json()) as { enrollmentId: string }).enrollmentId
+
+    // Real Stripe test PI — processRefund calls stripe.refunds.create against it,
+    // unlike issueCredit (which never touches Stripe).
+    const stripe = stripeClient()
+    const pi = await stripe.paymentIntents.create({
+      amount: 25000,
+      currency: 'usd',
+      payment_method: 'pm_card_visa',
+      payment_method_types: ['card'],
+      confirm: true,
+      off_session: true,
+    })
+
+    const seed = await request.post('http://localhost:3000/api/test/set-cancel-requested', {
+      data: {
+        enrollmentId: confirmedEnrollmentId,
+        stripePaymentIntentId: pi.id,
+        amountCents: 25000,
+        status: 'confirmed',
+      },
+    })
+    expect(seed.ok()).toBeTruthy()
+
+    await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
+    await page.goto(`/admin/courses/${confirmedCourseId}`)
+    const row = page.getByRole('row').filter({ hasText: 'pw_student2@ltsc.test' })
+    await expect(row).toBeVisible()
+    await expect(row.getByRole('cell').nth(2)).toContainText('Enrolled')
+
+    // Offered directly — no "Request Cancellation" needed
+    await expect(row.getByRole('button', { name: 'Process Refund' })).toBeVisible()
+    // The old silent no-refund shortcut is NOT offered when a payment exists
+    await expect(row.getByRole('button', { name: 'Cancel', exact: true })).toHaveCount(0)
+
+    await row.getByRole('button', { name: 'Process Refund' }).click({ force: true })
+    await page.getByRole('button', { name: 'Refund & Cancel' }).click({ force: true })
+
+    await expect(row.getByRole('cell').nth(2)).toContainText('cancelled', { timeout: 15000 })
+    await expect(row.getByRole('cell').nth(3)).toContainText('$250.00')
+  })
 })

@@ -338,6 +338,15 @@ export async function processRefund(
 // self-service student request — same trust model as processRefund). No
 // money moves; the school keeps the cash and the student gets a redeemable
 // balance (#107 spends it at a future checkout).
+//
+// Currently unreachable from the UI (see DEC-035's status update, 2026-07-08)
+// — the refund-vs-credit policy needs sign-off before this is exposed again.
+// If this ever runs anyway (direct call, stale bundle), be aware a
+// 'credited' payment renders NOWHERE in the admin UI right now — the course
+// page's payment column and student page's balance display were both
+// reverted to pre-#106 state, which don't recognize that status. The row
+// still exists in `payments`/`credit_ledger`, just invisible until the UI
+// comes back.
 export async function issueCredit(
   enrollmentId: string,
   courseId: string,
