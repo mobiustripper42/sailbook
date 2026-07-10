@@ -24,6 +24,14 @@ type RawCourse = {
   sessions: RawSessionRow[]
 }
 
+type RawRosterRow = {
+  session_id: string
+  enrollment: {
+    status: string
+    student: { first_name: string; last_name: string } | null
+  } | null
+}
+
 export default async function AdminCalendarPage() {
   const supabase = await createClient()
   const {
@@ -73,7 +81,36 @@ export default async function AdminCalendarPage() {
         instructorName: effectiveInstructor
           ? `${effectiveInstructor.first_name} ${effectiveInstructor.last_name}`
           : null,
+        studentNames: [],
       })
+    }
+  }
+
+  // Attach the roster per session so the calendar can filter by student.
+  // Second flat query keyed on the loaded session ids, rather than a deep
+  // courses→sessions→attendance→enrollments→profiles nested select.
+  const sessionById = new Map(sessions.map((s) => [s.id, s]))
+  if (sessionById.size > 0) {
+    const { data: roster } = await supabase
+      .from('session_attendance')
+      .select(`
+        session_id,
+        enrollment:enrollments!session_attendance_enrollment_id_fkey (
+          status,
+          student:profiles!enrollments_student_id_fkey ( first_name, last_name )
+        )
+      `)
+      .in('session_id', [...sessionById.keys()])
+
+    for (const row of (roster as unknown as RawRosterRow[]) ?? []) {
+      const enrollment = row.enrollment
+      // Skip cancelled enrollments — show the effective roster (confirmed +
+      // pending cancel requests, which still hold a seat).
+      if (!enrollment || enrollment.status === 'cancelled') continue
+      const student = enrollment.student
+      if (!student) continue
+      const name = `${student.first_name} ${student.last_name}`
+      sessionById.get(row.session_id)?.studentNames?.push(name)
     }
   }
 
