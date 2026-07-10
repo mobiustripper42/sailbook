@@ -52,4 +52,20 @@ test.describe('Form field preservation on server action error', () => {
     await expect(page.locator('.text-destructive').first()).toBeVisible()
     await expect(page.getByLabel('ASA number')).toHaveValue('TESTASA999')
   })
+
+  test('student account form requires a phone number (#129)', async ({ page }) => {
+    await loginAs(page, 'pw_student@ltsc.test', '/student/dashboard')
+    await page.goto('/student/account')
+
+    const phone = page.getByLabel('Phone')
+    await expect(phone).toHaveAttribute('required', '')
+
+    // Clearing phone must block the save via native validation — no server
+    // write happens, so the shared fixture's real phone is left intact.
+    await phone.fill('')
+    await page.getByRole('button', { name: 'Save changes' }).click()
+
+    await expect(page).toHaveURL(/\/student\/account/)
+    await expect(phone).toHaveJSProperty('validity.valid', false)
+  })
 })

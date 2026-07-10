@@ -98,6 +98,7 @@ export async function updateStudentProfile(
   const instructor_notes = (formData.get('instructor_notes') as string)?.trim() || null
 
   if (!first_name || !last_name) return 'First name and last name are required.'
+  if (!phone) return 'Phone number is required.'
   if (instructor_notes && instructor_notes.length > 2000) {
     return 'Notes must be 2000 characters or fewer.'
   }
