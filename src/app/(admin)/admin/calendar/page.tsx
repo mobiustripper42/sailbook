@@ -91,7 +91,7 @@ export default async function AdminCalendarPage() {
   // courses→sessions→attendance→enrollments→profiles nested select.
   const sessionById = new Map(sessions.map((s) => [s.id, s]))
   if (sessionById.size > 0) {
-    const { data: roster } = await supabase
+    const { data: roster, error: rosterError } = await supabase
       .from('session_attendance')
       .select(`
         session_id,
@@ -102,10 +102,15 @@ export default async function AdminCalendarPage() {
       `)
       .in('session_id', [...sessionById.keys()])
 
+    // Non-fatal to the page render — a failure just leaves the student filter
+    // empty rather than blanking the calendar, but it shouldn't fail silently.
+    if (rosterError) console.error('Calendar roster fetch failed:', rosterError.message)
+
     for (const row of (roster as unknown as RawRosterRow[]) ?? []) {
       const enrollment = row.enrollment
-      // Skip cancelled enrollments — show the effective roster (confirmed +
-      // pending cancel requests, which still hold a seat).
+      // Skip cancelled enrollments; every remaining status that has attendance
+      // rows (in practice confirmed onward — rows are seeded at confirmation)
+      // counts toward the session's effective roster.
       if (!enrollment || enrollment.status === 'cancelled') continue
       const student = enrollment.student
       if (!student) continue
