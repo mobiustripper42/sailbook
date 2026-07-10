@@ -45,6 +45,30 @@ test.describe('Admin /users page — sorting', () => {
   })
 })
 
+test.describe('Admin /users page — student name links to profile', () => {
+  test('clicking a student name opens their profile with course history, not the edit form', async ({ page }) => {
+    test.skip(test.info().project.name !== 'desktop')
+
+    await loginAs(page, ADMIN_EMAIL, '/admin/dashboard')
+    await page.goto('/admin/users')
+
+    // Narrow to students so the first name link is guaranteed to be one
+    await page.getByRole('button', { name: 'Student', exact: true }).click()
+
+    const firstStudentName = page.locator('tbody tr td:first-child a').first()
+    await expect(firstStudentName).toBeVisible()
+    await firstStudentName.click()
+
+    // Lands on the profile page (/admin/students/<uuid>), NOT the edit form
+    await page.waitForURL(/\/admin\/students\/[0-9a-f-]+$/)
+    await expect(page).not.toHaveURL(/\/edit$/)
+    await expect(page.getByRole('heading', { name: 'Course History' })).toBeVisible()
+
+    // Edit is still one tap away from the profile
+    await expect(page.getByRole('link', { name: 'Edit' })).toBeVisible()
+  })
+})
+
 test.describe('Admin /users page — invite panels', () => {
   test('admin and instructor invite panels are collapsed by default', async ({ page }) => {
     test.skip(test.info().project.name !== 'desktop')
