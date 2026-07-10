@@ -6,7 +6,7 @@ branch: task/unwind-credit-ui
 started: 2026-07-10T04:46:33Z
 ended:
 points:
-pr_numbers: [131, 132]
+pr_numbers: [131, 132, 134]
 status: open
 transcript: /home/eric/.claude/projects/-home-eric-sailbook/f75a1782-10fd-4f41-81ff-39d21865a258.jsonl
 ---
@@ -47,6 +47,23 @@ transcript: /home/eric/.claude/projects/-home-eric-sailbook/f75a1782-10fd-4f41-8
 **Branch:** task/111-calendar-student-filter
 **Opened at:** 2026-07-10T16:33:41Z
 
+## Task 3: Make phone required for students (#129 — PR A of two)
+
+**Completed:**
+- #129 ("addresses for book shipping") split with Eric into PR A (phone required, no migration) + PR B (address at ASA enrollment, migration). This is PR A. Decisions: address is NOT on the registration form — it's collected/confirmed at ASA-class enroll (student self-enroll only); phone required at registration + admin forms + OTP; "shipped" checkbox deferred.
+- Phone now required (form-layer, no DB `NOT NULL` — existing null-phone rows untouched) at: `register-form.tsx` + `register` action, `requestRegisterCode` (OTP register), `create-admin-student-form.tsx` + `createAdminStudent`, `user-edit-form.tsx` + `updateUserProfile` (gated on `is_student` so admin/instructor-only accounts stay optional), and — review catch — `student-account-form.tsx` + `updateStudentProfile` (student's own account edit).
+- Tests: new required-phone tests (`auth.spec.ts`, `admin-students.spec.ts`, `form-field-preservation.spec.ts`). Fixed full-suite landmines my change created: `auth-email-verification.spec.ts` (3 registration submits) + `passwordless-register.spec.ts` (`fillProfile` helper) + the duplicate-email test now supply a phone; corrected an over-eager replace_all that wrongly added phone to two `/login` steps.
+- Verified: build green; ran auth/admin-students/auth-email-verification/form-field-preservation/instructor-notes/member-pricing/unsaved-changes/asa-number desktop — all green (passwordless skips locally, flag off; fix is in for CI). 375px Add Student form clean.
+
+**Code review:** @code-review — two real gaps, both "where can a student still lack a phone": (1) FIXED — student self-service account form let them blank their own phone (guarded + test, shipped as a follow-up commit); (2) DEFERRED + tracked as **#133** — Google OAuth signup collects no phone (needs a post-OAuth onboarding gate, a new flow, not a validation tweak). Four originally-touched surfaces reviewed clean.
+
+**PR:** [#134](https://github.com/mobiustripper42/sailbook/pull/134)
+**Points:** 2
+**Branch:** task/129a-phone-required
+**Opened at:** 2026-07-10T19:56:03Z
+
 **Next Steps:**
+- #129 PR B (address at ASA enrollment): migration adds `address_line1/line2/city/state/postal_code` to `profiles`; gate `createCheckoutSession` when `course_types.certification_body === 'ASA'` and address incomplete; `EnrollButton` opens an address confirm/collect dialog → `updateMyAddress` → auto-retry checkout. Student-self-enroll only (admin enroll not gated, per Eric). Branch off main (no file overlap with PR A). ASA seed types: ASA 101 / ASA 103 (`certification_body='ASA'`).
+- #133 (new): post-OAuth phone collection — the one student-creation path PR A can't cover form-side.
 
 **Context:**
