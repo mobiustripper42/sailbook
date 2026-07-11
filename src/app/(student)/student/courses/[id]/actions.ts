@@ -127,6 +127,28 @@ export async function createCheckoutSession(
     return { error: 'This course does not have a price set. Contact the school to enroll.' }
   }
 
+  // Load the profile up front — needed both for the ASA address gate (below)
+  // and to get/create the Stripe customer later.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, first_name, last_name, stripe_customer_id, is_member, is_student, address_line1, address_line2, city, state, postal_code')
+    .eq('id', user.id)
+    .single()
+
+  // ASA courses ship a textbook — the student must have a mailing address on
+  // file before we take payment (#129). Gate BEFORE the hold-reuse branch below,
+  // so resuming an existing hold can't skip it (e.g. a course type re-tagged ASA
+  // after a hold was created). Signal the client to collect/confirm the address,
+  // then it retries. Student self-enroll only; admin enroll isn't gated.
+  const certBody = (course.course_types as unknown as { certification_body: string | null } | null)?.certification_body
+  const isAsa = certBody?.trim().toUpperCase() === 'ASA'
+  if (isAsa && !hasCompleteMailingAddress(profile)) {
+    return {
+      error: 'ASA courses ship a textbook — please add your mailing address to continue.',
+      needsAddress: true,
+    }
+  }
+
   // Check for an existing non-cancelled, non-expired hold or enrollment
   const { data: existing } = await supabase
     .from('enrollments')
@@ -169,25 +191,7 @@ export async function createCheckoutSession(
     return { error: 'This course is full.' }
   }
 
-  // Get or create Stripe customer
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name, stripe_customer_id, is_member, is_student, address_line1, address_line2, city, state, postal_code')
-    .eq('id', user.id)
-    .single()
-
-  // ASA courses ship a textbook — the student must have a mailing address on
-  // file before we take payment (#129). Signal the client to collect/confirm it,
-  // then it retries checkout. Student self-enroll only; admin enroll isn't gated.
-  const certBody = (course.course_types as unknown as { certification_body: string | null } | null)?.certification_body
-  const isAsa = certBody?.trim().toUpperCase() === 'ASA'
-  if (isAsa && !hasCompleteMailingAddress(profile)) {
-    return {
-      error: 'ASA courses ship a textbook — please add your mailing address to continue.',
-      needsAddress: true,
-    }
-  }
-
+  // Get or create Stripe customer (profile loaded above)
   let stripeCustomerId = profile?.stripe_customer_id ?? null
 
   if (!stripeCustomerId) {
