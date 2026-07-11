@@ -6,7 +6,7 @@ branch: task/unwind-credit-ui
 started: 2026-07-10T04:46:33Z
 ended:
 points:
-pr_numbers: [131, 132, 134]
+pr_numbers: [131, 132, 134, 135]
 status: open
 transcript: /home/eric/.claude/projects/-home-eric-sailbook/f75a1782-10fd-4f41-81ff-39d21865a258.jsonl
 ---
@@ -62,8 +62,25 @@ transcript: /home/eric/.claude/projects/-home-eric-sailbook/f75a1782-10fd-4f41-8
 **Branch:** task/129a-phone-required
 **Opened at:** 2026-07-10T19:56:03Z
 
+## Task 4: Require a mailing address to enroll in ASA courses (#129 — PR B of two)
+
+**Completed:**
+- ASA courses ship a textbook → student must have a mailing address before self-enroll. ASA detection: `course_types.certification_body === 'ASA'` (normalized case/whitespace).
+- `supabase/migrations/20260710200000_add_address_to_profiles.sql` — 5 nullable address columns on `profiles` (no RLS change; inherit existing policies — the self-update WITH CHECK only guards role flags + auth_source). `src/lib/supabase/types.ts` updated (Row/Insert/Update).
+- `src/lib/address.ts` (`hasCompleteMailingAddress`), `src/actions/address.ts` (`getMyAddress`/`updateMyAddress`, self-update, 2-letter state validation).
+- Gate in `createCheckoutSession` (`student/courses/[id]/actions.ts`): loads profile early and returns `{ error, needsAddress: true }` before the hold-reuse branch + all Stripe work when ASA + address incomplete. `enroll-button.tsx` opens `address-dialog.tsx` on `needsAddress` (pre-fills existing address to confirm; only sets non-empty fields to avoid clobbering) → retries checkout. Admin student profile page shows the address read-only. Dev-only `/api/test/set-address` for test setup.
+- `tests/asa-address.spec.ts` — ASA gate→dialog→retry-to-Stripe (abort-navigation + assert `cs_test_` request, payment-e2e pattern) + non-ASA pass-through. The test caught a real race bug (async pre-fill clobbering typed input) — fixed. Verified: build green; 2/2 ASA tests; 24 checkout/enroll regression tests; admin profile/history specs; 375px dialog clean (needed a local `supabase db reset` for the new columns).
+
+**Code review:** @code-review — two findings: (1) FIXED — hold-reuse branch could return a reused Stripe session before the gate (course re-tagged ASA after a hold); moved the gate above it (follow-up commit, retested green). (2) NOTED — `certification_body` free-text means a non-`ASA` spelling silently disables the gate; already normalizes case/whitespace, full enum is course-type-editing scope, reasonable follow-up. RLS/dead-code/dev-gate all confirmed clean.
+
+**PR:** [#135](https://github.com/mobiustripper42/sailbook/pull/135)
+**Points:** 5
+**Branch:** task/129b-asa-address
+**Opened at:** 2026-07-11T17:59:46Z
+
 **Next Steps:**
-- #129 PR B (address at ASA enrollment): migration adds `address_line1/line2/city/state/postal_code` to `profiles`; gate `createCheckoutSession` when `course_types.certification_body === 'ASA'` and address incomplete; `EnrollButton` opens an address confirm/collect dialog → `updateMyAddress` → auto-retry checkout. Student-self-enroll only (admin enroll not gated, per Eric). Branch off main (no file overlap with PR A). ASA seed types: ASA 101 / ASA 103 (`certification_body='ASA'`).
 - #133 (new): post-OAuth phone collection — the one student-creation path PR A can't cover form-side.
+- Possible follow-up (from PR B review): constrain `course_types.certification_body` to an enum/select so an ASA typo can't silently disable the address gate.
+- 5 PRs open this session (#131, #132, #134, #135 + #128 already merged) — merge whenever; #134 (phone) and #135 (address) are independent halves of #129.
 
 **Context:**
