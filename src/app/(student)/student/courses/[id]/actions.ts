@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
 import { getDropInDeposit } from '@/lib/drop-in'
+import { hasCompleteMailingAddress } from '@/lib/address'
 
 export async function enrollInCourse(courseId: string) {
   const supabase = await createClient()
@@ -94,7 +95,7 @@ export async function enrollInCourse(courseId: string) {
 
 export async function createCheckoutSession(
   courseId: string
-): Promise<{ url: string } | { error: string }> {
+): Promise<{ url: string } | { error: string; needsAddress?: boolean }> {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -103,7 +104,7 @@ export async function createCheckoutSession(
   // Load course
   const { data: course } = await supabase
     .from('courses')
-    .select('id, title, status, capacity, price, member_price, course_types(is_drop_in)')
+    .select('id, title, status, capacity, price, member_price, course_types(is_drop_in, certification_body)')
     .eq('id', courseId)
     .single()
 
@@ -171,9 +172,21 @@ export async function createCheckoutSession(
   // Get or create Stripe customer
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name, stripe_customer_id, is_member, is_student')
+    .select('id, first_name, last_name, stripe_customer_id, is_member, is_student, address_line1, address_line2, city, state, postal_code')
     .eq('id', user.id)
     .single()
+
+  // ASA courses ship a textbook — the student must have a mailing address on
+  // file before we take payment (#129). Signal the client to collect/confirm it,
+  // then it retries checkout. Student self-enroll only; admin enroll isn't gated.
+  const certBody = (course.course_types as unknown as { certification_body: string | null } | null)?.certification_body
+  const isAsa = certBody?.trim().toUpperCase() === 'ASA'
+  if (isAsa && !hasCompleteMailingAddress(profile)) {
+    return {
+      error: 'ASA courses ship a textbook — please add your mailing address to continue.',
+      needsAddress: true,
+    }
+  }
 
   let stripeCustomerId = profile?.stripe_customer_id ?? null
 

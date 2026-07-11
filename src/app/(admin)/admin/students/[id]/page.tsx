@@ -14,7 +14,7 @@ export default async function AdminStudentViewPage({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name, email, phone, experience_level, asa_number')
+    .select('id, first_name, last_name, email, phone, experience_level, asa_number, address_line1, address_line2, city, state, postal_code')
     .eq('id', id)
     .eq('is_student', true)
     .single()
@@ -50,6 +50,17 @@ export default async function AdminStudentViewPage({
             <p className="capitalize">Experience: {profile.experience_level}</p>
           )}
         </div>
+        {profile.address_line1 && (
+          <div className="mt-2 text-sm text-muted-foreground">
+            <p className="font-medium text-foreground">Mailing address</p>
+            <p>{profile.address_line1}</p>
+            {profile.address_line2 && <p>{profile.address_line2}</p>}
+            <p>
+              {[profile.city, profile.state].filter(Boolean).join(', ')}
+              {profile.postal_code ? ` ${profile.postal_code}` : ''}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="space-y-3">
