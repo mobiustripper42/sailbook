@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { createTestCourse, loginAs, runId } from './helpers'
 
-const BASE = 'http://localhost:3000'
+const BASE = 'http://localhost:3300'
 
 // Mock buffer is shared module-level state — the spot-opened test reads from it
 // and must run on desktop only (matches enrollment-notifications.spec.ts).

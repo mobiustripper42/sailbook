@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-const BASE = 'http://localhost:3000'
+const BASE = 'http://localhost:3300'
 
 // The notification dispatcher routes to the mock when NOTIFICATIONS_ENABLED is
 // not "true". Local dev defaults to mock; these tests assert the wiring (mock

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { createTestCourse, loginAs, runId } from './helpers'
 
-const BASE = 'http://localhost:3000'
+const BASE = 'http://localhost:3300'
 const STUDENT_EMAIL = 'pw_student@ltsc.test'
 
 // Mock buffer is shared module-level state. Same constraints as

@@ -52,7 +52,7 @@ jobs:
       NOTIFICATIONS_ENABLED: false
       SMS_ENABLED: true
       NEXT_PUBLIC_DEV_MODE: true
-      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      NEXT_PUBLIC_SITE_URL: http://localhost:3300
       ENROLLMENT_HOLD_MINUTES: 1
       DROP_IN_DEPOSIT: 20
       DROP_IN_ALERT_TEXT: "Pay {DROP_IN_DEPOSIT} now to reserve your spot. The remaining balance is paid to the captain on the day."
@@ -98,10 +98,10 @@ jobs:
       - name: Start Next.js
         run: npm start &
         env:
-          PORT: 3000
+          PORT: 3300
 
       - name: Wait for app to be ready
-        run: npx --yes wait-on http://localhost:3000 --timeout 60000
+        run: npx --yes wait-on http://localhost:3300 --timeout 60000
 
       - name: Run Playwright (${{ matrix.project }})
         run: npx playwright test --project=${{ matrix.project }}

@@ -101,7 +101,7 @@ test.describe('instructor roster — notes indicator', () => {
     const assignCtx = await browser.newContext()
     const assignPage = await assignCtx.newPage()
     try {
-      const res = await assignPage.request.post('http://localhost:3000/api/test/assign-instructor', {
+      const res = await assignPage.request.post('http://localhost:3300/api/test/assign-instructor', {
         data: { courseId, instructorEmail: 'pw_instructor@ltsc.test' },
       })
       if (!res.ok()) throw new Error(`assign-instructor failed: ${await res.text()}`)

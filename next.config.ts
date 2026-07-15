@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', '192.168.50.202', 'mill-dev:3000', '100.118.147.49:3000', '*.app.github.dev'],
+      allowedOrigins: ['localhost:3300', '192.168.50.202', 'mill-dev:3300', '100.118.147.49:3300', '*.app.github.dev'],
     },
   },
 };

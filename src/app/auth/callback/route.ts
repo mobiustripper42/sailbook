@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const next = safeNextPath(url.searchParams.get('next')) ?? '/student/dashboard'
 
   // Trust the Host header only when it matches an allow-list — the canonical
-  // site host (production) or localhost/127.0.0.1 any-port (dev: Hetzner's :3000
+  // site host (production) or localhost/127.0.0.1 any-port (dev: Hetzner's :3300
   // AND VS Code Remote-SSH's random forwarded port like :55934 both work). A
   // spoofed Host falls back to NEXT_PUBLIC_SITE_URL so it can't be used to
   // redirect users off-site post-auth.

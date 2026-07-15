@@ -106,7 +106,7 @@ test.describe('Student — checkout button', () => {
     // Create a pending_payment enrollment via test API
     const apiCtx = await browser.newContext();
     const apiPage = await apiCtx.newPage();
-    const resp = await apiPage.request.post('http://localhost:3000/api/test/enroll', {
+    const resp = await apiPage.request.post('http://localhost:3300/api/test/enroll', {
       data: { courseId, studentEmail: 'pw_student@ltsc.test' },
     });
     expect(resp.ok()).toBeTruthy();
@@ -141,7 +141,7 @@ test.describe('Student — capacity enforcement', () => {
     // Enroll pw_student via test API (confirmed = consumes the spot)
     const apiCtx = await browser.newContext();
     const apiPage = await apiCtx.newPage();
-    await apiPage.request.post('http://localhost:3000/api/test/enroll', {
+    await apiPage.request.post('http://localhost:3300/api/test/enroll', {
       data: { courseId, studentEmail: 'pw_student@ltsc.test' },
     });
     await apiCtx.close();
@@ -174,7 +174,7 @@ test.describe('Student — capacity enforcement', () => {
     // Enroll pw_student via test API (confirmed = consumes the spot)
     const apiCtx = await browser.newContext();
     const apiPage = await apiCtx.newPage();
-    await apiPage.request.post('http://localhost:3000/api/test/enroll', {
+    await apiPage.request.post('http://localhost:3300/api/test/enroll', {
       data: { courseId, studentEmail: 'pw_student@ltsc.test' },
     });
     await apiCtx.close();
@@ -212,7 +212,7 @@ test.describe('Student — duplicate enrollment prevention', () => {
     // Enroll pw_student via test API
     const apiCtx = await browser.newContext();
     const apiPage = await apiCtx.newPage();
-    await apiPage.request.post('http://localhost:3000/api/test/enroll', {
+    await apiPage.request.post('http://localhost:3300/api/test/enroll', {
       data: { courseId, studentEmail: 'pw_student@ltsc.test' },
     });
     await apiCtx.close();

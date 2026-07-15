@@ -21,7 +21,7 @@ async function registerFreshUser(
   await page.getByRole('button', { name: 'Create account' }).click()
   await page.waitForURL(/\/register\/check-email/, { timeout: 10000 })
 
-  const confirm = await request.post('http://localhost:3000/api/test/confirm-email', {
+  const confirm = await request.post('http://localhost:3300/api/test/confirm-email', {
     data: { email },
   })
   expect(confirm.ok()).toBe(true)

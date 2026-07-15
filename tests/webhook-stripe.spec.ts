@@ -51,14 +51,14 @@ test.describe('Stripe webhook', () => {
     }
 
     // Seed a pending_payment hold with a unique session ID
-    const holdRes = await request.post('http://localhost:3000/api/test/set-pending-hold', {
+    const holdRes = await request.post('http://localhost:3300/api/test/set-pending-hold', {
       data: { courseId, studentEmail: 'pw_student@ltsc.test', checkoutSessionId: sessionId },
     })
     expect(holdRes.ok()).toBeTruthy()
 
     // Fire the webhook
     const payload = makeCheckoutEvent(sessionId)
-    const webhookRes = await request.post('http://localhost:3000/api/webhooks/stripe', {
+    const webhookRes = await request.post('http://localhost:3300/api/webhooks/stripe', {
       data: payload,
       headers: {
         'content-type': 'application/json',
@@ -105,7 +105,7 @@ test.describe('Stripe webhook', () => {
       await adminCtx.close()
     }
 
-    await request.post('http://localhost:3000/api/test/set-pending-hold', {
+    await request.post('http://localhost:3300/api/test/set-pending-hold', {
       data: { courseId, studentEmail: 'pw_student@ltsc.test', checkoutSessionId: sessionId },
     })
 
@@ -115,7 +115,7 @@ test.describe('Stripe webhook', () => {
       'content-type': 'application/json',
       'stripe-signature': signPayload(payload, webhookSecret!),
     }
-    const res1 = await request.post('http://localhost:3000/api/webhooks/stripe', { data: payload, headers })
+    const res1 = await request.post('http://localhost:3300/api/webhooks/stripe', { data: payload, headers })
     expect(res1.ok()).toBeTruthy()
 
     // Second delivery uses a fresh signature (new timestamp) — same payload
@@ -123,7 +123,7 @@ test.describe('Stripe webhook', () => {
       'content-type': 'application/json',
       'stripe-signature': signPayload(payload, webhookSecret!),
     }
-    const res2 = await request.post('http://localhost:3000/api/webhooks/stripe', { data: payload, headers: headers2 })
+    const res2 = await request.post('http://localhost:3300/api/webhooks/stripe', { data: payload, headers: headers2 })
     expect(res2.ok()).toBeTruthy()
 
     // Student still shows Enrolled (not an error state)
@@ -144,7 +144,7 @@ test.describe('Stripe webhook', () => {
     test.skip(!webhookSecret, 'STRIPE_WEBHOOK_SECRET not set')
 
     const payload = makeCheckoutEvent(`cs_test_badsig_${runId()}`)
-    const res = await request.post('http://localhost:3000/api/webhooks/stripe', {
+    const res = await request.post('http://localhost:3300/api/webhooks/stripe', {
       data: payload,
       headers: {
         'content-type': 'application/json',
@@ -160,7 +160,7 @@ test.describe('Stripe webhook', () => {
     test.skip(!webhookSecret, 'STRIPE_WEBHOOK_SECRET not set')
 
     const payload = makeCheckoutEvent(`cs_test_unknown_${runId()}`)
-    const res = await request.post('http://localhost:3000/api/webhooks/stripe', {
+    const res = await request.post('http://localhost:3300/api/webhooks/stripe', {
       data: payload,
       headers: {
         'content-type': 'application/json',
