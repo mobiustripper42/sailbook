@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { runId } from './helpers'
 
-const BASE = 'http://localhost:3000'
+const BASE = 'http://localhost:3300'
 
 // 3.10 — password strength + email verification.
 // Desktop-only because the register flow is the same across viewports and

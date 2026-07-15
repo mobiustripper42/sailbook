@@ -5,7 +5,7 @@ const ADMIN_EMAIL = 'pw_admin@ltsc.test'
 const STUDENT_EMAIL = 'pw_student2@ltsc.test'
 
 async function resetInstructorFlag(request: import('@playwright/test').APIRequestContext, value: boolean) {
-  const resp = await request.post('http://localhost:3000/api/test/set-role-flag', {
+  const resp = await request.post('http://localhost:3300/api/test/set-role-flag', {
     data: { email: STUDENT_EMAIL, flag: 'is_instructor', value },
   })
   if (!resp.ok()) {

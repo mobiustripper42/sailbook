@@ -59,7 +59,7 @@ test.describe('Stripe Checkout — initiation', () => {
     // Fill the one spot via test API (confirmed = counts against capacity)
     const apiCtx = await browser.newContext();
     const apiPage = await apiCtx.newPage();
-    const apiResp = await apiPage.request.post('http://localhost:3000/api/test/enroll', {
+    const apiResp = await apiPage.request.post('http://localhost:3300/api/test/enroll', {
       data: { courseId, studentEmail: 'pw_student@ltsc.test' },
     });
     expect(apiResp.ok(), `Test enrollment failed: ${await apiResp.text()}`).toBeTruthy();

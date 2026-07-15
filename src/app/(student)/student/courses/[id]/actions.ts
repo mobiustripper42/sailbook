@@ -196,7 +196,7 @@ export async function createCheckoutSession(
     }
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3300'
   const holdExpiry = new Date(now.getTime() + holdMinutes * 60 * 1000)
 
   const isMember = (profile?.is_member ?? false) && (profile?.is_student ?? false)

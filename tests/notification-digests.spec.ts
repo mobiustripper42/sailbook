@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { loginAs, cronHeaders } from './helpers'
 
-const BASE = 'http://localhost:3000'
+const BASE = 'http://localhost:3300'
 const OPEN_SAILING_ID = 'b1000000-0000-0000-0000-000000000004'
 
 // #103 — low-enrollment digest: multiple qualifying courses in one cron run

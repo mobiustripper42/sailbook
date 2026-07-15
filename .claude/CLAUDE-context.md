@@ -40,7 +40,7 @@ waitlist_entries (notify on spot opening)
 ## Commands
 ```bash
 # Development
-npm run dev                    # local dev server (localhost:3000)
+npm run dev                    # local dev server (localhost:3300)
 npm run build                  # production build
 npm run lint                   # ESLint
 
@@ -168,6 +168,6 @@ The migration **discipline** lives in the shell's `## Migration Protocol`. This 
 
 Project-specific debugging gotchas. The shell's `## Workflow Notes` holds the universal rules.
 
-- **Before starting `npm run dev`:** run `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/` first. If it returns 200, skip the start — a server is already up. Only start a new one if the check fails.
+- **Before starting `npm run dev`:** run `curl -s -o /dev/null -w "%{http_code}" http://localhost:3300/` first. If it returns 200, skip the start — a server is already up. Only start a new one if the check fails.
 - **Bugs from Andy:** create a GitHub issue (`gh issue create`), tag `bug`, add to the current or next phase.
 - **Supabase OAuth redirect URLs — use `/**` not `/*`:** in the Supabase Dashboard (Authentication → URL Configuration → Redirect URLs), use a double-star glob (`https://<domain>/**`). `/*` matches only one path segment, so `/auth/callback` fails to match and Supabase silently falls back to Site URL, landing the user on `/?code=...` with the callback route never running. Symptom: "auth almost works" but OAuth codes don't get exchanged.

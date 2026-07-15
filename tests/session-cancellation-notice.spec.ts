@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { createEnrolledCourse, runId } from './helpers'
 
-const BASE = 'http://localhost:3000'
+const BASE = 'http://localhost:3300'
 
 // Mock buffer is shared module-level state. Same constraints as
 // notifications.spec.ts and enrollment-notifications.spec.ts: serialize

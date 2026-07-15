@@ -175,7 +175,7 @@ export async function createEnrolledCourse(
   const apiCtx = await browser.newContext();
   const apiPage = await apiCtx.newPage();
   try {
-    const response = await apiPage.request.post('http://localhost:3000/api/test/enroll', {
+    const response = await apiPage.request.post('http://localhost:3300/api/test/enroll', {
       data: { courseId, studentEmail: 'pw_student@ltsc.test' },
     });
     if (!response.ok()) {

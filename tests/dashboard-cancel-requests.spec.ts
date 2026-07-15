@@ -25,7 +25,7 @@ test.describe('Admin dashboard — cancellation requests widget', () => {
     const apiCtx = await browser.newContext()
     const apiPage = await apiCtx.newPage()
     try {
-      const r = await apiPage.request.post('http://localhost:3000/api/test/enroll', {
+      const r = await apiPage.request.post('http://localhost:3300/api/test/enroll', {
         data: { courseId, studentEmail: 'pw_student@ltsc.test' },
       })
       expect(r.ok()).toBeTruthy()
@@ -40,7 +40,7 @@ test.describe('Admin dashboard — cancellation requests widget', () => {
     const apiCtx = await page.context().browser()!.newContext()
     const apiPage = await apiCtx.newPage()
     try {
-      const res = await apiPage.request.post('http://localhost:3000/api/test/set-cancel-requested', {
+      const res = await apiPage.request.post('http://localhost:3300/api/test/set-cancel-requested', {
         data: { enrollmentId },
       })
       expect(res.ok()).toBeTruthy()

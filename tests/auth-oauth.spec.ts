@@ -82,7 +82,7 @@ test.describe('3.11 — handle_new_user trigger', () => {
     await page.waitForURL(/\/register\/check-email/, { timeout: 10000 })
 
     // Force-confirm so we can sign in and read the profile via the user session.
-    const confirm = await request.post('http://localhost:3000/api/test/confirm-email', {
+    const confirm = await request.post('http://localhost:3300/api/test/confirm-email', {
       data: { email },
     })
     expect(confirm.ok()).toBe(true)

@@ -18,7 +18,7 @@ test.describe('enrollment hold expiry', () => {
     const apiCtx = await browser.newContext()
     const apiPage = await apiCtx.newPage()
     try {
-      const res = await apiPage.request.post('http://localhost:3000/api/test/set-pending-hold', {
+      const res = await apiPage.request.post('http://localhost:3300/api/test/set-pending-hold', {
         data: { courseId, studentEmail: 'pw_student@ltsc.test', expired: true },
       })
       expect(res.ok()).toBeTruthy()
@@ -53,7 +53,7 @@ test.describe('enrollment hold expiry', () => {
     const apiCtx = await browser.newContext()
     const apiPage = await apiCtx.newPage()
     try {
-      const res = await apiPage.request.post('http://localhost:3000/api/test/set-pending-hold', {
+      const res = await apiPage.request.post('http://localhost:3300/api/test/set-pending-hold', {
         data: { courseId, studentEmail: 'pw_student@ltsc.test', expired: false },
       })
       expect(res.ok()).toBeTruthy()
@@ -90,7 +90,7 @@ test.describe('enrollment hold expiry', () => {
     const apiCtx = await browser.newContext()
     const apiPage = await apiCtx.newPage()
     try {
-      const res = await apiPage.request.post('http://localhost:3000/api/test/set-pending-hold', {
+      const res = await apiPage.request.post('http://localhost:3300/api/test/set-pending-hold', {
         data: { courseId, studentEmail: 'pw_student@ltsc.test', expired: false },
       })
       expect(res.ok()).toBeTruthy()
@@ -128,7 +128,7 @@ test.describe('enrollment hold expiry', () => {
     const apiCtx = await browser.newContext()
     const apiPage = await apiCtx.newPage()
     try {
-      const res = await apiPage.request.post('http://localhost:3000/api/test/set-pending-hold', {
+      const res = await apiPage.request.post('http://localhost:3300/api/test/set-pending-hold', {
         data: { courseId, studentEmail: 'pw_student@ltsc.test', expired: true },
       })
       expect(res.ok()).toBeTruthy()
@@ -137,7 +137,7 @@ test.describe('enrollment hold expiry', () => {
     }
 
     // Fire the cron endpoint — verifyCron() requires the bearer when CRON_SECRET is set (CI does)
-    const cronRes = await request.get('http://localhost:3000/api/cron/expire-holds', {
+    const cronRes = await request.get('http://localhost:3300/api/cron/expire-holds', {
       headers: cronHeaders(),
     })
     expect(cronRes.ok()).toBeTruthy()

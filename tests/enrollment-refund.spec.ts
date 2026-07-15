@@ -35,13 +35,13 @@ test.describe('Admin refund & cancel flow', () => {
     const apiCtx = await browser.newContext()
     const apiPage = await apiCtx.newPage()
     try {
-      const r1 = await apiPage.request.post('http://localhost:3000/api/test/enroll', {
+      const r1 = await apiPage.request.post('http://localhost:3300/api/test/enroll', {
         data: { courseId, studentEmail: 'pw_student@ltsc.test' },
       })
       expect(r1.ok()).toBeTruthy()
       enrollmentId = ((await r1.json()) as { enrollmentId: string }).enrollmentId
 
-      const r2 = await apiPage.request.post('http://localhost:3000/api/test/enroll', {
+      const r2 = await apiPage.request.post('http://localhost:3300/api/test/enroll', {
         data: { courseId, studentEmail: 'pw_student2@ltsc.test' },
       })
       expect(r2.ok()).toBeTruthy()
@@ -65,7 +65,7 @@ test.describe('Admin refund & cancel flow', () => {
     const apiCtx = await page.context().browser()!.newContext()
     const apiPage = await apiCtx.newPage()
     try {
-      const res = await apiPage.request.post('http://localhost:3000/api/test/set-cancel-requested', {
+      const res = await apiPage.request.post('http://localhost:3300/api/test/set-cancel-requested', {
         data: { enrollmentId },
       })
       expect(res.ok()).toBeTruthy()
@@ -115,7 +115,7 @@ test.describe('Admin refund & cancel flow', () => {
     const apiCtx = await page.context().browser()!.newContext()
     const apiPage = await apiCtx.newPage()
     try {
-      const res = await apiPage.request.post('http://localhost:3000/api/test/set-cancel-requested', {
+      const res = await apiPage.request.post('http://localhost:3300/api/test/set-cancel-requested', {
         data: {
           enrollmentId: enrollment2Id,
           stripePaymentIntentId: pi.id,
@@ -176,7 +176,7 @@ test.describe('Admin refund & cancel flow', () => {
       await adminCtx.close()
     }
 
-    const r = await request.post('http://localhost:3000/api/test/enroll', {
+    const r = await request.post('http://localhost:3300/api/test/enroll', {
       data: { courseId: confirmedCourseId, studentEmail: 'pw_student2@ltsc.test' },
     })
     expect(r.ok()).toBeTruthy()
@@ -194,7 +194,7 @@ test.describe('Admin refund & cancel flow', () => {
       off_session: true,
     })
 
-    const seed = await request.post('http://localhost:3000/api/test/set-cancel-requested', {
+    const seed = await request.post('http://localhost:3300/api/test/set-cancel-requested', {
       data: {
         enrollmentId: confirmedEnrollmentId,
         stripePaymentIntentId: pi.id,

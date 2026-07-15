@@ -33,7 +33,7 @@ export async function register(_: unknown, formData: FormData) {
   const experienceLevel = (formData.get('experienceLevel') as string) || ''
   const instructorNotes = (formData.get('instructorNotes') as string)?.trim() || ''
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3300'
 
   const next = safeNextPath(formData.get('next') as string | null) ?? '/student/dashboard'
 
@@ -68,7 +68,7 @@ export async function register(_: unknown, formData: FormData) {
 
 export async function signInWithGoogle(_: unknown, formData: FormData) {
   const supabase = await createClient()
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3300'
 
   // Caller can pass ?next=/foo to send the user somewhere after sign-in
   // (e.g. the invite-acceptance page). Default to the student dashboard.
