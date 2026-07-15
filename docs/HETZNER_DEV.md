@@ -23,7 +23,7 @@ forwarded port.
 2. Ctrl+Shift+P → **Remote-SSH: Connect to Host** → `sailbook-dev`
 3. Open folder `/home/eric/sailbook`
 4. Terminal: `supabase start` (only if not already running) then `npm run dev`
-5. Browse `http://localhost:3000` — VS Code auto-forwards the port
+5. Browse `http://localhost:3300` — VS Code auto-forwards the port
 
 End of session: just close the VS Code window. Server keeps running.
 

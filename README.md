@@ -12,7 +12,7 @@ supabase start
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3300](http://localhost:3300).
 
 ### After a shutdown
 
@@ -51,7 +51,7 @@ Install the [Stripe CLI](https://stripe.com/docs/stripe-cli), then forward event
 
 ```bash
 stripe login
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
+stripe listen --forward-to localhost:3300/api/webhooks/stripe
 ```
 
 Copy the `whsec_...` secret printed on startup into `.env.local` as `STRIPE_WEBHOOK_SECRET`.
