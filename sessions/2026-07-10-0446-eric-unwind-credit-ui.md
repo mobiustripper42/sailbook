@@ -6,7 +6,7 @@ branch: task/unwind-credit-ui
 started: 2026-07-10T04:46:33Z
 ended:
 points:
-pr_numbers: [131, 132, 134, 135]
+pr_numbers: [131, 132, 134, 135, 138]
 status: open
 transcript: /home/eric/.claude/projects/-home-eric-sailbook/f75a1782-10fd-4f41-81ff-39d21865a258.jsonl
 ---
@@ -78,7 +78,22 @@ transcript: /home/eric/.claude/projects/-home-eric-sailbook/f75a1782-10fd-4f41-8
 **Branch:** task/129b-asa-address
 **Opened at:** 2026-07-11T17:59:46Z
 
+## Task 5: Move dev/test server port 3000 → 3300 (chore)
+
+**Completed:**
+- Eric wants local dev/app servers off port 3000 (collides with something on his box) — use 3300. Saved as memory [[dev_server_port]]; committed 3300 as the project default.
+- `package.json` `dev` → `next dev -p 3300`; `playwright.config.ts` `baseURL: process.env.BASE_URL ?? 'http://localhost:3300'` (env-overridable); `.github/workflows/playwright.yml` `PORT: 3300` + `wait-on :3300` + `NEXT_PUBLIC_SITE_URL :3300`; `next.config.ts` allowedOrigins → `:3300`; two `NEXT_PUBLIC_SITE_URL` dev fallbacks (auth + checkout actions) → `:3300`; ~22 test files + `helpers.ts` hardcoded `localhost:3000` API URLs → `:3300`.
+- Verified end to end: build green; started a real `npm run dev` on 3300 and ran auth + student-enrollment (POSTs to `:3300/api/test/*`) + checkout desktop → **34 passed**; stopped the server after.
+
+**Code review:** @code-review — my code/test grep missed bootstrap/docs files; all fixed in a follow-up commit: `.env.example` (real bite — env overrides the fallback, would reintroduce a server-action origin mismatch), `.devcontainer/devcontainer.json` forwardPorts, `.claude/CLAUDE-context.md` (dev note + pre-start curl check), `supabase/config.toml` site_url, README, `docs/HETZNER_DEV.md`. Final sweep: zero remaining `3000` port refs.
+
+**PR:** [#138](https://github.com/mobiustripper42/sailbook/pull/138)
+**Points:** 2
+**Branch:** chore/dev-port-3300
+**Opened at:** 2026-07-15T02:57:56Z
+
 **Next Steps:**
+- `supabase/config.toml` `site_url` now `:3300` — takes effect on next `supabase stop && supabase start` (local auth links).
 - #133 (new): post-OAuth phone collection — the one student-creation path PR A can't cover form-side.
 - Possible follow-up (from PR B review): constrain `course_types.certification_body` to an enum/select so an ASA typo can't silently disable the address gate.
 - 5 PRs open this session (#131, #132, #134, #135 + #128 already merged) — merge whenever; #134 (phone) and #135 (address) are independent halves of #129.
