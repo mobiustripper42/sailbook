@@ -4,10 +4,10 @@ dev: eric
 slug: unwind-credit-ui
 branch: task/unwind-credit-ui
 started: 2026-07-10T04:46:33Z
-ended:
-points:
+ended: 2026-07-15T03:02:25Z
+points: 13
 pr_numbers: [131, 132, 134, 135, 138]
-status: open
+status: closed
 transcript: /home/eric/.claude/projects/-home-eric-sailbook/f75a1782-10fd-4f41-81ff-39d21865a258.jsonl
 ---
 
