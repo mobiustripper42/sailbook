@@ -28,6 +28,7 @@ export default async function StudentHistoryPage() {
       <StudentHistoryList
         courses={courses}
         emptyMessage="No course history yet. Enroll in a course to get started."
+        courseBasePath="/student/courses"
       />
     </div>
   )

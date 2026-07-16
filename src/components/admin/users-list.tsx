@@ -140,11 +140,14 @@ export default function UsersList({ users }: { users: User[] }) {
                 const editHref = u.is_student
                   ? `/admin/students/${u.id}/edit`
                   : `/admin/users/${u.id}/edit`
+                // Students have a profile page (with course history); their name
+                // links there. Other roles have no profile — name links to edit.
+                const nameHref = u.is_student ? `/admin/students/${u.id}` : editHref
                 return (
                   <TableRow key={u.id}>
                     <TableCell className="font-medium">
                       <Link
-                        href={editHref}
+                        href={nameHref}
                         className="hover:underline underline-offset-2"
                       >
                         {u.first_name} {u.last_name}

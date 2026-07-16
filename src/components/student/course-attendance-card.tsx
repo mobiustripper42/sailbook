@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { fmtDate, fmtTime } from '@/lib/utils'
@@ -39,12 +40,26 @@ function enrollmentStatusLabel(status: string): string {
   return status
 }
 
-export default function CourseAttendanceCard({ course }: { course: CourseAttendance }) {
+export default function CourseAttendanceCard({
+  course,
+  courseHref,
+}: {
+  course: CourseAttendance
+  courseHref?: string
+}) {
   return (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2">
-          <CardTitle className="text-base">{course.courseName}</CardTitle>
+          <CardTitle className="text-base">
+            {courseHref ? (
+              <Link href={courseHref} className="hover:underline underline-offset-2">
+                {course.courseName}
+              </Link>
+            ) : (
+              course.courseName
+            )}
+          </CardTitle>
           <div className="flex items-center gap-2 shrink-0">
             <Badge variant={enrollmentStatusVariant(course.enrollmentStatus)}>
               {enrollmentStatusLabel(course.enrollmentStatus)}

@@ -144,7 +144,11 @@ export default async function StudentAttendancePage() {
       ) : (
         <div className="space-y-4">
           {courses.map((course) => (
-            <CourseAttendanceCard key={course.courseId} course={course} />
+            <CourseAttendanceCard
+              key={course.courseId}
+              course={course}
+              courseHref={`/student/courses/${course.courseId}`}
+            />
           ))}
         </div>
       )}

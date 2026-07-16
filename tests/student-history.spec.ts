@@ -29,6 +29,13 @@ test.describe('Student — Experience page', () => {
     // Sam completed April course
     await expect(page.getByText('Completed')).toBeVisible();
   });
+
+  test('course title links to the course detail page', async ({ page }) => {
+    await page.goto('/student/history');
+    const courseLink = page.getByRole('link', { name: 'ASA 101 - Weekend (April)' });
+    await expect(courseLink).toBeVisible();
+    await expect(courseLink).toHaveAttribute('href', /^\/student\/courses\/[0-9a-f-]+$/);
+  });
 });
 
 test.describe('Student — Experience page (mobile)', () => {
@@ -67,6 +74,13 @@ test.describe('Admin — Student view', () => {
     await expect(page.getByText('Course History')).toBeVisible();
     await expect(page.getByText('ASA 101 - Weekend Intensive (May)')).toBeVisible();
     await expect(page.getByText('ASA 101 - Weekend (April)')).toBeVisible();
+  });
+
+  test('course title links to the admin course detail page', async ({ page }) => {
+    await page.goto(`/admin/students/${SAM_ID}`);
+    const courseLink = page.getByRole('link', { name: 'ASA 101 - Weekend (April)' });
+    await expect(courseLink).toBeVisible();
+    await expect(courseLink).toHaveAttribute('href', /^\/admin\/courses\/[0-9a-f-]+$/);
   });
 
   test('admin student view has Edit link', async ({ page }) => {
@@ -108,6 +122,13 @@ test.describe('Instructor — student link from roster', () => {
     // Sam has enrollments across multiple courses — all visible to instructor
     await expect(page.getByText('ASA 101 - Weekend Intensive (May)')).toBeVisible();
     await expect(page.getByText('ASA 101 - Weekend (April)')).toBeVisible();
+  });
+
+  test('course title is not linked (no instructor course route yet)', async ({ page }) => {
+    await loginAs(page, 'mike@ltsc.test', '/instructor/dashboard');
+    await page.goto(`/instructor/students/${SAM_ID}`);
+    await expect(page.getByText('ASA 101 - Weekend (April)')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'ASA 101 - Weekend (April)' })).toHaveCount(0);
   });
 
   test('instructor student view back link returns to dashboard', async ({ page }) => {
