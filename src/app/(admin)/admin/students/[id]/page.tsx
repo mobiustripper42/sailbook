@@ -60,6 +60,7 @@ export default async function AdminStudentViewPage({
           <StudentHistoryList
             courses={courses}
             emptyMessage="No course history for this student."
+            courseBasePath="/admin/courses"
           />
         )}
       </div>
