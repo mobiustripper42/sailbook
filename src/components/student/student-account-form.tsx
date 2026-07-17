@@ -86,6 +86,7 @@ export default function StudentAccountForm({
           id="phone"
           name="phone"
           type="tel"
+          required
           autoComplete="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}

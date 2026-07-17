@@ -105,8 +105,8 @@ export default function UserEditForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone</Label>
-          <Input id="phone" name="phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <Label htmlFor="phone">Phone{isStudent && ' *'}</Label>
+          <Input id="phone" name="phone" type="tel" autoComplete="tel" required={isStudent} value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
 
         <div className="space-y-2">

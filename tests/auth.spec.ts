@@ -48,6 +48,43 @@ test.describe('Auth — VersionTag', () => {
   }
 });
 
+test.describe('Auth — registration', () => {
+  test('phone field is required (#129)', async ({ page }) => {
+    await page.goto('/register');
+
+    const phone = page.getByLabel('Phone');
+    await expect(phone).toHaveAttribute('required', '');
+
+    // Fill name + email, leave phone blank. Native required validation must
+    // block the submit regardless of the passwordless flag / password field.
+    await page.getByLabel('First name').fill('No');
+    await page.getByLabel('Last name').fill('Phone');
+    await page.getByLabel('Email').fill(`nophone-${Date.now()}@test.invalid`);
+    await page.getByRole('button', { name: /create account|email me a code/i }).click();
+
+    await expect(page).toHaveURL(/\/register/);
+    await expect(phone).toHaveJSProperty('validity.valid', false);
+  });
+
+  test('phone must be a real 10-digit number, not just non-empty (#129)', async ({ page }) => {
+    await page.goto('/register');
+
+    await page.getByLabel('First name').fill('Bad');
+    await page.getByLabel('Last name').fill('Phone');
+    await page.getByLabel('Email').fill(`badphone-${Date.now()}@test.invalid`);
+    // Non-empty but only 5 digits — clears native `required`, so the submit
+    // reaches the server-side format check.
+    await page.getByLabel('Phone').fill('12345');
+    // Password field only renders on the password path (flag off in CI).
+    const pw = page.getByLabel('Password');
+    if (await pw.count()) await pw.fill('ValidPassword12');
+    await page.getByRole('button', { name: /create account|email me a code/i }).click();
+
+    await expect(page.getByText('Enter a valid 10-digit US phone number.')).toBeVisible();
+    await expect(page).toHaveURL(/\/register/);
+  });
+});
+
 test.describe('Auth — unauthenticated access', () => {
   test('unauthenticated user visiting / is redirected to /login', async ({ page }) => {
     await page.goto('/');
