@@ -18,6 +18,7 @@ const ALL = '__all__'
 export function AdminCalendarView({ sessions }: { sessions: SessionEvent[] }) {
   const [courseTypeId, setCourseTypeId] = useState(ALL)
   const [instructorName, setInstructorName] = useState(ALL)
+  const [studentName, setStudentName] = useState(ALL)
 
   const courseTypes = useMemo(() => {
     const map = new Map<string, string>()
@@ -35,14 +36,23 @@ export function AdminCalendarView({ sessions }: { sessions: SessionEvent[] }) {
     return [...set].sort()
   }, [sessions])
 
+  const students = useMemo(() => {
+    const set = new Set<string>()
+    for (const s of sessions) {
+      for (const name of s.studentNames ?? []) set.add(name)
+    }
+    return [...set].sort()
+  }, [sessions])
+
   const filtered = useMemo(
     () =>
       sessions.filter((s) => {
         if (courseTypeId !== ALL && s.courseTypeId !== courseTypeId) return false
         if (instructorName !== ALL && s.instructorName !== instructorName) return false
+        if (studentName !== ALL && !s.studentNames?.includes(studentName)) return false
         return true
       }),
-    [sessions, courseTypeId, instructorName],
+    [sessions, courseTypeId, instructorName, studentName],
   )
 
   const filterSelects = (
@@ -76,6 +86,24 @@ export function AdminCalendarView({ sessions }: { sessions: SessionEvent[] }) {
         <SelectContent>
           <SelectItem value={ALL}>All instructors</SelectItem>
           {instructors.map((n) => (
+            <SelectItem key={n} value={n}>
+              {n}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select value={studentName} onValueChange={setStudentName}>
+        <SelectTrigger
+          className="w-48"
+          aria-label="Filter by student"
+          data-testid="filter-student"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>All students</SelectItem>
+          {students.map((n) => (
             <SelectItem key={n} value={n}>
               {n}
             </SelectItem>

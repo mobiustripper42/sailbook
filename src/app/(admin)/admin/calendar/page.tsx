@@ -24,6 +24,14 @@ type RawCourse = {
   sessions: RawSessionRow[]
 }
 
+type RawRosterRow = {
+  session_id: string
+  enrollment: {
+    status: string
+    student: { first_name: string; last_name: string } | null
+  } | null
+}
+
 export default async function AdminCalendarPage() {
   const supabase = await createClient()
   const {
@@ -73,7 +81,41 @@ export default async function AdminCalendarPage() {
         instructorName: effectiveInstructor
           ? `${effectiveInstructor.first_name} ${effectiveInstructor.last_name}`
           : null,
+        studentNames: [],
       })
+    }
+  }
+
+  // Attach the roster per session so the calendar can filter by student.
+  // Second flat query keyed on the loaded session ids, rather than a deep
+  // courses→sessions→attendance→enrollments→profiles nested select.
+  const sessionById = new Map(sessions.map((s) => [s.id, s]))
+  if (sessionById.size > 0) {
+    const { data: roster, error: rosterError } = await supabase
+      .from('session_attendance')
+      .select(`
+        session_id,
+        enrollment:enrollments!session_attendance_enrollment_id_fkey (
+          status,
+          student:profiles!enrollments_student_id_fkey ( first_name, last_name )
+        )
+      `)
+      .in('session_id', [...sessionById.keys()])
+
+    // Non-fatal to the page render — a failure just leaves the student filter
+    // empty rather than blanking the calendar, but it shouldn't fail silently.
+    if (rosterError) console.error('Calendar roster fetch failed:', rosterError.message)
+
+    for (const row of (roster as unknown as RawRosterRow[]) ?? []) {
+      const enrollment = row.enrollment
+      // Skip cancelled enrollments; every remaining status that has attendance
+      // rows (in practice confirmed onward — rows are seeded at confirmation)
+      // counts toward the session's effective roster.
+      if (!enrollment || enrollment.status === 'cancelled') continue
+      const student = enrollment.student
+      if (!student) continue
+      const name = `${student.first_name} ${student.last_name}`
+      sessionById.get(row.session_id)?.studentNames?.push(name)
     }
   }
 

@@ -17,6 +17,7 @@ export type SessionEvent = {
   courseTypeId?: string
   courseTypeName?: string
   instructorName?: string | null
+  studentNames?: string[]
 }
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
