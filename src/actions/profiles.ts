@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { INVALID_PHONE_MESSAGE, isValidPhone, normalizePhone } from '@/lib/phone'
 
 export async function updateUserProfile(formData: FormData) {
   const supabase = await createClient()
@@ -40,11 +41,14 @@ export async function updateUserProfile(formData: FormData) {
   if (is_student && !phone) {
     return { error: 'Phone number is required for students.' }
   }
+  // Whenever a phone is provided (required for students, optional otherwise),
+  // it must be a real 10-digit US number.
+  if (phone && !isValidPhone(phone)) return { error: INVALID_PHONE_MESSAGE }
 
   const updates: Record<string, unknown> = {
     first_name,
     last_name,
-    phone,
+    phone: phone ? normalizePhone(phone) : null,
     is_active,
     is_instructor,
     is_student,
@@ -99,6 +103,7 @@ export async function updateStudentProfile(
 
   if (!first_name || !last_name) return 'First name and last name are required.'
   if (!phone) return 'Phone number is required.'
+  if (!isValidPhone(phone)) return INVALID_PHONE_MESSAGE
   if (instructor_notes && instructor_notes.length > 2000) {
     return 'Notes must be 2000 characters or fewer.'
   }
@@ -108,7 +113,7 @@ export async function updateStudentProfile(
     .update({
       first_name,
       last_name,
-      phone,
+      phone: normalizePhone(phone),
       asa_number,
       experience_level: experience_level === '—' ? null : experience_level,
       instructor_notes,
@@ -139,6 +144,7 @@ export async function updateProfile(formData: FormData) {
   if (!first_name || !last_name) {
     return { error: 'First name and last name are required.' }
   }
+  if (phone && !isValidPhone(phone)) return { error: INVALID_PHONE_MESSAGE }
 
   // Verify admin server-side — never trust client-supplied flags.
   const { data: callerProfile } = await supabase
@@ -152,7 +158,7 @@ export async function updateProfile(formData: FormData) {
   const updates: Record<string, unknown> = {
     first_name,
     last_name,
-    phone,
+    phone: phone ? normalizePhone(phone) : null,
     experience_level: experience_level === '—' ? null : experience_level,
     asa_number,
     updated_at: new Date().toISOString(),
@@ -198,8 +204,8 @@ export async function createAdminStudent(
 
   if (!first_name || !last_name || !email) return 'First name, last name, and email are required.'
   if (!phone) return 'Phone number is required.'
+  if (!isValidPhone(phone)) return INVALID_PHONE_MESSAGE
   if (first_name.length > 100 || last_name.length > 100) return 'Name must be 100 characters or fewer.'
-  if (phone.length > 30) return 'Phone must be 30 characters or fewer.'
   if (asa_number && asa_number.length > 20) return 'ASA number must be 20 characters or fewer.'
 
   const adminClient = createAdminClient()
@@ -222,7 +228,7 @@ export async function createAdminStudent(
       first_name,
       last_name,
       email,
-      phone,
+      phone: normalizePhone(phone),
       experience_level: experience_level === '—' ? null : experience_level,
       asa_number,
       is_student: true,

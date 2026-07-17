@@ -65,6 +65,24 @@ test.describe('Auth — registration', () => {
     await expect(page).toHaveURL(/\/register/);
     await expect(phone).toHaveJSProperty('validity.valid', false);
   });
+
+  test('phone must be a real 10-digit number, not just non-empty (#129)', async ({ page }) => {
+    await page.goto('/register');
+
+    await page.getByLabel('First name').fill('Bad');
+    await page.getByLabel('Last name').fill('Phone');
+    await page.getByLabel('Email').fill(`badphone-${Date.now()}@test.invalid`);
+    // Non-empty but only 5 digits — clears native `required`, so the submit
+    // reaches the server-side format check.
+    await page.getByLabel('Phone').fill('12345');
+    // Password field only renders on the password path (flag off in CI).
+    const pw = page.getByLabel('Password');
+    if (await pw.count()) await pw.fill('ValidPassword12');
+    await page.getByRole('button', { name: /create account|email me a code/i }).click();
+
+    await expect(page.getByText('Enter a valid 10-digit US phone number.')).toBeVisible();
+    await expect(page).toHaveURL(/\/register/);
+  });
 });
 
 test.describe('Auth — unauthenticated access', () => {

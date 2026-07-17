@@ -77,7 +77,7 @@ test.describe('3.11 — handle_new_user trigger', () => {
     await page.getByLabel('First name').fill('Trig')
     await page.getByLabel('Last name').fill('Ger')
     await page.getByLabel('Email').fill(email)
-    await page.getByLabel('Phone').fill('555-0100') // required as of #129
+    await page.getByLabel('Phone').fill('216-555-0100') // required as of #129
     await page.getByLabel('Password').fill('ValidPassword12')
     await page.getByRole('button', { name: 'Create account' }).click()
     await page.waitForURL(/\/register\/check-email/, { timeout: 10000 })

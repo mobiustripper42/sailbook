@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { safeNextPath } from '@/lib/auth/safe-next'
 import { friendlyPasswordError, validatePassword } from '@/lib/auth/password-rules'
 import { redirectForRole } from '@/lib/auth/role-redirect'
+import { INVALID_PHONE_MESSAGE, isValidPhone, normalizePhone } from '@/lib/phone'
 import { redirect } from 'next/navigation'
 
 export async function login(_: unknown, formData: FormData) {
@@ -40,6 +41,8 @@ export async function register(_: unknown, formData: FormData) {
   // Phone is required for students so the school can reach them about sessions,
   // cancellations, and ASA book shipments (#129).
   if (!phone) return { error: 'Phone number is required.' }
+  if (!isValidPhone(phone)) return { error: INVALID_PHONE_MESSAGE }
+  const normalizedPhone = normalizePhone(phone)
 
   // Mirror the Supabase password policy server-side for a clearer error path.
   const passwordError = validatePassword(password)
@@ -57,7 +60,7 @@ export async function register(_: unknown, formData: FormData) {
         is_student: true,
         first_name: firstName,
         last_name: lastName,
-        phone,
+        phone: normalizedPhone,
         experience_level: experienceLevel,
         instructor_notes: instructorNotes,
       },
@@ -266,6 +269,8 @@ export async function requestRegisterCode(
   // Phone is required for students (#129) — matches the password-path register().
   const phone = (formData.get('phone') as string)?.trim() || ''
   if (!phone) return { ok: false, error: 'Phone number is required.' }
+  if (!isValidPhone(phone)) return { ok: false, error: INVALID_PHONE_MESSAGE }
+  const normalizedPhone = normalizePhone(phone)
 
   const supabase = await createClient()
   const { error } = await supabase.auth.signInWithOtp({
@@ -282,7 +287,7 @@ export async function requestRegisterCode(
       data: {
         first_name: formData.get('firstName') as string,
         last_name: formData.get('lastName') as string,
-        phone,
+        phone: normalizedPhone,
         experience_level: (formData.get('experienceLevel') as string) || '',
         instructor_notes: (formData.get('instructorNotes') as string)?.trim() || '',
       },
