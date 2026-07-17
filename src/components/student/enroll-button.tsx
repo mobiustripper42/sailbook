@@ -3,6 +3,7 @@
 import { useTransition, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { createCheckoutSession } from '@/app/(student)/student/courses/[id]/actions'
+import AddressDialog from '@/components/student/address-dialog'
 
 interface EnrollButtonProps {
   courseId: string
@@ -12,15 +13,19 @@ interface EnrollButtonProps {
 export default function EnrollButton({ courseId, label }: EnrollButtonProps) {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [addressOpen, setAddressOpen] = useState(false)
 
   function handleEnroll() {
     setError(null)
     startTransition(async () => {
       const result = await createCheckoutSession(courseId)
-      if ('error' in result) {
-        setError(result.error)
-      } else {
+      if ('url' in result) {
         window.location.href = result.url
+      } else if (result.needsAddress) {
+        // ASA course needs a mailing address first — collect it, then retry.
+        setAddressOpen(true)
+      } else {
+        setError(result.error)
       }
     })
   }
@@ -31,6 +36,7 @@ export default function EnrollButton({ courseId, label }: EnrollButtonProps) {
         {pending ? 'Preparing checkout…' : (label ?? 'Register & Pay')}
       </Button>
       {error && <p className="text-sm text-destructive">{error}</p>}
+      <AddressDialog open={addressOpen} onOpenChange={setAddressOpen} onSaved={handleEnroll} />
     </div>
   )
 }
