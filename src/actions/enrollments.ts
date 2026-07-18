@@ -446,12 +446,17 @@ export async function setBookMailed(
   }
 
   const adminClient = createAdminClient()
-  const { error } = await adminClient
+  // Scope to course_id as well as id — a mismatched pair from the client can't
+  // write to another course's enrollment; a zero-row result is surfaced.
+  const { data, error } = await adminClient
     .from('enrollments')
     .update({ book_mailed_at: mailedDate, updated_at: new Date().toISOString() })
     .eq('id', enrollmentId)
+    .eq('course_id', courseId)
+    .select('id')
 
   if (error) return { error: error.message }
+  if (!data || data.length === 0) return { error: 'Enrollment not found for this course.' }
 
   revalidatePath(`/admin/courses/${courseId}`)
   return { error: null }
