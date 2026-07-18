@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
 import { getDropInDeposit } from '@/lib/drop-in'
 import { hasCompleteMailingAddress } from '@/lib/address'
+import { isAsaCertBody } from '@/lib/asa'
 
 export async function enrollInCourse(courseId: string) {
   const supabase = await createClient()
@@ -141,7 +142,7 @@ export async function createCheckoutSession(
   // after a hold was created). Signal the client to collect/confirm the address,
   // then it retries. Student self-enroll only; admin enroll isn't gated.
   const certBody = (course.course_types as unknown as { certification_body: string | null } | null)?.certification_body
-  const isAsa = certBody?.trim().toUpperCase() === 'ASA'
+  const isAsa = isAsaCertBody(certBody)
   if (isAsa && !hasCompleteMailingAddress(profile)) {
     return {
       error: 'ASA courses ship a textbook — please add your mailing address to continue.',

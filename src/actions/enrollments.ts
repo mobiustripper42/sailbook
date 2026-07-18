@@ -419,3 +419,45 @@ export async function issueCredit(
   // Cancel the enrollment and flip attendance records
   return cancelEnrollment(enrollmentId, courseId)
 }
+
+/**
+ * Record (or clear) the date an ASA course's textbook was mailed to a student
+ * (#153). Admin-only; `mailedDate` is a YYYY-MM-DD string, or null to clear.
+ * The ASA-only surfacing is a UI concern — the column is course-agnostic.
+ */
+export async function setBookMailed(
+  enrollmentId: string,
+  courseId: string,
+  mailedDate: string | null,
+): Promise<{ error: string | null }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { data: callerProfile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (!callerProfile?.is_admin) return { error: 'Unauthorized.' }
+
+  if (mailedDate !== null && !/^\d{4}-\d{2}-\d{2}$/.test(mailedDate)) {
+    return { error: 'Invalid date.' }
+  }
+
+  const adminClient = createAdminClient()
+  // Scope to course_id as well as id — a mismatched pair from the client can't
+  // write to another course's enrollment; a zero-row result is surfaced.
+  const { data, error } = await adminClient
+    .from('enrollments')
+    .update({ book_mailed_at: mailedDate, updated_at: new Date().toISOString() })
+    .eq('id', enrollmentId)
+    .eq('course_id', courseId)
+    .select('id')
+
+  if (error) return { error: error.message }
+  if (!data || data.length === 0) return { error: 'Enrollment not found for this course.' }
+
+  revalidatePath(`/admin/courses/${courseId}`)
+  return { error: null }
+}
