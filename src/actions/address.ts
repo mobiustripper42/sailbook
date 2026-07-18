@@ -2,7 +2,12 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import type { MailingAddress } from '@/lib/address'
+import {
+  addressInputToColumns,
+  readAddressForm,
+  validateAddressInput,
+  type MailingAddress,
+} from '@/lib/address'
 
 /**
  * The signed-in student's own mailing address. Used to pre-fill the ASA-enroll
@@ -33,27 +38,14 @@ export async function updateMyAddress(formData: FormData): Promise<{ error: stri
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated.' }
 
-  const line1 = (formData.get('address_line1') as string)?.trim() || ''
-  const line2 = (formData.get('address_line2') as string)?.trim() || ''
-  const city = (formData.get('city') as string)?.trim() || ''
-  const state = (formData.get('state') as string)?.trim().toUpperCase() || ''
-  const postal = (formData.get('postal_code') as string)?.trim() || ''
-
-  if (!line1 || !city || !state || !postal) {
-    return { error: 'Street address, city, state, and ZIP are required.' }
-  }
-  if (state.length !== 2) {
-    return { error: 'State must be a 2-letter abbreviation (e.g. OH).' }
-  }
+  const parsed = readAddressForm(formData)
+  const validationError = validateAddressInput(parsed, { required: true })
+  if (validationError) return { error: validationError }
 
   const { error } = await supabase
     .from('profiles')
     .update({
-      address_line1: line1,
-      address_line2: line2 || null,
-      city,
-      state,
-      postal_code: postal,
+      ...addressInputToColumns(parsed),
       updated_at: new Date().toISOString(),
     })
     .eq('id', user.id)
