@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { INVALID_PHONE_MESSAGE, isValidPhone, normalizePhone } from '@/lib/phone'
+import { addressInputToColumns, readAddressForm, validateAddressInput } from '@/lib/address'
 
 export async function updateUserProfile(formData: FormData) {
   const supabase = await createClient()
@@ -68,6 +69,13 @@ export async function updateUserProfile(formData: FormData) {
     updates.asa_number = (formData.get('asa_number') as string)?.trim() || null
     updates.experience_level = raw_exp === '—' ? null : raw_exp
     updates.is_member = formData.get('is_member') === 'on'
+
+    // Mailing address is optional here (admin may leave it blank), but a
+    // partially-filled address must still be complete.
+    const parsedAddress = readAddressForm(formData)
+    const addressError = validateAddressInput(parsedAddress, { required: false })
+    if (addressError) return { error: addressError }
+    Object.assign(updates, addressInputToColumns(parsedAddress))
   }
 
   const { error } = await supabase.from('profiles').update(updates).eq('id', id)
