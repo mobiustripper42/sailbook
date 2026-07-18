@@ -86,7 +86,7 @@ export default function AddressDialog({
         </AlertDialogHeader>
 
         <div className="space-y-3 py-2">
-          <AddressFields value={address} onChange={setAddress} disabled={pending} />
+          <AddressFields value={address} onChange={setAddress} disabled={pending} required />
           {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
 

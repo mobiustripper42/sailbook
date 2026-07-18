@@ -24,10 +24,15 @@ export default function AddressFields({
   value,
   onChange,
   disabled = false,
+  required = false,
 }: {
   value: AddressValue
   onChange: (next: AddressValue) => void
   disabled?: boolean
+  // Applies native `required` to line1/city/state/ZIP (line2 stays optional) so
+  // required-path callers get instant browser validation. Server-side
+  // validateAddressInput enforces it regardless.
+  required?: boolean
 }) {
   const set = (patch: Partial<AddressValue>) => onChange({ ...value, ...patch })
 
@@ -42,6 +47,7 @@ export default function AddressFields({
           value={value.line1}
           onChange={(e) => set({ line1: e.target.value })}
           disabled={disabled}
+          required={required}
         />
       </div>
       <div className="space-y-1">
@@ -67,6 +73,7 @@ export default function AddressFields({
             value={value.city}
             onChange={(e) => set({ city: e.target.value })}
             disabled={disabled}
+            required={required}
           />
         </div>
         <div className="space-y-1">
@@ -81,6 +88,7 @@ export default function AddressFields({
             className="w-16"
             placeholder="OH"
             disabled={disabled}
+            required={required}
           />
         </div>
         <div className="space-y-1">
@@ -93,6 +101,7 @@ export default function AddressFields({
             onChange={(e) => set({ postal: e.target.value })}
             className="w-24"
             disabled={disabled}
+            required={required}
           />
         </div>
       </div>

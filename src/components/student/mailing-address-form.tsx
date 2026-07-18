@@ -40,7 +40,7 @@ export default function MailingAddressForm({ initial }: { initial: MailingAddres
       </p>
       {error && <p className="text-sm text-destructive">{error}</p>}
       {saved && <p className="text-sm text-primary">Address updated.</p>}
-      <AddressFields value={address} onChange={setAddress} disabled={pending} />
+      <AddressFields value={address} onChange={setAddress} disabled={pending} required />
       <Button type="submit" disabled={pending}>
         {pending ? 'Saving…' : 'Save address'}
       </Button>
