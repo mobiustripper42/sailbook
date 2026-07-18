@@ -401,6 +401,28 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 
 ---
 
+## Phase 10: UI Redesign — Muster Design System (V3)
+
+Full screen-by-screen redesign adopting the Muster visual language (DEC-039) and the IA improvements surfaced with it. **Reference implementation:** the redesign mockup (all roles + public + auth, IBM Plex + tokens embedded), reviewed by @architect and @ui-reviewer. **Decisions:** DEC-039 (visual identity, supersedes D-018), DEC-036 (`section_label`), DEC-037 (instructor attendance RPC), DEC-038 (audit events). Sequenced @architect's way: cheap UI/IA wins first, then the schema-touching and subsystem work, landing page last. Accessibility carry-forward (focus token, form `label` `for`/`id`, keyboard-reachable controls, segmented-control aria — see muster#469) is baked into each task and swept in 10.11.
+
+| # | Task | Pts | Status |
+|---|------|-----|--------|
+| 10.1 | **Design-system foundation** — swap Mira/Sky/Nunito → Muster tokens in `globals.css` (IBM Plex Sans/Mono, `--accent`/`--accent-solid`/`--on-accent`, semantic chips, `--faint` at AA, ~12px radius, both themes), define the system `:focus-visible` token, rewrite `.claude/ui-context.md` + `@ui-reviewer` to the new language. (DEC-039) | 8 | [ ] |
+| 10.2 | **App-shell unification** — one parameterized role layout + nav-config keyed by role flags; collapse the three copy-paste shells + mobile drawers. Gate on cross-role nav/access Playwright green. | 5 | [ ] |
+| 10.3 | **Schedule consolidation** — merge `/calendar` + `/courses` → one `/schedule` (Month/List, single nav item) + breadcrumb rename. Folds #122 (create a course by clicking a date), #140 (course-list ordering). | 5 | [ ] |
+| 10.4 | **Course schedule/section model** — add `courses.section_label` (migration); derived-schedule formatter (degrades to "Varies" for makeups/one-offs); recurrence generator in New Course (weekday+time+range → sessions). (DEC-036) **Closes #124.** | 8 | [ ] |
+| 10.5 | **Admin dashboard triage board** — "Needs you" + real operational signal (fill/at-risk, recent enrollments, payments); reuse 6.9 `CleanIndicator` + 5.8 low-enrollment helper (no reinvention). | 5 | [ ] |
+| 10.6 | **Instructor build-out** — session roster + **attendance capture** via SECURITY DEFINER RPC (admin-or-assigned-instructor, pgTAP mandatory), instructor student view, linked course history. (DEC-037) **Closes #146, #142**; folds #125 (self-assign — UI only; availability model is out of scope, see #80). | 8 | [ ] |
+| 10.7 | **Student flows** — Home / Browse / Course / My Courses (merge the redundant Attendance + Experience tabs) / Account. Folds #143 (phone validation), #150 + #129 + #133 + #141 (mailing-address field on register/account/admin profile — autocomplete #148 / USPS #149 stay separate), #115 (credit-ledger history — gated on the DEC-035 policy call), #137 (enroll from student/course page). | 8 | [ ] |
+| 10.8 | **Audit / activity log** — append-only `events` table (immutable INSERT/SELECT RLS, DEC-035 shape), admin feed with type/date/entity filters; emit from server actions + webhook/cron, wire per category. (DEC-038) **Closes #144.** Split by emitter — an 8+, effectively a small subsystem. | 8 | [ ] |
+| 10.9 | **Public landing + auth rebuild** — SailBook's own landing page (replaces the WordPress clone; was cut task 6.11) + login/register in the new system. Folds #100 (double VersionTag on login), #101 (Simply Sailing → Learn to Sail Cleveland rename sweep). | 5 | [ ] |
+| 10.10 | **Enrollment-management fold-ins (admin)** — #121 (populate a class from waitlist), #116 (admin-solo course transfer), #130 (waive a paid fee), #147 (constrain cert-body to an enum). Each carries real backend logic — scope individually; may split out. | 5 | [ ] |
+| 10.11 | **End-of-phase close** — @ui-reviewer + @architect pass, accessibility sweep (form `label` wiring, keyboard reachability, segmented-control aria — muster#469 carry-forward), lint clean, tests green, retrospective. | 5 | [ ] |
+
+**Phase 10 estimated: ~70 pts.** Large by design (a coherent redesign) — 10.4/10.6/10.8 are the schema/invariant/subsystem-heavy ones and each may split during build. Develops on a feature branch + worktree (see below), not straight on `main`.
+
+---
+
 ## V3 Ideas (parked)
 
 - Proxy enrollment ("Who are you enrolling?" — Me / Me + someone / Someone else) — requires shopping cart model

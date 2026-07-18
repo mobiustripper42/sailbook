@@ -12,7 +12,7 @@ Roles:
 - **Students** — self-register, pay via Stripe, view schedule and attendance, cancel enrollments, manage notification preferences.
 
 ## Stack
-- **Frontend:** Next.js 16+ (App Router), Tailwind CSS, shadcn/ui, Nunito Sans
+- **Frontend:** Next.js 16+ (App Router), Tailwind CSS, shadcn/ui, IBM Plex Sans + IBM Plex Mono (Muster design system, DEC-039)
 - **Backend:** Supabase (PostgreSQL + Auth + Row Level Security) — no separate API server
 - **Payments:** Stripe (Checkout Sessions, webhooks)
 - **Notifications:** Twilio (SMS), Resend (email)
@@ -149,12 +149,12 @@ The migration **discipline** lives in the shell's `## Migration Protocol`. This 
 - Migrations: `supabase/migrations/YYYYMMDDHHMMSS_descriptive_name.sql`
 
 ### UI / Brand
-- Theme: Mira preset (b7CSfQ4Xo), Sky/Mist, oklch color vars. No color for color's sake.
-- Font: Nunito Sans (heading + body). Dark mode default; light mode via toggle (preference stored in user profile).
-- One border radius: xs throughout (`--radius: 0.125rem`) — never mixed.
-- Layout padding in layout.tsx only (DEC-017). Student-facing cards: `size="sm"`.
-- No nautical kitsch. Every page works at 375px.
-- **Full design system + the @ui-reviewer checklist live in `.claude/ui-context.md`.**
+- **Design system: the Muster language (DEC-039, supersedes D-018).** Adopted in the V3 UI redesign (PROJECT_PLAN Phase 10). The old Mira/Sky/Nunito preset is retired — do not build against it.
+- Font: **IBM Plex Sans** (UI) + **IBM Plex Mono** (all meaningful numerals — times, counts, capacities, prices, codes).
+- Color: harbor slate-blue accent, split `--accent` (expressive) vs `--accent-solid` + `--on-accent` (fill behind white text). Semantic chips ok/warn/bad/info (tint-bg + line) encode state, never decorate. `--faint` is AA-safe for text.
+- Both themes first-class (light primary); ~12px radius; two shadow levels; a system `:focus-visible` token.
+- Layout padding in layout.tsx only (DEC-017). No nautical kitsch (sail-mark logo aside). Every page works at 375px, in both themes.
+- **Authoritative tokens: `docs/BRAND.md`. Reference implementation: the redesign mockup** (all roles + public + auth). `.claude/ui-context.md` + `@ui-reviewer` are rewritten to these tokens in Phase 10 task 10.1 — until then, BRAND.md wins over any stale ui-context.md content.
 
 ### Testing
 - pgTAP tests in `supabase/tests/`; Playwright tests in `tests/`.

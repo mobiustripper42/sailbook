@@ -1,5 +1,7 @@
 # SailBook — UI Context (design system for @ui-reviewer)
 
+> ⚠️ **STALE below (2026-07-18).** The Mira/Sky/Nunito system this file describes is superseded by the **Muster design system** (DEC-039) in the V3 redesign. Until PROJECT_PLAN task **10.1** rewrites this file + `globals.css` + `@ui-reviewer` to the new tokens, treat **`docs/BRAND.md`** as authoritative and the redesign mockup as the reference implementation. Do not review or build against the tokens below.
+
 The design-system reference `@ui-reviewer` checks surfaces against (DEC-S019). Sources: `docs/BRAND.md` (philosophy, voice), the Mira theme preset, and the live tokens in `app/globals.css`. Nothing here syncs from seeds — it's project-owned.
 
 SailBook is a sailing school scheduling app for Learn to Sail Cleveland. Aesthetic priorities: **clarity first, personality second. Function over form. No nautical kitsch.**
