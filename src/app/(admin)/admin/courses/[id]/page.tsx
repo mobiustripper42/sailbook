@@ -18,6 +18,8 @@ import SessionCardItem from '@/components/admin/session-card-item'
 import CourseStatusActions from '@/components/admin/course-status-actions'
 import EnrollmentActions from '@/components/admin/enrollment-actions'
 import AdminEnrollStudentPanel from '@/components/admin/admin-enroll-student-panel'
+import BookMailedCell from '@/components/admin/book-mailed-cell'
+import { isAsaCertBody } from '@/lib/asa'
 import AdminWaitlistCard from '@/components/admin/admin-waitlist-card'
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -28,13 +30,19 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     .from('courses')
     .select(`
       *,
-      course_types ( name, short_code, is_drop_in ),
+      course_types ( name, short_code, is_drop_in, certification_body ),
       instructor:profiles!courses_instructor_id_fkey ( id, first_name, last_name )
     `)
     .eq('id', id)
     .single()
 
   if (!course) notFound()
+
+  // ASA courses ship a textbook (#153) — the roster exposes a "Book mailed"
+  // column only for these.
+  const isAsa = isAsaCertBody(
+    (course.course_types as { certification_body: string | null } | null)?.certification_body,
+  )
 
   const { data: sessions } = await supabase
     .from('sessions')
@@ -229,6 +237,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   <TableHead className="hidden sm:table-cell">Email</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="hidden sm:table-cell">Payment</TableHead>
+                  {isAsa && <TableHead>Book mailed</TableHead>}
                   <TableHead className="hidden md:table-cell">Enrolled</TableHead>
                   <TableHead className="w-32" />
                 </TableRow>
@@ -272,6 +281,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                           <span className="text-muted-foreground">—</span>
                         )}
                       </TableCell>
+                      {isAsa && (
+                        <TableCell>
+                          <BookMailedCell enrollmentId={e.id} courseId={id} initial={e.book_mailed_at} />
+                        </TableCell>
+                      )}
                       <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
                         {new Date(e.enrolled_at).toLocaleDateString()}
                       </TableCell>

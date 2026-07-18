@@ -278,6 +278,7 @@ export type Database = {
       }
       enrollments: {
         Row: {
+          book_mailed_at: string | null
           course_id: string
           enrolled_at: string | null
           hold_expires_at: string | null
@@ -288,6 +289,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          book_mailed_at?: string | null
           course_id: string
           enrolled_at?: string | null
           hold_expires_at?: string | null
@@ -298,6 +300,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          book_mailed_at?: string | null
           course_id?: string
           enrolled_at?: string | null
           hold_expires_at?: string | null
