@@ -154,7 +154,7 @@ The migration **discipline** lives in the shell's `## Migration Protocol`. This 
 - Color: harbor slate-blue accent, split `--accent` (expressive) vs `--accent-solid` + `--on-accent` (fill behind white text). Semantic chips ok/warn/bad/info (tint-bg + line) encode state, never decorate. `--faint` is AA-safe for text.
 - Both themes first-class (light primary); ~12px radius; two shadow levels; a system `:focus-visible` token.
 - Layout padding in layout.tsx only (DEC-017). No nautical kitsch (sail-mark logo aside). Every page works at 375px, in both themes.
-- **Authoritative tokens: `docs/BRAND.md`. Reference implementation: the redesign mockup** (all roles + public + auth). `.claude/ui-context.md` + `@ui-reviewer` are rewritten to these tokens in Phase 10 task 10.1 — until then, BRAND.md wins over any stale ui-context.md content.
+- **Authoritative tokens: `docs/BRAND.md`. Reference implementation: `docs/design/mockups/sailbook-redesign.html`** (open in a browser — every role/screen, both themes; see that dir's README). `.claude/ui-context.md` + `@ui-reviewer` are rewritten to these tokens in Phase 10 task 10.1 — until then, BRAND.md wins over any stale ui-context.md content.
 
 ### Testing
 - pgTAP tests in `supabase/tests/`; Playwright tests in `tests/`.

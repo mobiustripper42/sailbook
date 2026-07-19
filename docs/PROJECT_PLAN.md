@@ -403,7 +403,7 @@ Take the May-4-ready app and put it in front of real students. One-time work; no
 
 ## Phase 10: UI Redesign — Muster Design System (V3)
 
-Full screen-by-screen redesign adopting the Muster visual language (DEC-039) and the IA improvements surfaced with it. **Reference implementation:** the redesign mockup (all roles + public + auth, IBM Plex + tokens embedded), reviewed by @architect and @ui-reviewer. **Decisions:** DEC-039 (visual identity, supersedes D-018), DEC-036 (`section_label`), DEC-037 (instructor attendance RPC), DEC-038 (audit events). Sequenced @architect's way: cheap UI/IA wins first, then the schema-touching and subsystem work, landing page last. Accessibility carry-forward (focus token, form `label` `for`/`id`, keyboard-reachable controls, segmented-control aria — see muster#469) is baked into each task and swept in 10.11.
+Full screen-by-screen redesign adopting the Muster visual language (DEC-039) and the IA improvements surfaced with it. **Reference implementation:** `docs/design/mockups/sailbook-redesign.html` (all roles + public + auth, both themes — open in a browser; see the dir README), reviewed by @architect and @ui-reviewer. **Decisions:** DEC-039 (visual identity, supersedes D-018), DEC-036 (`section_label`), DEC-037 (instructor attendance RPC), DEC-038 (audit events). Sequenced @architect's way: cheap UI/IA wins first, then the schema-touching and subsystem work, landing page last. Accessibility carry-forward (focus token, form `label` `for`/`id`, keyboard-reachable controls, segmented-control aria — see muster#469) is baked into each task and swept in 10.11.
 
 | # | Task | Pts | Status |
 |---|------|-----|--------|
