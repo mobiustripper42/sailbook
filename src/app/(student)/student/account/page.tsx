@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import StudentAccountForm from '@/components/student/student-account-form'
 import NotificationPreferencesSection from '@/components/student/notification-preferences-section'
+import MailingAddressForm from '@/components/student/mailing-address-form'
+import { getMyAddress } from '@/actions/address'
 import { isSMSEnabled, normalizeStudentPreferences } from '@/lib/notifications/preferences'
 
 export const metadata = { title: 'SailBook — Account' }
@@ -27,6 +29,7 @@ export default async function StudentAccountPage() {
 
   if (!profile) redirect('/login')
 
+  const address = await getMyAddress()
   const initialNotifPrefs = normalizeStudentPreferences(profile.notification_preferences)
 
   return (
@@ -43,6 +46,11 @@ export default async function StudentAccountPage() {
         experienceCodes={codes ?? []}
         smsEnabled={isSMSEnabled()}
       />
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Mailing address</h2>
+        <MailingAddressForm initial={address} />
+      </section>
 
       <NotificationPreferencesSection initialPrefs={initialNotifPrefs} smsEnabled={isSMSEnabled()} />
     </div>

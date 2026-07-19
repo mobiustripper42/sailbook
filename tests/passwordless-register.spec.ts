@@ -46,6 +46,7 @@ async function fillProfile(page: import('@playwright/test').Page, first: string,
   await page.getByLabel('First name').fill(first)
   await page.getByLabel('Last name').fill(last)
   await page.getByLabel('Email', { exact: true }).fill(email)
+  await page.getByLabel('Phone').fill('216-555-0100') // required as of #129
 }
 
 test.describe('Passwordless registration (DEC-033)', () => {

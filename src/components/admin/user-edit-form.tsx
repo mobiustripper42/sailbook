@@ -6,6 +6,7 @@ import { updateUserProfile } from '@/actions/profiles'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import AddressFields, { type AddressValue } from '@/components/shared/address-fields'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 
 type ExperienceCode = {
@@ -27,6 +28,11 @@ type Profile = {
   asa_number?: string | null
   experience_level?: string | null
   is_member?: boolean
+  address_line1?: string | null
+  address_line2?: string | null
+  city?: string | null
+  state?: string | null
+  postal_code?: string | null
 }
 
 export default function UserEditForm({
@@ -54,6 +60,13 @@ export default function UserEditForm({
   const [asaNumber, setAsaNumber] = useState(profile.asa_number ?? '')
   const [experienceLevel, setExperienceLevel] = useState(profile.experience_level ?? '—')
   const [isMember, setIsMember] = useState(profile.is_member ?? false)
+  const [address, setAddress] = useState<AddressValue>({
+    line1: profile.address_line1 ?? '',
+    line2: profile.address_line2 ?? '',
+    city: profile.city ?? '',
+    state: profile.state ?? '',
+    postal: profile.postal_code ?? '',
+  })
 
   function handleSubmit(formData: FormData) {
     setError(null)
@@ -105,8 +118,8 @@ export default function UserEditForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone</Label>
-          <Input id="phone" name="phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <Label htmlFor="phone">Phone{isStudent && ' *'}</Label>
+          <Input id="phone" name="phone" type="tel" autoComplete="tel" required={isStudent} value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
 
         <div className="space-y-2">
@@ -172,6 +185,11 @@ export default function UserEditForm({
                 className="h-4 w-4 rounded border border-input accent-primary"
               />
               <Label htmlFor="is_member" className="cursor-pointer">Member Pricing</Label>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm">Mailing address</Label>
+              <AddressFields value={address} onChange={setAddress} disabled={pending} />
             </div>
           </div>
 

@@ -18,6 +18,7 @@ test.describe('3.10 — password strength + email verification', () => {
     await page.getByLabel('First name').fill('Pat')
     await page.getByLabel('Last name').fill('Test')
     await page.getByLabel('Email').fill(email)
+    await page.getByLabel('Phone').fill('216-555-0100') // required as of #129
     // 14 chars (passes minLength) but no uppercase — server-side
     // validatePassword() rejects before ever calling Supabase.
     await page.getByLabel('Password').fill('alllowercase12')
@@ -38,6 +39,7 @@ test.describe('3.10 — password strength + email verification', () => {
     await page.getByLabel('First name').fill('Pat')
     await page.getByLabel('Last name').fill('Test')
     await page.getByLabel('Email').fill(email)
+    await page.getByLabel('Phone').fill('216-555-0100') // required as of #129
     await page.getByLabel('Password').fill('ValidPassword12')
     await page.getByRole('button', { name: 'Create account' }).click()
 
@@ -55,6 +57,7 @@ test.describe('3.10 — password strength + email verification', () => {
     await page.getByLabel('First name').fill('Pat')
     await page.getByLabel('Last name').fill('Test')
     await page.getByLabel('Email').fill(email)
+    await page.getByLabel('Phone').fill('216-555-0100') // required as of #129
     await page.getByLabel('Password').fill(password)
     await page.getByRole('button', { name: 'Create account' }).click()
     await page.waitForURL(/\/register\/check-email/, { timeout: 10000 })

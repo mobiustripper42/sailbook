@@ -10,7 +10,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   const [{ data: profile }, { data: { user } }, { data: codes }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, first_name, last_name, email, phone, is_admin, is_instructor, is_student, is_active, asa_number, experience_level, is_member')
+      .select('id, first_name, last_name, email, phone, is_admin, is_instructor, is_student, is_active, asa_number, experience_level, is_member, address_line1, address_line2, city, state, postal_code')
       .eq('id', id)
       .single(),
     supabase.auth.getUser(),

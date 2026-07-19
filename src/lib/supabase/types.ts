@@ -278,6 +278,7 @@ export type Database = {
       }
       enrollments: {
         Row: {
+          book_mailed_at: string | null
           course_id: string
           enrolled_at: string | null
           hold_expires_at: string | null
@@ -288,6 +289,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          book_mailed_at?: string | null
           course_id: string
           enrolled_at?: string | null
           hold_expires_at?: string | null
@@ -298,6 +300,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          book_mailed_at?: string | null
           course_id?: string
           enrolled_at?: string | null
           hold_expires_at?: string | null
@@ -428,10 +431,15 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address_line1: string | null
+          address_line2: string | null
           asa_number: string | null
           auth_source: string
+          city: string | null
           created_at: string | null
           email: string
+          postal_code: string | null
+          state: string | null
           experience_level: string | null
           first_name: string
           id: string
@@ -449,10 +457,15 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
           asa_number?: string | null
           auth_source?: string
+          city?: string | null
           created_at?: string | null
           email: string
+          postal_code?: string | null
+          state?: string | null
           experience_level?: string | null
           first_name: string
           id: string
@@ -470,10 +483,15 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          address_line1?: string | null
+          address_line2?: string | null
           asa_number?: string | null
           auth_source?: string
+          city?: string | null
           created_at?: string | null
           email?: string
+          postal_code?: string | null
+          state?: string | null
           experience_level?: string | null
           first_name?: string
           id?: string

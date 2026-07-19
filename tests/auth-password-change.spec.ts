@@ -17,6 +17,7 @@ async function registerFreshUser(
   await page.getByLabel('First name').fill('Pw')
   await page.getByLabel('Last name').fill('Change')
   await page.getByLabel('Email').fill(email)
+  await page.getByLabel('Phone').fill('216-555-0100') // required as of #129
   await page.getByLabel('Password').fill(VALID_PW)
   await page.getByRole('button', { name: 'Create account' }).click()
   await page.waitForURL(/\/register\/check-email/, { timeout: 10000 })

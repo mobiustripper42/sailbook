@@ -54,7 +54,7 @@ export default function CreateAdminStudentForm({
 
       <div className="space-y-1.5">
         <Label htmlFor="phone">Phone</Label>
-        <Input id="phone" name="phone" type="tel" placeholder="Optional" />
+        <Input id="phone" name="phone" type="tel" required />
       </div>
 
       <div className="space-y-1.5">
