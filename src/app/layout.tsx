@@ -1,13 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Nunito_Sans } from "next/font/google";
+import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { NavProgress } from "@/components/nav-progress";
 import { ThemeProvider } from "@/components/theme-provider";
 import { VersionTag } from "@/components/VersionTag";
 import "./globals.css";
 
-const nunitoSans = Nunito_Sans({
+const plexSans = IBM_Plex_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -32,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={nunitoSans.variable} suppressHydrationWarning>
+    <html lang="en" className={`${plexSans.variable} ${plexMono.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
         {process.env.NODE_ENV === 'development' && (
           <div className="fixed top-0 left-0 right-0 h-0.5 bg-red-500 z-[9999]" />

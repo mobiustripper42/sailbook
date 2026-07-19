@@ -8,7 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+  --font-mono: var(--font-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -40,6 +40,42 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Muster palette — first-class utilities for redesign components (DEC-040).
+     Names mirror the mockup vocabulary; two renames avoid CSS-property
+     collisions with shadcn (--accent hover-bg, --muted bg):
+       mockup --accent      -> --brand        (expressive harbor blue)
+       mockup --accent-ink  -> --brand-ink    (text on a blue tint)
+       mockup --muted (text)-> --muted-ink    (a.k.a. shadcn --muted-foreground) */
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-accent-solid: var(--accent-solid);
+  --color-on-accent: var(--on-accent);
+  --color-surface: var(--surface);
+  --color-rail: var(--rail);
+  --color-sink: var(--sink);
+  --color-ink: var(--ink);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-ok: var(--ok);
+  --color-ok-bg: var(--ok-bg);
+  --color-ok-line: var(--ok-line);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-warn-line: var(--warn-line);
+  --color-bad: var(--bad);
+  --color-bad-bg: var(--bad-bg);
+  --color-bad-line: var(--bad-line);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --color-info-line: var(--info-line);
+  --color-t-asa101: var(--t-asa101);
+  --color-t-asa103: var(--t-asa103);
+  --color-t-open: var(--t-open);
+  --color-t-ding: var(--t-ding);
+  --color-t-camp: var(--t-camp);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -49,81 +85,138 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ============================================================================
+   Muster design system (DEC-039 / DEC-040). Palette authored in hex as the
+   single source of truth (BRAND.md); shadcn tokens are thin aliases over it so
+   shipped components re-skin with no markup change. Reference implementation:
+   docs/design/mockups/sailbook-redesign.html
+   ========================================================================== */
+
 :root {
-  --progress-bar: oklch(0.5 0.134 242.749);
-  --radius: 0.125rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.148 0.004 228.8);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.148 0.004 228.8);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.148 0.004 228.8);
-  --primary: oklch(0.5 0.134 242.749);
-  --primary-foreground: oklch(0.977 0.013 236.62);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.963 0.002 197.1);
-  /* WCAG AA: needs 4.5:1 against light bg. 0.56 → 4.43:1 (fail), 0.52 → 4.95:1 (pass). */
-  --muted-foreground: oklch(0.52 0.021 213.5);
-  --accent: oklch(0.963 0.002 197.1);
-  --accent-foreground: oklch(0.218 0.008 223.9);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.977 0.013 236.62);
-  --border: oklch(0.925 0.005 214.3);
-  --input: oklch(0.925 0.005 214.3);
-  --ring: oklch(0.723 0.014 214.4);
-  /* WCAG AA: warning text on bg-warning/10 needs 4.5:1. 0.68 fails on white;
-     0.55 passes on white but fails on the warm-tinted card bg; 0.48 passes both. */
-  --warning: oklch(0.48 0.16 51);
-  --chart-1: oklch(0.872 0.007 219.6);
-  --chart-2: oklch(0.56 0.021 213.5);
-  --chart-3: oklch(0.45 0.017 213.2);
-  --chart-4: oklch(0.378 0.015 216);
-  --chart-5: oklch(0.275 0.011 216.9);
-  --sidebar: oklch(0.987 0.002 197.1);
-  --sidebar-foreground: oklch(0.148 0.004 228.8);
-  --sidebar-primary: oklch(0.588 0.158 241.966);
-  --sidebar-primary-foreground: oklch(0.977 0.013 236.62);
-  --sidebar-accent: oklch(0.963 0.002 197.1);
-  --sidebar-accent-foreground: oklch(0.218 0.008 223.9);
-  --sidebar-border: oklch(0.925 0.005 214.3);
-  --sidebar-ring: oklch(0.723 0.014 214.4);
+  /* --- Muster palette (light) --- */
+  --brand: #2f5d86;         /* expressive harbor blue (mockup --accent) */
+  --brand-ink: #24486a;     /* text on a blue tint (mockup --accent-ink) */
+  --accent-solid: #2f5d86;  /* fill behind white text (buttons, avatars) */
+  --on-accent: #ffffff;
+  --bg: #eef2f6;
+  --surface: #ffffff;
+  --rail: #f7f9fb;
+  --sink: #f1f4f8;
+  --ink: #101826;
+  --muted-ink: #5b6675;     /* muted text (mockup --muted) */
+  --faint: #6a7482;         /* AA-safe faint text (DEC-039 fix) */
+  --line: #e3e8ee;
+  --line-soft: #eef2f6;
+  --ok: #15803d;   --ok-bg: #e7f4ec;   --ok-line: #cbe6d5;
+  --warn: #b45309; --warn-bg: #fbf0db; --warn-line: #f0ddb4;
+  --bad: #be2f2a;  --bad-bg: #fbe6e4;  --bad-line: #f2cdc9;
+  --info: #3257a8; --info-bg: #e7ecf7; --info-line: #cdd8ee;
+  --t-asa101: #2f5d86; --t-asa103: #2f7d70; --t-open: #8a5f93;
+  --t-ding: #9c6b4e;   --t-camp: #b07d16;
+  --shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 12px 28px -18px rgba(15, 23, 42, .28);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, .05);
+
+  --radius: 0.75rem;        /* ~12px, consistent */
+  --progress-bar: var(--brand);
+
+  /* --- shadcn aliases (light) --- */
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--accent-solid);
+  --primary-foreground: var(--on-accent);
+  --secondary: var(--sink);
+  --secondary-foreground: var(--ink);
+  --muted: var(--rail);
+  --muted-foreground: var(--muted-ink);
+  --accent: var(--sink);
+  --accent-foreground: var(--ink);
+  --destructive: var(--bad);
+  --destructive-foreground: var(--on-accent);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--brand);
+  --warning: var(--warn);
+  --chart-1: var(--t-asa101);
+  --chart-2: var(--t-asa103);
+  --chart-3: var(--t-open);
+  --chart-4: var(--t-ding);
+  --chart-5: var(--t-camp);
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--accent-solid);
+  --sidebar-primary-foreground: var(--on-accent);
+  --sidebar-accent: var(--sink);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--brand);
 }
 
 .dark {
-  --background: oklch(0.148 0.004 228.8);
-  --foreground: oklch(0.987 0.002 197.1);
-  --card: oklch(0.218 0.008 223.9);
-  --card-foreground: oklch(0.987 0.002 197.1);
-  --popover: oklch(0.218 0.008 223.9);
-  --popover-foreground: oklch(0.987 0.002 197.1);
-  --primary: oklch(0.443 0.11 240.79);
-  --primary-foreground: oklch(0.977 0.013 236.62);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.275 0.011 216.9);
-  --muted-foreground: oklch(0.723 0.014 214.4);
-  --accent: oklch(0.275 0.011 216.9);
-  --accent-foreground: oklch(0.987 0.002 197.1);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.977 0.013 236.62);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.56 0.021 213.5);
-  --warning: oklch(0.80 0.15 67);
-  --chart-1: oklch(0.872 0.007 219.6);
-  --chart-2: oklch(0.56 0.021 213.5);
-  --chart-3: oklch(0.45 0.017 213.2);
-  --chart-4: oklch(0.378 0.015 216);
-  --chart-5: oklch(0.275 0.011 216.9);
-  --sidebar: oklch(0.218 0.008 223.9);
-  --sidebar-foreground: oklch(0.987 0.002 197.1);
-  --sidebar-primary: oklch(0.685 0.169 237.323);
-  --sidebar-primary-foreground: oklch(0.293 0.066 243.157);
-  --sidebar-accent: oklch(0.275 0.011 216.9);
-  --sidebar-accent-foreground: oklch(0.987 0.002 197.1);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.56 0.021 213.5);
+  /* --- Muster palette (dark) --- */
+  --brand: #6ba3d6;
+  --brand-ink: #8fbde4;
+  --accent-solid: #316293;  /* darkened so white text passes AA */
+  --on-accent: #ffffff;
+  --bg: #0d131e;
+  --surface: #161e2c;
+  --rail: #111927;
+  --sink: #1b2434;
+  --ink: #e8edf3;
+  --muted-ink: #9aa7b7;
+  --faint: #8792a1;
+  --line: #25303f;
+  --line-soft: #1c2634;
+  --ok: #5cc98d;   --ok-bg: #132a20;   --ok-line: #22503a;
+  --warn: #e0a459; --warn-bg: #2c2313; --warn-line: #54421f;
+  --bad: #e78078;  --bad-bg: #2c1817;  --bad-line: #57302c;
+  --info: #7ea3e0; --info-bg: #182238; --info-line: #2c3d5e;
+  --t-asa101: #6ba3d6; --t-asa103: #5cb3a2; --t-open: #b58cc0;
+  --t-ding: #c39274;   --t-camp: #d6a94a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 14px 30px -18px rgba(0, 0, 0, .6);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .25);
+
+  --progress-bar: var(--brand);
+
+  /* --- shadcn aliases (dark) --- restated so the var() expressions re-resolve
+     against the dark Muster palette above (a custom property declared only on
+     :root computes once with light values and inherits frozen). --- */
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--accent-solid);
+  --primary-foreground: var(--on-accent);
+  --secondary: var(--sink);
+  --secondary-foreground: var(--ink);
+  --muted: var(--rail);
+  --muted-foreground: var(--muted-ink);
+  --accent: var(--sink);
+  --accent-foreground: var(--ink);
+  --destructive: var(--bad);
+  --destructive-foreground: var(--on-accent);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--brand);
+  --warning: var(--warn);
+  --chart-1: var(--t-asa101);
+  --chart-2: var(--t-asa103);
+  --chart-3: var(--t-open);
+  --chart-4: var(--t-ding);
+  --chart-5: var(--t-camp);
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--accent-solid);
+  --sidebar-primary-foreground: var(--on-accent);
+  --sidebar-accent: var(--sink);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--brand);
 }
 
 @layer base {
@@ -138,11 +231,21 @@
   }
 }
 
-/* Placeholder text — unlayered so it wins over @layer utilities without !important.
-   Targets ::placeholder specifically without touching muted-foreground everywhere else. */
-::placeholder {
-  color: oklch(0.8 0.021 213.5); /* light mode: clearly lighter than input text */
+/* System focus-visible token (DEC-039). One uniform keyboard-focus ring across
+   every interactive element; mouse/touch focus stays quiet. */
+@layer base {
+  :where(a, button, input, select, textarea, [tabindex], [role="switch"]):focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  :where(a, button, input, select, textarea, [tabindex]):focus:not(:focus-visible) {
+    outline: none;
+  }
 }
-.dark ::placeholder {
-  color: oklch(0.35 0.014 214.4); /* dark mode: clearly darker than foreground text */
+
+/* Placeholder text — faint token, distinguishable from input text in both
+   themes (faint is lighter than ink in light, darker than ink in dark). */
+::placeholder {
+  color: var(--faint);
 }

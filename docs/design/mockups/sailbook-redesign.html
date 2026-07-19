@@ -1,0 +1,1544 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SailBook Redesign · muster-based</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+:root{
+  --accent:#2f5d86; --accent-ink:#24486a; --accent-solid:#2f5d86; --on-accent:#ffffff;
+  --bg:#eef2f6; --surface:#ffffff; --rail:#f7f9fb; --sink:#f1f4f8;
+  --ink:#101826; --muted:#5b6675; --faint:#6a7482;
+  --line:#e3e8ee; --line-soft:#eef2f6;
+  --ok:#15803d; --ok-bg:#e7f4ec; --ok-line:#cbe6d5;
+  --warn:#b45309; --warn-bg:#fbf0db; --warn-line:#f0ddb4;
+  --bad:#be2f2a; --bad-bg:#fbe6e4; --bad-line:#f2cdc9;
+  --info:#3257a8; --info-bg:#e7ecf7; --info-line:#cdd8ee;
+  --t-asa101:#2f5d86; --t-asa103:#2f7d70; --t-open:#8a5f93; --t-ding:#9c6b4e; --t-camp:#b07d16;
+  --radius:12px;
+  --shadow:0 1px 2px rgba(15,23,42,.04), 0 12px 28px -18px rgba(15,23,42,.28);
+  --shadow-sm:0 1px 2px rgba(15,23,42,.05);
+  --sans:'IBM Plex Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --mono:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --accent:#6ba3d6; --accent-ink:#8fbde4; --accent-solid:#316293; --on-accent:#ffffff;
+  --bg:#0d131e; --surface:#161e2c; --rail:#111927; --sink:#1b2434;
+  --ink:#e8edf3; --muted:#9aa7b7; --faint:#8792a1;
+  --line:#25303f; --line-soft:#1c2634;
+  --ok:#5cc98d; --ok-bg:#132a20; --ok-line:#22503a;
+  --warn:#e0a459; --warn-bg:#2c2313; --warn-line:#54421f;
+  --bad:#e78078; --bad-bg:#2c1817; --bad-line:#57302c;
+  --info:#7ea3e0; --info-bg:#182238; --info-line:#2c3d5e;
+  --t-asa101:#6ba3d6; --t-asa103:#5cb3a2; --t-open:#b58cc0; --t-ding:#c39274; --t-camp:#d6a94a;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 14px 30px -18px rgba(0,0,0,.6);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.25);
+}}
+:root[data-theme="light"]{
+  --accent:#2f5d86; --accent-ink:#24486a; --accent-solid:#2f5d86; --on-accent:#ffffff;
+  --bg:#eef2f6; --surface:#ffffff; --rail:#f7f9fb; --sink:#f1f4f8;
+  --ink:#101826; --muted:#5b6675; --faint:#6a7482;
+  --line:#e3e8ee; --line-soft:#eef2f6;
+  --ok:#15803d; --ok-bg:#e7f4ec; --ok-line:#cbe6d5;
+  --warn:#b45309; --warn-bg:#fbf0db; --warn-line:#f0ddb4;
+  --bad:#be2f2a; --bad-bg:#fbe6e4; --bad-line:#f2cdc9;
+  --info:#3257a8; --info-bg:#e7ecf7; --info-line:#cdd8ee;
+  --t-asa101:#2f5d86; --t-asa103:#2f7d70; --t-open:#8a5f93; --t-ding:#9c6b4e; --t-camp:#b07d16;
+  --shadow:0 1px 2px rgba(15,23,42,.04), 0 12px 28px -18px rgba(15,23,42,.28);
+}
+:root[data-theme="dark"]{
+  --accent:#6ba3d6; --accent-ink:#8fbde4; --accent-solid:#316293; --on-accent:#ffffff;
+  --bg:#0d131e; --surface:#161e2c; --rail:#111927; --sink:#1b2434;
+  --ink:#e8edf3; --muted:#9aa7b7; --faint:#8792a1;
+  --line:#25303f; --line-soft:#1c2634;
+  --ok:#5cc98d; --ok-bg:#132a20; --ok-line:#22503a;
+  --warn:#e0a459; --warn-bg:#2c2313; --warn-line:#54421f;
+  --bad:#e78078; --bad-bg:#2c1817; --bad-line:#57302c;
+  --info:#7ea3e0; --info-bg:#182238; --info-line:#2c3d5e;
+  --t-asa101:#6ba3d6; --t-asa103:#5cb3a2; --t-open:#b58cc0; --t-ding:#c39274; --t-camp:#d6a94a;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 14px 30px -18px rgba(0,0,0,.6);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--sans); background:var(--bg); color:var(--ink); font-size:14px; line-height:1.45; -webkit-font-smoothing:antialiased}
+.mono{font-family:var(--mono); font-variant-ligatures:none}
+.tnum{font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{margin:0; font-weight:600}
+a{color:inherit}
+button{font-family:inherit;cursor:pointer}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible,[role="switch"]:focus-visible,.clik:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+*:focus:not(:focus-visible){outline:none}
+
+/* gallery chrome */
+.gallery-bar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:9px 16px;background:var(--ink);color:#e8edf3;font-size:12.5px}
+:root[data-theme="dark"] .gallery-bar{background:#05090f}
+.gallery-bar .gt{font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.gallery-bar .gt i{width:12px;height:12px;border-radius:3px;background:var(--accent);display:inline-block}
+.gallery-bar .gsub{color:#93a0b0;font-family:var(--mono);font-size:11px}
+.gallery-bar .rtag{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#aeb9c8;border:1px solid #2a3647;padding:3px 9px;border-radius:6px}
+.gthemetoggle{background:transparent;border:1px solid #2a3647;color:#aeb9c8;font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:7px}
+.roleswitch{display:flex;gap:5px;margin-left:auto}
+.roleswitch .rl{font-size:10px;color:#67748a;text-transform:uppercase;letter-spacing:.06em;font-weight:700;align-self:center;margin-right:3px}
+.roleswitch button{background:transparent;border:1px solid #2a3647;color:#aeb9c8;font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:7px}
+.roleswitch button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.roleswitch button:disabled{opacity:.4;cursor:not-allowed}
+
+/* app shell */
+.app{display:flex;min-height:calc(100vh - 40px)}
+.side{width:224px;flex:none;background:var(--surface);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;position:sticky;top:40px;height:calc(100vh - 40px)}
+.side-brand{padding:16px 18px;border-bottom:1px solid var(--line)}
+.side-brand .bn{font-weight:700;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.side-brand .bn i{width:13px;height:13px;border-radius:4px;background:var(--accent)}
+.side-brand .role{font-size:11px;color:var(--faint);margin-top:3px;text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+.side-brand .school{font-size:11.5px;color:var(--muted);margin-top:6px}
+.nav{flex:1;padding:8px 8px;display:flex;flex-direction:column;gap:1px;overflow-y:auto}
+.nav a{display:flex;align-items:center;gap:9px;padding:7px 11px;border-radius:8px;font-size:13px;color:var(--muted);text-decoration:none;font-weight:500}
+.nav a:hover{background:var(--sink);color:var(--ink)}
+.nav a.on{background:var(--info-bg);color:var(--accent-ink);font-weight:600}
+.nav a .ic{width:15px;text-align:center;opacity:.85}
+.nav a .badge{margin-left:auto;font-size:10.5px;font-weight:700;background:var(--bad-bg);color:var(--bad);padding:1px 7px;border-radius:99px;border:1px solid var(--bad-line)}
+.side-foot{padding:12px 14px;border-top:1px solid var(--line);display:flex;align-items:center;gap:9px}
+.avatar{width:30px;height:30px;border-radius:8px;background:var(--accent-solid);color:var(--on-accent);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;flex:none}
+.side-foot .who{min-width:0}
+.side-foot .who b{font-size:12.5px;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side-foot .who span{font-size:11px;color:var(--faint)}
+.icon-btn{margin-left:auto;background:transparent;border:1px solid var(--line);color:var(--muted);width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px}
+
+.main{flex:1;min-width:0;padding:22px 26px 60px;max-width:1240px}
+.topmobile{display:none}
+.mobilenav{display:none}
+
+/* page header */
+.phead{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+.phead .day{font-size:24px;font-weight:600;letter-spacing:-.02em}
+.phead h1.day{font-size:23px}
+.phead .sub{font-size:13px;color:var(--muted);margin-top:3px}
+.pulse{display:flex;gap:22px;flex-wrap:wrap}
+.pulse .p{display:flex;flex-direction:column;align-items:flex-end}
+.pulse .pv{font-family:var(--mono);font-size:19px;font-weight:600;line-height:1.1}
+.pulse .pl{font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-top:1px}
+.pulse .pv.good{color:var(--ok)}
+
+/* buttons */
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:12.5px;padding:7px 13px;border-radius:8px;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--sink)}
+.btn-primary{background:var(--accent-solid);border-color:var(--accent-solid);color:var(--on-accent)}
+.btn-primary:hover{background:color-mix(in oklab,var(--accent-solid) 85%,#000)}
+.btn-s{padding:5px 10px;font-size:12px}
+.mini-btn{border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:11.5px;font-weight:600;padding:4px 9px;border-radius:6px;white-space:nowrap;text-decoration:none}
+.mini-btn:hover{background:var(--sink);color:var(--ink)}
+.mini-go{border-color:var(--accent);color:var(--accent);background:var(--info-bg)}
+.mini-go:hover{background:var(--accent-solid);color:var(--on-accent)}
+.mini-warn{color:var(--bad)} .mini-warn:hover{background:var(--bad-bg);border-color:var(--bad-line);color:var(--bad)}
+
+/* section frame */
+.sec{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);margin-bottom:16px}
+.sec-h{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.sec-h h2{font-size:13.5px;font-weight:600}
+.sec-h .cnt{font-family:var(--mono);font-size:12px;color:var(--faint)}
+.sec-h .more{margin-left:auto;font-size:12px;color:var(--accent);text-decoration:none;font-weight:600}
+.sec-b{padding:6px 16px 14px}
+.sec-b.flush{padding:0}
+
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);font-weight:700;margin:22px 2px 10px;display:flex;align-items:center;gap:9px}
+.eyebrow .n{font-family:var(--mono);color:var(--muted)}
+.eyebrow.first{margin-top:4px}
+
+/* needs-you */
+.needs{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:11px}
+.ncard{display:flex;gap:12px;padding:13px 14px;background:var(--surface);border:1px solid var(--line);border-left-width:3px;border-radius:11px;box-shadow:var(--shadow-sm);text-decoration:none;color:inherit}
+.ncard:hover{border-color:var(--accent)}
+.ncard .big{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1;flex:none;min-width:30px}
+.ncard .tx b{font-size:13px;font-weight:600;display:block}
+.ncard .tx span{font-size:12px;color:var(--muted);display:block;margin-top:3px;line-height:1.35}
+.ncard .go{font-size:11.5px;font-weight:700;color:var(--accent);margin-top:6px;display:inline-block}
+.ncard.warn{border-left-color:var(--warn)} .ncard.warn .big{color:var(--warn)}
+.ncard.bad{border-left-color:var(--bad)} .ncard.bad .big{color:var(--bad)}
+.ncard.info{border-left-color:var(--info)} .ncard.info .big{color:var(--info)}
+
+/* two-col */
+.cols{display:grid;grid-template-columns:1.55fr 1fr;gap:18px;align-items:start}
+
+/* today sessions */
+.tsession{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 4px;border-top:1px solid var(--line-soft)}
+.tsession:first-child{border-top:0}
+.tclock{display:flex;flex-direction:column;align-items:flex-start;min-width:74px}
+.tclock .t1{font-family:var(--mono);font-size:14px;font-weight:600}
+.tclock .t2{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+.tclock .call{font-size:10px;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:.04em;margin-top:3px}
+.tbody .tt{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.type-chip{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.03em;padding:2px 7px;border-radius:5px;background:var(--sink);color:var(--muted);border:1px solid var(--line)}
+.tbody .tm{font-size:12.5px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.tbody .tm .dot{color:var(--faint)}
+.unassigned{color:var(--warn);font-weight:600}
+.tright{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.fill{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.fill .fnum{font-family:var(--mono);font-size:12.5px;font-weight:600}
+.fill .bar{width:78px;height:5px;border-radius:99px;background:var(--sink);overflow:hidden}
+.fill .bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.att{font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.att.todo{background:var(--warn-bg);color:var(--warn)}
+.att.open{background:var(--info-bg);color:var(--info)}
+.att.done{background:var(--ok-bg);color:var(--ok)}
+.att.link{background:var(--accent-solid);color:var(--on-accent);text-decoration:none}
+
+/* week list */
+.wday{margin-top:12px}
+.wday:first-child{margin-top:2px}
+.wday .wh{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:700;padding-bottom:5px;border-bottom:1px solid var(--line-soft);margin-bottom:2px}
+.wrow{display:flex;align-items:center;gap:10px;padding:7px 2px;font-size:13px;border-top:1px solid var(--line-soft)}
+.wrow:first-of-type{border-top:0}
+.wrow .wt{font-family:var(--mono);font-size:12px;color:var(--muted);width:66px;flex:none}
+.wrow .wn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wrow .wn .wi{color:var(--muted);font-size:12px}
+.wrow .wc{font-family:var(--mono);font-size:12px;color:var(--muted);flex:none}
+.wrow .wc.tight{color:var(--warn);font-weight:600}
+
+/* side lists */
+.mini{display:flex;align-items:center;gap:11px;padding:9px 2px;border-top:1px solid var(--line-soft)}
+.mini:first-child{border-top:0}
+.mini .m-av{width:28px;height:28px;border-radius:7px;background:var(--sink);color:var(--muted);font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex:none}
+.mini .m-tx{flex:1;min-width:0}
+.mini .m-tx b{font-size:12.5px;font-weight:600;display:block}
+.mini .m-tx span{font-size:11.5px;color:var(--muted)}
+.mini .m-r{font-size:11px;color:var(--faint);font-family:var(--mono);flex:none}
+.st-chip{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+.st-chip.reg{background:var(--info-bg);color:var(--info)}
+.st-chip.pend{background:var(--warn-bg);color:var(--warn)}
+.st-chip.paid{background:var(--ok-bg);color:var(--ok)}
+
+.chrow{padding:9px 2px;border-top:1px solid var(--line-soft)}
+.chrow:first-child{border-top:0}
+.chrow .ct{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600}
+.chrow .cmeta{font-size:11.5px;color:var(--muted);margin:3px 0 6px}
+.chrow .cbar{height:6px;border-radius:99px;background:var(--sink);overflow:hidden}
+.chrow .cbar i{display:block;height:100%;border-radius:99px}
+.risk-lo{color:var(--warn)}
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pay-grid .pc{padding:12px;background:var(--rail);border:1px solid var(--line);border-radius:10px}
+.pay-grid .pc .pv{font-family:var(--mono);font-size:20px;font-weight:600}
+.pay-grid .pc .pl{font-size:11px;color:var(--faint);margin-top:2px}
+.pay-grid .pc .pv.warn{color:var(--warn)}
+
+.footnote{margin-top:26px;padding:14px 16px;background:var(--rail);border:1px solid var(--line);border-radius:10px;font-size:12px;color:var(--muted);line-height:1.6}
+.footnote b{color:var(--ink)}
+
+/* toolbar: search + pills + actions */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.search{position:relative;flex:1;min-width:180px;max-width:320px}
+.search input{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 11px 7px 30px;font:inherit;font-size:13px;color:var(--ink)}
+.search input::placeholder{color:var(--faint)}
+.search .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--faint);font-size:13px}
+.pills{display:flex;gap:5px;flex-wrap:wrap}
+.pill{font-size:12px;font-weight:600;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
+.pill[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+:root[data-theme="dark"] .pill[aria-pressed="true"]{background:var(--ink);color:#0d131e}
+.pill .pc{font-family:var(--mono);opacity:.6;margin-left:4px}
+.spacer{margin-left:auto}
+
+/* table */
+.tblwrap{overflow-x:auto}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
+table.tbl th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);font-weight:700;padding:10px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.tbl th.r,table.tbl td.r{text-align:right}
+table.tbl td{padding:11px 14px;border-top:1px solid var(--line-soft);vertical-align:middle}
+table.tbl tr:first-child td{border-top:0}
+table.tbl tbody tr{cursor:default}
+table.tbl tbody tr.clik{cursor:pointer}
+table.tbl tbody tr.clik:hover{background:var(--sink)}
+td.mono{font-family:var(--mono)}
+.cell-title{font-weight:600;display:flex;align-items:center;gap:8px}
+.cell-sub{font-size:11.5px;color:var(--faint);margin-top:2px}
+.linky{color:var(--accent);text-decoration:none;font-weight:600}
+.linky:hover{text-decoration:underline}
+.cellbar{display:flex;align-items:center;gap:8px}
+.cellbar .cb{width:52px;height:5px;border-radius:99px;background:var(--sink);overflow:hidden}
+.cellbar .cb i{display:block;height:100%;border-radius:99px;background:var(--accent)}
+.cellbar .cb i.tight{background:var(--warn)}
+.cellbar .cbn{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.rowact{color:var(--faint);font-weight:700;font-size:16px;text-decoration:none;padding:2px 6px;border-radius:6px}
+.rowact:hover{background:var(--sink);color:var(--ink)}
+
+/* status badges */
+.badge{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;display:inline-block}
+.badge.active{background:var(--ok-bg);color:var(--ok)}
+.badge.draft{background:var(--sink);color:var(--muted);border:1px solid var(--line)}
+.badge.completed{background:var(--info-bg);color:var(--info)}
+.badge.cancelled{background:var(--bad-bg);color:var(--bad)}
+.badge.role{background:var(--info-bg);color:var(--info);text-transform:none;letter-spacing:0;font-weight:600}
+.badge.role.admin{background:#efe7f6;color:#6a4fb0}
+:root[data-theme="dark"] .badge.role.admin{background:#241d33;color:#b49ce0}
+.badge.role.instr{background:var(--ok-bg);color:var(--ok)}
+.badge.inactive{background:var(--sink);color:var(--faint);border:1px solid var(--line)}
+
+/* breadcrumb */
+.crumb{font-size:12.5px;color:var(--faint);margin-bottom:10px}
+.crumb a{color:var(--accent);text-decoration:none;cursor:pointer}
+.crumb a:hover{text-decoration:underline}
+
+/* course detail header band */
+.cd-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin-bottom:16px}
+.cd-title{font-size:22px;font-weight:600;letter-spacing:-.02em;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cd-meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--muted)}
+.cd-meta b{color:var(--ink);font-weight:600}
+.cd-actions{display:flex;gap:8px;flex-wrap:wrap}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.statgrid .sc{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:13px 15px;box-shadow:var(--shadow-sm)}
+.statgrid .sc .sv{font-family:var(--mono);font-size:20px;font-weight:600}
+.statgrid .sc .sl{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-top:3px}
+.statgrid .sc .sv.warn{color:var(--warn)}
+.pay-cell{display:flex;flex-direction:column;gap:1px}
+.pay-cell .amt{font-family:var(--mono);font-weight:600}
+.pay-cell .strike{text-decoration:line-through;color:var(--faint);font-size:11px}
+.pay-cell .rf{font-size:11px;color:var(--bad)}
+.dotnote{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block}
+
+/* calendar */
+.calbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.calnav{display:flex;align-items:center;gap:6px}
+.calnav button{width:30px;height:30px;border:1px solid var(--line);background:var(--surface);border-radius:8px;color:var(--muted);font-size:14px}
+.calnav .mo{font-size:16px;font-weight:600;min-width:135px;text-align:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);color:var(--muted);font-size:12px;font-weight:600;padding:6px 12px}
+.seg button.on{background:var(--accent-solid);color:var(--on-accent)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-left:auto;font-size:11.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:9px;height:9px;border-radius:3px;display:inline-block}
+.cal{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)}
+.cal .dow{display:grid;grid-template-columns:repeat(7,1fr);background:var(--rail);border-bottom:1px solid var(--line)}
+.cal .dow div{padding:8px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:700}
+.cal .grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cell{min-height:104px;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:6px 7px}
+.cell:nth-child(7n){border-right:0}
+.cell.dim{background:var(--rail)}
+.cell .dn{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:600}
+.cell.today .dn{background:var(--accent-solid);color:var(--on-accent);width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.cev{display:block;margin-top:4px;font-size:11px;font-weight:600;padding:3px 6px;border-radius:5px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid rgba(0,0,0,.18)}
+.cev .cet{font-family:var(--mono);font-weight:600;opacity:.9;font-size:10px}
+.cev.asa101{background:var(--t-asa101)} .cev.asa103{background:var(--t-asa103)}
+.cev.open{background:var(--t-open)} .cev.ding{background:var(--t-ding)} .cev.camp{background:var(--t-camp)}
+.cev.warnflag{box-shadow:inset 0 0 0 1.5px var(--warn)}
+.cmore{font-size:10.5px;color:var(--faint);margin-top:3px;font-weight:600}
+
+/* invite cards */
+.invgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.invcard{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:13px 15px;box-shadow:var(--shadow-sm)}
+.invcard h4{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:8px}
+.invcard .ilink{font-family:var(--mono);font-size:11.5px;color:var(--muted);background:var(--sink);border:1px solid var(--line);border-radius:7px;padding:6px 9px;margin:8px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.invcard .irow{display:flex;gap:8px;align-items:center}
+.invcard .gen{font-size:11px;color:var(--faint);margin-left:auto}
+
+/* makeup / missed cards */
+.mkcard{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow-sm)}
+.mkcard .mh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mkcard .mh b{font-size:14px;font-weight:600}
+.mkcard .mh .miss{font-size:11px;font-weight:700;background:var(--warn-bg);color:var(--warn);padding:2px 9px;border-radius:99px}
+.mkcard .mh .em{font-size:12px;color:var(--muted);margin-left:auto}
+.mkcard .ms{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line-soft);font-size:13px;margin-top:8px}
+.mkcard .ms:first-of-type{margin-top:10px}
+.mkcard .ms .mt{font-family:var(--mono);font-size:12px;color:var(--muted);width:120px;flex:none}
+.mkcard .ms .mn{flex:1;min-width:0}
+
+/* toggles (notifications) */
+.togrow{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line-soft)}
+.togrow:first-child{border-top:0}
+.togrow .tl{flex:1}
+.togrow .tl b{font-size:13.5px;font-weight:600}
+.togrow .tl span{font-size:12px;color:var(--muted);display:block;margin-top:2px}
+.sw{width:38px;height:22px;border-radius:99px;background:var(--sink);border:1px solid var(--line);position:relative;flex:none;cursor:pointer}
+.sw.on{background:var(--accent);border-color:var(--accent)}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}
+.sw.on::after{left:18px}
+.chanlbl{font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;width:44px;text-align:right}
+
+/* event-type chips (audit) */
+.ev{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;display:inline-block}
+.ev.enroll{background:var(--info-bg);color:var(--info)}
+.ev.pay{background:var(--ok-bg);color:var(--ok)}
+.ev.refund{background:var(--bad-bg);color:var(--bad)}
+.ev.assign{background:#efe7f6;color:#6a4fb0}
+:root[data-theme="dark"] .ev.assign{background:#241d33;color:#b49ce0}
+.ev.session{background:var(--warn-bg);color:var(--warn)}
+.ev.attend{background:#e4f3ef;color:#2f7d70}
+:root[data-theme="dark"] .ev.attend{background:#132a25;color:#5cb3a2}
+.ev.notify{background:var(--sink);color:var(--muted);border:1px solid var(--line)}
+.ev.account{background:var(--info-bg);color:var(--info)}
+.ev.course{background:var(--sink);color:var(--muted);border:1px solid var(--line)}
+.daterange{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px;font-size:12.5px;color:var(--muted)}
+.audit-actor{display:inline-flex;align-items:center;gap:7px}
+.audit-actor .aa{width:22px;height:22px;border-radius:6px;background:var(--sink);color:var(--muted);font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:center;flex:none}
+.audit-actor .aa.sys{background:var(--info-bg);color:var(--info)}
+.tgt-link{color:var(--accent);font-weight:600;text-decoration:none}
+.tgt-link:hover{text-decoration:underline}
+
+/* section / boat pill */
+.sect{font-size:10px;font-weight:700;color:var(--accent-ink);background:var(--info-bg);border:1px solid var(--info-line);padding:1px 7px;border-radius:5px;white-space:nowrap}
+.sched-main{font-weight:600;font-size:13px}
+.sched-sub{font-size:11.5px;color:var(--faint);margin-top:2px;font-family:var(--mono)}
+
+/* forms */
+.form{max-width:760px}
+.frow{display:flex;gap:18px;flex-wrap:wrap;padding:15px 0;border-top:1px solid var(--line-soft)}
+.frow:first-child{border-top:0}
+.flab{width:184px;flex:none;font-size:13px}
+.flab b{font-weight:600;display:block}
+.flab span{font-size:11.5px;color:var(--faint);display:block;margin-top:3px;line-height:1.4}
+.fctl{flex:1;min-width:220px}
+.inp{width:100%;max-width:360px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 11px;font:inherit;font-size:13px;color:var(--ink)}
+.inp::placeholder{color:var(--faint)}
+.inp.sm{max-width:130px}.inp.md{max-width:210px}
+select.inp{max-width:280px;cursor:pointer}
+.fhelp{font-size:11.5px;color:var(--muted);margin-top:7px}
+.fhelp.good{color:var(--ok)}
+.dow-pick{display:inline-flex;gap:4px}
+.dow-pick button{width:32px;height:32px;border:1px solid var(--line);background:var(--surface);border-radius:8px;font-size:11.5px;font-weight:600;color:var(--muted)}
+.dow-pick button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.sess-preview{margin-top:10px;background:var(--rail);border:1px solid var(--line);border-radius:9px;padding:4px 12px;max-width:360px}
+.sess-preview .sp{display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-top:1px solid var(--line-soft)}
+.sess-preview .sp:first-child{border-top:0}
+.sess-preview .sp .spd{font-family:var(--mono);color:var(--muted)}
+.title-preview{background:var(--info-bg);border:1px solid var(--info-line);border-radius:9px;padding:11px 14px;font-size:13px;max-width:560px}
+.title-preview b{font-weight:600}
+.title-preview .tp-name{font-size:15px;font-weight:600;margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* profile role tabs / sections */
+.role-sec-lbl{display:inline-flex;align-items:center;gap:7px}
+
+/* ===== public landing ===== */
+.app.public .side,.app.public .topmobile,.app.public .mobilenav{display:none}
+.app.public .main{max-width:none;padding:0}
+.app.public #foot{margin:0 20px 20px}
+.pub{--maxw:1060px}
+.pub a{text-decoration:none;color:inherit}
+.pub-nav{display:flex;align-items:center;gap:14px;padding:15px 26px;background:var(--surface);border-bottom:1px solid var(--line);position:relative}
+.pub-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.01em}
+.pub-brand .sail{width:20px;height:20px;flex:none}
+.pub-brand small{display:block;font-size:10.5px;color:var(--muted);font-weight:500;letter-spacing:0;margin-top:1px}
+.pub-links{display:flex;gap:2px;margin-left:18px}
+.pub-links a{color:var(--muted);font-size:13px;font-weight:500;padding:6px 11px;border-radius:7px}
+.pub-links a:hover{background:var(--sink);color:var(--ink)}
+.pub-nav .r{margin-left:auto;display:flex;gap:8px;align-items:center}
+@media(max-width:720px){.pub-links{display:none}}
+
+.pub-hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);
+  background:radial-gradient(130% 90% at 78% -20%, color-mix(in oklab,var(--accent) 24%, transparent), transparent 58%), linear-gradient(180deg,var(--sink),var(--bg))}
+.pub-hero .inner{max-width:var(--maxw);margin:0 auto;padding:74px 26px 82px;position:relative;z-index:2}
+.pub-hero h1{font-size:47px;line-height:1.04;letter-spacing:-.03em;font-weight:700;max-width:15ch;text-wrap:balance;margin:0}
+.pub-hero p{font-size:17px;color:var(--muted);max-width:50ch;margin:20px 0 28px;line-height:1.5}
+.pub-hero .cta{display:flex;gap:12px;flex-wrap:wrap}
+.pub-hero .bignote{margin-top:24px;font-size:12.5px;color:var(--faint);font-family:var(--mono)}
+.hero-sail{position:absolute;right:-30px;bottom:-40px;width:340px;opacity:.16;z-index:1;color:var(--accent)}
+@media(max-width:760px){.pub-hero h1{font-size:34px}.hero-sail{width:220px;opacity:.1}}
+.btn-lg{font-size:15px;padding:12px 22px;border-radius:9px}
+
+.pub-sec{max-width:var(--maxw);margin:0 auto;padding:56px 26px;border-bottom:1px solid var(--line)}
+.pub-eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:700;margin-bottom:12px}
+.pub-h2{font-size:27px;font-weight:600;letter-spacing:-.02em;text-wrap:balance;margin:0}
+.pub-lead{color:var(--muted);font-size:15px;max-width:58ch;margin:10px 0 0;line-height:1.5}
+
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
+.vcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow-sm)}
+.vcard .vi{width:38px;height:38px;border-radius:10px;background:var(--info-bg);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:14px}
+.vcard h3{font-size:16px;font-weight:600;margin:0}
+.vcard p{color:var(--muted);font-size:13.5px;margin:7px 0 0;line-height:1.5}
+
+.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px}
+.ccard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:17px 18px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column}
+.ccard .cn{font-size:15px;font-weight:600;margin:11px 0 5px}
+.ccard .cd{color:var(--muted);font-size:12.5px;line-height:1.45;flex:1}
+.ccard .cf{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.ccard .price{font-family:var(--mono);font-weight:600;font-size:14px}
+.ccard .price small{color:var(--faint);font-weight:400;font-size:11px}
+.ccard .see{font-size:12.5px;font-weight:600;color:var(--accent)}
+
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px}
+.step{padding:20px;background:var(--rail);border:1px solid var(--line);border-radius:12px}
+.step .num{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.05em}
+.step h4{font-size:15px;margin:9px 0 5px;font-weight:600}
+.step p{color:var(--muted);font-size:13px;margin:0;line-height:1.45}
+
+.pub-band{background:var(--accent-solid)}
+.pub-band .inner{max-width:var(--maxw);margin:0 auto;padding:52px 26px;text-align:center}
+.pub-band h2{font-size:29px;font-weight:600;color:#fff;margin:0;letter-spacing:-.02em}
+.pub-band p{color:rgba(255,255,255,.82);margin:11px 0 24px;font-size:15px}
+.btn-white{background:#fff;color:var(--accent-solid);border-color:#fff}
+.btn-white:hover{background:#f0f4f8}
+.btn-ghost-w{background:transparent;border-color:rgba(255,255,255,.55);color:#fff}
+.btn-ghost-w:hover{background:rgba(255,255,255,.12)}
+
+.pub-foot .inner{max-width:var(--maxw);margin:0 auto;padding:30px 26px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:12.5px}
+.pub-foot .inner b{color:var(--ink);font-weight:600}
+.pub-foot .wp{font-family:var(--mono);font-size:11px;color:var(--faint)}
+@media(max-width:760px){.vgrid,.cgrid,.steps{grid-template-columns:1fr}}
+
+/* ===== auth ===== */
+.auth-wrap{min-height:calc(100vh - 40px);display:flex;align-items:center;justify-content:center;padding:44px 20px;
+  background:radial-gradient(130% 90% at 78% -20%, color-mix(in oklab,var(--accent) 20%, transparent), transparent 58%), linear-gradient(180deg,var(--sink),var(--bg))}
+.auth-card{width:100%;max-width:396px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:28px 26px}
+.auth-card.wide{max-width:456px}
+.auth-brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;justify-content:center}
+.auth-brand .sail{width:20px;height:20px}
+.auth-h{text-align:center;font-size:21px;font-weight:600;margin:16px 0 3px;letter-spacing:-.01em}
+.auth-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:20px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:10px;font-weight:600;font-size:13.5px;color:var(--ink);cursor:pointer}
+.gbtn:hover{background:var(--sink)}
+.gicon{width:16px;height:16px;flex:none}
+.divider{display:flex;align-items:center;gap:10px;color:var(--faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;margin:16px 0;font-weight:600}
+.divider::before,.divider::after{content:"";height:1px;background:var(--line);flex:1}
+.afield{margin-bottom:12px}
+.afield label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.afield .inp{max-width:none;width:100%}
+.arow2{display:flex;gap:10px}
+.arow2 .afield{flex:1}
+.consent{display:flex;gap:8px;font-size:12px;color:var(--muted);align-items:flex-start;margin:2px 0 12px;line-height:1.4}
+.consent input{margin-top:2px;flex:none}
+.auth-primary{width:100%;justify-content:center;font-size:14px;padding:11px;margin-top:4px}
+.auth-alt{text-align:center;font-size:13px;color:var(--muted);margin-top:16px}
+.auth-alt a{color:var(--accent);font-weight:600;cursor:pointer}
+.auth-back{text-align:center;margin-top:14px}
+.auth-back a{font-size:12px;color:var(--faint);cursor:pointer}
+.forgot{text-align:right;margin:-4px 0 10px}
+.forgot a{font-size:12px;color:var(--accent);cursor:pointer}
+.badge.sm{font-size:10px;padding:2px 8px}
+.st-chip.full{background:var(--sink);color:var(--muted);border:1px solid var(--line)}
+.sw{padding:0}
+:root[data-theme="dark"] .cev{color:#0d131e}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .cev{color:#0d131e}}
+.pub-menu-btn{display:none;background:transparent;border:1px solid var(--line);color:var(--muted);width:34px;height:34px;border-radius:8px;font-size:15px;cursor:pointer}
+@media(max-width:820px){ .rowact{padding:8px 12px} .calnav button{width:38px;height:38px} .dow-pick button{width:40px;height:40px} .mini-btn{padding:7px 11px} }
+@media(max-width:720px){ .pub-menu-btn{display:inline-flex;align-items:center;justify-content:center} .pub-links.open{display:flex;position:absolute;top:58px;right:14px;left:14px;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px;box-shadow:var(--shadow);z-index:50} .pub-links.open a{padding:10px 12px} }
+
+/* screens */
+.screen{display:none}
+.screen.active{display:block}
+
+@media (max-width:980px){ .cols{grid-template-columns:1fr} .statgrid{grid-template-columns:repeat(2,1fr)} .invgrid{grid-template-columns:1fr} }
+@media (max-width:820px){
+  .side{display:none}
+  .app{min-height:0;flex-direction:column}
+  .topmobile{display:flex;align-items:center;gap:11px;padding:11px 15px;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:40px;z-index:30}
+  .topmobile .bn{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+  .topmobile .bn i{width:12px;height:12px;border-radius:4px;background:var(--accent)}
+  .topmobile .role{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+  .topmobile .icon-btn{margin-left:auto}
+  .mobilenav{display:flex;gap:6px;overflow-x:auto;padding:9px 12px;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:88px;z-index:29}
+  .mobilenav a{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;padding:5px 10px;border-radius:7px;background:var(--sink);text-decoration:none}
+  .mobilenav a.on{background:var(--accent);color:#fff}
+  .main{padding:16px 14px 50px}
+  .phead .day,.phead h1.day{font-size:20px}
+  .pulse{gap:16px}
+  .cell{min-height:78px} .cev{font-size:10px}
+  .cal{overflow-x:auto} .cal .grid,.cal .dow{min-width:640px}
+}
+</style>
+
+<div class="gallery-bar">
+  <div class="gt"><i></i>SailBook Redesign <span class="gsub">muster-based · v0.3</span></div>
+  <div class="roleswitch">
+    <span class="rl">View as</span>
+    <button id="role-admin" class="on" onclick="setRole('admin')">Admin</button>
+    <button id="role-instructor" onclick="setRole('instructor')">Instructor</button>
+    <button id="role-student" onclick="setRole('student')">Student</button>
+    <button id="role-public" onclick="setRole('public')">Public site</button>
+  </div>
+  <button class="gthemetoggle" onclick="tt()" aria-label="Toggle theme">◐ Theme</button>
+</div>
+
+<div class="app" id="app">
+  <aside class="side">
+    <div class="side-brand">
+      <div class="bn"><i></i>SailBook</div>
+      <div class="role" id="brandRole">Admin</div>
+      <div class="school">Learn to Sail Cleveland</div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">
+      <div class="avatar" id="footAv">AR</div>
+      <div class="who"><b id="footName">Andy Reeves</b><span id="footRole">Admin</span></div>
+      <button class="icon-btn" onclick="tt()" title="Theme">◐</button>
+    </div>
+  </aside>
+
+  <div style="flex:1;min-width:0">
+    <div class="topmobile">
+      <div class="bn"><i></i>SailBook</div><span class="role" id="brandRoleM">Admin</span>
+      <button class="icon-btn" onclick="tt()" aria-label="Toggle theme">◐</button>
+    </div>
+    <nav class="mobilenav" id="mnav"></nav>
+
+    <div class="main">
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="screen active" id="s-dashboard">
+      <header class="phead">
+        <div><h1 class="day">Friday, July 17</h1><div class="sub">2026 season</div></div>
+        <div class="pulse">
+          <div class="p"><div class="pv tnum">128</div><div class="pl">Active enrollments</div></div>
+          <div class="p"><div class="pv tnum">12</div><div class="pl">Courses running</div></div>
+          <div class="p"><div class="pv good tnum">$18.4k</div><div class="pl">Collected this wk</div></div>
+        </div>
+      </header>
+
+      <div class="eyebrow first">Needs you <span class="n">5</span></div>
+      <div class="needs">
+        <a class="ncard warn" onclick="go('courses')"><div class="big tnum">2</div><div class="tx"><b>Courses unassigned</b><span>ASA 101 · Jul 22 &nbsp;·&nbsp; Dinghy Basics · Jul 29</span><span class="go">Assign instructor →</span></div></a>
+        <a class="ncard warn" onclick="go('courses')"><div class="big tnum">1</div><div class="tx"><b>Low enrollment</b><span>Open Sailing III — 3/6 filled, starts Mon</span><span class="go">Review →</span></div></a>
+        <a class="ncard info" onclick="go('course')"><div class="big tnum">4</div><div class="tx"><b>Pending confirmation</b><span>Oldest waiting 2 days · all paid</span><span class="go">Confirm →</span></div></a>
+        <a class="ncard bad" onclick="go('course')"><div class="big tnum">1</div><div class="tx"><b>Cancellation request</b><span>Jane Okafor · ASA 103 · refund $395</span><span class="go">Handle →</span></div></a>
+        <a class="ncard warn" onclick="go('missed')"><div class="big tnum">3</div><div class="tx"><b>Students need makeups</b><span>From cancelled Jul 10 keelboat session</span><span class="go">Schedule →</span></div></a>
+      </div>
+
+      <div class="cols">
+        <div>
+          <div class="eyebrow">Today on the water <span class="n">3 sessions</span></div>
+          <div class="sec"><div class="sec-b">
+            <div class="tsession">
+              <div class="tclock"><div class="t1">9:00a</div><div class="t2">–12:00p</div><div class="call">call 8:30</div></div>
+              <div class="tbody"><div class="tt">ASA 101 — Basic Keelboat <span class="type-chip">ASA101</span></div><div class="tm">Capt. Dave Molina <span class="dot">·</span> Edgewater Marina, Dock B</div></div>
+              <div class="tright"><div class="fill"><span class="fnum">6/6</span><span class="bar"><i style="width:100%"></i></span></div><a class="att link" onclick="go('course')">Take attendance</a></div>
+            </div>
+            <div class="tsession">
+              <div class="tclock"><div class="t1">1:00p</div><div class="t2">–3:30p</div></div>
+              <div class="tbody"><div class="tt">Open Sailing II <span class="type-chip">OPEN</span></div><div class="tm">Sarah Chen <span class="dot">·</span> Edgewater Marina, Dock A</div></div>
+              <div class="tright"><div class="fill"><span class="fnum">5/8</span><span class="bar"><i style="width:62%"></i></span></div><span class="att open">Attendance open</span></div>
+            </div>
+            <div class="tsession">
+              <div class="tclock"><div class="t1">5:30p</div><div class="t2">–8:00p</div></div>
+              <div class="tbody"><div class="tt">Dinghy Basics <span class="type-chip">DING</span></div><div class="tm"><span class="unassigned">⚑ No instructor assigned</span> <span class="dot">·</span> Wendy Park Launch</div></div>
+              <div class="tright"><div class="fill"><span class="fnum">4/6</span><span class="bar"><i style="width:66%"></i></span></div><a class="att link" onclick="go('courses')">Assign →</a></div>
+            </div>
+          </div></div>
+
+          <div class="eyebrow">Rest of the week <span class="n">Jul 18 – 24</span></div>
+          <div class="sec"><div class="sec-b">
+            <div class="wday"><div class="wh">Tomorrow · Sat Jul 18</div>
+              <div class="wrow"><span class="wt">9:00a</span><span class="wn">ASA 103 — Coastal <span class="wi">· Dave Molina</span></span><span class="wc">8/8</span></div>
+              <div class="wrow"><span class="wt">10:00a</span><span class="wn">Kids Sail Camp <span class="wi">· Sarah Chen</span></span><span class="wc">11/12</span></div>
+              <div class="wrow"><span class="wt">2:00p</span><span class="wn">Open Sailing I <span class="wi">· Marcus Webb</span></span><span class="wc tight">2/8</span></div>
+            </div>
+            <div class="wday"><div class="wh">Mon Jul 20</div>
+              <div class="wrow"><span class="wt">6:00p</span><span class="wn">Open Sailing III <span class="wi">· Marcus Webb</span></span><span class="wc tight">3/6</span></div>
+              <div class="wrow"><span class="wt">6:00p</span><span class="wn">ASA 101 — Keelboat <span class="wi">· ⚑ unassigned</span></span><span class="wc">5/6</span></div>
+            </div>
+            <div class="wday"><div class="wh">Wed Jul 22</div>
+              <div class="wrow"><span class="wt">9:00a</span><span class="wn">ASA 101 — Keelboat <span class="wi">· ⚑ unassigned</span></span><span class="wc">6/6</span></div>
+              <div class="wrow"><span class="wt">5:30p</span><span class="wn">Dinghy Basics <span class="wi">· Sarah Chen</span></span><span class="wc">4/6</span></div>
+            </div>
+          </div></div>
+        </div>
+
+        <div>
+          <div class="eyebrow">Filling now</div>
+          <div class="sec"><div class="sec-b">
+            <div class="chrow"><div class="ct">Open Sailing III <span class="type-chip">OPEN</span></div><div class="cmeta risk-lo">3 of 6 · starts Mon · below minimum</div><div class="cbar"><i style="width:50%;background:var(--warn)"></i></div></div>
+            <div class="chrow"><div class="ct">Open Sailing I <span class="type-chip">OPEN</span></div><div class="cmeta risk-lo">2 of 8 · starts Sat</div><div class="cbar"><i style="width:25%;background:var(--warn)"></i></div></div>
+            <div class="chrow"><div class="ct">Kids Sail Camp <span class="type-chip">CAMP</span></div><div class="cmeta">11 of 12 · nearly full</div><div class="cbar"><i style="width:92%;background:var(--ok)"></i></div></div>
+            <div class="chrow"><div class="ct">ASA 103 — Coastal <span class="type-chip">ASA103</span></div><div class="cmeta">8 of 8 · full · 2 on waitlist</div><div class="cbar"><i style="width:100%;background:var(--accent)"></i></div></div>
+          </div></div>
+
+          <div class="eyebrow">Just enrolled</div>
+          <div class="sec"><div class="sec-b">
+            <div class="mini"><div class="m-av">TO</div><div class="m-tx"><b>Tom Okafor</b><span>ASA 101 — Basic Keelboat</span></div><span class="st-chip paid">Paid</span></div>
+            <div class="mini"><div class="m-av">PR</div><div class="m-tx"><b>Priya Rao</b><span>Open Sailing II</span></div><span class="st-chip pend">Pending</span></div>
+            <div class="mini"><div class="m-av">LN</div><div class="m-tx"><b>Liam Nguyen</b><span>Kids Sail Camp</span></div><span class="st-chip paid">Paid</span></div>
+            <div class="mini"><div class="m-av">GB</div><div class="m-tx"><b>Grace Bauer</b><span>ASA 103 — waitlist #2</span></div><span class="st-chip reg">Waitlist</span></div>
+          </div></div>
+
+          <div class="eyebrow">Payments</div>
+          <div class="sec"><div class="sec-b"><div class="pay-grid">
+            <div class="pc"><div class="pv tnum">$18,430</div><div class="pl">Collected this week</div></div>
+            <div class="pc"><div class="pv warn tnum">3</div><div class="pl">Holds expiring &lt;1h</div></div>
+            <div class="pc"><div class="pv tnum">$395</div><div class="pl">Refund to process</div></div>
+            <div class="pc"><div class="pv tnum">$61,200</div><div class="pl">Season to date</div></div>
+          </div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CALENDAR ============ -->
+    <section class="screen" id="s-calendar">
+      <header class="phead"><div><h1 class="day">Schedule</h1><div class="sub">Month view · every session, click any to open its course</div></div>
+        <a class="btn btn-primary" onclick="go('newcourse')">+ New Course</a>
+      </header>
+      <div class="calbar">
+        <div class="seg"><button class="on">Month</button><button onclick="go('courses')">List</button></div>
+        <div class="legend" style="margin-left:auto">
+          <span><i style="background:var(--t-asa101)"></i>ASA 101</span>
+          <span><i style="background:var(--t-asa103)"></i>ASA 103</span>
+          <span><i style="background:var(--t-open)"></i>Open Sailing</span>
+          <span><i style="background:var(--t-ding)"></i>Dinghy</span>
+          <span><i style="background:var(--t-camp)"></i>Camp</span>
+        </div>
+        <div class="calnav" style="margin-left:18px"><button aria-label="Previous month">‹</button><span class="mo">July 2026</span><button aria-label="Next month">›</button><button class="btn btn-s" style="margin-left:6px">Today</button></div>
+      </div>
+      <div class="cal">
+        <div class="dow"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div>
+        <div class="grid">
+          <div class="cell dim"><div class="dn">29</div></div>
+          <div class="cell dim"><div class="dn">30</div></div>
+          <div class="cell"><div class="dn">1</div><span class="cev open"><span class="cet">6:00p</span> Open Sailing II</span></div>
+          <div class="cell"><div class="dn">2</div></div>
+          <div class="cell"><div class="dn">3</div><span class="cev asa101"><span class="cet">9:00a</span> ASA 101</span></div>
+          <div class="cell"><div class="dn">4</div></div>
+          <div class="cell"><div class="dn">5</div><span class="cev camp"><span class="cet">10:00a</span> Kids Camp</span></div>
+
+          <div class="cell"><div class="dn">6</div></div>
+          <div class="cell"><div class="dn">7</div><span class="cev open"><span class="cet">6:00p</span> Open Sailing II</span></div>
+          <div class="cell"><div class="dn">8</div><span class="cev ding"><span class="cet">5:30p</span> Dinghy</span></div>
+          <div class="cell"><div class="dn">9</div></div>
+          <div class="cell"><div class="dn">10</div><span class="cev asa103 warnflag"><span class="cet">9:00a</span> ASA 103 ✕</span><div class="cmore">cancelled — wind</div></div>
+          <div class="cell"><div class="dn">11</div><span class="cev asa101"><span class="cet">9:00a</span> ASA 101</span></div>
+          <div class="cell"><div class="dn">12</div><span class="cev camp"><span class="cet">10:00a</span> Kids Camp</span></div>
+
+          <div class="cell"><div class="dn">13</div></div>
+          <div class="cell"><div class="dn">14</div><span class="cev open"><span class="cet">6:00p</span> Open Sailing II</span></div>
+          <div class="cell"><div class="dn">15</div><span class="cev ding"><span class="cet">5:30p</span> Dinghy</span></div>
+          <div class="cell"><div class="dn">16</div><span class="cev asa101"><span class="cet">9:00a</span> ASA 101</span></div>
+          <div class="cell today"><div class="dn">17</div><span class="cev asa101" onclick="go('course')"><span class="cet">9:00a</span> ASA 101</span><span class="cev open"><span class="cet">1:00p</span> Open II</span><span class="cev ding warnflag"><span class="cet">5:30p</span> Dinghy ⚑</span></div>
+          <div class="cell"><div class="dn">18</div><span class="cev asa103"><span class="cet">9:00a</span> ASA 103</span><span class="cev camp"><span class="cet">10:00a</span> Camp</span><span class="cev open"><span class="cet">2:00p</span> Open I</span></div>
+          <div class="cell"><div class="dn">19</div></div>
+
+          <div class="cell"><div class="dn">20</div><span class="cev open"><span class="cet">6:00p</span> Open III</span><span class="cev asa101 warnflag"><span class="cet">6:00p</span> ASA 101 ⚑</span></div>
+          <div class="cell"><div class="dn">21</div><span class="cev ding"><span class="cet">5:30p</span> Dinghy</span></div>
+          <div class="cell"><div class="dn">22</div><span class="cev asa101 warnflag"><span class="cet">9:00a</span> ASA 101 ⚑</span><span class="cev ding"><span class="cet">5:30p</span> Dinghy</span></div>
+          <div class="cell"><div class="dn">23</div></div>
+          <div class="cell"><div class="dn">24</div><span class="cev asa103"><span class="cet">9:00a</span> ASA 103</span><span class="cev camp"><span class="cet">10:00a</span> Camp</span></div>
+          <div class="cell"><div class="dn">25</div><span class="cev asa101"><span class="cet">9:00a</span> ASA 101</span></div>
+          <div class="cell"><div class="dn">26</div></div>
+
+          <div class="cell"><div class="dn">27</div></div>
+          <div class="cell"><div class="dn">28</div><span class="cev open"><span class="cet">6:00p</span> Open III</span></div>
+          <div class="cell"><div class="dn">29</div><span class="cev ding"><span class="cet">5:30p</span> Dinghy</span></div>
+          <div class="cell"><div class="dn">30</div></div>
+          <div class="cell"><div class="dn">31</div><span class="cev asa101"><span class="cet">9:00a</span> ASA 101</span></div>
+          <div class="cell dim"><div class="dn">1</div></div>
+          <div class="cell dim"><div class="dn">2</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ COURSES LIST ============ -->
+    <section class="screen" id="s-courses">
+      <header class="phead"><div><h1 class="day">Schedule</h1><div class="sub">List view · 14 courses · 2026 season</div></div>
+        <a class="btn btn-primary" onclick="go('newcourse')">+ New Course</a>
+      </header>
+      <div class="toolbar">
+        <div class="seg" title="Same sessions, two views"><button onclick="go('calendar')">Month</button><button class="on">List</button></div>
+        <div class="search"><span class="si">⌕</span><input placeholder="Search type, instructor, boat…"></div>
+        <div role="group" class="pills">
+          <button class="pill" aria-pressed="true">All <span class="pc">14</span></button>
+          <button class="pill" aria-pressed="false">Draft <span class="pc">2</span></button>
+          <button class="pill" aria-pressed="false">Active <span class="pc">9</span></button>
+          <button class="pill" aria-pressed="false">Completed <span class="pc">2</span></button>
+          <button class="pill" aria-pressed="false">Cancelled <span class="pc">1</span></button>
+        </div>
+      </div>
+      <div class="sec"><div class="tblwrap"><table class="tbl">
+        <thead><tr><th>Course</th><th>Schedule</th><th>Instructor</th><th>Enrolled</th><th class="r">Price</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <tr class="clik" onclick="go('course')"><td><div class="cell-title"><span class="type-chip">ASA101</span> ASA 101 — Basic Keelboat</div><div class="cell-sub">Basic Keelboat</div></td><td><div class="sched-main">Thu 9:00a</div><div class="sched-sub">Jul 17 – 31 · 3 sess</div></td><td>Capt. Dave Molina</td><td><div class="cellbar"><span class="cb"><i style="width:100%"></i></span><span class="cbn">6/6</span></div></td><td class="r mono">$395</td><td><span class="badge active">Active</span></td><td><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('course')"><td><div class="cell-title"><span class="type-chip">ASA103</span> ASA 103 — Coastal Cruising</div><div class="cell-sub">Coastal Cruising</div></td><td><div class="sched-main">Sat 9:00a</div><div class="sched-sub">Jul 18 – Aug 8 · 4 sess</div></td><td>Capt. Dave Molina</td><td><div class="cellbar"><span class="cb"><i style="width:100%"></i></span><span class="cbn">8/8</span></div></td><td class="r mono">$495</td><td><span class="badge active">Active</span></td><td><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('course')"><td><div class="cell-title"><span class="type-chip">OPEN</span> Open Sailing III <span class="sect">Boat 1</span></div><div class="cell-sub">Open Sailing</div></td><td><div class="sched-main">Wed 6:00p</div><div class="sched-sub">Jul 1 – 29 · 5 sess</div></td><td>Marcus Webb</td><td><div class="cellbar"><span class="cb"><i class="tight" style="width:50%"></i></span><span class="cbn">3/6</span></div></td><td class="r mono">$260</td><td><span class="badge active">Active</span></td><td><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('course')"><td><div class="cell-title"><span class="type-chip">OPEN</span> Open Sailing III <span class="sect">Boat 2</span></div><div class="cell-sub">Open Sailing</div></td><td><div class="sched-main">Wed 6:00p</div><div class="sched-sub">Jul 1 – 29 · 5 sess</div></td><td>Elena Ruiz</td><td><div class="cellbar"><span class="cb"><i style="width:83%"></i></span><span class="cbn">5/6</span></div></td><td class="r mono">$260</td><td><span class="badge active">Active</span></td><td><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('course')"><td><div class="cell-title"><span class="type-chip">OPEN</span> Open Sailing I <span class="sect">Boat 1</span></div><div class="cell-sub">Open Sailing</div></td><td><div class="sched-main">Sat 2:00p</div><div class="sched-sub">Jul 18 – Aug 22 · 6 sess</div></td><td>Marcus Webb</td><td><div class="cellbar"><span class="cb"><i class="tight" style="width:25%"></i></span><span class="cbn">2/8</span></div></td><td class="r mono">$260</td><td><span class="badge active">Active</span></td><td><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('course')"><td><div class="cell-title"><span class="type-chip">CAMP</span> Kids Sail Camp</div><div class="cell-sub">Kids Camp</div></td><td><div class="sched-main">Fri 10:00a</div><div class="sched-sub">Jul 11 – Aug 8 · 5 sess</div></td><td>Sarah Chen</td><td><div class="cellbar"><span class="cb"><i style="width:92%"></i></span><span class="cbn">11/12</span></div></td><td class="r mono">$320</td><td><span class="badge active">Active</span></td><td><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('course')"><td><div class="cell-title"><span class="type-chip">ASA101</span> ASA 101 — Basic Keelboat</div><div class="cell-sub">Basic Keelboat</div></td><td><div class="sched-main">Wed 9:00a</div><div class="sched-sub">Jul 22 – Aug 5 · 3 sess</div></td><td><span class="unassigned">⚑ Unassigned</span></td><td><div class="cellbar"><span class="cb"><i style="width:100%"></i></span><span class="cbn">6/6</span></div></td><td class="r mono">$395</td><td><span class="badge active">Active</span></td><td><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('course')"><td><div class="cell-title"><span class="type-chip">DING</span> Dinghy Basics</div><div class="cell-sub">Dinghy</div></td><td><div class="sched-main">Tue 5:30p</div><div class="sched-sub">Jul 8 – 29 · 4 sess</div></td><td>Sarah Chen</td><td><div class="cellbar"><span class="cb"><i style="width:66%"></i></span><span class="cbn">4/6</span></div></td><td class="r mono">$180</td><td><span class="badge active">Active</span></td><td><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('course')"><td><div class="cell-title"><span class="type-chip">DING</span> Dinghy Basics</div><div class="cell-sub">Dinghy</div></td><td><div class="sched-main">Tue 5:30p</div><div class="sched-sub">Jul 29 – Aug 19 · 4 sess</div></td><td><span class="unassigned">⚑ Unassigned</span></td><td><div class="cellbar"><span class="cb"><i class="tight" style="width:33%"></i></span><span class="cbn">2/6</span></div></td><td class="r mono">$180</td><td><span class="badge draft">Draft</span></td><td><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('course')"><td><div class="cell-title"><span class="type-chip">ASA104</span> ASA 104 — Bareboat</div><div class="cell-sub">Bareboat Cruising</div></td><td><div class="sched-main">Mon 6:00p</div><div class="sched-sub">Aug 4 – Sep 1 · 5 sess</div></td><td>Elena Ruiz</td><td><div class="cellbar"><span class="cb"><i style="width:71%"></i></span><span class="cbn">5/7</span></div></td><td class="r mono">$650</td><td><span class="badge draft">Draft</span></td><td><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('course')"><td><div class="cell-title"><span class="type-chip">OPEN</span> Open Sailing <span class="sect">Boat 1</span></div><div class="cell-sub">Open Sailing</div></td><td><div class="sched-main">Wed 6:00p</div><div class="sched-sub">Jun 4 – 25 · 4 sess</div></td><td>Marcus Webb</td><td><div class="cellbar"><span class="cb"><i style="width:100%"></i></span><span class="cbn">8/8</span></div></td><td class="r mono">$260</td><td><span class="badge completed">Completed</span></td><td><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('course')"><td><div class="cell-title"><span class="type-chip">OPEN</span> Open Sailing <span class="sect">Boat 2</span></div><div class="cell-sub">Open Sailing</div></td><td><div class="sched-main">Wed 6:00p</div><div class="sched-sub">May 7 – 28 · 1 of 4</div></td><td>Marcus Webb</td><td><div class="cellbar"><span class="cb"><i class="tight" style="width:12%"></i></span><span class="cbn">1/8</span></div></td><td class="r mono">$260</td><td><span class="badge cancelled">Cancelled</span></td><td><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+        </tbody>
+      </table></div></div>
+    </section>
+
+    <!-- ============ COURSE DETAIL ============ -->
+    <section class="screen" id="s-course">
+      <div class="crumb"><a onclick="go('courses')">Schedule</a> / ASA 101 — Basic Keelboat</div>
+      <div class="cd-head">
+        <div>
+          <h1 class="cd-title">ASA 101 — Basic Keelboat <span class="badge active">Active</span></h1>
+          <div class="cd-meta"><span>Basic Keelboat</span><span>Schedule <b class="mono">Thu 9:00a · Jul 17 – 31</b></span><span>Instructor <b>Capt. Dave Molina</b></span><span>Capacity <b class="mono">6 / 6</b></span><span>Price <b class="mono">$395</b> · Member <b class="mono">$355</b></span></div>
+        </div>
+        <div class="cd-actions"><a class="btn btn-s">Edit</a><a class="btn btn-s">Enroll student</a><a class="btn btn-s">⋯</a></div>
+      </div>
+      <div class="statgrid">
+        <div class="sc"><div class="sv tnum">6/6</div><div class="sl">Confirmed</div></div>
+        <div class="sc"><div class="sv tnum">3</div><div class="sl">Sessions</div></div>
+        <div class="sc"><div class="sv warn tnum">1</div><div class="sl">Pending confirm</div></div>
+        <div class="sc"><div class="sv tnum">2</div><div class="sl">On waitlist</div></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-h"><h2>Sessions</h2><span class="cnt">3</span><a class="more">+ Add session</a></div>
+        <div class="tblwrap"><table class="tbl">
+          <thead><tr><th>Date</th><th>Time</th><th>Location</th><th>Instructor</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="mono">Thu Jul 17</td><td class="mono">9:00a–12:00p</td><td>Edgewater, Dock B</td><td>Capt. Dave Molina</td><td><span class="badge active">Today</span></td><td class="r"><a class="mini-btn mini-go" onclick="go('attendance')">Attendance</a></td></tr>
+            <tr><td class="mono">Thu Jul 24</td><td class="mono">9:00a–12:00p</td><td>Edgewater, Dock B</td><td>Capt. Dave Molina</td><td><span class="badge draft">Scheduled</span></td><td class="r"><a class="mini-btn">Edit</a></td></tr>
+            <tr><td class="mono">Thu Jul 31</td><td class="mono">9:00a–12:00p</td><td>Edgewater, Dock B</td><td>Capt. Dave Molina</td><td><span class="badge draft">Scheduled</span></td><td class="r"><a class="mini-btn">Edit</a></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-h"><h2>Enrollments</h2><span class="cnt">7</span></div>
+        <div class="tblwrap"><table class="tbl">
+          <thead><tr><th>Student</th><th>Email</th><th>Status</th><th>Payment</th><th>Enrolled</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="cell-title">Tom Okafor</td><td class="cell-sub" style="margin:0">tom.okafor@gmail.com</td><td><span class="badge active">Confirmed</span></td><td><div class="pay-cell"><span class="amt">$395.00</span></div></td><td class="mono">Jul 15</td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+            <tr><td class="cell-title">Maria Delgado</td><td class="cell-sub" style="margin:0">mdelgado@outlook.com</td><td><span class="badge active">Confirmed</span></td><td><div class="pay-cell"><span class="amt">$355.00</span><span class="rf">member price</span></div></td><td class="mono">Jul 12</td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+            <tr><td class="cell-title">James Park</td><td class="cell-sub" style="margin:0">jpark@gmail.com</td><td><span class="badge active">Confirmed</span></td><td><div class="pay-cell"><span class="amt">$395.00</span></div></td><td class="mono">Jul 11</td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+            <tr><td class="cell-title">Aisha Karim</td><td class="cell-sub" style="margin:0">aisha.k@gmail.com</td><td><span class="badge active">Confirmed</span></td><td><div class="pay-cell"><span class="amt">$395.00</span></div></td><td class="mono">Jul 10</td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+            <tr><td class="cell-title">Ben Foster</td><td class="cell-sub" style="margin:0">bfoster@yahoo.com</td><td><span class="badge active">Confirmed</span></td><td><div class="pay-cell"><span class="amt">$395.00</span></div></td><td class="mono">Jul 9</td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+            <tr><td class="cell-title">Nina Alvarez</td><td class="cell-sub" style="margin:0">nina.alv@gmail.com</td><td><span class="badge active">Confirmed</span></td><td><div class="pay-cell"><span class="amt">$395.00</span></div></td><td class="mono">Jul 8</td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+            <tr style="background:var(--warn-bg)"><td class="cell-title">Priya Rao</td><td class="cell-sub" style="margin:0">priya.rao@gmail.com</td><td><span class="st-chip pend">Pending confirm</span></td><td><div class="pay-cell"><span class="amt">$395.00</span><span class="rf" style="color:var(--warn)">hold · 42 min left</span></div></td><td class="mono">Jul 17</td><td class="r"><a class="mini-btn mini-go">Confirm</a></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-h"><h2>Waitlist</h2><span class="cnt">2</span></div>
+        <div class="tblwrap"><table class="tbl">
+          <thead><tr><th style="width:40px">#</th><th>Student</th><th>Email</th><th>Joined</th><th>Last notified</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">1</td><td class="cell-title">Grace Bauer</td><td class="cell-sub" style="margin:0">grace.b@gmail.com</td><td class="mono">Jul 14</td><td class="mono">Jul 16</td></tr>
+            <tr><td class="mono">2</td><td class="cell-title">Owen Reilly</td><td class="cell-sub" style="margin:0">oreilly@gmail.com</td><td class="mono">Jul 16</td><td>—</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ============ ATTENDANCE ============ -->
+    <section class="screen" id="s-attendance">
+      <div class="crumb"><a onclick="go('courses')">Schedule</a> / <a onclick="go('course')">ASA 101 — Basic Keelboat</a> / Attendance</div>
+      <header class="phead"><div><h1 class="day">Attendance — Thu Jul 17</h1><div class="sub">9:00a–12:00p · Edgewater Marina, Dock B · Capt. Dave Molina</div></div>
+        <a class="btn btn-primary">Save attendance</a>
+      </header>
+      <div class="sec">
+        <div class="sec-h"><h2>Roster</h2><span class="cnt">6 students</span></div>
+        <div class="tblwrap"><table class="tbl">
+          <thead><tr><th>Student</th><th>Mark</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td class="cell-title">Tom Okafor</td><td><div class="seg"><button class="on">Present</button><button>Absent</button><button>Excused</button></div></td><td class="cell-sub" style="margin:0">—</td></tr>
+            <tr><td class="cell-title">Maria Delgado</td><td><div class="seg"><button class="on">Present</button><button>Absent</button><button>Excused</button></div></td><td class="cell-sub" style="margin:0">—</td></tr>
+            <tr><td class="cell-title">James Park <span class="dotnote" title="Left an instructor note"></span></td><td><div class="seg"><button class="on">Present</button><button>Absent</button><button>Excused</button></div></td><td class="cell-sub" style="margin:0">"New to keelboats, sailed dinghies as a kid"</td></tr>
+            <tr><td class="cell-title">Aisha Karim</td><td><div class="seg"><button>Present</button><button class="on">Absent</button><button>Excused</button></div></td><td class="cell-sub" style="margin:0;color:var(--warn)">will need a makeup</td></tr>
+            <tr><td class="cell-title">Ben Foster</td><td><div class="seg"><button class="on">Present</button><button>Absent</button><button>Excused</button></div></td><td class="cell-sub" style="margin:0">—</td></tr>
+            <tr><td class="cell-title">Nina Alvarez</td><td><div class="seg"><button>Present</button><button>Absent</button><button class="on">Excused</button></div></td><td class="cell-sub" style="margin:0">called ahead</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ============ COURSE TYPES ============ -->
+    <section class="screen" id="s-types">
+      <header class="phead"><div><h1 class="day">Course Types</h1><div class="sub">Templates — the courses you offer, before dates</div></div>
+        <a class="btn btn-primary">+ New Course Type</a>
+      </header>
+      <div class="sec"><div class="tblwrap"><table class="tbl">
+        <thead><tr><th>Name</th><th>Code</th><th>Cert Body</th><th class="r">Max</th><th class="r">Min Hrs</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="cell-title">Basic Keelboat</td><td class="mono">ASA101</td><td>ASA</td><td class="r mono">6</td><td class="r mono">12</td><td><span class="badge active">Active</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr><td class="cell-title">Coastal Cruising</td><td class="mono">ASA103</td><td>ASA</td><td class="r mono">8</td><td class="r mono">16</td><td><span class="badge active">Active</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr><td class="cell-title">Bareboat Cruising</td><td class="mono">ASA104</td><td>ASA</td><td class="r mono">7</td><td class="r mono">20</td><td><span class="badge active">Active</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr><td class="cell-title">Open Sailing</td><td class="mono">OPEN</td><td>—</td><td class="r mono">8</td><td class="r mono">15</td><td><span class="badge active">Active</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr><td class="cell-title">Dinghy Basics</td><td class="mono">DING</td><td>US Sailing</td><td class="r mono">6</td><td class="r mono">10</td><td><span class="badge active">Active</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr><td class="cell-title">Kids Sail Camp</td><td class="mono">CAMP</td><td>—</td><td class="r mono">12</td><td class="r mono">25</td><td><span class="badge active">Active</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr><td class="cell-title">Advanced Coastal</td><td class="mono">ASA106</td><td>ASA</td><td class="r mono">6</td><td class="r mono">24</td><td><span class="badge inactive">Inactive</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+        </tbody>
+      </table></div></div>
+    </section>
+
+    <!-- ============ USERS ============ -->
+    <section class="screen" id="s-users">
+      <header class="phead"><div><h1 class="day">Users</h1><div class="sub">143 accounts</div></div>
+        <a class="btn btn-primary">+ Add Student</a>
+      </header>
+      <div class="invgrid">
+        <div class="invcard"><h4><span class="badge role admin">Admin</span> invite link</h4><div class="ilink">sailbook.app/invite/admin/9f3a…c21</div><div class="irow"><a class="mini-btn mini-go">Copy link</a><a class="mini-btn">Regenerate</a><span class="gen">created Jul 2</span></div></div>
+        <div class="invcard"><h4><span class="badge role instr">Instructor</span> invite link</h4><div class="ilink">sailbook.app/invite/instructor/4b8e…07d</div><div class="irow"><a class="mini-btn mini-go">Copy link</a><a class="mini-btn">Regenerate</a><span class="gen">created Jun 18</span></div></div>
+      </div>
+      <div class="toolbar">
+        <div class="search"><span class="si">⌕</span><input placeholder="Search name or email…"></div>
+        <div role="group" class="pills">
+          <button class="pill" aria-pressed="true">All <span class="pc">143</span></button>
+          <button class="pill" aria-pressed="false">Admin <span class="pc">2</span></button>
+          <button class="pill" aria-pressed="false">Instructor <span class="pc">4</span></button>
+          <button class="pill" aria-pressed="false">Student <span class="pc">138</span></button>
+        </div>
+      </div>
+      <div class="sec"><div class="tblwrap"><table class="tbl">
+        <thead><tr><th>Name</th><th>Email</th><th>Roles</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="cell-title">Andy Reeves</td><td>andy@ltscleveland.org</td><td><span class="badge role admin">Admin</span></td><td><span class="badge active">Active</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('instructor')"><td class="cell-title"><a class="linky">Capt. Dave Molina</a></td><td>dave@ltscleveland.org</td><td><span class="badge role instr">Instructor</span></td><td><span class="badge active">Active</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('combo')"><td class="cell-title"><a class="linky">Sarah Chen</a></td><td>sarah.chen@gmail.com</td><td><span class="badge role instr">Instructor</span> <span class="badge role">Student</span></td><td><span class="badge active">Active</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('instructor')"><td class="cell-title"><a class="linky">Marcus Webb</a></td><td>mwebb@gmail.com</td><td><span class="badge role instr">Instructor</span></td><td><span class="badge active">Active</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('student')"><td class="cell-title"><a class="linky">Tom Okafor</a></td><td>tom.okafor@gmail.com</td><td><span class="badge role">Student</span></td><td><span class="badge active">Active</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('student')"><td class="cell-title"><a class="linky">Priya Rao</a></td><td>priya.rao@gmail.com</td><td><span class="badge role">Student</span></td><td><span class="badge active">Active</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('student')"><td class="cell-title"><a class="linky">Grace Bauer</a></td><td>grace.b@gmail.com</td><td><span class="badge role">Student</span></td><td><span class="badge active">Active</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+          <tr class="clik" onclick="go('combo')"><td class="cell-title"><a class="linky">Elena Ruiz</a></td><td>elena.ruiz@gmail.com</td><td><span class="badge role instr">Instructor</span> <span class="badge role">Student</span></td><td><span class="badge inactive">Inactive</span></td><td class="r"><a class="rowact" role="button" tabindex="0" aria-label="Row actions" title="Actions">⋯</a></td></tr>
+        </tbody>
+      </table></div></div>
+    </section>
+
+    <!-- ============ STUDENT PROFILE ============ -->
+    <section class="screen" id="s-student">
+      <div class="crumb"><a onclick="go('users')">Users</a> / Tom Okafor</div>
+      <div class="cd-head">
+        <div><h1 class="cd-title">Tom Okafor</h1>
+          <div class="cd-meta"><span>tom.okafor@gmail.com</span><span>(216) 555-0142</span><span>ASA # <b>4471902</b></span><span>Experience <b>Just getting started</b></span></div>
+        </div>
+        <div class="cd-actions"><a class="btn btn-s">Edit</a></div>
+      </div>
+      <div class="sec"><div class="sec-h"><h2>Note from student</h2></div><div class="sec-b"><p style="margin:8px 0;color:var(--muted);font-size:13px">"Booked this as a birthday gift to myself — always wanted to learn. A little nervous about the deep water but excited!"</p></div></div>
+      <div class="eyebrow">Course history</div>
+      <div class="sec"><div class="sec-b">
+        <div class="chrow"><div class="ct">ASA 101 — Basic Keelboat <span class="badge active sm">In progress</span></div><div class="cmeta">Capt. Dave Molina · 1 of 3 sessions · <span style="color:var(--ok)">1 present</span></div></div>
+        <div class="chrow"><div class="ct">Dinghy Basics — June <span class="badge completed sm">Completed</span></div><div class="cmeta">Sarah Chen · 4 of 4 sessions · all present</div></div>
+      </div></div>
+    </section>
+
+    <!-- ============ MISSED SESSIONS ============ -->
+    <section class="screen" id="s-missed">
+      <header class="phead"><div><h1 class="day">Missed Sessions</h1><div class="sub">3 missed sessions across 3 students needing makeups</div></div></header>
+      <div class="mkcard">
+        <div class="mh"><b>Aisha Karim</b><span class="miss">1 missed</span><span class="em">aisha.k@gmail.com</span></div>
+        <div class="ms"><span class="mt">Jul 10 · 9:00a</span><span class="mn">ASA 103 — Coastal Cruising <span class="cell-sub" style="display:inline">Session cancelled — high wind</span></span><a class="mini-btn mini-go">Schedule makeup</a></div>
+      </div>
+      <div class="mkcard">
+        <div class="mh"><b>David Kwon</b><span class="miss">1 missed</span><span class="em">dkwon@gmail.com</span></div>
+        <div class="ms"><span class="mt">Jul 10 · 9:00a</span><span class="mn">ASA 103 — Coastal Cruising <span class="cell-sub" style="display:inline">Session cancelled — high wind</span></span><a class="mini-btn mini-go">Schedule makeup</a></div>
+      </div>
+      <div class="mkcard">
+        <div class="mh"><b>Rachel Green</b><span class="miss">1 missed</span><span class="em">rgreen@yahoo.com</span></div>
+        <div class="ms"><span class="mt">Jul 10 · 9:00a</span><span class="mn">ASA 103 — Coastal Cruising <span class="cell-sub" style="display:inline">Session cancelled — high wind</span></span><a class="mini-btn mini-go">Schedule makeup</a></div>
+      </div>
+    </section>
+
+    <!-- ============ NOTIFICATIONS ============ -->
+    <section class="screen" id="s-notifs">
+      <header class="phead"><div><h1 class="day">Notifications</h1><div class="sub">When SailBook should ping you</div></div></header>
+      <div class="sec">
+        <div class="sec-h"><h2>New enrollment alert</h2></div>
+        <div class="sec-b">
+          <div class="togrow"><div class="tl"><b>Email me</b><span>Every time a student enrolls and pays</span></div><span class="chanlbl">Email</span><button class="sw on" role="switch" aria-checked="true" aria-label="Toggle setting"></button></div>
+          <div class="togrow"><div class="tl"><b>Text me</b><span>SMS to (216) 555-0100</span></div><span class="chanlbl">SMS</span><button class="sw" role="switch" aria-checked="false" aria-label="Toggle setting"></button></div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-h"><h2>Low enrollment warning</h2></div>
+        <div class="sec-b">
+          <div class="togrow"><div class="tl"><b>Email me</b><span>When a course is below minimum with its lead-time window closing</span></div><span class="chanlbl">Email</span><button class="sw on" role="switch" aria-checked="true" aria-label="Toggle setting"></button></div>
+          <div class="togrow"><div class="tl"><b>Text me</b><span>SMS to (216) 555-0100</span></div><span class="chanlbl">SMS</span><button class="sw on" role="switch" aria-checked="true" aria-label="Toggle setting"></button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ NEW COURSE FORM ============ -->
+    <section class="screen" id="s-newcourse">
+      <div class="crumb"><a onclick="go('courses')">Schedule</a> / New course</div>
+      <header class="phead"><div><h1 class="day">New course</h1><div class="sub">A dated offering of a course type — schedule and boat live here, not in the title</div></div>
+        <div class="cd-actions"><a class="btn btn-s" onclick="go('courses')">Cancel</a><a class="btn btn-primary btn-s">Create course</a></div>
+      </header>
+      <div class="sec"><div class="sec-b"><div class="form">
+        <div class="frow"><div class="flab"><b>Course type</b><span>The template it's built from</span></div><div class="fctl"><select class="inp"><option>Open Sailing</option><option>ASA 101 — Basic Keelboat</option><option>ASA 103 — Coastal Cruising</option><option>Dinghy Basics</option><option>Kids Sail Camp</option></select></div></div>
+        <div class="frow"><div class="flab"><b>Section / boat</b><span>Distinguishes offerings that run at the same time. This used to get typed into the title — now it's a field.</span></div><div class="fctl"><input class="inp md" value="Boat 1"><div class="fhelp">Optional. Shows as a chip, e.g. <span class="sect">Boat 1</span></div></div></div>
+        <div class="frow"><div class="flab"><b>Instructor</b><span>Assign now or leave open</span></div><div class="fctl"><select class="inp"><option>Marcus Webb</option><option>Capt. Dave Molina</option><option>Sarah Chen</option><option>Elena Ruiz</option><option>— Unassigned —</option></select></div></div>
+        <div class="frow"><div class="flab"><b>Schedule</b><span>Pick a weekday, time, and date range. Sessions are generated for you — no manual date entry.</span></div><div class="fctl">
+          <div class="dow-pick" role="group" aria-label="Repeat on" style="margin-bottom:10px"><button aria-label="Sunday">S</button><button aria-label="Monday">M</button><button aria-label="Tuesday">T</button><button class="on" aria-pressed="true" aria-label="Wednesday">W</button><button aria-label="Thursday">T</button><button aria-label="Friday">F</button><button aria-label="Saturday">S</button></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <input class="inp sm mono" value="6:00 PM">
+            <span style="color:var(--faint);font-size:12px">from</span><input class="inp sm mono" value="Jul 1">
+            <span style="color:var(--faint);font-size:12px">to</span><input class="inp sm mono" value="Jul 29">
+          </div>
+          <div class="sess-preview">
+            <div class="sp"><span class="spd">Wed Jul 1</span><span class="mono">6:00–8:00 PM</span></div>
+            <div class="sp"><span class="spd">Wed Jul 8</span><span class="mono">6:00–8:00 PM</span></div>
+            <div class="sp"><span class="spd">Wed Jul 15</span><span class="mono">6:00–8:00 PM</span></div>
+            <div class="sp"><span class="spd">Wed Jul 22</span><span class="mono">6:00–8:00 PM</span></div>
+            <div class="sp"><span class="spd">Wed Jul 29</span><span class="mono">6:00–8:00 PM</span></div>
+          </div>
+          <div class="fhelp good">✓ 5 sessions · edit or add one-offs after creating</div>
+        </div></div>
+        <div class="frow"><div class="flab"><b>Location</b></div><div class="fctl"><input class="inp" value="Edgewater Marina, Dock A"></div></div>
+        <div class="frow"><div class="flab"><b>Capacity &amp; price</b></div><div class="fctl" style="display:flex;gap:10px;flex-wrap:wrap">
+          <span><div class="fhelp" style="margin:0 0 4px">Capacity</div><input class="inp sm mono" value="6"></span>
+          <span><div class="fhelp" style="margin:0 0 4px">Price</div><input class="inp sm mono" value="$260"></span>
+          <span><div class="fhelp" style="margin:0 0 4px">Member price</div><input class="inp sm mono" value="$235"></span>
+        </div></div>
+        <div class="frow"><div class="flab"><b>How it appears</b><span>Assembled from the fields above — nobody types a date into a name</span></div><div class="fctl">
+          <div class="title-preview"><span class="cell-sub" style="margin:0">Course list &amp; calendar show</span>
+            <div class="tp-name"><span class="type-chip">OPEN</span> Open Sailing <span class="sect">Boat 1</span></div>
+            <div class="sched-sub" style="margin-top:6px">Wed 6:00p · Jul 1 – 29 · 5 sess · Marcus Webb</div>
+          </div>
+        </div></div>
+      </div></div></div>
+    </section>
+
+    <!-- ============ INSTRUCTOR PROFILE ============ -->
+    <section class="screen" id="s-instructor">
+      <div class="crumb"><a onclick="go('users')">Users</a> / Capt. Dave Molina</div>
+      <div class="cd-head">
+        <div><h1 class="cd-title">Capt. Dave Molina <span class="badge role instr">Instructor</span></h1>
+          <div class="cd-meta"><span>dave@ltscleveland.org</span><span>(216) 555-0110</span><span>Certifications <b>ASA 101 · 103 · 104</b></span></div>
+        </div>
+        <div class="cd-actions"><a class="btn btn-s">Edit</a></div>
+      </div>
+      <div class="statgrid">
+        <div class="sc"><div class="sv tnum">2</div><div class="sl">Teaching now</div></div>
+        <div class="sc"><div class="sv tnum">3</div><div class="sl">Sessions this week</div></div>
+        <div class="sc"><div class="sv tnum">14</div><div class="sl">Courses taught</div></div>
+        <div class="sc"><div class="sv tnum">96</div><div class="sl">Students taught</div></div>
+      </div>
+      <div class="eyebrow">Teaching — upcoming <span class="n">2 courses</span></div>
+      <div class="sec"><div class="tblwrap"><table class="tbl">
+        <thead><tr><th>Course</th><th>Schedule</th><th>Next session</th><th>Enrolled</th></tr></thead>
+        <tbody>
+          <tr class="clik" onclick="go('course')"><td class="cell-title"><span class="type-chip">ASA101</span> ASA 101 — Basic Keelboat</td><td><div class="sched-main">Thu 9:00a</div><div class="sched-sub">Jul 17 – 31</div></td><td class="mono">Today 9:00a</td><td><div class="cellbar"><span class="cb"><i style="width:100%"></i></span><span class="cbn">6/6</span></div></td></tr>
+          <tr class="clik" onclick="go('course')"><td class="cell-title"><span class="type-chip">ASA103</span> ASA 103 — Coastal Cruising</td><td><div class="sched-main">Sat 9:00a</div><div class="sched-sub">Jul 18 – Aug 8</div></td><td class="mono">Tomorrow 9:00a</td><td><div class="cellbar"><span class="cb"><i style="width:100%"></i></span><span class="cbn">8/8</span></div></td></tr>
+        </tbody>
+      </table></div></div>
+      <div class="eyebrow">Taught — history</div>
+      <div class="sec"><div class="sec-b">
+        <div class="chrow"><div class="ct">ASA 101 — Basic Keelboat <span class="badge completed sm">Completed</span></div><div class="cmeta">Jun 5 – 19 · 3 sessions · 6 students · Edgewater Dock B</div></div>
+        <div class="chrow"><div class="ct">ASA 103 — Coastal Cruising <span class="badge completed sm">Completed</span></div><div class="cmeta">May 3 – 24 · 4 sessions · 7 students</div></div>
+        <div class="chrow"><div class="ct">ASA 101 — Basic Keelboat <span class="badge completed sm">Completed</span></div><div class="cmeta">Apr 10 – 24 · 3 sessions · 5 students</div></div>
+      </div></div>
+    </section>
+
+    <!-- ============ COMBINED-ROLE PROFILE ============ -->
+    <section class="screen" id="s-combo">
+      <div class="crumb"><a onclick="go('users')">Users</a> / Sarah Chen</div>
+      <div class="cd-head">
+        <div><h1 class="cd-title">Sarah Chen <span class="badge role instr">Instructor</span> <span class="badge role">Student</span></h1>
+          <div class="cd-meta"><span>sarah.chen@gmail.com</span><span>(216) 555-0173</span><span>Certifications <b>Dinghy · Kids Camp</b></span><span>Experience <b>Comfortable solo</b></span></div>
+        </div>
+        <div class="cd-actions"><a class="btn btn-s">Edit</a></div>
+      </div>
+      <div class="eyebrow"><span class="role-sec-lbl"><span class="badge role instr">Instructor</span> Teaching</span> <span class="n">2 courses</span></div>
+      <div class="sec"><div class="tblwrap"><table class="tbl">
+        <thead><tr><th>Course</th><th>Schedule</th><th>Next session</th><th>Enrolled</th></tr></thead>
+        <tbody>
+          <tr class="clik" onclick="go('course')"><td class="cell-title"><span class="type-chip">CAMP</span> Kids Sail Camp</td><td><div class="sched-main">Fri 10:00a</div><div class="sched-sub">Jul 11 – Aug 8</div></td><td class="mono">Tomorrow 10:00a</td><td><div class="cellbar"><span class="cb"><i style="width:92%"></i></span><span class="cbn">11/12</span></div></td></tr>
+          <tr class="clik" onclick="go('course')"><td class="cell-title"><span class="type-chip">DING</span> Dinghy Basics</td><td><div class="sched-main">Tue 5:30p</div><div class="sched-sub">Jul 8 – 29</div></td><td class="mono">Tue 5:30p</td><td><div class="cellbar"><span class="cb"><i style="width:66%"></i></span><span class="cbn">4/6</span></div></td></tr>
+        </tbody>
+      </table></div></div>
+      <div class="eyebrow"><span class="role-sec-lbl"><span class="badge role">Student</span> Enrolled &amp; history</span></div>
+      <div class="sec"><div class="sec-b">
+        <div class="chrow"><div class="ct">ASA 104 — Bareboat Cruising <span class="badge active sm">Enrolled</span></div><div class="cmeta">Elena Ruiz · starts Aug 4 · 0 of 5 sessions</div></div>
+        <div class="chrow"><div class="ct">ASA 103 — Coastal Cruising <span class="badge completed sm">Completed</span></div><div class="cmeta">Capt. Dave Molina · 4 of 4 sessions · all present</div></div>
+      </div></div>
+    </section>
+
+    <!-- ============ ACTIVITY / AUDIT ============ -->
+    <section class="screen" id="s-audit">
+      <header class="phead"><div><h1 class="day">Activity</h1><div class="sub">Everything that's happened, newest first · <span class="mono">2,418 events</span></div></div>
+        <a class="btn btn-s">Export CSV</a>
+      </header>
+      <div class="toolbar">
+        <div class="search"><span class="si">⌕</span><input placeholder="Filter by student, course, or person…"></div>
+        <span class="daterange">Jul 10 – Jul 17 ▾</span>
+        <div class="spacer"></div>
+      </div>
+      <div role="group" class="pills" style="margin-bottom:14px">
+        <button class="pill" aria-pressed="true">All <span class="pc">2418</span></button>
+        <button class="pill" aria-pressed="false">Enrollments</button>
+        <button class="pill" aria-pressed="false">Payments</button>
+        <button class="pill" aria-pressed="false">Assignments</button>
+        <button class="pill" aria-pressed="false">Sessions</button>
+        <button class="pill" aria-pressed="false">Attendance</button>
+        <button class="pill" aria-pressed="false">Notifications</button>
+        <button class="pill" aria-pressed="false">Accounts</button>
+      </div>
+      <div class="sec"><div class="tblwrap"><table class="tbl">
+        <thead><tr><th style="width:132px">When</th><th style="width:118px">Type</th><th>What happened</th><th>By</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">Today 2:14p</td><td><span class="ev pay">Payment</span></td><td><b>Priya Rao</b> paid <span class="mono">$395.00</span> — <a class="tgt-link" onclick="go('course')">ASA 101 — Basic Keelboat</a> · hold confirmed</td><td><span class="audit-actor"><span class="aa sys">S</span>Stripe</span></td></tr>
+          <tr><td class="mono">Today 2:14p</td><td><span class="ev enroll">Enrollment</span></td><td><b>Priya Rao</b> enrolled → pending confirmation · <a class="tgt-link" onclick="go('course')">ASA 101 — Basic Keelboat</a></td><td><span class="audit-actor"><span class="aa">PR</span>Priya Rao</span></td></tr>
+          <tr><td class="mono">Today 1:02p</td><td><span class="ev attend">Attendance</span></td><td>Attendance saved — Open Sailing II · <span class="mono">5 present, 0 absent</span></td><td><span class="audit-actor"><span class="aa">SC</span>Sarah Chen</span></td></tr>
+          <tr><td class="mono">Today 11:47a</td><td><span class="ev notify">Notification</span></td><td>SMS sent — session reminder to <span class="mono">6</span> students · ASA 101 (today 9:00a)</td><td><span class="audit-actor"><span class="aa sys">S</span>System</span></td></tr>
+          <tr><td class="mono">Today 10:30a</td><td><span class="ev assign">Assignment</span></td><td>Instructor cleared — <a class="tgt-link" onclick="go('course')">Dinghy Basics</a> (Jul 29) is now <span class="unassigned">unassigned</span></td><td><span class="audit-actor"><span class="aa">AR</span>Andy Reeves</span></td></tr>
+          <tr><td class="mono">Today 9:58a</td><td><span class="ev refund">Cancellation</span></td><td><b>Jane Okafor</b> requested cancellation · ASA 103 · refund <span class="mono">$395.00</span> pending</td><td><span class="audit-actor"><span class="aa">JO</span>Jane Okafor</span></td></tr>
+          <tr><td class="mono">Yest 4:20p</td><td><span class="ev session">Session</span></td><td>Session cancelled — ASA 103, Jul 10 9:00a · reason: high wind · 3 students flagged for makeup</td><td><span class="audit-actor"><span class="aa">AR</span>Andy Reeves</span></td></tr>
+          <tr><td class="mono">Jul 16 3:10p</td><td><span class="ev assign">Assignment</span></td><td>Marcus Webb assigned → <a class="tgt-link" onclick="go('course')">Open Sailing III · Boat 1</a></td><td><span class="audit-actor"><span class="aa">AR</span>Andy Reeves</span></td></tr>
+          <tr><td class="mono">Jul 16 1:22p</td><td><span class="ev pay">Payment</span></td><td><b>Tom Okafor</b> paid <span class="mono">$395.00</span> — ASA 101 — Basic Keelboat</td><td><span class="audit-actor"><span class="aa sys">S</span>Stripe</span></td></tr>
+          <tr><td class="mono">Jul 16 11:00a</td><td><span class="ev account">Account</span></td><td>Instructor invite accepted — <a class="tgt-link" onclick="go('combo')">Elena Ruiz</a> granted Instructor role</td><td><span class="audit-actor"><span class="aa">ER</span>Elena Ruiz</span></td></tr>
+          <tr><td class="mono">Jul 15 6:45p</td><td><span class="ev refund">Refund</span></td><td>Refund issued <span class="mono">$260.00</span> — Open Sailing (May) cancelled</td><td><span class="audit-actor"><span class="aa">AR</span>Andy Reeves</span></td></tr>
+          <tr><td class="mono">Jul 15 2:00p</td><td><span class="ev course">Course</span></td><td>Course published — <a class="tgt-link" onclick="go('course')">Kids Sail Camp</a> · draft → active</td><td><span class="audit-actor"><span class="aa">AR</span>Andy Reeves</span></td></tr>
+          <tr><td class="mono">Jul 15 9:30a</td><td><span class="ev enroll">Enrollment</span></td><td><b>Tom Okafor</b> confirmed · ASA 101 — Basic Keelboat</td><td><span class="audit-actor"><span class="aa">AR</span>Andy Reeves</span></td></tr>
+        </tbody>
+      </table></div></div>
+      <div style="text-align:center;margin-top:12px"><a class="btn btn-s">Load older activity</a></div>
+    </section>
+
+    <!-- ============ INSTRUCTOR · DASHBOARD ============ -->
+    <section class="screen" id="s-idash">
+      <header class="phead">
+        <div><h1 class="day">Friday, July 17</h1><div class="sub">Your teaching day</div></div>
+        <div class="pulse">
+          <div class="p"><div class="pv tnum">1</div><div class="pl">Session today</div></div>
+          <div class="p"><div class="pv tnum">4</div><div class="pl">This week</div></div>
+          <div class="p"><div class="pv tnum">22</div><div class="pl">Your students</div></div>
+        </div>
+      </header>
+
+      <div class="eyebrow first">Heads up <span class="n">2</span></div>
+      <div class="needs">
+        <a class="ncard warn" onclick="go('isession')"><div class="big tnum">1</div><div class="tx"><b>Attendance not submitted</b><span>ASA 103 · Tue Jul 15 · 8 students</span><span class="go">Submit →</span></div></a>
+        <a class="ncard info" onclick="go('istudent')"><div class="big tnum">2</div><div class="tx"><b>New notes from students</b><span>James Park &amp; Priya Rao — read before class</span><span class="go">Read →</span></div></a>
+      </div>
+
+      <div class="cols">
+        <div>
+          <div class="eyebrow">Today on the water <span class="n">1 session</span></div>
+          <div class="sec"><div class="sec-b">
+            <div class="tsession">
+              <div class="tclock"><div class="t1">9:00a</div><div class="t2">–12:00p</div><div class="call">call 8:30</div></div>
+              <div class="tbody"><div class="tt">ASA 101 — Basic Keelboat <span class="type-chip">ASA101</span></div><div class="tm">Edgewater Marina, Dock B <span class="dot">·</span> 6 students</div></div>
+              <div class="tright"><div class="fill"><span class="fnum">6/6</span><span class="bar"><i style="width:100%"></i></span></div><a class="att link" onclick="go('isession')">Take attendance</a></div>
+            </div>
+          </div></div>
+
+          <div class="eyebrow">Rest of the week</div>
+          <div class="sec"><div class="sec-b">
+            <div class="wday"><div class="wh">Tomorrow · Sat Jul 18</div>
+              <div class="wrow" style="cursor:pointer" onclick="go('isession')"><span class="wt">9:00a</span><span class="wn">ASA 103 — Coastal <span class="wi">· Edgewater Dock B</span></span><span class="wc">8/8</span></div>
+            </div>
+            <div class="wday"><div class="wh">Thu Jul 24</div>
+              <div class="wrow" style="cursor:pointer" onclick="go('isession')"><span class="wt">9:00a</span><span class="wn">ASA 101 — Basic Keelboat</span><span class="wc">6/6</span></div>
+            </div>
+            <div class="wday"><div class="wh">Sat Jul 25</div>
+              <div class="wrow" style="cursor:pointer" onclick="go('isession')"><span class="wt">9:00a</span><span class="wn">ASA 103 — Coastal</span><span class="wc">8/8</span></div>
+            </div>
+          </div></div>
+        </div>
+
+        <div>
+          <div class="eyebrow">Notes from your students</div>
+          <div class="sec"><div class="sec-b">
+            <div class="mini" style="cursor:pointer" onclick="go('istudent')"><div class="m-av">JP</div><div class="m-tx"><b>James Park</b><span>"New to keelboats, sailed dinghies as a kid"</span></div></div>
+            <div class="mini"><div class="m-av">PR</div><div class="m-tx"><b>Priya Rao</b><span>"A little nervous about the deep water"</span></div></div>
+            <div class="mini"><div class="m-av">MD</div><div class="m-tx"><b>Maria Delgado</b><span>"Sailing with my teenage son — go easy on us"</span></div></div>
+          </div></div>
+
+          <div class="eyebrow">Makeups owed</div>
+          <div class="sec"><div class="sec-b">
+            <div class="chrow"><div class="ct">Aisha Karim</div><div class="cmeta risk-lo">Missed ASA 103 · Jul 10 (cancelled — wind)</div></div>
+            <div class="chrow"><div class="ct">David Kwon</div><div class="cmeta risk-lo">Missed ASA 103 · Jul 10 (cancelled — wind)</div></div>
+          </div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INSTRUCTOR · MY SCHEDULE ============ -->
+    <section class="screen" id="s-ischedule">
+      <header class="phead"><div><h1 class="day">My Schedule</h1><div class="sub">Your upcoming sessions · tap one for its roster</div></div></header>
+      <div class="sec"><div class="sec-b">
+        <div class="wday"><div class="wh">Today · Fri Jul 17</div>
+          <div class="wrow" style="cursor:pointer" onclick="go('isession')"><span class="wt">9:00a</span><span class="wn">ASA 101 — Basic Keelboat <span class="wi">· Edgewater Dock B</span></span><span class="wc">6/6</span></div>
+        </div>
+        <div class="wday"><div class="wh">Tomorrow · Sat Jul 18</div>
+          <div class="wrow" style="cursor:pointer" onclick="go('isession')"><span class="wt">9:00a</span><span class="wn">ASA 103 — Coastal Cruising <span class="wi">· Edgewater Dock B</span></span><span class="wc">8/8</span></div>
+        </div>
+        <div class="wday"><div class="wh">Thu Jul 24</div>
+          <div class="wrow" style="cursor:pointer" onclick="go('isession')"><span class="wt">9:00a</span><span class="wn">ASA 101 — Basic Keelboat <span class="wi">· Edgewater Dock B</span></span><span class="wc">6/6</span></div>
+        </div>
+        <div class="wday"><div class="wh">Sat Jul 25</div>
+          <div class="wrow" style="cursor:pointer" onclick="go('isession')"><span class="wt">9:00a</span><span class="wn">ASA 103 — Coastal Cruising</span><span class="wc">8/8</span></div>
+        </div>
+        <div class="wday"><div class="wh">Thu Jul 31</div>
+          <div class="wrow" style="cursor:pointer" onclick="go('isession')"><span class="wt">9:00a</span><span class="wn">ASA 101 — Basic Keelboat <span class="wi">· final session</span></span><span class="wc">6/6</span></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ============ INSTRUCTOR · SESSION ROSTER ============ -->
+    <section class="screen" id="s-isession">
+      <div class="crumb"><a onclick="go('ischedule')">My Schedule</a> / ASA 101 · Thu Jul 17</div>
+      <div class="cd-head">
+        <div><h1 class="cd-title">ASA 101 — Basic Keelboat</h1>
+          <div class="cd-meta"><span>Thu Jul 17 · <b>9:00a–12:00p</b></span><span>Edgewater Marina, Dock B</span></div>
+        </div>
+        <div class="cd-actions"><a class="btn btn-primary btn-s">Take attendance</a></div>
+      </div>
+      <div class="statgrid" style="grid-template-columns:repeat(3,1fr);max-width:440px">
+        <div class="sc"><div class="sv tnum">6/6</div><div class="sl">Enrolled</div></div>
+        <div class="sc"><div class="sv warn tnum">1</div><div class="sl">Needs makeup</div></div>
+        <div class="sc"><div class="sv tnum">2</div><div class="sl">Student notes</div></div>
+      </div>
+      <div class="sec">
+        <div class="sec-h"><h2>Roster</h2><span class="cnt">6 students</span></div>
+        <div class="tblwrap"><table class="tbl">
+          <thead><tr><th>Student</th><th>Phone</th><th>Attendance</th></tr></thead>
+          <tbody>
+            <tr class="clik" onclick="go('istudent')"><td class="cell-title"><a class="linky">Tom Okafor</a></td><td class="mono">(216) 555-0142</td><td><span class="badge active">Present</span></td></tr>
+            <tr class="clik" onclick="go('istudent')"><td class="cell-title"><a class="linky">Maria Delgado</a></td><td class="mono">(216) 555-0188</td><td><span class="badge active">Present</span></td></tr>
+            <tr class="clik" onclick="go('istudent')"><td class="cell-title"><a class="linky">James Park</a> <span class="dotnote" title="Left a note"></span></td><td class="mono">(440) 555-0121</td><td><span class="badge active">Present</span></td></tr>
+            <tr class="clik" onclick="go('istudent')"><td class="cell-title"><a class="linky">Aisha Karim</a></td><td class="mono">(216) 555-0164</td><td><span class="st-chip pend">Absent · needs makeup</span></td></tr>
+            <tr class="clik" onclick="go('istudent')"><td class="cell-title"><a class="linky">Ben Foster</a></td><td class="mono">(216) 555-0109</td><td><span class="badge active">Present</span></td></tr>
+            <tr class="clik" onclick="go('istudent')"><td class="cell-title"><a class="linky">Nina Alvarez</a></td><td class="mono">(330) 555-0175</td><td><span class="badge draft">Excused</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="sec">
+        <div class="sec-h"><h2>Session notes</h2><span class="cnt">visible to all instructors + admin</span></div>
+        <div class="sec-b"><textarea class="inp" style="max-width:100%;min-height:74px">Windy but manageable — steady 12kt out of the NW. Covered points of sail and tacking; whole group got a turn at the helm. James picked it up fast.</textarea><div style="margin-top:8px"><a class="btn btn-primary btn-s">Save note</a></div></div>
+      </div>
+    </section>
+
+    <!-- ============ INSTRUCTOR · STUDENT VIEW ============ -->
+    <section class="screen" id="s-istudent">
+      <div class="crumb"><a onclick="go('isession')">ASA 101 · Jul 17</a> / James Park</div>
+      <div class="cd-head">
+        <div><h1 class="cd-title">James Park</h1>
+          <div class="cd-meta"><span>Experience <b>Some experience — dinghies</b></span></div>
+        </div>
+      </div>
+      <div class="sec"><div class="sec-h"><h2>Note from student</h2></div><div class="sec-b"><p style="margin:8px 0;color:var(--muted);font-size:13px">"New to keelboats, but sailed dinghies as a kid at summer camp. Excited to get back on the water — hoping to work toward bareboat eventually."</p></div></div>
+      <div class="eyebrow">With you</div>
+      <div class="sec"><div class="sec-b">
+        <div class="chrow"><div class="ct">ASA 101 — Basic Keelboat <span class="badge active sm">In progress</span></div><div class="cmeta">Session 1 of 3 · Jul 17 present</div></div>
+      </div></div>
+      <div class="eyebrow">Earlier</div>
+      <div class="sec"><div class="sec-b">
+        <div class="chrow"><div class="ct">Dinghy Basics <span class="badge completed sm">Completed</span></div><div class="cmeta">Jun · 4 of 4 sessions · all present</div></div>
+      </div></div>
+    </section>
+
+    <!-- ============ STUDENT · HOME ============ -->
+    <section class="screen" id="s-stdash">
+      <header class="phead"><div><h1 class="day">Hi, Priya</h1><div class="sub">Here's what's coming up</div></div></header>
+
+      <div class="eyebrow first">Your next session</div>
+      <div class="sec" style="border-color:var(--info-line)"><div class="sec-b" style="padding:16px">
+        <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center">
+          <div>
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);font-weight:700;margin-bottom:6px">In 7 days</div>
+            <div style="font-size:17px;font-weight:600">ASA 101 — Basic Keelboat <span class="type-chip">ASA101</span></div>
+            <div class="cd-meta" style="margin-top:8px"><span><b>Thu Jul 24</b> · 9:00a–12:00p</span><span>Edgewater Marina, Dock B</span><span>Capt. Dave Molina</span></div>
+          </div>
+          <a class="btn btn-primary" onclick="go('stcourse')">View course</a>
+        </div>
+      </div></div>
+
+      <div class="eyebrow">Your courses <span class="n">2 active</span></div>
+      <div class="sec"><div class="sec-b">
+        <div class="chrow" style="cursor:pointer" onclick="go('stcourse')"><div class="ct">ASA 101 — Basic Keelboat <span class="badge active sm">Enrolled</span></div><div class="cmeta">Capt. Dave Molina · 2 of 3 sessions left · next Thu Jul 24</div><div class="cbar" style="max-width:200px"><i style="width:33%;background:var(--accent)"></i></div></div>
+        <div class="chrow" style="cursor:pointer" onclick="go('stcourse')"><div class="ct">Open Sailing II <span class="st-chip pend" style="font-size:9px">Pending payment</span></div><div class="cmeta" style="color:var(--warn)">Hold expires in 38 min — finish checkout to keep your spot</div></div>
+      </div></div>
+
+      <div class="eyebrow">Ready for more?</div>
+      <div class="sec"><div class="sec-b">
+        <div class="mini" style="cursor:pointer" onclick="go('stbrowse')"><div class="m-av" style="background:var(--info-bg);color:var(--accent)">→</div><div class="m-tx"><b>Browse courses</b><span>ASA 103 — Coastal Cruising starts Sat · 2 spots left</span></div></div>
+      </div></div>
+    </section>
+
+    <!-- ============ STUDENT · BROWSE ============ -->
+    <section class="screen" id="s-stbrowse">
+      <header class="phead"><div><h1 class="day">Browse courses</h1><div class="sub">Find your next class and register</div></div>
+        <div class="seg"><button class="on">List</button><button>Calendar</button></div>
+      </header>
+      <div role="group" class="pills" style="margin-bottom:14px">
+        <button class="pill" aria-pressed="true">All</button>
+        <button class="pill" aria-pressed="false">Getting started</button>
+        <button class="pill" aria-pressed="false">ASA certification</button>
+        <button class="pill" aria-pressed="false">Open Sailing</button>
+        <button class="pill" aria-pressed="false">Kids</button>
+      </div>
+      <div class="sec"><div class="tblwrap"><table class="tbl">
+        <thead><tr><th>Course</th><th>Schedule</th><th>Instructor</th><th>Spots</th><th class="r">Price</th><th></th></tr></thead>
+        <tbody>
+          <tr class="clik" onclick="go('stcourse')"><td><div class="cell-title"><span class="type-chip">ASA103</span> ASA 103 — Coastal Cruising</div><div class="cell-sub">Next step after ASA 101</div></td><td><div class="sched-main">Sat 9:00a</div><div class="sched-sub">Jul 18 – Aug 8</div></td><td>Capt. Dave Molina</td><td><span class="st-chip pend">2 left</span></td><td class="r mono">$495</td><td><a class="mini-btn mini-go">Enroll</a></td></tr>
+          <tr class="clik" onclick="go('stcourse')"><td><div class="cell-title"><span class="type-chip">OPEN</span> Open Sailing I <span class="sect">Boat 1</span></div><div class="cell-sub">No experience needed</div></td><td><div class="sched-main">Sat 2:00p</div><div class="sched-sub">Jul 18 – Aug 22</div></td><td>Marcus Webb</td><td><span class="st-chip paid">6 left</span></td><td class="r mono">$260</td><td><a class="mini-btn mini-go">Enroll</a></td></tr>
+          <tr class="clik" onclick="go('stcourse')"><td><div class="cell-title"><span class="type-chip">DING</span> Dinghy Basics</div><div class="cell-sub">Small-boat fundamentals</div></td><td><div class="sched-main">Tue 5:30p</div><div class="sched-sub">Jul 29 – Aug 19</div></td><td>Sarah Chen</td><td><span class="st-chip pend">2 left</span></td><td class="r mono">$180</td><td><a class="mini-btn mini-go">Enroll</a></td></tr>
+          <tr class="clik" onclick="go('stcourse')"><td><div class="cell-title"><span class="type-chip">CAMP</span> Kids Sail Camp</div><div class="cell-sub">Ages 10–15</div></td><td><div class="sched-main">Fri 10:00a</div><div class="sched-sub">Jul 11 – Aug 8</div></td><td>Sarah Chen</td><td><span class="st-chip pend">1 left</span></td><td class="r mono">$320</td><td><a class="mini-btn mini-go">Enroll</a></td></tr>
+          <tr class="clik" onclick="go('stcourse')"><td><div class="cell-title"><span class="type-chip">ASA104</span> ASA 104 — Bareboat Cruising</div><div class="cell-sub">Multi-day skipper cert</div></td><td><div class="sched-main">Mon 6:00p</div><div class="sched-sub">Aug 4 – Sep 1</div></td><td>Elena Ruiz</td><td><span class="st-chip pend">2 left</span></td><td class="r mono">$650</td><td><a class="mini-btn mini-go">Enroll</a></td></tr>
+          <tr class="clik" onclick="go('stcourse')"><td><div class="cell-title"><span class="type-chip">ASA101</span> ASA 101 — Basic Keelboat</div><div class="cell-sub">Thu mornings cohort</div></td><td><div class="sched-main">Thu 9:00a</div><div class="sched-sub">Aug 7 – 21</div></td><td>Capt. Dave Molina</td><td><span class="st-chip full">Full</span></td><td class="r mono">$395</td><td><a class="mini-btn">Waitlist</a></td></tr>
+        </tbody>
+      </table></div></div>
+    </section>
+
+    <!-- ============ STUDENT · COURSE DETAIL ============ -->
+    <section class="screen" id="s-stcourse">
+      <div class="crumb"><a onclick="go('stbrowse')">Browse</a> / ASA 103 — Coastal Cruising</div>
+      <div class="cd-head">
+        <div><h1 class="cd-title">ASA 103 — Coastal Cruising <span class="type-chip">ASA103</span></h1>
+          <div class="cd-meta"><span>Schedule <b class="mono">Sat 9:00a · Jul 18 – Aug 8</b></span><span>Capt. Dave Molina</span></div>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:13.5px;max-width:640px;margin:0 0 16px">Take the helm beyond the harbor. Four Saturdays of coastal navigation, boat handling under sail and power, and anchoring — building on what you learned in Basic Keelboat.</p>
+      <div class="statgrid">
+        <div class="sc"><div class="sv" style="font-size:15px">Capt. Dave Molina</div><div class="sl">Instructor</div></div>
+        <div class="sc"><div class="sv tnum">$495</div><div class="sl">Member $450</div></div>
+        <div class="sc"><div class="sv tnum">4</div><div class="sl">Saturdays</div></div>
+        <div class="sc"><div class="sv warn tnum">2</div><div class="sl">of 8 spots left</div></div>
+      </div>
+      <div class="sec" style="border-color:var(--ok-line);background:var(--ok-bg)"><div class="sec-b" style="padding:12px 15px;display:flex;gap:10px;align-items:center"><span style="color:var(--ok);font-weight:700">✓</span><span style="font-size:13px;color:var(--ink)">ASA 103 usually follows <b>ASA 101 — Basic Keelboat</b>, which you're currently completing. You're all set.</span></div></div>
+      <div class="sec">
+        <div class="sec-h"><h2>Schedule</h2><span class="cnt">4 sessions</span></div>
+        <div class="tblwrap"><table class="tbl">
+          <thead><tr><th>Date</th><th>Time</th><th>Location</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">Sat Jul 18</td><td class="mono">9:00a–1:00p</td><td>Edgewater Marina, Dock B</td></tr>
+            <tr><td class="mono">Sat Jul 25</td><td class="mono">9:00a–1:00p</td><td>Edgewater Marina, Dock B</td></tr>
+            <tr><td class="mono">Sat Aug 1</td><td class="mono">9:00a–1:00p</td><td>Edgewater Marina, Dock B</td></tr>
+            <tr><td class="mono">Sat Aug 8</td><td class="mono">9:00a–1:00p</td><td>Edgewater Marina, Dock B</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="sec"><div class="sec-b" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:16px">
+        <div><div style="font-size:18px;font-weight:600" class="mono">$495.00</div><div class="fhelp" style="margin:2px 0 0">Secure checkout · card via Stripe</div></div>
+        <a class="btn btn-primary" style="font-size:14px;padding:10px 20px">Register &amp; pay</a>
+      </div></div>
+    </section>
+
+    <!-- ============ STUDENT · MY COURSES ============ -->
+    <section class="screen" id="s-stcourses">
+      <header class="phead"><div><h1 class="day">My Courses</h1><div class="sub">Everything you're enrolled in — and everything you've finished</div></div></header>
+      <div role="group" class="pills" style="margin-bottom:14px">
+        <button class="pill" aria-pressed="true">Upcoming</button>
+        <button class="pill" aria-pressed="false">Past</button>
+        <button class="pill" aria-pressed="false">All</button>
+      </div>
+
+      <div class="mkcard">
+        <div class="mh"><b>ASA 101 — Basic Keelboat</b> <span class="type-chip">ASA101</span><span class="badge active" style="margin-left:2px">Enrolled</span><span class="em">Capt. Dave Molina</span></div>
+        <div class="ms"><span class="mt">Thu Jul 17 · 9:00a</span><span class="mn">Edgewater Marina, Dock B</span><span class="badge active">Present</span></div>
+        <div class="ms"><span class="mt">Thu Jul 24 · 9:00a</span><span class="mn">Edgewater Marina, Dock B</span><span class="st-chip reg">Upcoming</span></div>
+        <div class="ms"><span class="mt">Thu Jul 31 · 9:00a</span><span class="mn">Edgewater Marina, Dock B · final session</span><span class="st-chip reg">Upcoming</span></div>
+      </div>
+
+      <div class="mkcard">
+        <div class="mh"><b>Open Sailing II</b> <span class="type-chip">OPEN</span><span class="st-chip pend" style="margin-left:2px">Pending payment</span><span class="em">Sarah Chen</span></div>
+        <div class="ms" style="border:0"><span class="mn" style="color:var(--warn)">Hold expires in 38 min — finish checkout to keep your spot.</span><a class="mini-btn mini-go">Resume payment</a></div>
+      </div>
+
+      <div class="mkcard">
+        <div class="mh"><b>Dinghy Basics</b> <span class="type-chip">DING</span><span class="badge completed" style="margin-left:2px">Completed</span><span class="em">Sarah Chen · June</span></div>
+        <div class="ms"><span class="mt">4 of 4 sessions</span><span class="mn" style="color:var(--ok)">All present — nicely done</span><span class="badge completed">Completed</span></div>
+      </div>
+    </section>
+
+    <!-- ============ STUDENT · ACCOUNT ============ -->
+    <section class="screen" id="s-staccount">
+      <header class="phead"><div><h1 class="day">Account</h1><div class="sub">Your details and how we reach you</div></div>
+        <a class="btn btn-primary">Save changes</a>
+      </header>
+      <div class="sec"><div class="sec-h"><h2>Profile</h2></div><div class="sec-b"><div class="form">
+        <div class="frow"><div class="flab"><b>Name</b></div><div class="fctl" style="display:flex;gap:10px;flex-wrap:wrap"><input class="inp md" value="Priya"><input class="inp md" value="Rao"></div></div>
+        <div class="frow"><div class="flab"><b>Email</b></div><div class="fctl"><input class="inp" value="priya.rao@gmail.com"></div></div>
+        <div class="frow"><div class="flab"><b>Mobile</b><span>For booking links + crew updates</span></div><div class="fctl"><input class="inp md mono" value="(216) 555-0155"><div class="fhelp">☑ OK to text me about my sessions</div></div></div>
+        <div class="frow"><div class="flab"><b>ASA number</b><span>If you have one</span></div><div class="fctl"><input class="inp sm mono" value="4471908"></div></div>
+        <div class="frow"><div class="flab"><b>Sailing experience</b></div><div class="fctl"><select class="inp"><option>Just getting started</option><option selected>A little experience</option><option>Comfortable crewing</option><option>Comfortable solo</option></select></div></div>
+        <div class="frow"><div class="flab"><b>Note for your instructor</b><span>Anything they should know</span></div><div class="fctl"><textarea class="inp" style="max-width:100%;min-height:66px">A little nervous about the deep water, but excited to learn!</textarea></div></div>
+      </div></div></div>
+      <div class="sec">
+        <div class="sec-h"><h2>Notifications</h2></div>
+        <div class="sec-b">
+          <div class="togrow"><div class="tl"><b>Session reminders</b><span>The day before each session</span></div><span class="chanlbl">Email</span><button class="sw on" role="switch" aria-checked="true" aria-label="Toggle setting"></button><span class="chanlbl">SMS</span><button class="sw on" role="switch" aria-checked="true" aria-label="Toggle setting"></button></div>
+          <div class="togrow"><div class="tl"><b>Enrollment &amp; payment receipts</b><span>Confirmations and refunds</span></div><span class="chanlbl">Email</span><button class="sw on" role="switch" aria-checked="true" aria-label="Toggle setting"></button><span class="chanlbl">SMS</span><button class="sw" role="switch" aria-checked="false" aria-label="Toggle setting"></button></div>
+          <div class="togrow"><div class="tl"><b>Schedule changes</b><span>If a session is moved or cancelled</span></div><span class="chanlbl">Email</span><button class="sw on" role="switch" aria-checked="true" aria-label="Toggle setting"></button><span class="chanlbl">SMS</span><button class="sw on" role="switch" aria-checked="true" aria-label="Toggle setting"></button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PUBLIC LANDING ============ -->
+    <section class="screen pub" id="s-public">
+      <nav class="pub-nav">
+        <div class="pub-brand">
+          <svg class="sail" viewBox="0 0 24 24" fill="none"><path d="M12 2 L12 19 L3 19 Z" fill="var(--accent)"/><path d="M13.4 5 L20.5 19 L13.4 19 Z" fill="var(--accent)" opacity=".55"/><rect x="4" y="19.4" width="16" height="1.8" rx="0.9" fill="var(--muted)"/></svg>
+          <div>SailBook<small>Learn to Sail Cleveland</small></div>
+        </div>
+        <div class="pub-links"><a>Courses</a><a>The season</a><a>About</a><a>Contact</a></div><button class="pub-menu-btn" aria-label="Menu" onclick="document.querySelector('#s-public .pub-links').classList.toggle('open')">☰</button>
+        <div class="r">
+          <a class="btn btn-s" onclick="authView('login')">Log in</a>
+          <a class="btn btn-primary btn-s" onclick="authView('register')">Create account</a>
+        </div>
+      </nav>
+
+      <div class="pub-hero">
+        <svg class="hero-sail" viewBox="0 0 24 24" fill="none"><path d="M12 2 L12 19 L3 19 Z" fill="currentColor"/><path d="M13.4 5 L20.5 19 L13.4 19 Z" fill="currentColor" opacity=".5"/></svg>
+        <div class="inner">
+          <h1>Learn to sail on Lake Erie.</h1>
+          <p>Cleveland's community sailing school. From your very first time on the water to ASA certification — we meet you where you are, and take it from there.</p>
+          <div class="cta">
+            <a class="btn btn-primary btn-lg" onclick="setRole('student')">Browse courses</a>
+            <a class="btn btn-lg">How it works</a>
+          </div>
+          <div class="bignote">2026 season · May – September · Edgewater Marina, Cleveland</div>
+        </div>
+      </div>
+
+      <div class="pub-sec">
+        <div class="pub-eyebrow">Why sail with us</div>
+        <h2 class="pub-h2">No experience assumed. None required.</h2>
+        <p class="pub-lead">This school is about meeting people where they are in their sailing journey — not gatekeeping, not assuming. Whether you've never touched a tiller or you're chasing a bareboat cert, there's a boat for you.</p>
+        <div class="vgrid">
+          <div class="vcard"><div class="vi"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" aria-hidden="true"><path d="M12 3 L12 17 L4 17 Z" fill="currentColor"/><path d="M13.2 6 L19 17 L13.2 17 Z" fill="currentColor" opacity=".5"/></svg></div><h3>Start anywhere</h3><p>Never sailed? Open Sailing and Dinghy Basics get you on the water in an afternoon. No jargon, no pressure.</p></div>
+          <div class="vcard"><div class="vi">◎</div><h3>Real certification</h3><p>ASA 101 through 104, taught by USCG-licensed captains. Earn credentials recognized anywhere you charter.</p></div>
+          <div class="vcard"><div class="vi">⌖</div><h3>Right downtown</h3><p>We sail out of Edgewater Marina — ten minutes from downtown Cleveland, with the skyline off your stern.</p></div>
+        </div>
+      </div>
+
+      <div class="pub-sec">
+        <div class="pub-eyebrow">Courses</div>
+        <h2 class="pub-h2">Find your next class</h2>
+        <p class="pub-lead">Every course shows its real dates and price up front. Pick one, register online, and show up at the dock.</p>
+        <div class="cgrid">
+          <a class="ccard" onclick="setRole('student')"><span class="type-chip" style="align-self:flex-start">ASA101</span><div class="cn">Basic Keelboat</div><div class="cd">Your first certification. Handle a 24–30ft sloop with confidence.</div><div class="cf"><span class="price"><small>from</small> $395</span><span class="see">See dates →</span></div></a>
+          <a class="ccard" onclick="setRole('student')"><span class="type-chip" style="align-self:flex-start">ASA103</span><div class="cn">Coastal Cruising</div><div class="cd">Take the helm beyond the harbor — navigation, anchoring, longer passages.</div><div class="cf"><span class="price"><small>from</small> $495</span><span class="see">See dates →</span></div></a>
+          <a class="ccard" onclick="setRole('student')"><span class="type-chip" style="align-self:flex-start">OPEN</span><div class="cn">Open Sailing</div><div class="cd">No certification, no commitment — just guided time on the water, weekly.</div><div class="cf"><span class="price"><small>from</small> $260</span><span class="see">See dates →</span></div></a>
+          <a class="ccard" onclick="setRole('student')"><span class="type-chip" style="align-self:flex-start">DING</span><div class="cn">Dinghy Basics</div><div class="cd">Small-boat fundamentals. The fastest, most hands-on way to learn.</div><div class="cf"><span class="price"><small>from</small> $180</span><span class="see">See dates →</span></div></a>
+          <a class="ccard" onclick="setRole('student')"><span class="type-chip" style="align-self:flex-start">CAMP</span><div class="cn">Kids Sail Camp</div><div class="cd">Ages 10–15. A week of dinghies, games, and real sailing skills.</div><div class="cf"><span class="price"><small>from</small> $320</span><span class="see">See dates →</span></div></a>
+          <a class="ccard" onclick="setRole('student')"><span class="type-chip" style="align-self:flex-start">ASA104</span><div class="cn">Bareboat Cruising</div><div class="cd">Skipper a cruising boat overnight. The cert charter companies want.</div><div class="cf"><span class="price"><small>from</small> $650</span><span class="see">See dates →</span></div></a>
+        </div>
+      </div>
+
+      <div class="pub-sec">
+        <div class="pub-eyebrow">How it works</div>
+        <h2 class="pub-h2">On the water in three steps</h2>
+        <div class="steps">
+          <div class="step"><div class="num">01</div><h4>Pick a course</h4><p>Browse by date and level. Prerequisites guide you — they never block you.</p></div>
+          <div class="step"><div class="num">02</div><h4>Register &amp; pay</h4><p>Reserve your spot and pay securely online. A confirmation lands in your inbox.</p></div>
+          <div class="step"><div class="num">03</div><h4>Meet at the dock</h4><p>Show up at Edgewater. Your instructor has your name, your notes, and a boat ready.</p></div>
+        </div>
+      </div>
+
+      <div class="pub-band"><div class="inner">
+        <h2>Ready to get on the water?</h2>
+        <p>The 2026 season is filling up. Create an account and reserve your first class in minutes.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <a class="btn btn-lg btn-white" onclick="authView('register')">Create account</a>
+          <a class="btn btn-lg btn-ghost-w" onclick="setRole('student')">Browse courses</a>
+        </div>
+      </div></div>
+
+      <div class="pub-foot"><div class="inner">
+        <div><b>SailBook</b> · Learn to Sail Cleveland<br>Edgewater Marina · Cleveland, OH · (216) 555-0100</div>
+        <div style="text-align:right">hello@ltscleveland.org<br><span class="wp">Running on SailBook — no WordPress in sight.</span></div>
+      </div></div>
+    </section>
+
+    <!-- ============ LOGIN ============ -->
+    <section class="screen pub" id="s-login">
+      <div class="auth-wrap"><div class="auth-card">
+        <div class="auth-brand"><svg class="sail" viewBox="0 0 24 24" fill="none"><path d="M12 2 L12 19 L3 19 Z" fill="var(--accent)"/><path d="M13.4 5 L20.5 19 L13.4 19 Z" fill="var(--accent)" opacity=".55"/></svg>SailBook</div>
+        <div class="auth-h">Welcome back</div>
+        <div class="auth-sub">Log in to Learn to Sail Cleveland</div>
+        <button class="gbtn"><svg class="gicon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-2 3.2-4.9 3.2-7.8z"/><path fill="#34A853" d="M12 23c2.9 0 5.4-1 7.2-2.6l-3.6-2.7c-1 .7-2.3 1.1-3.7 1.1-2.8 0-5.2-1.9-6-4.5H2.2v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M6 14.3a6.6 6.6 0 0 1 0-4.2V7.3H2.2a11 11 0 0 0 0 9.8L6 14.3z"/><path fill="#EA4335" d="M12 5.5c1.6 0 3 .5 4.1 1.6l3.1-3.1A11 11 0 0 0 12 1 11 11 0 0 0 2.2 7.3L6 10.1c.8-2.6 3.2-4.6 6-4.6z"/></svg>Continue with Google</button>
+        <div class="divider">or</div>
+        <div class="afield"><label>Email</label><input class="inp" value="priya.rao@gmail.com"></div>
+        <div class="afield"><label>Password</label><input class="inp" type="password" value="passriparao"></div>
+        <div class="forgot"><a>Forgot password?</a></div>
+        <button class="btn btn-primary auth-primary" onclick="setRole('student')">Log in</button>
+        <div class="auth-alt">New to sailing? <a onclick="authView('register')">Create an account</a></div>
+        <div class="auth-back"><a onclick="setRole('public')">← Back to site</a></div>
+      </div></div>
+    </section>
+
+    <!-- ============ REGISTER ============ -->
+    <section class="screen pub" id="s-register">
+      <div class="auth-wrap"><div class="auth-card wide">
+        <div class="auth-brand"><svg class="sail" viewBox="0 0 24 24" fill="none"><path d="M12 2 L12 19 L3 19 Z" fill="var(--accent)"/><path d="M13.4 5 L20.5 19 L13.4 19 Z" fill="var(--accent)" opacity=".55"/></svg>SailBook</div>
+        <div class="auth-h">Create your account</div>
+        <div class="auth-sub">Tell us a little about you — we'll take it from there</div>
+        <button class="gbtn"><svg class="gicon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-2 3.2-4.9 3.2-7.8z"/><path fill="#34A853" d="M12 23c2.9 0 5.4-1 7.2-2.6l-3.6-2.7c-1 .7-2.3 1.1-3.7 1.1-2.8 0-5.2-1.9-6-4.5H2.2v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M6 14.3a6.6 6.6 0 0 1 0-4.2V7.3H2.2a11 11 0 0 0 0 9.8L6 14.3z"/><path fill="#EA4335" d="M12 5.5c1.6 0 3 .5 4.1 1.6l3.1-3.1A11 11 0 0 0 12 1 11 11 0 0 0 2.2 7.3L6 10.1c.8-2.6 3.2-4.6 6-4.6z"/></svg>Continue with Google</button>
+        <div class="divider">or sign up with email</div>
+        <div class="arow2"><div class="afield"><label>First name</label><input class="inp" placeholder="Priya"></div><div class="afield"><label>Last name</label><input class="inp" placeholder="Rao"></div></div>
+        <div class="afield"><label>Email</label><input class="inp" placeholder="you@email.com"></div>
+        <div class="afield"><label>Mobile</label><input class="inp" placeholder="(216) 555-0100"></div>
+        <div class="consent"><input type="checkbox" checked><span>Text me about my sessions and any schedule changes. Message &amp; data rates may apply.</span></div>
+        <div class="afield"><label>How much have you sailed?</label><select class="inp"><option>Just getting started</option><option>A little experience</option><option>Comfortable crewing</option><option>Comfortable solo</option></select></div>
+        <div class="afield"><label>Anything you want your instructor to know?</label><textarea class="inp" style="min-height:62px" placeholder="Nervous about deep water? Sailed as a kid? Whatever helps us meet you where you are."></textarea></div>
+        <div class="afield"><label>Password</label><input class="inp" type="password" placeholder="Create a password"></div>
+        <button class="btn btn-primary auth-primary" onclick="setRole('student')">Create account</button>
+        <div class="auth-alt">Already have an account? <a onclick="authView('login')">Log in</a></div>
+        <div class="auth-back"><a onclick="setRole('public')">← Back to site</a></div>
+      </div></div>
+    </section>
+
+    <div class="footnote" id="foot"></div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+var NOTES={
+  dashboard:"<b>Dashboard.</b> A triage board, not a stat wall. <b>Needs you</b> surfaces only what wants a human and collapses to “all clear” when nothing does. <b>Today on the water</b> leads with the day’s sessions + one-tap attendance; the right rail adds fill/at-risk, live enrollments and payments — signal the old screen lacked.",
+  calendar:"<b>Schedule · Month view.</b> Calendar and Courses are now one destination — Month and List are two views of the same sessions, so the sidebar no longer jumps between them. Sessions colored by course type; cancelled and unassigned flagged inline; every event taps into its course.",
+  courses:"<b>Schedule · List view.</b> The old Courses table, now a view of Schedule. The new <b>Schedule</b> column (weekday · time · date range) plus <b>Boat/section</b> chips retire the dates-in-titles hack; fill bars flag at-risk (amber) and full at a glance.",
+  course:"<b>Course detail.</b> The dense hub, made scannable: a 4-stat header band up top, then Sessions / Enrollments / Waitlist as distinct cards. Schedule now sits in the header — no more hunting through session rows to learn when a course runs.",
+  newcourse:"<b>New course — the date fix.</b> Schedule (weekday + time + date range) and <b>Section / boat</b> are real fields; sessions generate from them and the display name assembles itself. This kills the “Open Sailing July 1st Boat 1” title hack — that information now lives on the record.",
+  attendance:"<b>Attendance.</b> Segmented Present/Absent/Excused per student, the student’s instructor-note dot inline, and absences pre-flagged as needing a makeup.",
+  types:"<b>Course Types.</b> The templates behind courses — code, cert body, capacity and min-hours in a clean mono-aligned table.",
+  users:"<b>Users.</b> Invite links promoted to real cards up top (not buried in accordions), then a filterable roster with role chips. Every name clicks through — to the profile that matches their role(s).",
+  student:"<b>Student profile.</b> Contact + the personal “note from student” that the brand leans on, then course history with attendance.",
+  instructor:"<b>Instructor profile.</b> Click-through from Users: what they’re teaching now, sessions this week, and their full teaching history — the assignment side students’ profiles don’t show.",
+  combo:"<b>Combined-role profile.</b> A user who is both instructor and student gets both, clearly separated: a <b>Teaching</b> section and an <b>Enrolled</b> section. Admins (admin+instructor+student) would show all three the same way.",
+  missed:"<b>Missed Sessions.</b> One card per student who owes a makeup, each with a direct “schedule makeup” action.",
+  audit:"<b>Activity / audit (issue #144).</b> A filterable feed of every meaningful event — enrollments, payments, assignments, session changes, attendance, notifications, accounts. Filter by type, date range, or entity; each target links back to its record. Read-only, admin-only, backed by an append-only events table.",
+  idash:"<b>Instructor dashboard.</b> Rebuilt from the old three-stat-and-a-list. Leads with <b>Heads up</b> (attendance still owed, new student notes), then today’s session with one-tap attendance, the week, and — the part the old one buried — the personal notes students wrote and who still owes a makeup.",
+  ischedule:"<b>Instructor · My Schedule.</b> Just their sessions, grouped by day, each tapping straight into the roster. No month/list toggle needed at this volume — an agenda is the right default.",
+  isession:"<b>Instructor · Session roster.</b> Where the real work lives: roster with note-dots and makeup flags, phone numbers for the dock, and session notes shared with all instructors + admin. This is arguably more central than the dashboard.",
+  istudent:"<b>Instructor · Student.</b> The leaner, instructor-facing student view — experience, the note the student wrote, and how they’re doing with you. No admin contact/billing detail.",
+  stdash:"<b>Student · Home.</b> One clear answer to “what’s next” — the next session up top, your active courses with progress, and a nudge toward the next class. The old version led with stat cards that just restated the list below; those are gone.",
+  stbrowse:"<b>Student · Browse.</b> The catalog, now readable: every course shows its real <b>schedule</b> and spots left, so you pick by when it runs — not by decoding a title. List/Calendar toggle mirrors the admin Schedule.",
+  stcourse:"<b>Student · Course.</b> Schedule and spots up front, prerequisites that <b>flag but don’t block</b> (the brand’s ‘meet people where they are’), and one clear Register &amp; pay action.",
+  stcourses:"<b>Student · My Courses.</b> Collapses the old separate <b>Attendance</b> and <b>Experience</b> tabs into one place — each course shows its sessions with attendance, pending-payment holds, and completed history together.",
+  staccount:"<b>Student · Account.</b> Profile, the personal instructor note, and per-channel notification toggles in one screen — with <b>one</b> Save action for the whole page, not a save button per section (profile / notifications / address all commit together).",
+  public:"<b>Public landing.</b> SailBook’s own front door — not a copy of the WordPress site. Same design DNA as the app, leading with the school’s ‘meet you where you are’ voice, real course dates/prices, and a straight path into Create account → Browse. The buttons drop you into the student app.",
+  login:"<b>Log in.</b> One calm card — Google or email, forgot-password, and a clear path to register. Reached from the public site’s Log in.",
+  register:"<b>Register.</b> Where the brand voice first lands: sailing-experience in human terms (‘Just getting started’), the ‘anything you want your instructor to know?’ note, and SMS consent stated plainly. Google or email; a passwordless code is an easy variant. Submitting drops you into the student app.",
+  notifs:"<b>Notifications.</b> Plain per-channel toggles — what pings you, and where."
+};
+var ALIAS={schedule:'courses'};
+var PARENT={calendar:'schedule',courses:'schedule',course:'schedule',newcourse:'schedule',attendance:'schedule',student:'users',instructor:'users',combo:'users',isession:'ischedule',istudent:'ischedule',stcourse:'stbrowse'};
+function go(s){
+  s=ALIAS[s]||s;
+  document.querySelectorAll('.screen').forEach(function(e){e.classList.remove('active')});
+  var el=document.getElementById('s-'+s); if(el)el.classList.add('active');
+  var navKey=PARENT[s]||s;
+  document.querySelectorAll('#nav a,#mnav a').forEach(function(a){a.classList.toggle('on', a.getAttribute('data-s')===navKey)});
+  var f=document.getElementById('foot'); f.innerHTML=NOTES[s]||''; f.style.display=NOTES[s]?'block':'none';
+  window.scrollTo(0,0);
+}
+function tt(){var r=document.documentElement;var c=r.getAttribute('data-theme');if(!c){c=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}r.setAttribute('data-theme',c==='dark'?'light':'dark');}
+
+var NAVS={
+  admin:[['dashboard','▚','Dashboard'],['schedule','▦','Schedule'],['types','❏','Course Types'],['users','◍','Users'],['missed','⚑','Missed Sessions','3'],['audit','◷','Activity'],['notifs','◔','Notifications']],
+  instructor:[['idash','▚','Dashboard'],['ischedule','▦','My Schedule']],
+  student:[['stdash','▚','Home'],['stbrowse','⌕','Browse'],['stcourses','≣','My Courses'],['staccount','◍','Account']]
+};
+var IDENT={admin:{av:'AR',name:'Andy Reeves',role:'Admin'},instructor:{av:'DM',name:'Capt. Dave Molina',role:'Instructor'},student:{av:'PR',name:'Priya Rao',role:'Student'}};
+var DEF={admin:'dashboard',instructor:'idash',student:'stdash'};
+function renderNav(role){
+  var items=NAVS[role]||[];
+  document.getElementById('nav').innerHTML=items.map(function(it){
+    var b=it[3]?'<span class="badge">'+it[3]+'</span>':'';
+    return '<a data-s="'+it[0]+'" onclick="go(\''+it[0]+'\')"><span class="ic">'+it[1]+'</span>'+it[2]+b+'</a>';
+  }).join('');
+  document.getElementById('mnav').innerHTML=items.map(function(it){
+    return '<a data-s="'+it[0]+'" onclick="go(\''+it[0]+'\')">'+it[2]+'</a>';
+  }).join('');
+}
+function authView(s){document.getElementById('app').classList.add('public');document.getElementById('role-public').classList.add('on');go(s);}
+function setRole(role){
+  ['admin','instructor','student','public'].forEach(function(r){var b=document.getElementById('role-'+r); if(b)b.classList.toggle('on', r===role);});
+  var app=document.getElementById('app');
+  if(role==='public'){ app.classList.add('public'); go('public'); return; }
+  app.classList.remove('public');
+  var id=IDENT[role];
+  document.getElementById('brandRole').textContent=id.role;
+  document.getElementById('brandRoleM').textContent=id.role;
+  document.getElementById('footAv').textContent=id.av;
+  document.getElementById('footName').textContent=id.name;
+  document.getElementById('footRole').textContent=id.role;
+  renderNav(role);
+  go(DEF[role]);
+}
+setRole('admin');
+</script>

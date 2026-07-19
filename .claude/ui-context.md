@@ -1,152 +1,119 @@
 # SailBook — UI Context (design system for @ui-reviewer)
 
-> ⚠️ **STALE below (2026-07-18).** The Mira/Sky/Nunito system this file describes is superseded by the **Muster design system** (DEC-039) in the V3 redesign. Until PROJECT_PLAN task **10.1** rewrites this file + `globals.css` + `@ui-reviewer` to the new tokens, treat **`docs/BRAND.md`** as authoritative and the redesign mockup as the reference implementation. Do not review or build against the tokens below.
+The design-system reference `@ui-reviewer` checks surfaces against (DEC-S019). Sources: `docs/BRAND.md` (authoritative tokens, philosophy, voice), `docs/design/mockups/sailbook-redesign.html` (the reference implementation — every role/screen, both themes), and the live tokens in `src/app/globals.css`. Project-owned; nothing syncs from seeds.
 
-The design-system reference `@ui-reviewer` checks surfaces against (DEC-S019). Sources: `docs/BRAND.md` (philosophy, voice), the Mira theme preset, and the live tokens in `app/globals.css`. Nothing here syncs from seeds — it's project-owned.
-
-SailBook is a sailing school scheduling app for Learn to Sail Cleveland. Aesthetic priorities: **clarity first, personality second. Function over form. No nautical kitsch.**
+SailBook is a sailing-school scheduling app for Learn to Sail Cleveland. Aesthetic priorities: **clarity first, personality second. Function over form. No nautical kitsch.** The look is the **Muster design system** (DEC-039) — a calm, data-dense operator-tool aesthetic. SailBook's distinct identity is its **sail-mark logo**, not a bespoke palette.
 
 ## Active Theme
 
-- Preset: Mira (b7CSfQ4Xo)
-- Font: Nunito Sans
-- Base: Mist
-- Accent: Sky
-- Border radius: xs (`--radius: 0.125rem`)
-- Default mode: Dark
+- System: **Muster** (DEC-039 / token architecture DEC-040)
+- Fonts: **IBM Plex Sans** (all UI text) + **IBM Plex Mono** (all meaningful numerals)
+- Border radius: **~12px** (`--radius: 0.75rem`), consistent — never mixed
+- Both themes first-class (**light is the canonical look**); `.dark` via next-themes, `defaultTheme="system"`, stored per user
+- **Authoritative tokens: `docs/BRAND.md`.** If BRAND and the mockup ever disagree, BRAND wins.
 
 ---
 
 ## Design System Reference
 
+### Token architecture (DEC-040)
+
+The Muster palette is authored in **hex** in `globals.css` as the source of truth; **shadcn tokens are thin aliases** over it. So:
+- **Shipped shadcn components** (Button, Card, Input, Badge, Dialog, Sidebar…) consume shadcn token names (`bg-primary`, `text-muted-foreground`, `border-border`) and re-skin automatically.
+- **New redesign components** consume the Muster utilities directly: `bg-surface`, `bg-rail`, `bg-sink`, `text-ink`, `text-faint`, `border-line`, `bg-ok-bg text-ok border-ok-line`, etc.
+
+**Two renames vs. the mockup** (avoid CSS-property collisions — see DEC-040):
+
+| Mockup var | Our var / utility | Meaning |
+|-----------|-------------------|---------|
+| `--accent` | `--brand` (`text-brand`, `bg-brand`) | expressive harbor blue — focus ring, brandmark, dots |
+| `--accent-ink` | `--brand-ink` (`text-brand-ink`) | text sitting on a blue *tint* (e.g. active nav) |
+| `--muted` (text) | `--muted-ink` = shadcn `--muted-foreground` (`text-muted-foreground`) | muted body/label text |
+
+shadcn keeps `--accent` = subtle hover fill (`--sink`) and `--muted` = a background (`--rail`). Do **not** use `bg-accent` expecting brand blue — it's the hover tint.
+
 ### Color
 
-Use shadcn CSS tokens backed by OKLCH values. Do **not** hardcode Tailwind color classes for surfaces or text.
+Four surface layers, blue in four roles, two hairlines, semantic chips. Never hardcode Tailwind color classes (`bg-slate-100`, `text-gray-500`) for surfaces or text.
 
-| Token | Use |
-|-------|-----|
-| `bg-background` / `text-foreground` | Page base |
-| `bg-card` / `text-card-foreground` | Card surfaces |
-| `bg-primary` / `text-primary-foreground` | Primary actions, strong emphasis |
-| `bg-secondary` / `text-secondary-foreground` | Secondary actions, chips |
-| `text-muted-foreground` | Labels, metadata, supporting text |
-| `bg-muted` | Muted backgrounds (empty states, disabled) |
-| `bg-accent` / `text-accent-foreground` | Hover states, selected nav |
-| `text-destructive` | Error states, irreversible actions |
-| `border-border` | All borders |
-| `ring` | Focus rings |
+| Role | Token / utility | Use |
+|------|-----------------|-----|
+| Page bg | `bg-background` (`--bg`) | page base |
+| Card surface | `bg-card` / `bg-surface` (`--surface`) | cards, popovers, sidebar |
+| Sidebar/muted bg | `bg-muted` (`--rail`) | quiet backgrounds |
+| Inset / hover fill | `bg-secondary` / `bg-accent` / `bg-sink` (`--sink`) | row hover, inset wells, fill-bar tracks |
+| Ink (text) | `text-foreground` / `text-ink` (`--ink`) | primary text |
+| Muted text | `text-muted-foreground` (`--muted-ink`) | labels, metadata, sub-rows |
+| Faint text | `text-faint` (`--faint`) | table headers, placeholders, timestamps — **AA-safe** |
+| Brand blue | `text-brand` / `--ring` (`--brand`) | focus ring, brandmark, dot indicators |
+| Brand fill | `bg-primary` (`--accent-solid`) + `text-primary-foreground` (`--on-accent`) | primary buttons, avatars, segmented-control active |
+| Hairlines | `border-border` / `border-line` (`--line`) and `--line-soft` | card borders / interior row rules |
 
-**Never:**
-- Raw `text-black` or `text-white` (use foreground/background tokens)
-- Hardcoded zinc, gray, slate, or neutral Tailwind classes for text or backgrounds
-- Color as the sole state indicator (must pair with icon or text label)
+**Semantic chips** — encode state, never decorate. Each has a text, tint-bg, and line variant: `ok` / `warn` / `bad` / `info`. Example badge: `bg-ok-bg text-ok border border-ok-line`. Active→ok, Draft→sink/muted, Completed→info, Cancelled→bad.
 
-**Exceptions:** Semantic amber for warnings is OK — it's a UX signal, not brand color.
+**Course-type hues** (`--t-asa101 / -asa103 / -open / -ding / -camp`) — categorical, for calendar/legend/type-chip use only. Not status.
+
+**Never:** raw `text-black`/`text-white` for content; hardcoded zinc/gray/slate/neutral; color as the *sole* state indicator (pair with icon or text).
 
 ### Typography
 
-- **Font:** Nunito Sans, loaded as `--font-sans`.
-- **Scale:** Max 3 font sizes per screen.
-  - Page heading: `text-2xl font-semibold` (h1)
-  - Section headings inside cards: `text-base font-semibold` (CardTitle)
-  - Body / labels: `text-sm font-medium`
-  - Meta / timestamps: `text-xs`
-  - Nothing smaller than `text-xs` (12px).
-- **Weight:** `font-semibold` for headings, `font-medium` for labels, default for body. Avoid `font-bold`.
-- **Muted text:** `text-muted-foreground` token only.
+- **UI text:** IBM Plex Sans (`font-sans`).
+- **Meaningful numerals:** IBM Plex Mono (`font-mono`) — times, dates, counts, capacities, prices, codes (`ASA101`), IDs. Mono numerals are a signature of the system; apply per-surface as screens are built.
+- **Scale:** ≤3 sizes per screen. Page heading `text-2xl font-semibold`; section/CardTitle `text-base font-semibold`; body/labels `text-sm`; meta `text-xs`. Nothing below `text-xs` (12px) for content.
+- **Weight:** `font-semibold` headings, `font-medium`/`font-semibold` labels, default body. Table headers are uppercase `text-faint` with tracking.
 
-### Spacing
+### Spacing & radius
 
-- Tailwind 4px scale only. No arbitrary values (`p-[13px]`, `gap-[22px]`, etc.).
-- Page padding lives in layout.tsx, not individual pages (DEC-017).
-- Section spacing: `space-y-6` between major sections.
-
-### Border Radius
-
-One radius throughout: `rounded-xs` (`--radius: 0.125rem`). Never mixed.
-
-**Never:** `rounded-md`, `rounded-lg`, `rounded-full` (except true circles like avatars), or zero radius overrides.
+- Tailwind 4px scale; no arbitrary values (`p-[13px]`). Page padding in layout, not pages (DEC-017). `space-y-6` between major sections.
+- One radius: **`rounded-lg` = ~12px** (`--radius`). shadcn components inherit it. Pills/badges use full-round (`rounded-full`); avatars ~`rounded-md`. Never a jarring mix.
 
 ### Shadows
 
-- Cards: shadcn Card default (shadow-sm or none, per theme).
-- Modals/overlays: `shadow-lg`.
-- Nothing else. No `shadow-md`, `drop-shadow`, or arbitrary shadows.
+Two levels only: `--shadow-sm` hairline for cards, `--shadow` soft-lifted for modals/popovers. No `shadow-md`, `drop-shadow`, or arbitrary shadows.
 
-### Components
+### Focus (accessibility baseline — DEC-039)
 
-- **Card** (CardHeader, CardTitle, CardDescription, CardContent, CardFooter): primary content container.
-- **Badge** variants — semantics must match:
-  - `default`: confirmed, active, enrolled
-  - `secondary`: pending, neutral, informational
-  - `outline`: available spots, minor labels
-  - `destructive`: cancelled, error, irreversible
-- **Button** variants:
-  - `default`: primary action (one per screen)
-  - `secondary`: secondary action
-  - `outline`: tertiary / back navigation
-  - `ghost`: nav items, icon-only buttons
-  - `destructive`: irreversible actions
-- **Tables:** plain HTML `<table>` with `w-full text-sm`. `border-b` between rows, `last:border-0`. `text-muted-foreground` headers with `font-medium`. No striped rows.
-- **Empty states:** `<EmptyState message="..." />` component — not raw `<p>` in the main content column.
-- **Student-facing cards:** use `size="sm"` prop. Admin/instructor surfaces use the default.
+A system `:focus-visible` token lives in `globals.css`: `outline: 2px solid var(--brand); outline-offset: 2px` on every interactive element, with mouse/touch focus quiet (`*:focus:not(:focus-visible)`). Don't override with bare `outline-none`. Keyboard focus must be visible on every control including segmented controls and custom `[role]` widgets.
 
-### Layout & Navigation
+### Components (mockup vocabulary)
 
-- Two-column layout: fixed-width sidebar + `flex-1 min-w-0 bg-background` main.
-- Sidebar uses `bg-sidebar` token — not `bg-white` (wrong in dark mode).
-- **Active nav links:** `bg-accent text-accent-foreground`. Inactive: `text-muted-foreground hover:text-foreground`.
+- **Card:** primary container; `--shadow-sm`, `border-line`, `bg-surface`.
+- **Badge / status:** chip triads above; uppercase, `rounded-full`. Variants map to Active/Draft/Completed/Cancelled/role/inactive.
+- **Filter pills:** `rounded-full`, `border-line`; pressed = `bg-foreground text-background` (`aria-pressed`).
+- **Tables (`table.tbl` idiom):** `w-full text-sm`; uppercase `text-faint` headers; `--line-soft` row rules; numeric cells `font-mono` + right-aligned; hoverable rows `bg-sink`. No striping.
+- **Segmented control:** `border-line` group; active segment `bg-primary text-primary-foreground`. Needs proper aria (muster#469 carry-forward).
+- **Fill / capacity bars:** `--sink` track + colored fill encoding fullness.
+- **Inputs:** `border-line bg-surface`, faint placeholder. Every field a real `<label for>` — not placeholder-as-label.
+- **Empty states:** `<EmptyState>` component, not a raw `<p>`.
 
-### Dark Mode
+### Layout & navigation
 
-Dark mode is the default. Verify:
-- Sidebar uses `bg-sidebar` token (dark-aware), not `bg-white`.
-- Cards use `bg-card` (dark-aware), not `bg-white`.
-- No hardcoded white backgrounds on any surface.
-- Text contrast meets WCAG AA against dark backgrounds.
-- Borders are subtle but visible (`border-border` token).
+- Sidebar `bg-surface`, `border-line` divider; `flex-1 min-w-0 bg-background` main.
+- **Active nav:** blue tint — `bg-[--info-bg] text-brand-ink` (bespoke; there is no `bg-accent` shortcut for it). Inactive: `text-muted-foreground hover:bg-sink hover:text-ink`.
 
 ### Mobile (375px)
 
-- All views must work at 375px.
-- No horizontal scroll.
-- Touch targets: minimum 44px height for interactive elements.
-- Cards stack single-column on mobile (`grid-cols-1`), go multi-column at `sm:` or `lg:`.
-
-### Visual Hierarchy
-
-- One `<h1>` per page (`text-2xl font-semibold`).
-- One primary CTA per screen. Multiple actions → one `default`, rest `secondary` or `outline`.
-
-### Accessibility (Baseline)
-
-- All interactive elements must have visible focus rings (shadcn manages this — don't override with bare `outline-none`).
-- Color must not be the sole state indicator.
-- Form fields must have visible `<label>` elements, not just placeholder text.
-- Decorative icons: `aria-hidden="true"`.
-- Images: meaningful `alt` text.
+All views work at 375px; no horizontal scroll (wide tables scroll inside their own container); touch targets ≥44px; cards stack single-column, go multi-column at `sm:`/`lg:`.
 
 ---
 
 ## What to Check
 
-For each page or component under review:
-
-1. **Color / tokens** — shadcn tokens in use; no hardcoded Tailwind color classes
-2. **Dark mode** — sidebar/card backgrounds use dark-aware tokens; no `bg-white` surfaces
-3. **Typography** — Nunito Sans applied; ≤3 sizes; min 12px; correct weights
-4. **Spacing** — 4px scale; no arbitrary values; page padding in layout not page
-5. **Border radius** — `rounded-xs` throughout; nothing else
-6. **Shadows** — Card default; shadow-lg for modals; nothing else
-7. **Component usage** — shadcn components used correctly; Badge/Button variants match semantics; one primary CTA
-8. **Tables** — `w-full text-sm`, muted headers, row borders, no striping
-9. **Empty states** — EmptyState component, not raw paragraph text
-10. **Layout** — sidebar uses `bg-sidebar`; padding not doubled; main fills `flex-1`
-11. **Mobile 375px** — no horizontal scroll; cards stack; touch targets ≥44px
-12. **Accessibility** — focus states intact; color + icon for state; visible labels; `aria-hidden` on decorative icons
+1. **Tokens** — Muster/shadcn tokens in use; no hardcoded Tailwind colors; `bg-accent` not mistaken for brand blue
+2. **Both themes** — light *and* dark checked; surfaces use `bg-surface`/`bg-card` (dark-aware), no `bg-white`; AA contrast both ways
+3. **Typography** — Plex Sans applied; **meaningful numerals in Plex Mono**; ≤3 sizes; ≥12px; correct weights
+4. **Radius** — ~12px consistent; no mixed radii
+5. **Shadows** — `--shadow-sm` cards, `--shadow` overlays; nothing else
+6. **Chips/status** — correct chip triad per state; state also carried by icon/label, not color alone
+7. **Focus** — `:focus-visible` ring intact on every control (incl. segmented/`[role]` widgets); no bare `outline-none`
+8. **Tables** — faint uppercase headers, `--line-soft` rules, mono numeric cells, no striping
+9. **Forms** — real `<label for>` per field; not placeholder-as-label
+10. **Empty states** — `<EmptyState>`, not raw paragraph
+11. **Layout/nav** — sidebar `bg-surface`; active nav = blue tint + `text-brand-ink`; padding not doubled
+12. **Mobile 375px** — no horizontal scroll; tables scroll in-container; targets ≥44px
 
 ---
 
 ## How to Review (viewports)
 
-Take Playwright screenshots at **375px, 768px, and 1440px** with **dark mode active**, then check each item above against the source and screenshots.
+Take Playwright screenshots at **375px, 768px, and 1440px** in **both light and dark**, then check each item above against source + screenshots.
