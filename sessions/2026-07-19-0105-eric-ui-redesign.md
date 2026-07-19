@@ -6,7 +6,7 @@ branch: feature/ui-redesign
 started: 2026-07-19T01:05:07Z
 ended:
 points:
-pr_numbers: [167]
+pr_numbers: [167, 168]
 status: open
 transcript: /home/eric/.claude/projects/-home-eric-sailbook/09831fad-c94f-4942-a5a4-fbc7c25e4e77.jsonl
 ---
@@ -31,6 +31,22 @@ transcript: /home/eric/.claude/projects/-home-eric-sailbook/09831fad-c94f-4942-a
 **Points:** 8
 **Branch:** task/10.1-design-system-foundation
 **Opened at:** 2026-07-19T04:20:00Z
+
+## Task 2: App-shell unification + lucide standardization (10.2, #157)
+
+**Completed:**
+- Collapsed the three copy-paste role shells into one config-driven shell under `src/components/shell/`: `nav-config.ts` (role-keyed items w/ lucide icons), `app-shell.tsx` (server guard + one profiles query for all flags), `app-sidebar.tsx` + `app-mobile-drawer.tsx` + `nav-links.tsx` + `sidebar-footer.tsx` (shared), `layout-metadata.ts`. The 3 route-group layouts are now one-liners (`<AppShell role=…>`).
+- Deleted the 6 old nav/drawer components. RoleToggles derived generically from the flags the user holds (consistent admin→instructor→student order across shells; old order was ad-hoc per shell — cosmetic only, flagged in PR).
+- **Fixed the 10.1 flattened-active-nav regression:** active nav → `bg-info-bg text-brand-ink` + `aria-current`. Adopted mockup shell details (brand square, "Learn to Sail Cleveland" subtitle, footer avatar).
+- **Standardized the app on lucide-react** (shadcn default, ~143× the npm adoption of Hugeicons — 85.8M vs 598K/wk, fetched live). Migrated `theme-toggle` + shadcn `select`/`dropdown-menu` off `@hugeicons`; removed the dep. Filed Muster issue [#479](https://github.com/mobiustripper42/muster/issues/479) to do the same on the shared side.
+- Mobile drawer keeps its DOM contract (aria-labels, `.fixed` drawer, overlay) so nav specs stay green. New `tests/app-shell.spec.ts` asserts per-role nav render + active state.
+- Verified: build green; desktop 39/39, mobile 14/14 (1 skip) — auth cross-role, dual-role toggle, mobile drawer, theme (post-migration), design-system, app-shell; screenshots of unified shell light/dark + mobile drawer confirm icons + active-nav highlight.
+
+**Code review:** @code-review — clean bill. One cosmetic note (role-toggle order now consistent across shells vs old ad-hoc order) — intentional, no behavior/label change, no test asserts order.
+**PR:** [#168](https://github.com/mobiustripper42/sailbook/pull/168) — base `feature/ui-redesign`
+**Points:** 5
+**Branch:** task/10.2-app-shell-unification
+**Opened at:** 2026-07-19T05:10:00Z
 
 **Next Steps:**
 
