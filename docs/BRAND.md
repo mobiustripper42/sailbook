@@ -34,7 +34,7 @@ Practical, clean, no-nonsense. This is a tool for running a sailing school, not 
 | Page bg | `#eef2f6` | `#0d131e` |
 | Surface (cards) | `#ffffff` | `#161e2c` |
 | Ink (text) | `#101826` | `#e8edf3` |
-| Muted / faint | `#5b6675` / `#93a0b0` | `#9aa7b7` / `#6a7789` |
+| Muted / faint | `#5b6675` / `#6a7482` | `#9aa7b7` / `#8792a1` |
 | Hairline | `#e3e8ee` | `#25303f` |
 
 Status colors (each has a text, a tint-bg, and a line variant), used only to encode state — never as decoration:

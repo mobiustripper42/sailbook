@@ -17,7 +17,7 @@ If the file does not exist, stop: "`.claude/ui-context.md` is missing. Create it
 
 1. Read the component/page source file(s).
 2. Read `.claude/ui-context.md` for the project's design system and checklist.
-3. Take Playwright screenshots at the viewports listed in `ui-context.md` (default: 375px and 1440px).
+3. Take Playwright screenshots at the viewports listed in `ui-context.md` (375px, 768px, 1440px) in **both light and dark** — Muster is a both-themes-first-class system (DEC-039).
 4. Work through the project-specific checklist in `ui-context.md` against the source and screenshots.
 
 ---
