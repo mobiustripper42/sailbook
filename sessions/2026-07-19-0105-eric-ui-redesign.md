@@ -6,7 +6,7 @@ branch: feature/ui-redesign
 started: 2026-07-19T01:05:07Z
 ended:
 points:
-pr_numbers: [167, 168]
+pr_numbers: [167, 168, 170]
 status: open
 transcript: /home/eric/.claude/projects/-home-eric-sailbook/09831fad-c94f-4942-a5a4-fbc7c25e4e77.jsonl
 ---
@@ -48,7 +48,26 @@ transcript: /home/eric/.claude/projects/-home-eric-sailbook/09831fad-c94f-4942-a
 **Branch:** task/10.2-app-shell-unification
 **Opened at:** 2026-07-19T05:10:00Z
 
+## Task 3: Schedule consolidation — /calendar + /courses → /schedule (10.3, #158)
+
+**Completed:**
+- New `/admin/schedule` with a Month/List toggle: `src/app/(admin)/admin/schedule/page.tsx` (two fetches — all courses for the table + active-course session events for the calendar) + `src/components/admin/schedule-view.tsx` (Month = calendar with course-type/instructor/student filters + hue legend; List = `CoursesList` table).
+- `/admin/calendar` + `/admin/courses` now `redirect('/admin/schedule')`; `/admin/courses/[id]` detail/edit/attendance/new unchanged. Deleted `admin-calendar-view.tsx`.
+- Single "Schedule" nav item (Calendar + Courses collapsed) with a `match` prefix so it stays active on the course-detail subtree; breadcrumbs "Courses"→"Schedule" (4 pages) + dashboard quick link.
+- Calendar pills tinted by course-type hue (`--t-*`, cycled for >5 types, **dark text for AA**) + legend. `SessionsViewSwitcher` labels parameterized (Month/List here; instructor calendar keeps Calendar/List — unaffected).
+- **#140:** courses list defaults to earliest-session-date order (`earliestSessionDate` + compareCourses 'date'; no-session courses sort last).
+- **Caught + fixed a 10.1 a11y regression:** Muster `--warn` (`#b45309`) was only 3.91:1 on the dashboard warning/10 tint → darkened to `#8a3d02` (globals + BRAND). Surfaced by running `accessibility.spec` (10.1/10.2 hadn't).
+- Verified: build green; desktop specs (calendar/schedule/courses-list/app-shell/dashboard/accessibility/time-select[isolated]/instructor-cascade/unsaved-changes/student-courses-calendar) + mobile admin-mobile all pass; screenshots of Month (legend + hued pills) and List (date-ordered table) confirm.
+
+**Code review:** @code-review — clean bill on load-bearing code. Took the one actionable finding: repointed `revalidatePath('/admin/courses')` → `/admin/schedule` (harmless via force-dynamic, but a landmine). Deferred: courses-list.tsx >200 lines (pre-existing); hued pills lack hover (cosmetic).
+**PR:** [#170](https://github.com/mobiustripper42/sailbook/pull/170) — base `task/10.2` (stacked; merge #168 first)
+**Points:** 5
+**Branch:** task/10.3-schedule-consolidation
+**Opened at:** 2026-07-20T00:00:00Z
+
 **Next Steps:**
+- **10.3b** (#122): click a calendar day → `/admin/courses/new?date=…` with the date seeded in CourseForm. Stacks on 10.3.
+- Merge order for the stack: #168 (10.2) → #170 (10.3) → then 10.3b.
 
 **Context:**
 - ui-redesign work lives in a dedicated worktree: `/home/eric/sailbook-redesign` on `feature/ui-redesign` (4 docs/planning commits ahead of main, no PR yet — BRAND.md Muster identity, V3 phase/decisions, Account single-save AC, #152 print-addresses folded into Phase 10). Session anchor branch is `feature/ui-redesign`; primary checkout is on `main`.
