@@ -58,7 +58,16 @@ function buildMonthGrid(viewDate: Date, sessions: SessionEvent[]): DayCell[] {
   return cells
 }
 
-export function SessionsCalendar({ sessions }: { sessions: SessionEvent[] }) {
+export function SessionsCalendar({
+  sessions,
+  hueByType,
+}: {
+  sessions: SessionEvent[]
+  // Optional courseTypeId → CSS custom-property name (e.g. '--t-asa101').
+  // When provided, non-cancelled pills are tinted in that course type's hue;
+  // omitted (e.g. instructor calendar) falls back to the neutral primary tint.
+  hueByType?: Record<string, string>
+}) {
   const [viewDate, setViewDate] = useState<Date>(() => {
     const now = new Date()
     return new Date(now.getFullYear(), now.getMonth(), 1)
@@ -142,22 +151,38 @@ export function SessionsCalendar({ sessions }: { sessions: SessionEvent[] }) {
                 {cell.date.getDate()}
               </div>
               <div className="space-y-1">
-                {visible.map((s) => (
-                  <Link
-                    key={s.id}
-                    href={s.href}
-                    data-testid="calendar-session-pill"
-                    className={cn(
-                      'block truncate rounded border px-1.5 py-0.5 text-xs transition-colors',
-                      s.cancelled
-                        ? 'bg-muted text-muted-foreground border-border line-through'
-                        : 'bg-primary/15 text-primary hover:bg-primary/25 border-primary/30',
-                    )}
-                    title={s.label}
-                  >
-                    {s.label}
-                  </Link>
-                ))}
+                {visible.map((s) => {
+                  const hueVar =
+                    !s.cancelled && s.courseTypeId ? hueByType?.[s.courseTypeId] : undefined
+                  return (
+                    <Link
+                      key={s.id}
+                      href={s.href}
+                      data-testid="calendar-session-pill"
+                      // Foreground (ink) text keeps AA on the pale tint; the
+                      // course-type hue reads from the tint bg + border.
+                      style={
+                        hueVar
+                          ? {
+                              backgroundColor: `color-mix(in oklab, var(${hueVar}) 20%, transparent)`,
+                              borderColor: `color-mix(in oklab, var(${hueVar}) 55%, transparent)`,
+                            }
+                          : undefined
+                      }
+                      className={cn(
+                        'block truncate rounded border px-1.5 py-0.5 text-xs transition-colors',
+                        s.cancelled
+                          ? 'bg-muted text-muted-foreground border-border line-through'
+                          : hueVar
+                            ? 'text-foreground'
+                            : 'bg-primary/15 text-primary hover:bg-primary/25 border-primary/30',
+                      )}
+                      title={s.label}
+                    >
+                      {s.label}
+                    </Link>
+                  )
+                })}
                 {overflow > 0 && (
                   <div className="px-1.5 text-xs text-muted-foreground">+{overflow} more</div>
                 )}

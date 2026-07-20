@@ -25,7 +25,9 @@ test.describe('Admin courses list — search, filter, sort', () => {
     const adminPage = await adminCtx.newPage()
     try {
       await loginAs(adminPage, 'pw_admin@ltsc.test', '/admin/dashboard')
-      await adminPage.goto('/admin/courses')
+      await adminPage.goto('/admin/schedule')
+      // The courses table is the "List" view of the consolidated Schedule (10.3).
+      await adminPage.getByTestId('view-toggle-list').click()
 
       // Search for the unique title
       await adminPage.getByPlaceholder('Search by title, type, or instructor…').fill(title)
@@ -47,7 +49,9 @@ test.describe('Admin courses list — search, filter, sort', () => {
     const adminPage = await adminCtx.newPage()
     try {
       await loginAs(adminPage, 'pw_admin@ltsc.test', '/admin/dashboard')
-      await adminPage.goto('/admin/courses')
+      await adminPage.goto('/admin/schedule')
+      // The courses table is the "List" view of the consolidated Schedule (10.3).
+      await adminPage.getByTestId('view-toggle-list').click()
 
       // The test course is published (active) by createTestCourse
       await adminPage.getByRole('button', { name: 'Active' }).click()
@@ -73,7 +77,9 @@ test.describe('Admin courses list — search, filter, sort', () => {
     const adminPage = await adminCtx.newPage()
     try {
       await loginAs(adminPage, 'pw_admin@ltsc.test', '/admin/dashboard')
-      await adminPage.goto('/admin/courses')
+      await adminPage.goto('/admin/schedule')
+      // The courses table is the "List" view of the consolidated Schedule (10.3).
+      await adminPage.getByTestId('view-toggle-list').click()
 
       // Click Course header once → ascending indicator
       const courseHeader = adminPage.getByRole('columnheader', { name: /Course/ })
@@ -96,7 +102,9 @@ test.describe('Admin courses list — search, filter, sort', () => {
     const adminPage = await adminCtx.newPage()
     try {
       await loginAs(adminPage, 'pw_admin@ltsc.test', '/admin/dashboard')
-      await adminPage.goto('/admin/courses')
+      await adminPage.goto('/admin/schedule')
+      // The courses table is the "List" view of the consolidated Schedule (10.3).
+      await adminPage.getByTestId('view-toggle-list').click()
 
       const statusHeader = adminPage.getByRole('columnheader', { name: /Status/ })
       await statusHeader.getByRole('button').click()

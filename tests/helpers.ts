@@ -80,7 +80,12 @@ export async function selectTime(page: Page, name: string, hhmm: string): Promis
  */
 export async function createTestCourse(
   page: Page,
-  { capacity, title, price = 250 }: { capacity: number; title: string; price?: number }
+  {
+    capacity,
+    title,
+    price = 250,
+    sessionDate = '2027-09-15',
+  }: { capacity: number; title: string; price?: number; sessionDate?: string }
 ): Promise<string> {
   await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard');
   await page.goto('/admin/courses/new');
@@ -94,8 +99,8 @@ export async function createTestCourse(
   await page.getByLabel('Capacity').fill(String(capacity));
   await page.getByLabel('Price ($)', { exact: true }).fill(String(price));
 
-  // Far-future date so the session never counts as past
-  await page.locator('input[type="date"]').fill('2027-09-15');
+  // Far-future date so the session never counts as past (override for date-order tests)
+  await page.locator('input[type="date"]').fill(sessionDate);
   await selectTime(page, 'session_start_0', '09:00');
   await selectTime(page, 'session_end_0', '17:00');
   await page.locator('section').filter({ hasText: 'Sessions' }).getByPlaceholder(/Dock A/).fill('Edgewater Park');

@@ -59,8 +59,9 @@ test.describe('Accessibility — admin pages', () => {
     expect(issues, formatViolations(issues)).toEqual([]);
   });
 
-  test('admin courses list', async ({ page }) => {
-    await page.goto('/admin/courses');
+  test('admin schedule (list view)', async ({ page }) => {
+    await page.goto('/admin/schedule');
+    await page.getByTestId('view-toggle-list').click();
     const results = await runAxe(page);
     const issues = criticalOrSerious(results.violations);
     expect(issues, formatViolations(issues)).toEqual([]);
@@ -87,8 +88,8 @@ test.describe('Accessibility — admin pages', () => {
     expect(issues, formatViolations(issues)).toEqual([]);
   });
 
-  test('admin calendar', async ({ page }) => {
-    await page.goto('/admin/calendar');
+  test('admin schedule (month view)', async ({ page }) => {
+    await page.goto('/admin/schedule');
     const results = await runAxe(page);
     const issues = criticalOrSerious(results.violations);
     expect(issues, formatViolations(issues)).toEqual([]);

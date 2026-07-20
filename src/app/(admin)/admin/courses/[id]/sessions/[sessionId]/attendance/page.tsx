@@ -83,7 +83,7 @@ export default async function AttendancePage({
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground">
-            <Link href="/admin/courses" className="hover:underline hover:text-foreground">Courses</Link>
+            <Link href="/admin/schedule" className="hover:underline hover:text-foreground">Schedule</Link>
             {' / '}
             <Link href={`/admin/courses/${courseId}`} className="hover:underline hover:text-foreground">{courseName}</Link>
             {' / Attendance'}
