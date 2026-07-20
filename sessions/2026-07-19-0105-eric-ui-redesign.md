@@ -6,7 +6,7 @@ branch: feature/ui-redesign
 started: 2026-07-19T01:05:07Z
 ended:
 points:
-pr_numbers: [167, 168, 170]
+pr_numbers: [167, 168, 170, 172]
 status: open
 transcript: /home/eric/.claude/projects/-home-eric-sailbook/09831fad-c94f-4942-a5a4-fbc7c25e4e77.jsonl
 ---
@@ -66,9 +66,26 @@ transcript: /home/eric/.claude/projects/-home-eric-sailbook/09831fad-c94f-4942-a
 **Branch:** task/10.3-schedule-consolidation
 **Opened at:** 2026-07-20T00:00:00Z
 
+## Task 4: Input-border contrast — WCAG 1.4.11 (#171)
+
+**Completed:**
+- Bug found while polishing 10.3: text inputs nearly invisible in light mode (`--input` aliased the `--line` hairline, ~1.2:1 on white). `accessibility.spec`'s axe pass missed it — axe checks text contrast, not component borders (1.4.11).
+- `globals.css`: new `--field-border` token (both palettes: `#7e8792` light ~3.6:1 / `#66707f` dark ~3.3:1); `--input` aliases it, decoupled from `--line` so card/table hairlines stay subtle.
+- `input/select/textarea`: fill `bg-input/30` → `bg-transparent` (darkening the border darkened the fill too, dropping the select's muted placeholder to 3.82:1). Select `dark:hover:bg-input/50` → `dark:hover:bg-muted`.
+- `button` outline: fill `bg-input/30` → `bg-muted/50` (kept subtle, not a side-effect of the border change).
+- `design-system.spec.ts`: **measured** non-text-contrast test (input border ≥3:1 on surface + bg, both themes) as a regression guard.
+- Verified: build green; design-system 6/6 (incl. new #171 test) + accessibility 14/14; login screenshot confirms clearly-bounded fields.
+
+**Code review:** @code-review — core fix solid (both-palette alias, 3.24–3.71:1 margins, safe button swap, correct test). Took the one finding: leftover `dark:hover:bg-input/50` on the select → `bg-muted`. No `bg-input` usages remain.
+**PR:** [#172](https://github.com/mobiustripper42/sailbook/pull/172) — base `feature/ui-redesign`
+**Points:** 2
+**Branch:** task/171-input-contrast
+**Opened at:** 2026-07-20T02:00:00Z
+
 **Next Steps:**
-- **10.3b** (#122): click a calendar day → `/admin/courses/new?date=…` with the date seeded in CourseForm. Stacks on 10.3.
-- Merge order for the stack: #168 (10.2) → #170 (10.3) → then 10.3b.
+- **10.3b** (#122): click a calendar day → `/admin/courses/new?date=…` with the date seeded in CourseForm.
+- Phase 10 continues: 10.4 (section_label/schedule model), 10.5–10.11.
+- Open PRs to merge: #172 (input contrast). Stack #168/#170 already merged into feature/ui-redesign.
 
 **Context:**
 - ui-redesign work lives in a dedicated worktree: `/home/eric/sailbook-redesign` on `feature/ui-redesign` (4 docs/planning commits ahead of main, no PR yet — BRAND.md Muster identity, V3 phase/decisions, Account single-save AC, #152 print-addresses folded into Phase 10). Session anchor branch is `feature/ui-redesign`; primary checkout is on `main`.
