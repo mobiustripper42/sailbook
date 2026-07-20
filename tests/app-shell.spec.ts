@@ -11,10 +11,11 @@ test.describe('unified app shell — nav per role', () => {
     test.skip((page.viewportSize()?.width ?? 768) < 768, 'sidebar is md+ only')
 
     const aside = page.locator('aside')
-    // Calendar + Courses are consolidated into one Schedule item (10.3).
+    // Schedule (sessions) and Courses (the table) are separate items (10.3).
     for (const label of [
       'Dashboard',
       'Schedule',
+      'Courses',
       'Course Types',
       'Users',
       'Missed Sessions',

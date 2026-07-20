@@ -7,8 +7,7 @@ test.describe('TimeSelect — add session form', () => {
     test.skip(test.info().project.name === 'mobile', 'asserts on columns hidden at 375px')
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
 
-    await page.goto('/admin/schedule')
-    await page.getByTestId('view-toggle-list').click()
+    await page.goto('/admin/courses')
     await page.getByRole('link', { name: /ASA 101/i }).first().click()
     await page.waitForURL(/\/admin\/courses\/[^/]+$/)
 
@@ -39,8 +38,7 @@ test.describe('TimeSelect — add session form', () => {
     test.skip(test.info().project.name === 'mobile', 'asserts on columns hidden at 375px')
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
 
-    await page.goto('/admin/schedule')
-    await page.getByTestId('view-toggle-list').click()
+    await page.goto('/admin/courses')
     await page.getByRole('link', { name: /ASA 101/i }).first().click()
     await page.waitForURL(/\/admin\/courses\/[^/]+$/)
 

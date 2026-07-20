@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test'
 import { createTestCourse, loginAs, runId } from './helpers'
 
-// Task 10.3 — consolidated admin Schedule: default date order (#140) + type legend.
-test.describe('Admin schedule', () => {
+// Task 10.3 — courses table default date order (#140) + schedule type legend.
+test.describe('Courses table + schedule', () => {
   test.beforeEach(() => {
     test.skip(test.info().project.name !== 'desktop')
   })
 
-  test('List view defaults to session-date order, not title/created order (#140)', async ({
+  test('courses list defaults to session-date order, not title/created order (#140)', async ({
     browser,
   }) => {
     test.setTimeout(120000)
@@ -25,11 +25,9 @@ test.describe('Admin schedule', () => {
 
     const ctx = await browser.newContext()
     const page = await ctx.newPage()
-    // createTestCourse leaves `page` admin-authed; a second loginAs would just
-    // redirect away (non-idempotent). Go straight to the schedule.
+    // createTestCourse leaves `page` admin-authed; go straight to the courses table.
     await createTestCourse(page, { capacity: 4, title: lateTitle, sessionDate: '2027-10-05' })
-    await page.goto('/admin/schedule')
-    await page.getByTestId('view-toggle-list').click()
+    await page.goto('/admin/courses')
     await page.getByPlaceholder('Search by title, type, or instructor…').fill(`Order-${id}`)
 
     const earlyLink = page.getByRole('link', { name: earlyTitle })
@@ -44,7 +42,7 @@ test.describe('Admin schedule', () => {
     await ctx.close()
   })
 
-  test('Month view shows a course-type hue legend', async ({ page }) => {
+  test('Schedule Month view shows a course-type hue legend', async ({ page }) => {
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
     await page.goto('/admin/schedule')
     await page.waitForLoadState('networkidle')

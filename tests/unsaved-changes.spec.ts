@@ -184,7 +184,7 @@ test.describe('Unsaved changes guard — browser back button', () => {
 
   test('back button with unsaved changes shows confirm; accept navigates away', async ({ page }) => {
     // Navigate via a real link so there's a valid previous page to go back to
-    await page.goto('/admin/schedule');
+    await page.goto('/admin/courses');
     await page.goto(`/admin/courses/${courseId}/edit`);
     await page.getByLabel('Title Override').fill('Changed Title');
 

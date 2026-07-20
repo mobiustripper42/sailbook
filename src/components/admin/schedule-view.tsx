@@ -3,8 +3,8 @@
 import { useMemo, useState } from 'react'
 import type { SessionEvent } from '@/components/shared/sessions-calendar'
 import { SessionsCalendar } from '@/components/shared/sessions-calendar'
+import { SessionsList } from '@/components/shared/sessions-list'
 import { SessionsViewSwitcher } from '@/components/shared/sessions-view-switcher'
-import CoursesList, { type Course } from '@/components/admin/courses-list'
 import {
   Select,
   SelectContent,
@@ -19,16 +19,10 @@ const ALL = '__all__'
 // present, so >5 types still get a stable categorical color.
 const HUE_TOKENS = ['--t-asa101', '--t-asa103', '--t-open', '--t-ding', '--t-camp']
 
-// The admin Schedule: one Month/List toggle over the same season.
-// Month = the calendar (with course-type/instructor/student filters + a hue
-// legend); List = the courses table (its own search + status filters).
-export function ScheduleView({
-  sessions,
-  courses,
-}: {
-  sessions: SessionEvent[]
-  courses: Course[]
-}) {
+// The admin Schedule: sessions in two views of the same data — Month (calendar)
+// and List (agenda, the mobile-friendly read). Course-type/instructor/student
+// filters narrow BOTH views. Courses (the table) is a separate destination.
+export function ScheduleView({ sessions }: { sessions: SessionEvent[] }) {
   const [courseTypeId, setCourseTypeId] = useState(ALL)
   const [instructorName, setInstructorName] = useState(ALL)
   const [studentName, setStudentName] = useState(ALL)
@@ -134,22 +128,24 @@ export function ScheduleView({
     </div>
   )
 
-  const monthView = (
-    <div className="space-y-3">
+  return (
+    <div className="space-y-4">
+      {/* Filters apply to both Month and List. */}
       <div className="flex flex-wrap gap-3" data-testid="calendar-filters">
         {filterSelects}
       </div>
-      {legend}
-      <SessionsCalendar sessions={filtered} hueByType={hueByType} />
-    </div>
-  )
 
-  return (
-    <SessionsViewSwitcher
-      calendarLabel="Month"
-      listLabel="List"
-      calendar={monthView}
-      list={<CoursesList courses={courses} />}
-    />
+      <SessionsViewSwitcher
+        calendarLabel="Month"
+        listLabel="List"
+        calendar={
+          <div className="space-y-3">
+            {legend}
+            <SessionsCalendar sessions={filtered} hueByType={hueByType} />
+          </div>
+        }
+        list={<SessionsList sessions={filtered} showInstructor />}
+      />
+    </div>
   )
 }

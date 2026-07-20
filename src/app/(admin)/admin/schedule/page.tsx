@@ -6,7 +6,6 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { ScheduleView } from '@/components/admin/schedule-view'
 import type { SessionEvent } from '@/components/shared/sessions-calendar'
-import type { Course } from '@/components/admin/courses-list'
 
 type RawSessionRow = {
   id: string
@@ -35,9 +34,8 @@ type RawRosterRow = {
   } | null
 }
 
-// The consolidated admin Schedule (task 10.3): Month = calendar over active
-// sessions, List = the full courses table. Replaces the former /admin/calendar
-// and /admin/courses, both of which now redirect here.
+// The admin Schedule (task 10.3): all active-course sessions, viewable as a
+// Month calendar or a List agenda. The course *table* lives at /admin/courses.
 export default async function AdminSchedulePage() {
   const supabase = await createClient()
   const {
@@ -52,22 +50,7 @@ export default async function AdminSchedulePage() {
     .maybeSingle()
   if (!profile?.is_admin) redirect('/login')
 
-  // --- List (table) data: all courses, every status ---
-  const { data: courseRows, error: coursesError } = await supabase
-    .from('courses')
-    .select(`
-      id, title, status, capacity, price, created_at,
-      course_types ( name, short_code ),
-      instructor:profiles!courses_instructor_id_fkey ( first_name, last_name ),
-      sessions ( id, date ),
-      enrollments ( id, status )
-    `)
-    .order('created_at', { ascending: false })
-
-  if (coursesError) return <div className="text-destructive text-sm">{coursesError.message}</div>
-
-  // --- Month (calendar) data: active courses → session events ---
-  const { data: activeCourses, error: calError } = await supabase
+  const { data: activeCourses, error } = await supabase
     .from('courses')
     .select(`
       id, title,
@@ -81,7 +64,7 @@ export default async function AdminSchedulePage() {
     .eq('status', 'active')
     .order('created_at')
 
-  if (calError) return <div className="text-destructive text-sm">{calError.message}</div>
+  if (error) return <div className="text-destructive text-sm">{error.message}</div>
 
   const sessions: SessionEvent[] = []
   for (const course of (activeCourses as unknown as RawCourse[]) ?? []) {
@@ -135,8 +118,6 @@ export default async function AdminSchedulePage() {
 
   sessions.sort((a, b) => a.date.localeCompare(b.date))
 
-  const courses = (courseRows ?? []) as unknown as Course[]
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -145,7 +126,7 @@ export default async function AdminSchedulePage() {
           <Link href="/admin/courses/new">New Course</Link>
         </Button>
       </div>
-      <ScheduleView sessions={sessions} courses={courses} />
+      <ScheduleView sessions={sessions} />
     </div>
   )
 }

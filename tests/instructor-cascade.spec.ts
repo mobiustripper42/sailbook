@@ -51,8 +51,7 @@ test.describe('Instructor deactivation cascade', () => {
     await expect(pwRow.getByText('Inactive')).toBeVisible({ timeout: 10000 });
 
     // Step 3: Verify the course now shows no instructor on the courses list
-    await page.goto('/admin/schedule');
-    await page.getByTestId('view-toggle-list').click();
+    await page.goto('/admin/courses');
     const courseRow = page.getByRole('row', { name: new RegExp(title) });
     await expect(courseRow).toBeVisible();
     // Instructor is the 2nd cell (index 1); use nth() to avoid ambiguity with

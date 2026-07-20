@@ -18,7 +18,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
   return (
     <div className="max-w-2xl">
       <p className="text-sm text-muted-foreground mb-1">
-        <Link href="/admin/schedule" className="hover:underline hover:text-foreground">Schedule</Link>
+        <Link href="/admin/courses" className="hover:underline hover:text-foreground">Courses</Link>
         {' / '}
         <Link href={`/admin/courses/${id}`} className="hover:underline hover:text-foreground">{course.title ?? 'Course'}</Link>
         {' / Edit'}

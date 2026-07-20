@@ -6,9 +6,7 @@ test.describe('Admin mobile responsiveness', () => {
     test.skip(test.info().project.name !== 'mobile', 'mobile-only')
 
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
-    await page.goto('/admin/schedule')
-    // Courses table is the List view of the consolidated Schedule (10.3).
-    await page.getByTestId('view-toggle-list').click()
+    await page.goto('/admin/courses')
 
     await expect(page.getByRole('columnheader', { name: 'Course' })).toBeVisible()
     await expect(page.getByRole('columnheader', { name: 'Status' })).toBeVisible()

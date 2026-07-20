@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   CalendarDays,
   CalendarRange,
+  BookOpen,
   Tags,
   Users,
   Flag,
@@ -45,14 +46,10 @@ export const ROLE_HOME: Record<Role, string> = {
 export const NAV_ITEMS: Record<Role, NavItem[]> = {
   admin: [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    // Calendar + Courses consolidated into Schedule (task 10.3). Course detail
-    // still lives under /admin/courses/[id], so keep Schedule active there.
-    {
-      href: '/admin/schedule',
-      label: 'Schedule',
-      icon: CalendarRange,
-      match: ['/admin/courses', '/admin/calendar'],
-    },
+    // Schedule = sessions (Month calendar / List agenda). Courses = the table,
+    // a separate destination. (task 10.3)
+    { href: '/admin/schedule', label: 'Schedule', icon: CalendarRange },
+    { href: '/admin/courses', label: 'Courses', icon: BookOpen },
     { href: '/admin/course-types', label: 'Course Types', icon: Tags },
     { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/missed-sessions', label: 'Missed Sessions', icon: Flag },

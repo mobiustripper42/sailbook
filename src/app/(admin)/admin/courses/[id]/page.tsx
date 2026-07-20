@@ -113,7 +113,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm text-muted-foreground mb-1">
-            <Link href="/admin/schedule" className="hover:underline hover:text-foreground">Schedule</Link>
+            <Link href="/admin/courses" className="hover:underline hover:text-foreground">Courses</Link>
             {' / '}
             {course.title ?? type?.name}
           </p>

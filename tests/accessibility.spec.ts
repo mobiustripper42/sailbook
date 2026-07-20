@@ -59,9 +59,8 @@ test.describe('Accessibility — admin pages', () => {
     expect(issues, formatViolations(issues)).toEqual([]);
   });
 
-  test('admin schedule (list view)', async ({ page }) => {
-    await page.goto('/admin/schedule');
-    await page.getByTestId('view-toggle-list').click();
+  test('admin courses list', async ({ page }) => {
+    await page.goto('/admin/courses');
     const results = await runAxe(page);
     const issues = criticalOrSerious(results.violations);
     expect(issues, formatViolations(issues)).toEqual([]);

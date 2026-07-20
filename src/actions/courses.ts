@@ -51,7 +51,7 @@ export async function createCourse(prevState: string | null, formData: FormData)
     if (sessionError) return sessionError.message
   }
 
-  revalidatePath('/admin/schedule')
+  revalidatePath('/admin/courses')
   redirect(`/admin/courses/${course.id}`)
 }
 
@@ -79,7 +79,7 @@ export async function updateCourse(id: string, prevState: string | null, formDat
   if (error) return error.message
 
   revalidatePath(`/admin/courses/${id}`)
-  revalidatePath('/admin/schedule')
+  revalidatePath('/admin/courses')
   redirect(`/admin/courses/${id}`)
 }
 
@@ -90,7 +90,7 @@ export async function revertToDraft(id: string) {
     .update({ status: 'draft', updated_at: new Date().toISOString() })
     .eq('id', id)
   if (error) return { error: error.message }
-  revalidatePath('/admin/schedule')
+  revalidatePath('/admin/courses')
   revalidatePath(`/admin/courses/${id}`)
   return { error: null }
 }
@@ -102,7 +102,7 @@ export async function publishCourse(id: string) {
     .update({ status: 'active', updated_at: new Date().toISOString() })
     .eq('id', id)
   if (error) return { error: error.message }
-  revalidatePath('/admin/schedule')
+  revalidatePath('/admin/courses')
   revalidatePath(`/admin/courses/${id}`)
   return { error: null }
 }
@@ -114,7 +114,7 @@ export async function completeCourse(id: string) {
     .update({ status: 'completed', updated_at: new Date().toISOString() })
     .eq('id', id)
   if (error) return { error: error.message }
-  revalidatePath('/admin/schedule')
+  revalidatePath('/admin/courses')
   revalidatePath(`/admin/courses/${id}`)
   return { error: null }
 }
@@ -142,7 +142,7 @@ export async function cancelCourse(id: string) {
       .eq('status', 'expected')
   }
 
-  revalidatePath('/admin/schedule')
+  revalidatePath('/admin/courses')
   revalidatePath(`/admin/courses/${id}`)
   return { error: null }
 }
