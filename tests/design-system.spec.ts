@@ -103,4 +103,49 @@ test.describe('Design system foundation (Muster / DEC-040)', () => {
     expect(dark.faintOnSurface).toBeGreaterThanOrEqual(4.5)
     expect(dark.onAccent).toBeGreaterThanOrEqual(4.5)
   })
+
+  test('input border meets WCAG 1.4.11 non-text contrast (3:1) in both themes (#171)', async ({
+    page,
+  }) => {
+    // axe's color-contrast rule only checks text, not component borders — this
+    // guards the input outline (--input) against the surface it sits on.
+    const borderContrast = () =>
+      page.evaluate(() => {
+        const cs = getComputedStyle(document.documentElement)
+        const v = (n: string) => cs.getPropertyValue(n).trim()
+        const lin = (c: number) => {
+          const s = c / 255
+          return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4)
+        }
+        const lum = (hex: string) => {
+          let h = hex.replace('#', '').trim()
+          if (h.length === 3) h = h.split('').map((c) => c + c).join('')
+          const r = parseInt(h.slice(0, 2), 16)
+          const g = parseInt(h.slice(2, 4), 16)
+          const b = parseInt(h.slice(4, 6), 16)
+          return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+        }
+        const ratio = (a: string, b: string) => {
+          const l1 = lum(a)
+          const l2 = lum(b)
+          return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)
+        }
+        // Inputs sit on the card (--surface); some on the page bg (--bg).
+        return {
+          onSurface: ratio(v('--input'), v('--surface')),
+          onBg: ratio(v('--input'), v('--bg')),
+        }
+      })
+
+    await page.goto('/login')
+    const light = await borderContrast()
+    expect(light.onSurface).toBeGreaterThanOrEqual(3)
+    expect(light.onBg).toBeGreaterThanOrEqual(3)
+
+    await page.evaluate(() => localStorage.setItem('theme', 'dark'))
+    await page.reload()
+    const dark = await borderContrast()
+    expect(dark.onSurface).toBeGreaterThanOrEqual(3)
+    expect(dark.onBg).toBeGreaterThanOrEqual(3)
+  })
 })
