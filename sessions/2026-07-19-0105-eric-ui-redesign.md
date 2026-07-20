@@ -60,7 +60,8 @@ transcript: /home/eric/.claude/projects/-home-eric-sailbook/09831fad-c94f-4942-a
 - Verified: build green; desktop specs (calendar/schedule/courses-list/app-shell/dashboard/accessibility/time-select[isolated]/instructor-cascade/unsaved-changes/student-courses-calendar) + mobile admin-mobile all pass; screenshots of Month (legend + hued pills) and List (date-ordered table) confirm.
 
 **Code review:** @code-review — clean bill on load-bearing code. Took the one actionable finding: repointed `revalidatePath('/admin/courses')` → `/admin/schedule` (harmless via force-dynamic, but a landmine). Deferred: courses-list.tsx >200 lines (pre-existing); hued pills lack hover (cosmetic).
-**PR:** [#170](https://github.com/mobiustripper42/sailbook/pull/170) — base `task/10.2` (stacked; merge #168 first)
+**PR:** [#170](https://github.com/mobiustripper42/sailbook/pull/170) — base auto-moved to `feature/ui-redesign` after #168 merged; MERGEABLE/clean
+**Design correction (commit 9ce37ee, post-review):** first pass wrongly made Schedule's List = the courses table (per mockup). Corrected: **Schedule = sessions** (Month calendar / List agenda, filters narrow both); **Courses = separate** table + nav item. `/admin/calendar`→`/admin/schedule` redirect kept; `/admin/courses` restored. Kept type-hue pills/legend, #140, --warn fix. Verified green after rework.
 **Points:** 5
 **Branch:** task/10.3-schedule-consolidation
 **Opened at:** 2026-07-20T00:00:00Z
