@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
-import { HugeiconsIcon } from '@hugeicons/react'
-import { Sun01Icon, Moon01Icon } from '@hugeicons/core-free-icons'
+import { Sun, Moon } from 'lucide-react'
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
@@ -30,7 +29,7 @@ export function ThemeToggle() {
       className="p-1 text-muted-foreground hover:text-foreground transition-colors"
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
-      <HugeiconsIcon icon={isDark ? Sun01Icon : Moon01Icon} size={16} />
+      {isDark ? <Sun size={16} /> : <Moon size={16} />}
     </button>
   )
 }
