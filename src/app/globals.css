@@ -107,6 +107,7 @@
   --faint: #6a7482;         /* AA-safe faint text (DEC-039 fix) */
   --line: #e3e8ee;
   --line-soft: #eef2f6;
+  --field-border: #7e8792; /* input/select/textarea border — AA 1.4.11 (~3.6:1 on surface) */
   --ok: #15803d;   --ok-bg: #e7f4ec;   --ok-line: #cbe6d5;
   /* --warn darkened from the mockup's #b45309 → AA on a warning/10 tint
      (#b45309 was only 3.91:1 on the dashboard warning card). */
@@ -139,7 +140,7 @@
   --destructive: var(--bad);
   --destructive-foreground: var(--on-accent);
   --border: var(--line);
-  --input: var(--line);
+  --input: var(--field-border);
   --ring: var(--brand);
   --warning: var(--warn);
   --chart-1: var(--t-asa101);
@@ -172,6 +173,7 @@
   --faint: #8792a1;
   --line: #25303f;
   --line-soft: #1c2634;
+  --field-border: #66707f; /* input border — AA 1.4.11 (~3.3:1 on dark surface) */
   --ok: #5cc98d;   --ok-bg: #132a20;   --ok-line: #22503a;
   --warn: #e0a459; --warn-bg: #2c2313; --warn-line: #54421f;
   --bad: #e78078;  --bad-bg: #2c1817;  --bad-line: #57302c;
@@ -203,7 +205,7 @@
   --destructive: var(--bad);
   --destructive-foreground: var(--on-accent);
   --border: var(--line);
-  --input: var(--line);
+  --input: var(--field-border);
   --ring: var(--brand);
   --warning: var(--warn);
   --chart-1: var(--t-asa101);
