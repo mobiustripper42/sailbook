@@ -108,7 +108,9 @@
   --line: #e3e8ee;
   --line-soft: #eef2f6;
   --ok: #15803d;   --ok-bg: #e7f4ec;   --ok-line: #cbe6d5;
-  --warn: #b45309; --warn-bg: #fbf0db; --warn-line: #f0ddb4;
+  /* --warn darkened from the mockup's #b45309 → AA on a warning/10 tint
+     (#b45309 was only 3.91:1 on the dashboard warning card). */
+  --warn: #8a3d02; --warn-bg: #fbf0db; --warn-line: #f0ddb4;
   --bad: #be2f2a;  --bad-bg: #fbe6e4;  --bad-line: #f2cdc9;
   --info: #3257a8; --info-bg: #e7ecf7; --info-line: #cdd8ee;
   --t-asa101: #2f5d86; --t-asa103: #2f7d70; --t-open: #8a5f93;

@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   CalendarDays,
+  CalendarRange,
   BookOpen,
   Tags,
   Users,
@@ -16,7 +17,14 @@ import {
 
 export type Role = 'admin' | 'instructor' | 'student'
 
-export type NavItem = { href: string; label: string; icon: LucideIcon }
+export type NavItem = {
+  href: string
+  label: string
+  icon: LucideIcon
+  // Extra path prefixes that also mark this item active (e.g. a consolidated
+  // item whose detail pages live under a different route).
+  match?: string[]
+}
 
 export const ALL_ROLES: Role[] = ['admin', 'instructor', 'student']
 
@@ -38,7 +46,9 @@ export const ROLE_HOME: Record<Role, string> = {
 export const NAV_ITEMS: Record<Role, NavItem[]> = {
   admin: [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/calendar', label: 'Calendar', icon: CalendarDays },
+    // Schedule = sessions (Month calendar / List agenda). Courses = the table,
+    // a separate destination. (task 10.3)
+    { href: '/admin/schedule', label: 'Schedule', icon: CalendarRange },
     { href: '/admin/courses', label: 'Courses', icon: BookOpen },
     { href: '/admin/course-types', label: 'Course Types', icon: Tags },
     { href: '/admin/users', label: 'Users', icon: Users },

@@ -21,7 +21,7 @@ test.describe('Admin dashboard', () => {
     const nav = page.getByRole('navigation', { name: 'Quick actions' });
     await expect(nav.getByRole('link', { name: '+ New Course' })).toHaveAttribute('href', '/admin/courses/new');
     await expect(nav.getByRole('link', { name: '+ New Student' })).toHaveAttribute('href', '/admin/students/new');
-    await expect(nav.getByRole('link', { name: 'Calendar' })).toHaveAttribute('href', '/admin/calendar');
+    await expect(nav.getByRole('link', { name: 'Schedule' })).toHaveAttribute('href', '/admin/schedule');
     await expect(nav.getByRole('link', { name: 'Missed Sessions' })).toHaveAttribute('href', '/admin/missed-sessions');
   });
 

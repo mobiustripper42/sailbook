@@ -29,12 +29,14 @@ export type Course = {
   created_at: string
   course_types: CourseType | null
   instructor: Instructor | null
-  sessions: { id: string }[]
+  sessions: { id: string; date?: string | null }[]
   enrollments: Enrollment[]
 }
 
 type StatusFilter = 'all' | 'draft' | 'active' | 'completed' | 'cancelled'
-type SortKey = 'title' | 'instructor' | 'enrolled' | 'status' | 'created_at'
+// 'date' (earliest session date) is the default order (#140) and isn't a
+// clickable column — the visible sortable columns are the rest.
+type SortKey = 'date' | 'title' | 'instructor' | 'enrolled' | 'status' | 'created_at'
 type SortDir = 'asc' | 'desc'
 
 const STATUS_FILTERS: { label: string; value: StatusFilter }[] = [
@@ -60,8 +62,24 @@ function displayTitle(c: Course): string {
   return c.title ?? c.course_types?.name ?? ''
 }
 
+// Earliest scheduled session date (ISO yyyy-mm-dd), or '' when a course has no
+// dated sessions — those sort last under ascending date order.
+function earliestSessionDate(c: Course): string {
+  const dates = c.sessions.map((s) => s.date).filter((d): d is string => !!d)
+  return dates.length ? dates.reduce((min, d) => (d < min ? d : min)) : ''
+}
+
 function compareCourses(a: Course, b: Course, key: SortKey): number {
   switch (key) {
+    case 'date': {
+      const aDate = earliestSessionDate(a)
+      const bDate = earliestSessionDate(b)
+      // Courses without sessions ('') sort after dated ones in asc order.
+      if (aDate === bDate) return 0
+      if (aDate === '') return 1
+      if (bDate === '') return -1
+      return aDate.localeCompare(bDate)
+    }
     case 'title':
       return displayTitle(a).toLowerCase().localeCompare(displayTitle(b).toLowerCase())
     case 'instructor': {
@@ -88,8 +106,9 @@ function compareCourses(a: Course, b: Course, key: SortKey): number {
 export default function CoursesList({ courses }: { courses: Course[] }) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [sortKey, setSortKey] = useState<SortKey>('created_at')
-  const [sortDir, setSortDir] = useState<SortDir>('desc')
+  // Default to date order (#140): earliest session first.
+  const [sortKey, setSortKey] = useState<SortKey>('date')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
 
   function toggleSort(key: SortKey) {
     if (key === sortKey) {

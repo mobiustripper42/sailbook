@@ -14,8 +14,11 @@ export function NavLinks({ role, onNavigate }: { role: Role; onNavigate?: () => 
 
   return (
     <nav className="flex-1 px-2 py-3 space-y-0.5">
-      {NAV_ITEMS[role].map(({ href, label, icon: Icon }) => {
-        const active = pathname === href || (href !== home && pathname.startsWith(href))
+      {NAV_ITEMS[role].map(({ href, label, icon: Icon, match }) => {
+        const active =
+          pathname === href ||
+          (href !== home && pathname.startsWith(href)) ||
+          (match?.some((m) => pathname.startsWith(m)) ?? false)
         return (
           <Link
             key={href}

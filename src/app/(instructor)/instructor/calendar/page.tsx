@@ -2,9 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { SessionsCalendar } from '@/components/shared/sessions-calendar'
-import { SessionsList } from '@/components/shared/sessions-list'
-import { SessionsViewSwitcher } from '@/components/shared/sessions-view-switcher'
+import { SessionsSchedule } from '@/components/shared/sessions-schedule'
 import type { SessionEvent } from '@/components/shared/sessions-calendar'
 
 type RawSession = {
@@ -88,10 +86,7 @@ export default async function InstructorCalendarPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Calendar</h1>
-      <SessionsViewSwitcher
-        calendar={<SessionsCalendar sessions={sessions} />}
-        list={<SessionsList sessions={sessions} />}
-      />
+      <SessionsSchedule sessions={sessions} />
     </div>
   )
 }

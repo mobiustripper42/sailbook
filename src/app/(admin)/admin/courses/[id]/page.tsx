@@ -22,8 +22,18 @@ import BookMailedCell from '@/components/admin/book-mailed-cell'
 import { isAsaCertBody } from '@/lib/asa'
 import AdminWaitlistCard from '@/components/admin/admin-waitlist-card'
 
-export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CourseDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ from?: string }>
+}) {
   const { id } = await params
+  // Context-aware breadcrumb: arriving from Schedule keeps you in that context.
+  const fromSchedule = (await searchParams).from === 'schedule'
+  const backHref = fromSchedule ? '/admin/schedule' : '/admin/courses'
+  const backLabel = fromSchedule ? 'Schedule' : 'Courses'
   const supabase = await createClient()
 
   const { data: course } = await supabase
@@ -113,7 +123,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm text-muted-foreground mb-1">
-            <Link href="/admin/courses" className="hover:underline hover:text-foreground">Courses</Link>
+            <Link href={backHref} className="hover:underline hover:text-foreground">{backLabel}</Link>
             {' / '}
             {course.title ?? type?.name}
           </p>

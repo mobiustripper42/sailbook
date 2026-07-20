@@ -190,7 +190,7 @@ function QuickActions() {
         <Link href="/admin/students/new">+ New Student</Link>
       </Button>
       <Button variant="ghost" size="sm" asChild>
-        <Link href="/admin/calendar">Calendar</Link>
+        <Link href="/admin/schedule">Schedule</Link>
       </Button>
       <Button variant="ghost" size="sm" asChild>
         <Link href="/admin/missed-sessions">Missed Sessions</Link>

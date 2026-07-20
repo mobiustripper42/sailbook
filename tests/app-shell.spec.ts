@@ -7,13 +7,14 @@ import { loginAs } from './helpers'
 test.describe('unified app shell — nav per role', () => {
   test('admin sidebar shows the admin nav items + active state', async ({ page }) => {
     await loginAs(page, 'pw_admin@ltsc.test', /\/admin\/dashboard/)
-    await page.goto('/admin/courses')
+    await page.goto('/admin/schedule')
     test.skip((page.viewportSize()?.width ?? 768) < 768, 'sidebar is md+ only')
 
     const aside = page.locator('aside')
+    // Schedule (sessions) and Courses (the table) are separate items (10.3).
     for (const label of [
       'Dashboard',
-      'Calendar',
+      'Schedule',
       'Courses',
       'Course Types',
       'Users',
@@ -23,7 +24,7 @@ test.describe('unified app shell — nav per role', () => {
       await expect(aside.getByRole('link', { name: label })).toBeVisible()
     }
     // The current section is marked active for assistive tech + styling.
-    await expect(aside.getByRole('link', { name: 'Courses' })).toHaveAttribute(
+    await expect(aside.getByRole('link', { name: 'Schedule' })).toHaveAttribute(
       'aria-current',
       'page',
     )

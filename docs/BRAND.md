@@ -38,7 +38,7 @@ Practical, clean, no-nonsense. This is a tool for running a sailing school, not 
 | Hairline | `#e3e8ee` | `#25303f` |
 
 Status colors (each has a text, a tint-bg, and a line variant), used only to encode state — never as decoration:
-- **ok** `#15803d`, **warn** `#b45309`, **bad** `#be2f2a`, **info** `#3257a8` (lightened for dark mode).
+- **ok** `#15803d`, **warn** `#8a3d02`, **bad** `#be2f2a`, **info** `#3257a8` (lightened for dark mode). (`warn` darkened from the mockup's `#b45309` for AA on a warning/10 tint.)
 
 Course types get their own quiet hue for calendar/legend use (slate / teal / purple / rust / amber). These are categorical, not status.
 

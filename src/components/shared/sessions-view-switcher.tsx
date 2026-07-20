@@ -12,10 +12,16 @@ export function SessionsViewSwitcher({
   calendar,
   list,
   endSlot,
+  calendarLabel = 'Calendar',
+  listLabel = 'List',
 }: {
   calendar: ReactNode
   list: ReactNode
   endSlot?: ReactNode
+  // Labels are configurable (schedule uses "Month"/"List"); the internal view
+  // keys + test-ids stay 'calendar'/'list' so specs and the stored pref hold.
+  calendarLabel?: string
+  listLabel?: string
 }) {
   const [view, setView] = useState<View>('calendar')
   const [hydrated, setHydrated] = useState(false)
@@ -39,7 +45,8 @@ export function SessionsViewSwitcher({
   return (
     <>
       {hydrated && (
-        <div className={cn('mb-4', endSlot && 'flex items-center justify-between gap-3')}>
+        // Toggle + month navigator cluster on the left (findable), not drifting right.
+        <div className={cn('mb-4', endSlot && 'flex flex-wrap items-center gap-x-5 gap-y-3')}>
           <div
             className="inline-flex items-center gap-1 rounded-md border bg-card p-0.5"
             data-testid="sessions-view-toggle"
@@ -55,7 +62,7 @@ export function SessionsViewSwitcher({
               aria-pressed={view === 'calendar'}
               className={cn('h-7 px-3', view === 'calendar' && 'shadow-sm')}
             >
-              Calendar
+              {calendarLabel}
             </Button>
             <Button
               type="button"
@@ -66,7 +73,7 @@ export function SessionsViewSwitcher({
               aria-pressed={view === 'list'}
               className={cn('h-7 px-3', view === 'list' && 'shadow-sm')}
             >
-              List
+              {listLabel}
             </Button>
           </div>
           {endSlot}
