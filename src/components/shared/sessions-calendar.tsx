@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useMemo } from 'react'
 import { cn } from '@/lib/utils'
 
 export type SessionEvent = {
@@ -58,65 +57,23 @@ function buildMonthGrid(viewDate: Date, sessions: SessionEvent[]): DayCell[] {
   return cells
 }
 
+// Month grid for `viewDate` (controlled — the pager lives in <MonthNavigator>,
+// owned by <SessionsSchedule> so Month and List share one month).
 export function SessionsCalendar({
   sessions,
+  viewDate,
   hueByType,
 }: {
   sessions: SessionEvent[]
+  viewDate: Date
   // Optional courseTypeId → CSS custom-property name (e.g. '--t-asa101').
-  // When provided, non-cancelled pills are tinted in that course type's hue;
-  // omitted (e.g. instructor calendar) falls back to the neutral primary tint.
+  // When provided, non-cancelled pills are tinted in that course type's hue.
   hueByType?: Record<string, string>
 }) {
-  const [viewDate, setViewDate] = useState<Date>(() => {
-    const now = new Date()
-    return new Date(now.getFullYear(), now.getMonth(), 1)
-  })
-
   const cells = useMemo(() => buildMonthGrid(viewDate, sessions), [viewDate, sessions])
-  const monthLabel = viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 
   return (
     <div data-testid="sessions-calendar" className="rounded-md border bg-card">
-      <div className="flex items-center justify-between gap-2 border-b p-3">
-        <h2 className="text-base font-semibold" data-testid="calendar-month-label">
-          {monthLabel}
-        </h2>
-        <div className="flex items-center gap-1">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
-            aria-label="Previous month"
-            data-testid="calendar-prev"
-          >
-            ‹
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              const now = new Date()
-              setViewDate(new Date(now.getFullYear(), now.getMonth(), 1))
-            }}
-          >
-            Today
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
-            aria-label="Next month"
-            data-testid="calendar-next"
-          >
-            ›
-          </Button>
-        </div>
-      </div>
-
       <div className="grid grid-cols-7 border-b text-xs font-medium text-muted-foreground">
         {WEEKDAYS.map((w) => (
           <div key={w} className="px-2 py-1.5 text-center">

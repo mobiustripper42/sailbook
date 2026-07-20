@@ -2,9 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import type { SessionEvent } from '@/components/shared/sessions-calendar'
-import { SessionsCalendar } from '@/components/shared/sessions-calendar'
-import { SessionsList } from '@/components/shared/sessions-list'
-import { SessionsViewSwitcher } from '@/components/shared/sessions-view-switcher'
+import { SessionsSchedule } from '@/components/shared/sessions-schedule'
 import {
   Select,
   SelectContent,
@@ -135,16 +133,11 @@ export function ScheduleView({ sessions }: { sessions: SessionEvent[] }) {
         {filterSelects}
       </div>
 
-      <SessionsViewSwitcher
-        calendarLabel="Month"
-        listLabel="List"
-        calendar={
-          <div className="space-y-3">
-            {legend}
-            <SessionsCalendar sessions={filtered} hueByType={hueByType} />
-          </div>
-        }
-        list={<SessionsList sessions={filtered} showInstructor />}
+      <SessionsSchedule
+        sessions={filtered}
+        hueByType={hueByType}
+        showInstructor
+        calendarExtra={legend}
       />
     </div>
   )

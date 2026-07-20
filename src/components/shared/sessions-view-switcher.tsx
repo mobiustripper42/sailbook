@@ -45,7 +45,8 @@ export function SessionsViewSwitcher({
   return (
     <>
       {hydrated && (
-        <div className={cn('mb-4', endSlot && 'flex items-center justify-between gap-3')}>
+        // Toggle + month navigator cluster on the left (findable), not drifting right.
+        <div className={cn('mb-4', endSlot && 'flex flex-wrap items-center gap-x-5 gap-y-3')}>
           <div
             className="inline-flex items-center gap-1 rounded-md border bg-card p-0.5"
             data-testid="sessions-view-toggle"

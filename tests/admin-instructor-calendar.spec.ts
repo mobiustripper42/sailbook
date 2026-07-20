@@ -1,7 +1,17 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { loginAs, createTestCourse, runId } from './helpers';
 
 // 6.20 / 10.3 — admin Schedule (sessions: Month=calendar, List=agenda) + instructor calendar
+
+// Month + List share one month; click "next month" until the label matches.
+async function gotoMonth(page: Page, label: string) {
+  for (let i = 0; i < 24; i++) {
+    const current = (await page.getByTestId('calendar-month-label').textContent())?.trim();
+    if (current === label) return;
+    await page.getByTestId('calendar-next').click();
+  }
+  throw new Error(`schedule never reached ${label}`);
+}
 
 test.describe('Admin schedule', () => {
   test.beforeEach(async ({ page }) => {
@@ -78,8 +88,10 @@ test.describe('Admin schedule — student filter', () => {
     await page.goto('/admin/schedule');
     await page.waitForLoadState('networkidle');
 
-    // List agenda avoids month navigation to reach the far-future session date.
+    // List agenda is month-scoped; navigate to the courses' month (Sep 2027).
+    // The list has no pill cap, so filtering is unambiguous there.
     await page.getByTestId('view-toggle-list').click();
+    await gotoMonth(page, 'September 2027');
     const list = page.getByTestId('sessions-list');
     await expect(list).toBeVisible();
 

@@ -77,7 +77,8 @@ export default async function AdminSchedulePage() {
         endTime: s.end_time,
         location: s.location,
         label: course.title ?? course.course_type?.name ?? 'Session',
-        href: `/admin/courses/${course.id}`,
+        // ?from=schedule so the course-detail breadcrumb points back to Schedule.
+        href: `/admin/courses/${course.id}?from=schedule`,
         cancelled: s.status === 'cancelled',
         courseTypeId: course.course_type?.id,
         courseTypeName: course.course_type?.name,

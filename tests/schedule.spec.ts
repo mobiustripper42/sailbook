@@ -49,4 +49,18 @@ test.describe('Courses table + schedule', () => {
     // Month is the default view; the legend lists the course types present.
     await expect(page.getByTestId('calendar-legend')).toBeVisible()
   })
+
+  test('course-detail breadcrumb reflects where you came from', async ({ page }) => {
+    const SEED_COURSE = 'c1000000-0000-0000-0000-000000000001'
+    await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
+    const main = page.locator('main') // scope past the sidebar nav links
+
+    // Arriving from Schedule → breadcrumb points back to Schedule.
+    await page.goto(`/admin/courses/${SEED_COURSE}?from=schedule`)
+    await expect(main.getByRole('link', { name: 'Schedule' })).toHaveAttribute('href', '/admin/schedule')
+
+    // Default (e.g. from the Courses table) → breadcrumb points to Courses.
+    await page.goto(`/admin/courses/${SEED_COURSE}`)
+    await expect(main.getByRole('link', { name: 'Courses' })).toHaveAttribute('href', '/admin/courses')
+  })
 })
