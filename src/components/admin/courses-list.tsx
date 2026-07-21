@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 import { SortableHead } from '@/components/admin/sortable-head'
+import { formatSchedule, type ScheduleSession } from '@/lib/course-schedule'
 
 type CourseType = { name: string; short_code: string }
 type Instructor = { first_name: string; last_name: string }
@@ -23,14 +24,24 @@ type Enrollment = { id: string; status: string }
 export type Course = {
   id: string
   title: string | null
+  section_label: string | null
   status: string
   capacity: number
   price: number | null
   created_at: string
   course_types: CourseType | null
   instructor: Instructor | null
-  sessions: { id: string; date?: string | null }[]
+  sessions: { id: string; date?: string | null; start_time?: string | null; end_time?: string | null }[]
   enrollments: Enrollment[]
+}
+
+// Sessions that carry a full date+time triple, ready for the schedule formatter.
+function scheduleSessions(c: Course): ScheduleSession[] {
+  return c.sessions
+    .filter((s): s is { id: string; date: string; start_time: string; end_time: string } =>
+      !!s.date && !!s.start_time && !!s.end_time
+    )
+    .map((s) => ({ date: s.date, start_time: s.start_time, end_time: s.end_time }))
 }
 
 type StatusFilter = 'all' | 'draft' | 'active' | 'completed' | 'cancelled'
@@ -125,6 +136,7 @@ export default function CoursesList({ courses }: { courses: Course[] }) {
     const matchesSearch =
       q === '' ||
       (c.title ?? '').toLowerCase().includes(q) ||
+      (c.section_label ?? '').toLowerCase().includes(q) ||
       (c.course_types?.name ?? '').toLowerCase().includes(q) ||
       (c.instructor
         ? `${c.instructor.first_name} ${c.instructor.last_name}`.toLowerCase().includes(q)
@@ -144,7 +156,7 @@ export default function CoursesList({ courses }: { courses: Course[] }) {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-3">
         <Input
-          placeholder="Search by title, type, or instructor…"
+          placeholder="Search by title, section, type, or instructor…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="sm:max-w-xs"
@@ -197,12 +209,18 @@ export default function CoursesList({ courses }: { courses: Course[] }) {
                   <TableRow key={c.id}>
                     <TableCell>
                       <div>
-                        <Link href={`/admin/courses/${c.id}`} className="font-medium hover:underline underline-offset-2">
-                          {c.title ?? c.course_types?.name ?? '—'}
-                        </Link>
+                        <div className="flex items-center gap-2">
+                          <Link href={`/admin/courses/${c.id}`} className="font-medium hover:underline underline-offset-2">
+                            {c.title ?? c.course_types?.name ?? '—'}
+                          </Link>
+                          {c.section_label && (
+                            <Badge variant="neutral" className="font-normal">{c.section_label}</Badge>
+                          )}
+                        </div>
                         {c.title && (
                           <p className="text-xs text-muted-foreground">{c.course_types?.name}</p>
                         )}
+                        <p className="text-xs text-muted-foreground">{formatSchedule(scheduleSessions(c))}</p>
                       </div>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
