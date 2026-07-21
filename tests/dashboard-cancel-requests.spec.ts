@@ -49,13 +49,11 @@ test.describe('Admin dashboard — cancellation requests widget', () => {
     }
 
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
-    const cancelCard = page.locator('[data-slot="card"]').filter({ hasText: /Cancellation Requests \(\d+\)/ })
+    // 10.5: cancellations surface as a "Needs you" triage card. The most-recent
+    // request (this freshly-enrolled one) is previewed with student · course.
+    const cancelCard = page.getByRole('link').filter({ hasText: /Cancellation request/ })
     await expect(cancelCard).toBeVisible()
-
-    const row = cancelCard.getByRole('row').filter({ hasText: courseTitle })
-    await expect(row).toBeVisible()
-
-    const courseLink = row.getByRole('link')
-    await expect(courseLink).toHaveAttribute('href', `/admin/courses/${courseId}`)
+    await expect(cancelCard).toContainText(courseTitle)
+    await expect(cancelCard).toHaveAttribute('href', '/admin/courses')
   })
 })

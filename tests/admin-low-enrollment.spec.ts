@@ -11,8 +11,9 @@ test.describe('Admin — low enrollment dashboard tile', () => {
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
   })
 
-  test('default seed: tile shows healthy state (minimum_enrollment is NULL on all course types)', async ({ page }) => {
-    await expect(page.getByText('Enrollment is healthy')).toBeVisible()
+  test('default seed: no low-enrollment triage card (minimum_enrollment is NULL on all course types)', async ({ page }) => {
+    // 10.5: healthy = the "Low enrollment" card is simply absent from "Needs you".
+    await expect(page.getByText('Low enrollment', { exact: true })).toHaveCount(0)
   })
 
   test('setting minimum_enrollment above current count flags the dashboard tile', async ({ page }) => {
@@ -27,8 +28,8 @@ test.describe('Admin — low enrollment dashboard tile', () => {
 
     try {
       await page.goto('/admin/dashboard')
-      await expect(page.getByText('Low Enrollment')).toBeVisible()
-      await expect(page.getByText('Below minimum, starting soon')).toBeVisible()
+      await expect(page.getByText('Low enrollment', { exact: true })).toBeVisible()
+      await expect(page.getByText('Review →')).toBeVisible()
     } finally {
       // Restore so other tests / re-runs see the seed default.
       await page.goto(`/admin/course-types/${ASA_101_ID}/edit`)

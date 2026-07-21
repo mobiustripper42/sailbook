@@ -25,25 +25,13 @@ test.describe('Admin dashboard', () => {
     await expect(nav.getByRole('link', { name: 'Missed Sessions' })).toHaveAttribute('href', '/admin/missed-sessions');
   });
 
-  test('shows Active Courses stat card', async ({ page }) => {
-    await expect(page.getByText('Active Courses')).toBeVisible();
+  test('header shows the active-course running count', async ({ page }) => {
+    await expect(page.getByText(/\d+ courses? running/)).toBeVisible();
   });
 
-  test('shows either warning card or clean indicator for instructor assignment', async ({ page }) => {
-    // Exactly one of the two states should be present
-    const warning = page.getByText('No Instructor Assigned');
-    const clean = page.getByText('All instructors assigned');
-    const visibleCount =
-      (await warning.isVisible() ? 1 : 0) + (await clean.isVisible() ? 1 : 0);
-    expect(visibleCount).toBe(1);
-  });
-
-  test('Sessions in Next 7 Days card renders', async ({ page }) => {
-    await expect(page.getByText('Sessions in Next 7 Days')).toBeVisible();
-  });
-
-  test('pending and cancellation queue cards render', async ({ page }) => {
-    await expect(page.getByText(/Pending Confirmation/)).toBeVisible();
-    await expect(page.getByText(/Cancellation Requests/)).toBeVisible();
+  test('triage board and all section headers render (10.5)', async ({ page }) => {
+    for (const label of ['Needs you', 'Today on the water', 'Rest of the week', 'Filling now', 'Just enrolled']) {
+      await expect(page.getByRole('heading', { name: label, exact: true })).toBeVisible();
+    }
   });
 });

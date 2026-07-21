@@ -1,28 +1,33 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 import { loginAs, runId, selectTime, clickCourseAction } from './helpers'
+
+// Reads the count off the "Courses unassigned" triage card (the big number that
+// leads the card's text). Returns 0 when the card isn't present (all assigned).
+async function unassignedTriageCount(page: Page): Promise<number> {
+  const card = page.getByRole('link').filter({ hasText: /Courses? unassigned/ })
+  if ((await card.count()) === 0) return 0
+  const match = (await card.first().innerText()).match(/\d+/)
+  return match ? parseInt(match[0], 10) : 0
+}
 
 test.describe('Admin — dashboard instructor count', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'pw_admin@ltsc.test', '/admin/dashboard')
   })
 
-  // Seed has one active course with no instructor (ASA 103 Coastal June)
-  test('shows warning card when active courses have no instructor assigned', async ({ page }) => {
-    await expect(page.getByText('No Instructor Assigned')).toBeVisible()
-    await expect(page.getByText('Assign before publishing')).toBeVisible()
+  // Seed has one active course with no instructor (ASA 103 Coastal June).
+  // 10.5: the old "No Instructor Assigned" stat card became a "Courses
+  // unassigned" triage card in the "Needs you" board.
+  test('shows a "Courses unassigned" triage card when active courses lack an instructor', async ({ page }) => {
+    await expect(page.getByText(/Courses? unassigned/)).toBeVisible()
+    await expect(page.getByText('Assign instructor →')).toBeVisible()
   })
 
   test('count increments after publishing a course without an instructor', async ({ page }) => {
     // Creates a course — desktop only to avoid parallel viewport interference with the count
     test.skip(test.info().project.name !== 'desktop')
 
-    // Read initial count from warning card
-    const initialCount = parseInt(
-      (await page
-        .getByText('Assign before publishing')
-        .locator('xpath=preceding-sibling::p')
-        .textContent()) ?? '0'
-    )
+    const initialCount = await unassignedTriageCount(page)
 
     // Create an active course with no instructor
     const id = runId()
@@ -46,12 +51,7 @@ test.describe('Admin — dashboard instructor count', () => {
     await expect(page.getByText('active')).toBeVisible({ timeout: 10000 })
 
     await page.goto('/admin/dashboard')
-    const newCount = parseInt(
-      (await page
-        .getByText('Assign before publishing')
-        .locator('xpath=preceding-sibling::p')
-        .textContent()) ?? '0'
-    )
+    const newCount = await unassignedTriageCount(page)
     expect(newCount).toBeGreaterThanOrEqual(initialCount + 1)
   })
 
