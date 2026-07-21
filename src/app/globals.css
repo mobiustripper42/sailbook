@@ -232,6 +232,13 @@
   }
   html {
     @apply font-sans;
+    /* IBM Plex Sans (DEC-039) has a large x-height and reads ~1–2pt bigger than
+       the old Nunito Sans at the browser-default 16px — the whole UI felt like a
+       Large Print edition. Drop the root so type AND all rem-based spacing
+       tokens shrink proportionally — 80% ≈ the "zoom to 80% and it looks right"
+       instinct (12.8px base). Below the usual 14px readability floor, but it's a
+       deliberate density call for an operator tool. */
+    font-size: 80%;
   }
 }
 
