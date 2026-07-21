@@ -136,7 +136,11 @@ export default async function CourseDetailPage({
           </div>
           {course.title && <p className="text-muted-foreground">{type?.name}</p>}
           <p className="text-sm text-muted-foreground mt-1">
-            {formatSchedule((sessions ?? []).map((s) => ({ date: s.date, start_time: s.start_time, end_time: s.end_time })))}
+            {formatSchedule(
+              (sessions ?? [])
+                .filter((s) => s.status !== 'cancelled')
+                .map((s) => ({ date: s.date, start_time: s.start_time, end_time: s.end_time }))
+            )}
           </p>
           <p className="text-sm text-muted-foreground mt-1">
             Instructor: {instructor ? `${instructor.first_name} ${instructor.last_name}` : '—'} ·

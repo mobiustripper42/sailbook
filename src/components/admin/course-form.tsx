@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
+import { parseLocalDate } from '@/lib/course-schedule'
 
 type CourseTypeOption = { id: string; name: string; short_code: string; max_students: number }
 type InstructorOption = { id: string; first_name: string; last_name: string }
@@ -42,10 +43,7 @@ function toISODate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function parseLocalDate(iso: string): Date {
-  const [y, m, d] = iso.split('-').map(Number)
-  return new Date(y, m - 1, d)
-}
+const MAX_GENERATED_SESSIONS = 52
 
 // Expand weekday + time + [start,end] date range into one SessionRow per matching week.
 function generateRecurringSessions(opts: {
@@ -62,7 +60,7 @@ function generateRecurringSessions(opts: {
   const cur = new Date(start)
   // Advance to the first occurrence of the chosen weekday on or after startDate.
   while (cur.getDay() !== opts.weekday) cur.setDate(cur.getDate() + 1)
-  while (cur <= end && out.length < 52) {
+  while (cur <= end && out.length < MAX_GENERATED_SESSIONS) {
     out.push({
       date: toISODate(cur),
       start_time: opts.startTime,
@@ -117,6 +115,11 @@ export default function CourseForm({ courseTypes, instructors }: Props) {
     }
     setSessions(generated)
     setIsDirty(true)
+    if (generated.length >= MAX_GENERATED_SESSIONS) {
+      // Surface the truncation and leave the panel open so the message is seen.
+      setGenError(`Range capped at ${MAX_GENERATED_SESSIONS} sessions — shorten the date range if you need fewer.`)
+      return
+    }
     setShowGenerator(false)
   }
 

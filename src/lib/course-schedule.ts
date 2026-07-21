@@ -14,7 +14,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 // Parse 'YYYY-MM-DD' into a local Date without UTC drift (avoids the
 // off-by-one-day trap of `new Date('2026-07-01')`, which is parsed as UTC).
-function parseLocalDate(iso: string): Date {
+export function parseLocalDate(iso: string): Date {
   const [y, m, d] = iso.split('-').map(Number)
   return new Date(y, m - 1, d)
 }

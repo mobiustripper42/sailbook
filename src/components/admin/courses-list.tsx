@@ -31,15 +31,23 @@ export type Course = {
   created_at: string
   course_types: CourseType | null
   instructor: Instructor | null
-  sessions: { id: string; date?: string | null; start_time?: string | null; end_time?: string | null }[]
+  sessions: {
+    id: string
+    date?: string | null
+    start_time?: string | null
+    end_time?: string | null
+    status?: string | null
+  }[]
   enrollments: Enrollment[]
 }
 
-// Sessions that carry a full date+time triple, ready for the schedule formatter.
+// Non-cancelled sessions that carry a full date+time triple, ready for the
+// schedule formatter (cancelled dates shouldn't define the recurrence).
 function scheduleSessions(c: Course): ScheduleSession[] {
   return c.sessions
-    .filter((s): s is { id: string; date: string; start_time: string; end_time: string } =>
-      !!s.date && !!s.start_time && !!s.end_time
+    .filter(
+      (s): s is { id: string; date: string; start_time: string; end_time: string; status?: string | null } =>
+        !!s.date && !!s.start_time && !!s.end_time && s.status !== 'cancelled'
     )
     .map((s) => ({ date: s.date, start_time: s.start_time, end_time: s.end_time }))
 }
