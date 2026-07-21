@@ -21,6 +21,7 @@ import AdminEnrollStudentPanel from '@/components/admin/admin-enroll-student-pan
 import BookMailedCell from '@/components/admin/book-mailed-cell'
 import { isAsaCertBody } from '@/lib/asa'
 import AdminWaitlistCard from '@/components/admin/admin-waitlist-card'
+import { formatSchedule } from '@/lib/course-schedule'
 
 export default async function CourseDetailPage({
   params,
@@ -129,10 +130,18 @@ export default async function CourseDetailPage({
           </p>
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-semibold">{course.title ?? type?.name}</h1>
+            {course.section_label && <Badge variant="neutral" className="font-normal">{course.section_label}</Badge>}
             <Badge variant={course.status === 'active' ? 'ok' : 'neutral'}>{course.status}</Badge>
             {type?.is_drop_in && <Badge variant="neutral">Drop-in</Badge>}
           </div>
           {course.title && <p className="text-muted-foreground">{type?.name}</p>}
+          <p className="text-sm text-muted-foreground mt-1">
+            {formatSchedule(
+              (sessions ?? [])
+                .filter((s) => s.status !== 'cancelled')
+                .map((s) => ({ date: s.date, start_time: s.start_time, end_time: s.end_time }))
+            )}
+          </p>
           <p className="text-sm text-muted-foreground mt-1">
             Instructor: {instructor ? `${instructor.first_name} ${instructor.last_name}` : '—'} ·
             Capacity: {enrollments?.filter(e => e.status === 'confirmed').length ?? 0} / {course.capacity}

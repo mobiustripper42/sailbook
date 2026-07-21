@@ -35,6 +35,7 @@ export default function CourseEditForm({ course, courseTypes, instructors }: Pro
   const [courseTypeId, setCourseTypeId] = useState(course.course_type_id)
   const [instructorId, setInstructorId] = useState(course.instructor_id ?? 'none')
   const [title, setTitle] = useState(course.title ?? '')
+  const [sectionLabel, setSectionLabel] = useState(course.section_label ?? '')
   const [capacity, setCapacity] = useState(String(course.capacity))
   const [price, setPrice] = useState(String(course.price ?? ''))
   const [memberPrice, setMemberPrice] = useState(String(course.member_price ?? ''))
@@ -76,6 +77,18 @@ export default function CourseEditForm({ course, courseTypes, instructors }: Pro
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="section_label">Section Label <span className="text-muted-foreground">(optional)</span></Label>
+        <Input
+          id="section_label"
+          name="section_label"
+          maxLength={50}
+          placeholder="e.g. Boat 1"
+          value={sectionLabel}
+          onChange={(e) => setSectionLabel(e.target.value)}
+        />
       </div>
 
       <div className="space-y-2">

@@ -166,6 +166,7 @@ export type Database = {
           member_price: number | null
           notes: string | null
           price: number | null
+          section_label: string | null
           status: string | null
           title: string | null
           updated_at: string | null
@@ -181,6 +182,7 @@ export type Database = {
           member_price?: number | null
           notes?: string | null
           price?: number | null
+          section_label?: string | null
           status?: string | null
           title?: string | null
           updated_at?: string | null
@@ -196,6 +198,7 @@ export type Database = {
           member_price?: number | null
           notes?: string | null
           price?: number | null
+          section_label?: string | null
           status?: string | null
           title?: string | null
           updated_at?: string | null

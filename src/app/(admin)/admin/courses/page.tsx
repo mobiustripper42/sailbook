@@ -9,10 +9,10 @@ export default async function CoursesPage() {
   const { data: courses, error } = await supabase
     .from('courses')
     .select(`
-      id, title, status, capacity, price, created_at,
+      id, title, section_label, status, capacity, price, created_at,
       course_types ( name, short_code ),
       instructor:profiles!courses_instructor_id_fkey ( first_name, last_name ),
-      sessions ( id, date ),
+      sessions ( id, date, start_time, end_time, status ),
       enrollments ( id, status )
     `)
     .order('created_at', { ascending: false })
