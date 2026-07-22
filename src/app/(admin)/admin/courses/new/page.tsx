@@ -12,11 +12,13 @@ export default async function NewCoursePage({
 
   // Return to the origin on Cancel / breadcrumb, so Schedule → New → Cancel
   // lands back on Schedule rather than the courses list.
+  // Allowlist the origin — only known keys thread through to Cancel / the
+  // post-save breadcrumb; anything else falls back to the courses list.
   const from = (await searchParams).from
   const origin =
     from === 'schedule'
-      ? { href: '/admin/schedule', label: 'Schedule' }
-      : { href: '/admin/courses', label: 'Courses' }
+      ? { key: 'schedule' as const, href: '/admin/schedule', label: 'Schedule' }
+      : { key: undefined, href: '/admin/courses', label: 'Courses' }
 
   const [{ data: courseTypes }, { data: instructors }] = await Promise.all([
     supabase.from('course_types').select('id, name, short_code, max_students').eq('is_active', true).order('name'),
@@ -38,7 +40,7 @@ export default async function NewCoursePage({
         courseTypes={courseTypes}
         instructors={instructors ?? []}
         cancelHref={origin.href}
-        fromParam={from}
+        fromParam={origin.key}
       />
     </div>
   )
