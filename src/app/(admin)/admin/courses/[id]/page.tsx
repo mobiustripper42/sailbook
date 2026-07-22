@@ -31,10 +31,17 @@ export default async function CourseDetailPage({
   searchParams: Promise<{ from?: string }>
 }) {
   const { id } = await params
-  // Context-aware breadcrumb: arriving from Schedule keeps you in that context.
-  const fromSchedule = (await searchParams).from === 'schedule'
-  const backHref = fromSchedule ? '/admin/schedule' : '/admin/courses'
-  const backLabel = fromSchedule ? 'Schedule' : 'Courses'
+  // Context-aware breadcrumb: arriving from Schedule or the Dashboard keeps you
+  // in that context on the way back.
+  const from = (await searchParams).from
+  const origin =
+    from === 'schedule'
+      ? { href: '/admin/schedule', label: 'Schedule' }
+      : from === 'dashboard'
+        ? { href: '/admin/dashboard', label: 'Dashboard' }
+        : { href: '/admin/courses', label: 'Courses' }
+  const backHref = origin.href
+  const backLabel = origin.label
   const supabase = await createClient()
 
   const { data: course } = await supabase
