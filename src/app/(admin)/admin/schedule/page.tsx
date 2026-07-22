@@ -124,7 +124,7 @@ export default async function AdminSchedulePage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Schedule</h1>
         <Button asChild>
-          <Link href="/admin/courses/new">New Course</Link>
+          <Link href="/admin/courses/new?from=schedule">New Course</Link>
         </Button>
       </div>
       <ScheduleView sessions={sessions} />

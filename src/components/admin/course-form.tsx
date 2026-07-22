@@ -25,6 +25,12 @@ type SessionRow = { date: string; start_time: string; end_time: string; location
 type Props = {
   courseTypes: CourseTypeOption[]
   instructors: InstructorOption[]
+  // Where Cancel returns to — set from the ?from origin so Schedule → New →
+  // Cancel lands back on Schedule, not the courses list. Defaults to the list.
+  cancelHref?: string
+  // The raw origin key (e.g. 'schedule'), forwarded to createCourse so the
+  // post-save course page keeps the same breadcrumb context.
+  fromParam?: string
 }
 
 const DEFAULT_SESSION: SessionRow = { date: '', start_time: '08:00', end_time: '16:00', location: '' }
@@ -72,7 +78,7 @@ function generateRecurringSessions(opts: {
   return out
 }
 
-export default function CourseForm({ courseTypes, instructors }: Props) {
+export default function CourseForm({ courseTypes, instructors, cancelHref = '/admin/courses', fromParam }: Props) {
   const router = useRouter()
   const [error, formAction, pending] = useActionState(createCourse, null)
   const [sessions, setSessions] = useState<SessionRow[]>([{ ...DEFAULT_SESSION }])
@@ -139,6 +145,7 @@ export default function CourseForm({ courseTypes, instructors }: Props) {
 
   return (
     <form action={formAction} className="space-y-6" onChange={() => setIsDirty(true)}>
+      {fromParam && <input type="hidden" name="from" value={fromParam} />}
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <section className="space-y-4">
@@ -383,7 +390,7 @@ export default function CourseForm({ courseTypes, instructors }: Props) {
         <Button
           type="button"
           variant="ghost"
-          onClick={() => { if (confirmDiscard()) router.push('/admin/courses') }}
+          onClick={() => { if (confirmDiscard()) router.push(cancelHref) }}
         >
           Cancel
         </Button>

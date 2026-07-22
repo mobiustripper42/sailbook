@@ -53,7 +53,10 @@ export async function createCourse(prevState: string | null, formData: FormData)
   }
 
   revalidatePath('/admin/courses')
-  redirect(`/admin/courses/${course.id}`)
+  // Preserve the origin (e.g. ?from=schedule) so the new course's breadcrumb
+  // keeps the same context the operator started from.
+  const from = formData.get('from') as string | null
+  redirect(`/admin/courses/${course.id}${from ? `?from=${encodeURIComponent(from)}` : ''}`)
 }
 
 export async function updateCourse(id: string, prevState: string | null, formData: FormData) {
