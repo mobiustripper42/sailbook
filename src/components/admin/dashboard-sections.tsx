@@ -47,14 +47,6 @@ function clock(time: string): string {
   return m === 0 ? `${hour}${ampm}` : `${hour}:${String(m).padStart(2, '0')}${ampm}`
 }
 
-// call-time = 30 min before start, for the crew.
-function callTime(start: string): string {
-  const [h, m] = start.split(':').map(Number)
-  const total = h * 60 + m - 30
-  const norm = ((total % 1440) + 1440) % 1440
-  return clock(`${String(Math.floor(norm / 60)).padStart(2, '0')}:${String(norm % 60).padStart(2, '0')}`)
-}
-
 function dayHeader(dateStr: string, now: Date): string {
   const today = new Date(now)
   today.setHours(0, 0, 0, 0)
@@ -132,14 +124,19 @@ export function TodayOnTheWater({ sessions }: { sessions: DashSession[] }) {
             <ul className="divide-y">
               {sessions.map((s) => (
                 <li key={s.id} className="flex items-start gap-3 py-2.5 first:pt-0 last:pb-0">
-                  <div className="w-20 shrink-0 text-sm tabular-nums">
+                  <div className="w-16 shrink-0 text-sm tabular-nums">
                     <div className="font-medium">{clock(s.startTime)}</div>
                     <div className="text-xs text-muted-foreground">–{clock(s.endTime)}</div>
-                    <div className="text-[10px] text-muted-foreground">call {callTime(s.startTime)}</div>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium">
-                      {s.courseName}
+                      {s.courseId ? (
+                        <Link href={`/admin/courses/${s.courseId}?from=dashboard`} className="hover:underline">
+                          {s.courseName}
+                        </Link>
+                      ) : (
+                        s.courseName
+                      )}
                       <TypeChip code={s.shortCode} />
                     </div>
                     <div className="truncate text-xs text-muted-foreground">
@@ -199,7 +196,13 @@ export function RestOfWeek({ sessions, now }: { sessions: DashSession[]; now: Da
                       <li key={s.id} className="flex items-center gap-3 py-2 text-sm">
                         <span className="w-14 shrink-0 tabular-nums text-muted-foreground">{clock(s.startTime)}</span>
                         <span className="min-w-0 flex-1 truncate">
-                          {s.courseName}
+                          {s.courseId ? (
+                            <Link href={`/admin/courses/${s.courseId}?from=dashboard`} className="hover:underline">
+                              {s.courseName}
+                            </Link>
+                          ) : (
+                            s.courseName
+                          )}
                           <span className="text-muted-foreground"> · {s.instructorName ?? <Unassigned />}</span>
                         </span>
                         <span className="shrink-0 tabular-nums text-muted-foreground">
@@ -243,7 +246,7 @@ export function FillingNow({ courses }: { courses: FillingCourse[] }) {
                   c.daysUntilStart === 0 ? 'starts today' : c.daysUntilStart === 1 ? 'starts tomorrow' : `starts in ${c.daysUntilStart}d`
                 return (
                   <li key={c.id}>
-                    <Link href={`/admin/courses/${c.id}`} className="group block">
+                    <Link href={`/admin/courses/${c.id}?from=dashboard`} className="group block">
                       <div className="flex items-center justify-between gap-2 text-sm">
                         <span className="min-w-0 truncate font-medium group-hover:underline">
                           {c.name}
@@ -298,7 +301,15 @@ export function JustEnrolled({ items }: { items: JustEnrolledItem[] }) {
                       {item.initials}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{item.studentName}</p>
+                      <p className="truncate text-sm font-medium">
+                        {item.studentId ? (
+                          <Link href={`/admin/students/${item.studentId}`} className="hover:underline">
+                            {item.studentName}
+                          </Link>
+                        ) : (
+                          item.studentName
+                        )}
+                      </p>
                       <p className="truncate text-xs text-muted-foreground">{item.courseName}</p>
                     </div>
                     <span className={cn('shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-medium', chip.cls)}>

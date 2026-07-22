@@ -54,6 +54,7 @@ test.describe('Admin dashboard — cancellation requests widget', () => {
     const cancelCard = page.getByRole('link').filter({ hasText: /Cancellation request/ })
     await expect(cancelCard).toBeVisible()
     await expect(cancelCard).toContainText(courseTitle)
-    await expect(cancelCard).toHaveAttribute('href', '/admin/courses')
+    // Deep-links the previewed course (this freshly-cancelled one), from=dashboard.
+    await expect(cancelCard).toHaveAttribute('href', `/admin/courses/${courseId}?from=dashboard`)
   })
 })

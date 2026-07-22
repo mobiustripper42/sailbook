@@ -58,7 +58,7 @@ async function getNeedsYou(client: Client, now: Date): Promise<NeedsYouItem[]> {
     client
       .from('enrollments')
       .select(
-        'id, student:profiles!enrollments_student_id_fkey ( first_name, last_name ), course:courses ( title, course_types ( name ) )',
+        'id, student:profiles!enrollments_student_id_fkey ( first_name, last_name ), course:courses ( id, title, course_types ( name ) )',
         { count: 'exact' },
       )
       .eq('status', 'cancel_requested')
@@ -145,7 +145,7 @@ async function getNeedsYou(client: Client, now: Date): Promise<NeedsYouItem[]> {
   if (cancelCount > 0) {
     const first = cancellations.data?.[0]
     const student = first?.student as unknown as { first_name: string; last_name: string } | null
-    const course = first?.course as unknown as { title: string | null; course_types: { name: string } | null } | null
+    const course = first?.course as unknown as { id: string; title: string | null; course_types: { name: string } | null } | null
     const detail = student
       ? `${student.first_name} ${student.last_name} · ${course?.title ?? course?.course_types?.name ?? 'a course'}`
       : 'Awaiting your review'
@@ -155,7 +155,8 @@ async function getNeedsYou(client: Client, now: Date): Promise<NeedsYouItem[]> {
       count: cancelCount,
       title: cancelCount === 1 ? 'Cancellation request' : 'Cancellation requests',
       detail,
-      href: '/admin/courses',
+      // Deep-link the previewed course; the queue itself has no dedicated page.
+      href: course?.id ? `/admin/courses/${course.id}?from=dashboard` : '/admin/courses',
       cta: 'Handle',
     })
   }
@@ -346,6 +347,7 @@ async function getFillingNow(client: Client, now: Date): Promise<FillingCourse[]
 
 export type JustEnrolledItem = {
   id: string
+  studentId: string | null
   studentName: string
   initials: string
   courseName: string
@@ -363,7 +365,7 @@ async function getJustEnrolled(client: Client, limit = 6): Promise<JustEnrolledI
       .from('enrollments')
       .select(`
         id, enrolled_at, status,
-        student:profiles!enrollments_student_id_fkey ( first_name, last_name ),
+        student:profiles!enrollments_student_id_fkey ( id, first_name, last_name ),
         course:courses ( title, course_types ( name ) ),
         payments ( status )
       `)
@@ -374,7 +376,7 @@ async function getJustEnrolled(client: Client, limit = 6): Promise<JustEnrolledI
       .from('waitlist_entries')
       .select(`
         id, created_at,
-        student:profiles!waitlist_entries_student_id_fkey ( first_name, last_name ),
+        student:profiles!waitlist_entries_student_id_fkey ( id, first_name, last_name ),
         course:courses ( title, course_types ( name ) )
       `)
       .order('created_at', { ascending: false })
@@ -385,13 +387,14 @@ async function getJustEnrolled(client: Client, limit = 6): Promise<JustEnrolledI
   logIfError('just enrolled — waitlist', waitlist.error)
 
   const fromEnrollments: (JustEnrolledItem & { ts: number })[] = (enrollments.data ?? []).map((e) => {
-    const student = e.student as unknown as { first_name: string; last_name: string } | null
+    const student = e.student as unknown as { id: string; first_name: string; last_name: string } | null
     const course = e.course as unknown as { title: string | null; course_types: { name: string } | null } | null
     const payments = (e.payments as unknown as { status: string }[]) ?? []
     const paid = payments.some((p) => p.status === 'succeeded')
     const when = e.enrolled_at ?? ''
     return {
       id: `e_${e.id}`,
+      studentId: student?.id ?? null,
       studentName: student ? `${student.first_name} ${student.last_name}` : '—',
       initials: student ? initialsOf(student.first_name, student.last_name) : '—',
       courseName: course?.title ?? course?.course_types?.name ?? '—',
@@ -402,10 +405,11 @@ async function getJustEnrolled(client: Client, limit = 6): Promise<JustEnrolledI
   })
 
   const fromWaitlist: (JustEnrolledItem & { ts: number })[] = (waitlist.data ?? []).map((w) => {
-    const student = w.student as unknown as { first_name: string; last_name: string } | null
+    const student = w.student as unknown as { id: string; first_name: string; last_name: string } | null
     const course = w.course as unknown as { title: string | null; course_types: { name: string } | null } | null
     return {
       id: `w_${w.id}`,
+      studentId: student?.id ?? null,
       studentName: student ? `${student.first_name} ${student.last_name}` : '—',
       initials: student ? initialsOf(student.first_name, student.last_name) : '—',
       courseName: course?.title ?? course?.course_types?.name ?? '—',
@@ -420,6 +424,7 @@ async function getJustEnrolled(client: Client, limit = 6): Promise<JustEnrolledI
     .slice(0, limit)
     .map((m): JustEnrolledItem => ({
       id: m.id,
+      studentId: m.studentId,
       studentName: m.studentName,
       initials: m.initials,
       courseName: m.courseName,
