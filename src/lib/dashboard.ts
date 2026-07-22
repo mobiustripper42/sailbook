@@ -18,6 +18,12 @@ function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10)
 }
 
+// Mirror low-enrollment.ts: a query error must be logged, not silently read as
+// "no data" — otherwise a transient failure renders a misleadingly-empty board.
+function logIfError(label: string, error: { message: string } | null): void {
+  if (error) console.error(`[dashboard] ${label} failed:`, error.message)
+}
+
 function confirmedCount(enrollments: { status: string }[]): number {
   return enrollments.filter((e) => e.status === 'confirmed').length
 }
@@ -63,6 +69,11 @@ async function getNeedsYou(client: Client, now: Date): Promise<NeedsYouItem[]> {
       .eq('status', 'missed')
       .is('makeup_session_id', null),
   ])
+
+  logIfError('unassigned courses', unassigned.error)
+  logIfError('pending confirmations', pending.error)
+  logIfError('cancellation requests', cancellations.error)
+  logIfError('missed sessions', missed.error)
 
   const items: NeedsYouItem[] = []
 
@@ -226,7 +237,7 @@ async function getWeekSessions(
   const todayISO = isoDate(now)
   const horizonISO = isoDate(new Date(now.getTime() + 7 * DAY_MS))
 
-  const { data } = await client
+  const { data, error } = await client
     .from('sessions')
     .select(`
       id, date, start_time, end_time,
@@ -244,6 +255,7 @@ async function getWeekSessions(
     .order('date')
     .order('start_time')
 
+  logIfError('week sessions', error)
   const all = ((data ?? []) as unknown as RawSession[]).map(shapeSession)
   return {
     today: all.filter((s) => s.date === todayISO),
@@ -269,7 +281,7 @@ async function getFillingNow(client: Client, now: Date): Promise<FillingCourse[]
   const todayISO = isoDate(now)
   const horizonISO = isoDate(new Date(now.getTime() + FILLING_HORIZON_DAYS * DAY_MS))
 
-  const { data } = await client
+  const { data, error } = await client
     .from('courses')
     .select(`
       id, title, capacity,
@@ -280,6 +292,7 @@ async function getFillingNow(client: Client, now: Date): Promise<FillingCourse[]
     `)
     .eq('status', 'active')
 
+  logIfError('filling now', error)
   const rows = (data ?? []) as unknown as {
     id: string
     title: string | null
@@ -368,6 +381,9 @@ async function getJustEnrolled(client: Client, limit = 6): Promise<JustEnrolledI
       .limit(limit),
   ])
 
+  logIfError('just enrolled — enrollments', enrollments.error)
+  logIfError('just enrolled — waitlist', waitlist.error)
+
   const fromEnrollments: (JustEnrolledItem & { ts: number })[] = (enrollments.data ?? []).map((e) => {
     const student = e.student as unknown as { first_name: string; last_name: string } | null
     const course = e.course as unknown as { title: string | null; course_types: { name: string } | null } | null
@@ -431,6 +447,8 @@ export async function getDashboardData(client: Client, now: Date = new Date()): 
     getJustEnrolled(client),
     client.from('courses').select('id', { count: 'exact', head: true }).eq('status', 'active'),
   ])
+
+  logIfError('active courses count', activeCourses.error)
 
   return {
     needsYou,

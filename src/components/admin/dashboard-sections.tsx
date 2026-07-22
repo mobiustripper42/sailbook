@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
-import { EmptyState } from '@/components/empty-state'
 import { cn } from '@/lib/utils'
 import type {
   NeedsYouItem,
@@ -288,7 +287,7 @@ export function JustEnrolled({ items }: { items: JustEnrolledItem[] }) {
       <Card>
         <CardContent>
           {items.length === 0 ? (
-            <EmptyState message="No recent enrollments." />
+            <p className="text-sm text-muted-foreground">No recent enrollments.</p>
           ) : (
             <ul className="space-y-2.5">
               {items.map((item) => {
