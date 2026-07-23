@@ -6,7 +6,7 @@
 -- Run with: supabase test db
 
 BEGIN;
-SELECT plan(12);
+SELECT plan(15);
 
 -- Reuse authenticate() helper from 01_rls_profiles.sql.
 -- If running this file standalone, recreate it here.
@@ -222,7 +222,56 @@ SELECT is(
   'invalid status: row was NOT changed'
 );
 
--- ─── 6. makeup_session_id is preserved across saves (DEC-005/006) ─────────────
+-- ─── 6. Unmatched enrollment_id is rejected atomically ───────────────────────
+-- A batch mixing a valid record with an enrollment that has no row for this
+-- session must reject the WHOLE batch (no partial write) and report the error,
+-- not silently no-op and claim success.
+
+SELECT tests.authenticate(
+  'a1000000-0000-0000-0000-000000000001',
+  p_is_admin => true
+);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  public.save_attendance(
+    '99000000-0000-0000-0000-000000000021',
+    '[{"enrollment_id": "99000000-0000-0000-0000-000000000030", "status": "excused", "notes": null},
+      {"enrollment_id": "99000000-0000-0000-0000-0000000000ff", "status": "attended", "notes": null}]'::jsonb
+  ),
+  'No attendance record for enrollment 99000000-0000-0000-0000-0000000000ff in this session.',
+  'unmatched enrollment_id: returns error for the missing row'
+);
+
+RESET ROLE;
+SELECT is(
+  (SELECT status FROM public.session_attendance
+   WHERE session_id = '99000000-0000-0000-0000-000000000021'
+     AND enrollment_id = '99000000-0000-0000-0000-000000000030'),
+  'missed',
+  'unmatched enrollment_id: valid sibling record was NOT written (atomic)'
+);
+
+-- ─── 7. Malformed enrollment_id gets a friendly error, not a cast exception ───
+
+SELECT tests.authenticate(
+  'a1000000-0000-0000-0000-000000000001',
+  p_is_admin => true
+);
+SET LOCAL ROLE authenticated;
+
+SELECT is(
+  public.save_attendance(
+    '99000000-0000-0000-0000-000000000021',
+    '[{"enrollment_id": "not-a-uuid", "status": "attended", "notes": null}]'::jsonb
+  ),
+  'Invalid enrollment id: not-a-uuid.',
+  'malformed enrollment_id: returns friendly error string'
+);
+
+RESET ROLE;
+
+-- ─── 8. makeup_session_id is preserved across saves (DEC-005/006) ─────────────
 -- The (s1, e9) row started with makeup_session_id → s2 and has since been
 -- through two successful status changes. The link must be untouched.
 
