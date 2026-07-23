@@ -3,18 +3,10 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { fmtDateLong, fmtTime } from '@/lib/utils'
-import { attendanceStatusConfig } from '@/lib/attendance'
 import type { AttendanceStatus } from '@/lib/attendance'
 import SessionNotesForm from '@/components/instructor/session-notes-form'
+import AttendanceCapture from '@/components/instructor/attendance-capture'
 
 type StudentRow = {
   enrollment_id: string
@@ -25,6 +17,7 @@ type StudentRow = {
   email: string
   has_instructor_notes: boolean
   attendance_status: AttendanceStatus | null
+  attendance_notes: string | null
   makeup_session_id: string | null
   makeup_from_date: string | null
 }
@@ -82,7 +75,7 @@ export default async function InstructorSessionRosterPage({
   // Fetch attendance records for this session
   const { data: attendanceRecords } = await supabase
     .from('session_attendance')
-    .select('enrollment_id, status, makeup_session_id')
+    .select('enrollment_id, status, makeup_session_id, notes')
     .eq('session_id', id)
 
   const attendanceMap = new Map(
@@ -120,6 +113,7 @@ export default async function InstructorSessionRosterPage({
       email: profile.email,
       has_instructor_notes: !!profile.instructor_notes,
       attendance_status: (attendance?.status as AttendanceStatus) ?? null,
+      attendance_notes: attendance?.notes ?? null,
       makeup_session_id: attendance?.makeup_session_id ?? null,
       makeup_from_date: makeupMap.get(e.id) ?? null,
     }
@@ -169,74 +163,7 @@ export default async function InstructorSessionRosterPage({
           <CardTitle>Roster</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          {students.length === 0 ? (
-            <p className="px-6 py-4 text-sm text-muted-foreground">No students enrolled.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead className="hidden sm:table-cell">Email</TableHead>
-                  <TableHead>Attendance</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {students.map((s) => (
-                  <TableRow key={s.enrollment_id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/instructor/students/${s.student_id}`}
-                          className="hover:underline underline-offset-2"
-                        >
-                          {s.last_name}, {s.first_name}
-                        </Link>
-                        {s.has_instructor_notes && (
-                          <span
-                            className="inline-block w-1.5 h-1.5 rounded-full bg-primary shrink-0"
-                            title="Student left a note for their instructor"
-                          />
-                        )}
-                        {s.makeup_from_date && (
-                          <Badge variant="warn">
-                            Makeup from {fmtDateLong(s.makeup_from_date)}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {s.phone ?? '—'}
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell text-muted-foreground">
-                      {s.email}
-                    </TableCell>
-                    <TableCell>
-                      {s.attendance_status ? (
-                        <div className="flex items-center gap-2">
-                          <Badge variant={attendanceStatusConfig[s.attendance_status].variant}>
-                            {attendanceStatusConfig[s.attendance_status].label}
-                          </Badge>
-                          {s.attendance_status === 'missed' && !s.makeup_session_id && (
-                            <span className="text-xs text-destructive font-medium">
-                              Needs makeup
-                            </span>
-                          )}
-                          {s.attendance_status === 'missed' && s.makeup_session_id && (
-                            <span className="text-xs text-muted-foreground">
-                              Makeup scheduled
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <AttendanceCapture sessionId={session.id} students={students} readOnly={isCancelled} />
         </CardContent>
       </Card>
 

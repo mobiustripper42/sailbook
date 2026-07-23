@@ -720,6 +720,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      save_attendance: {
+        Args: { p_records: Json; p_session_id: string }
+        Returns: string
+      }
       update_session_notes: {
         Args: { p_notes: string; p_session_id: string }
         Returns: string
