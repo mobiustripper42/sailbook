@@ -176,6 +176,29 @@ test.describe('Instructor session roster', () => {
     await expect(studentRow.getByText('Upcoming')).toBeVisible();
   });
 
+  // DEC-037: instructor records attendance through the save_attendance RPC.
+  test('instructor records attendance and it persists on reload', async ({ page, browser }) => {
+    test.skip(test.info().project.name !== 'desktop');
+    test.setTimeout(120000);
+
+    const title = `PW Attendance ${runId()}`;
+    const { sessionId } = await createInstructorCourse(browser, { title });
+
+    await loginAs(page, 'pw_instructor@ltsc.test', '/instructor/dashboard');
+    await page.goto(`/instructor/sessions/${sessionId}`);
+
+    const studentRow = page.getByRole('row', { name: /pw_student@ltsc\.test/ });
+    // Flip the student's status from Upcoming → Attended via the row's select.
+    await studentRow.getByRole('combobox').click();
+    await page.getByRole('option', { name: 'Attended' }).click();
+    await page.getByRole('button', { name: 'Save attendance' }).click();
+    await expect(page.getByText('Attendance saved.')).toBeVisible({ timeout: 10000 });
+
+    // The RPC write persists across a reload.
+    await page.reload();
+    await expect(studentRow.getByText('Attended')).toBeVisible();
+  });
+
   test('back link returns to instructor dashboard', async ({ page, browser }) => {
     test.skip(test.info().project.name !== 'desktop');
     test.setTimeout(90000);

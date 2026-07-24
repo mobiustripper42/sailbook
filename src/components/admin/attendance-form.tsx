@@ -65,14 +65,16 @@ export default function AttendanceForm({ courseId, sessionId, students }: Props)
 
   function handleSave() {
     const payload = students.map((s) => ({
-      session_id: sessionId,
       enrollment_id: s.enrollment_id,
       status: (records[s.enrollment_id] ?? s.current_status) as 'expected' | 'attended' | 'missed' | 'excused',
       notes: s.notes,
     }))
 
     startTransition(async () => {
-      const result = await saveAttendance(courseId, sessionId, payload)
+      const result = await saveAttendance(sessionId, payload, [
+        `/admin/courses/${courseId}/sessions/${sessionId}/attendance`,
+        `/admin/courses/${courseId}`,
+      ])
       if (result.error) {
         setMessage(`Error: ${result.error}`)
       } else {

@@ -2,33 +2,35 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import type { AttendanceStatus } from '@/lib/attendance'
 
 type AttendanceRecord = {
-  session_id: string
   enrollment_id: string
-  status: 'expected' | 'attended' | 'missed' | 'excused'
+  status: AttendanceStatus
   notes: string | null
 }
 
-export async function saveAttendance(courseId: string, sessionId: string, records: AttendanceRecord[]) {
+// DEC-037: attendance writes go through the `save_attendance` SECURITY DEFINER
+// RPC — authorized for admin OR the assigned instructor, preserving the status
+// vocabulary and never touching makeup_session_id. Both the admin and the
+// instructor capture forms call this one path (the RPC authorizes admin too), so
+// there is a single tested write surface.
+export async function saveAttendance(
+  sessionId: string,
+  records: AttendanceRecord[],
+  revalidate: string[] = [],
+): Promise<{ error: string | null }> {
   const supabase = await createClient()
 
-  const { error } = await supabase
-    .from('session_attendance')
-    .upsert(
-      records.map((r) => ({
-        session_id: r.session_id,
-        enrollment_id: r.enrollment_id,
-        status: r.status,
-        notes: r.notes,
-        updated_at: new Date().toISOString(),
-      })),
-      { onConflict: 'session_id,enrollment_id' }
-    )
+  const { data, error } = await supabase.rpc('save_attendance', {
+    p_session_id: sessionId,
+    p_records: records,
+  })
 
   if (error) return { error: error.message }
+  // The RPC returns NULL on success, or an error string (auth / invalid status).
+  if (data) return { error: data }
 
-  revalidatePath(`/admin/courses/${courseId}/sessions/${sessionId}/attendance`)
-  revalidatePath(`/admin/courses/${courseId}`)
+  for (const path of revalidate) revalidatePath(path)
   return { error: null }
 }
