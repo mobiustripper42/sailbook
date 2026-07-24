@@ -224,6 +224,40 @@ test.describe('Instructor session roster', () => {
   });
 });
 
+// ─── Instructor Course View (#142) ────────────────────────────────────────────
+
+test.describe('Instructor course view', () => {
+  test('course page shows roster + sessions and links through to a session', async ({ page, browser }) => {
+    test.skip(test.info().project.name !== 'desktop');
+    test.setTimeout(120000);
+
+    const title = `PW Course View ${runId()}`;
+    const { courseId, sessionId } = await createInstructorCourse(browser, { title });
+
+    await loginAs(page, 'pw_instructor@ltsc.test', '/instructor/dashboard');
+    await page.goto(`/instructor/courses/${courseId}`);
+
+    await expect(page.getByRole('heading', { name: title })).toBeVisible();
+    await expect(page.getByText('Roster', { exact: true })).toBeVisible();
+    await expect(page.getByText('Sessions', { exact: true })).toBeVisible();
+
+    // Roster links each student to their instructor student-view.
+    await expect(page.locator('a[href^="/instructor/students/"]').first()).toBeVisible();
+
+    // The session row links to the roster/attendance page.
+    await page.locator(`a[href="/instructor/sessions/${sessionId}"]`).click();
+    await expect(page).toHaveURL(`/instructor/sessions/${sessionId}`);
+    await expect(page.getByText('Roster', { exact: true })).toBeVisible();
+  });
+
+  test('an instructor cannot view a course they do not teach', async ({ page }) => {
+    // pw_instructor teaches none of the seed courses (Mike's) → redirect away.
+    await loginAs(page, 'pw_instructor@ltsc.test', '/instructor/dashboard');
+    await page.goto('/instructor/courses/c1000000-0000-0000-0000-000000000001');
+    await expect(page.getByRole('heading', { name: 'Roster' })).not.toBeVisible({ timeout: 5000 });
+  });
+});
+
 // ─── Session Notes (Phase 4.6) ────────────────────────────────────────────────
 
 test.describe('Instructor session notes', () => {
