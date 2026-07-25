@@ -29,8 +29,8 @@ test.describe('ASA number — student view', () => {
     await loginAs(page, 'sam@ltsc.test', '/student/dashboard');
   });
 
-  test('Experience page shows ASA number', async ({ page }) => {
-    await page.goto('/student/history');
+  test('My Courses header shows ASA number', async ({ page }) => {
+    await page.goto('/student/my-courses');
     await expect(page.getByText(`ASA #: ${SAM_ASA}`)).toBeVisible();
   });
 });

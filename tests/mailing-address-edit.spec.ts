@@ -25,9 +25,10 @@ test.describe('Mailing address — student self-service', () => {
     await page.getByLabel('City').fill('Cleveland');
     await page.getByLabel('State').fill('oh'); // lower-case → should coerce to OH
     await page.getByLabel('ZIP').fill('44113');
-    await page.getByRole('button', { name: 'Save address' }).click();
+    // One save for the whole Account page (10.7) — no per-section button.
+    await page.getByRole('button', { name: 'Save changes' }).click();
 
-    await expect(page.getByText('Address updated.')).toBeVisible();
+    await expect(page.getByText('Account updated.')).toBeVisible();
 
     // Persists across reload, state normalized to 2-letter uppercase.
     await page.reload();
@@ -37,19 +38,21 @@ test.describe('Mailing address — student self-service', () => {
     await expect(page.getByLabel('ZIP')).toHaveValue('44113');
   });
 
-  test('incomplete address is blocked by native validation', async ({ page }) => {
+  test('incomplete address is rejected server-side', async ({ page }) => {
     await loginAs(page, 'pw_student2@ltsc.test', '/student/dashboard');
     await page.goto('/student/account');
 
-    // Street only — the required city/state/ZIP must block the submit natively.
+    // Address is optional on the consolidated Account form (10.7) — a student
+    // with no address must still be able to save their phone — but a
+    // partially-filled one has to be complete.
     await page.getByLabel('Street address').fill('1 Nowhere St');
     await page.getByLabel('City').fill('');
     await page.getByLabel('State').fill('');
     await page.getByLabel('ZIP').fill('');
-    await page.getByRole('button', { name: 'Save address' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
 
-    await expect(page.getByText('Address updated.')).not.toBeVisible();
-    await expect(page.getByLabel('City')).toHaveJSProperty('validity.valid', false);
+    await expect(page.getByText(/Street address, city, state, and ZIP are required/)).toBeVisible();
+    await expect(page.getByText('Account updated.')).toHaveCount(0);
   });
 });
 

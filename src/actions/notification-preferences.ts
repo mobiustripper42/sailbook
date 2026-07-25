@@ -4,10 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import {
   ADMIN_NOTIFICATION_EVENTS,
-  STUDENT_GLOBAL_KEY,
   isSMSEnabled,
   type AdminNotificationPreferences,
-  type StudentNotificationPreferences,
 } from '@/lib/notifications/preferences'
 
 // Read the existing JSONB value for the calling user. Used by the merge-and-
@@ -78,53 +76,5 @@ export async function updateAdminNotificationPreferences(
   if (error) return error.message
 
   revalidatePath('/admin/notification-preferences')
-  return null
-}
-
-/**
- * Updates the calling student's own notification preferences. Single global
- * { sms, email } block keyed under STUDENT_GLOBAL_KEY. Merges with existing
- * JSONB so admin keys on dual-role profiles aren't wiped.
- *
- * Returns `string | null` per DEC-015.
- */
-export async function updateStudentNotificationPreferences(
-  _: unknown,
-  formData: FormData,
-): Promise<string | null> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return 'Not authenticated.'
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('is_student')
-    .eq('id', user.id)
-    .maybeSingle()
-  if (!profile?.is_student) return 'Unauthorized.'
-
-  const existing = await readExistingPrefs(supabase, user.id)
-  const smsEnabled = isSMSEnabled()
-  const existingStudent = (existing[STUDENT_GLOBAL_KEY] as { sms?: boolean } | undefined) ?? {}
-
-  const studentBlock: StudentNotificationPreferences = {
-    [STUDENT_GLOBAL_KEY]: {
-      sms: smsEnabled
-        ? formData.get('student_sms') === 'on'
-        : existingStudent.sms ?? true,
-      email: formData.get('student_email') === 'on',
-    },
-  }
-
-  const merged = { ...existing, ...studentBlock }
-
-  const { error } = await supabase
-    .from('profiles')
-    .update({ notification_preferences: merged })
-    .eq('id', user.id)
-
-  if (error) return error.message
-
-  revalidatePath('/student/account')
   return null
 }

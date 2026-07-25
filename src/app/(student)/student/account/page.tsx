@@ -1,8 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import StudentAccountForm from '@/components/student/student-account-form'
-import NotificationPreferencesSection from '@/components/student/notification-preferences-section'
-import MailingAddressForm from '@/components/student/mailing-address-form'
 import { getMyAddress } from '@/actions/address'
 import { isSMSEnabled, normalizeStudentPreferences } from '@/lib/notifications/preferences'
 
@@ -13,7 +11,7 @@ export default async function StudentAccountPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: profile }, { data: codes }] = await Promise.all([
+  const [{ data: profile }, { data: codes }, address] = await Promise.all([
     supabase
       .from('profiles')
       .select('first_name, last_name, phone, asa_number, experience_level, instructor_notes, notification_preferences')
@@ -25,34 +23,27 @@ export default async function StudentAccountPage() {
       .eq('category', 'experience_level')
       .eq('is_active', true)
       .order('sort_order'),
+    getMyAddress(),
   ])
 
   if (!profile) redirect('/login')
-
-  const address = await getMyAddress()
-  const initialNotifPrefs = normalizeStudentPreferences(profile.notification_preferences)
 
   return (
     <div className="space-y-8 max-w-3xl">
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold">Account</h1>
         <p className="text-sm text-muted-foreground">
-          Update your name, contact info, and sailing background.
+          Your name, contact info, mailing address, and notification settings — one save for the whole page.
         </p>
       </div>
 
       <StudentAccountForm
         profile={profile}
+        address={address}
+        initialPrefs={normalizeStudentPreferences(profile.notification_preferences)}
         experienceCodes={codes ?? []}
         smsEnabled={isSMSEnabled()}
       />
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Mailing address</h2>
-        <MailingAddressForm initial={address} />
-      </section>
-
-      <NotificationPreferencesSection initialPrefs={initialNotifPrefs} smsEnabled={isSMSEnabled()} />
     </div>
   )
 }

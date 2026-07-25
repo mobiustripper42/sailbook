@@ -140,6 +140,18 @@ INSERT INTO auth.users (
    '', '', '', '', '', '',
    '{"provider":"email","providers":["email"]}',
    '{"first_name":"PW","last_name":"Student2","is_admin":false,"is_instructor":false,"is_student":true}',
+   now(), now()),
+
+  -- Playwright: third student test user. Exists so account-page mutation tests
+  -- (10.7 single save) don't race pw_student2's mailing-address tests under
+  -- fullyParallel workers.
+  ('f1000000-0000-0000-0000-000000000005',
+   '00000000-0000-0000-0000-000000000000',
+   'authenticated', 'authenticated', 'pw_student3@ltsc.test',
+   extensions.crypt('Sailbook12345', extensions.gen_salt('bf')), now(),
+   '', '', '', '', '', '',
+   '{"provider":"email","providers":["email"]}',
+   '{"first_name":"PW","last_name":"Student3","is_admin":false,"is_instructor":false,"is_student":true}',
    now(), now());
 
 INSERT INTO auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at) VALUES
@@ -153,7 +165,8 @@ INSERT INTO auth.identities (id, user_id, provider_id, identity_data, provider, 
   ('f1000000-0000-0000-0000-000000000001','f1000000-0000-0000-0000-000000000001','pw_admin@ltsc.test',     '{"sub":"f1000000-0000-0000-0000-000000000001","email":"pw_admin@ltsc.test"}',     'email',now(),now(),now()),
   ('f1000000-0000-0000-0000-000000000002','f1000000-0000-0000-0000-000000000002','pw_instructor@ltsc.test','{"sub":"f1000000-0000-0000-0000-000000000002","email":"pw_instructor@ltsc.test"}','email',now(),now(),now()),
   ('f1000000-0000-0000-0000-000000000003','f1000000-0000-0000-0000-000000000003','pw_student@ltsc.test',   '{"sub":"f1000000-0000-0000-0000-000000000003","email":"pw_student@ltsc.test"}',   'email',now(),now(),now()),
-  ('f1000000-0000-0000-0000-000000000004','f1000000-0000-0000-0000-000000000004','pw_student2@ltsc.test',  '{"sub":"f1000000-0000-0000-0000-000000000004","email":"pw_student2@ltsc.test"}',  'email',now(),now(),now());
+  ('f1000000-0000-0000-0000-000000000004','f1000000-0000-0000-0000-000000000004','pw_student2@ltsc.test',  '{"sub":"f1000000-0000-0000-0000-000000000004","email":"pw_student2@ltsc.test"}',  'email',now(),now(),now()),
+  ('f1000000-0000-0000-0000-000000000005','f1000000-0000-0000-0000-000000000005','pw_student3@ltsc.test',  '{"sub":"f1000000-0000-0000-0000-000000000005","email":"pw_student3@ltsc.test"}',  'email',now(),now(),now());
 
 -- All seed users share Eric's phone number — every notification triggered in
 -- dev fires an SMS to him, which is the smoke test built into the seed data.
@@ -172,7 +185,8 @@ INSERT INTO public.profiles (id, email, first_name, last_name, phone, is_admin, 
   ('f1000000-0000-0000-0000-000000000001', 'pw_admin@ltsc.test',     'PW',     'Admin',      '+14403631199', true,  false, false, null,           null,     'dark'),
   ('f1000000-0000-0000-0000-000000000002', 'pw_instructor@ltsc.test','PW',     'Instructor', '+14403631199', false, true,  false, null,           null,     'dark'),
   ('f1000000-0000-0000-0000-000000000003', 'pw_student@ltsc.test',   'PW',     'Student',    '+14403631199', false, false, true,  null,           null,     'dark'),
-  ('f1000000-0000-0000-0000-000000000004', 'pw_student2@ltsc.test',  'PW',     'Student2',   '+14403631199', false, false, true,  null,           null,     'dark')
+  ('f1000000-0000-0000-0000-000000000004', 'pw_student2@ltsc.test',  'PW',     'Student2',   '+14403631199', false, false, true,  null,           null,     'dark'),
+  ('f1000000-0000-0000-0000-000000000005', 'pw_student3@ltsc.test',  'PW',     'Student3',   '+14403631199', false, false, true,  null,           null,     'dark')
 ON CONFLICT (id) DO UPDATE SET
   email             = EXCLUDED.email,
   first_name        = EXCLUDED.first_name,
@@ -425,9 +439,11 @@ INSERT INTO public.session_attendance (session_id, enrollment_id, status) VALUES
 --   pw_instructor@ltsc.test → Playwright instructor test user
 --   pw_student@ltsc.test    → Playwright student test user
 --   pw_student2@ltsc.test   → Playwright second student (multi-student capacity tests)
+--   pw_student3@ltsc.test   → Playwright third student (account-page mutation tests, 10.7)
 --
 -- Playwright UUIDs (f1 block)
 --   f1000000-0000-0000-0000-000000000001  pw_admin
 --   f1000000-0000-0000-0000-000000000002  pw_instructor
 --   f1000000-0000-0000-0000-000000000003  pw_student
 --   f1000000-0000-0000-0000-000000000004  pw_student2
+--   f1000000-0000-0000-0000-000000000005  pw_student3

@@ -101,6 +101,9 @@ export async function adminEnrollStudent(
   await notifyEnrollmentConfirmed(enrollment.id)
 
   revalidatePath(`/admin/courses/${courseId}`)
+  // Also reachable from the student's page (#137) — refresh that view's
+  // course history and its enrollable-course picker.
+  revalidatePath(`/admin/students/${studentId}`)
   return null
 }
 

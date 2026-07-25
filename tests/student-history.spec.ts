@@ -5,45 +5,57 @@ import { loginAs } from './helpers';
 const SAM_ID = 'a1000000-0000-0000-0000-000000000005';
 const SESSION_WEEKEND_MAY_1 = 'd1000000-0000-0000-0000-000000000001';
 
-// ─── Student — Experience page ───────────────────────────────────────────────
+// ─── Student — course history on My Courses (10.7) ───────────────────────────
+//
+// The standalone Experience page folded into My Courses: past courses are the
+// `past` filter, and /student/history is a redirect.
 
-test.describe('Student — Experience page', () => {
+test.describe('Student — course history on My Courses', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'sam@ltsc.test', '/student/dashboard');
   });
 
-  test('Experience link appears in sidebar nav', async ({ page }) => {
-    await expect(page.getByRole('link', { name: 'Experience' })).toBeVisible();
+  test('My Courses link appears in sidebar nav', async ({ page }) => {
+    await expect(page.getByRole('link', { name: 'My Courses' })).toBeVisible();
   });
 
-  test('Experience page loads with course history', async ({ page }) => {
+  test('/student/history redirects to My Courses', async ({ page }) => {
     await page.goto('/student/history');
-    await expect(page.getByRole('heading', { name: 'Experience' })).toBeVisible();
-    // Sam has 3 seed enrollments — expect at least one course card
+    await page.waitForURL('/student/my-courses');
+    await expect(page.getByRole('heading', { name: 'My Courses' })).toBeVisible();
+  });
+
+  test('past courses appear under the past filter', async ({ page }) => {
+    await page.goto('/student/my-courses');
+    await page.getByRole('button', { name: 'all' }).click();
+    // Sam has 3 seed enrollments spanning past and upcoming courses.
     await expect(page.getByText('ASA 101 - Weekend Intensive (May)')).toBeVisible();
     await expect(page.getByText('ASA 101 - Weekend (April)')).toBeVisible();
   });
 
-  test('Experience page shows enrollment status badges', async ({ page }) => {
-    await page.goto('/student/history');
-    // Sam completed April course
-    await expect(page.getByText('Completed')).toBeVisible();
+  test('My Courses shows enrollment status badges', async ({ page }) => {
+    await page.goto('/student/my-courses');
+    await page.getByRole('button', { name: 'all' }).click();
+    // Sam completed the April course
+    await expect(page.getByText('Completed').first()).toBeVisible();
   });
 
   test('course title links to the course detail page', async ({ page }) => {
-    await page.goto('/student/history');
-    const courseLink = page.getByRole('link', { name: 'ASA 101 - Weekend (April)' });
+    await page.goto('/student/my-courses');
+    await page.getByRole('button', { name: 'all' }).click();
+    const courseLink = page.getByRole('link', { name: 'ASA 101 - Weekend (April)' }).first();
     await expect(courseLink).toBeVisible();
     await expect(courseLink).toHaveAttribute('href', /^\/student\/courses\/[0-9a-f-]+$/);
   });
 });
 
-test.describe('Student — Experience page (mobile)', () => {
-  test('Experience link appears in mobile drawer', async ({ page }) => {
+test.describe('Student — My Courses (mobile)', () => {
+  test('My Courses link appears in mobile drawer', async ({ page }) => {
     test.skip((page.viewportSize()?.width ?? 768) >= 768, 'mobile-only test');
     await loginAs(page, 'sam@ltsc.test', '/student/dashboard');
     await page.getByRole('button', { name: 'Open navigation' }).click();
-    await expect(page.getByRole('link', { name: 'Experience' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'My Courses' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Experience' })).toHaveCount(0);
   });
 });
 

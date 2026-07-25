@@ -9,8 +9,6 @@ import {
   Bell,
   Search,
   GraduationCap,
-  ClipboardCheck,
-  Award,
   CircleUser,
   type LucideIcon,
 } from 'lucide-react'
@@ -40,9 +38,8 @@ export const ROLE_HOME: Record<Role, string> = {
   student: '/student/dashboard',
 }
 
-// Nav item lists match the pre-redesign navs 1:1 (task 10.2 is shell
-// unification only). Route/tab changes land later: /schedule merge is 10.3,
-// dropping student Attendance/Experience is 10.7, the audit item is 10.8.
+// Route/tab changes land per task: /schedule merge was 10.3, dropping the
+// student Attendance/Experience tabs was 10.7, the audit item is 10.8.
 export const NAV_ITEMS: Record<Role, NavItem[]> = {
   admin: [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -62,9 +59,9 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   student: [
     { href: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/student/courses', label: 'Browse Courses', icon: Search },
+    // My Courses absorbed Attendance + Experience in 10.7 — schedule,
+    // attendance status, and past courses are one destination now.
     { href: '/student/my-courses', label: 'My Courses', icon: GraduationCap },
-    { href: '/student/attendance', label: 'Attendance', icon: ClipboardCheck },
-    { href: '/student/history', label: 'Experience', icon: Award },
     { href: '/student/account', label: 'Account', icon: CircleUser },
   ],
 }
