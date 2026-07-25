@@ -34,6 +34,10 @@ test.describe('My Courses — schedule and attendance together', () => {
 });
 
 test.describe('Account — one save for the whole page', () => {
+  // These mutate pw_student3's profile row, so they must not run against each
+  // other in parallel workers.
+  test.describe.configure({ mode: 'serial' });
+
   test.beforeEach(async ({}, testInfo) => {
     test.skip(testInfo.project.name !== 'desktop', 'profile mutation — desktop only');
   });
@@ -78,6 +82,40 @@ test.describe('Account — one save for the whole page', () => {
     await expect(page.getByLabel('Receive email notifications')).toBeChecked({
       checked: !emailWasChecked,
     });
+  });
+
+  test('saving does not wipe a dual-role profile\'s admin preferences', async ({ page, request }) => {
+    // The reason updateStudentAccount merges instead of overwriting: on a
+    // profile that is both admin and student, the student save must leave the
+    // admin block alone.
+    const setRole = (value: boolean) =>
+      request.post('http://localhost:3300/api/test/set-role-flag', {
+        data: { email: 'pw_student3@ltsc.test', flag: 'is_admin', value },
+      });
+
+    await setRole(true);
+    await request.post('http://localhost:3300/api/test/set-notification-prefs', {
+      data: {
+        email: 'pw_student3@ltsc.test',
+        prefs: {
+          admin_enrollment_alert: { sms: false, email: false },
+          student_global: { sms: true, email: true },
+        },
+      },
+    });
+
+    try {
+      await loginAs(page, 'pw_student3@ltsc.test', '/admin/dashboard');
+      await page.goto('/student/account');
+      await page.getByRole('button', { name: 'Save changes' }).click();
+      await expect(page.getByText('Account updated.')).toBeVisible();
+
+      // The admin block survived the student-side save.
+      await page.goto('/admin/notification-preferences');
+      await expect(page.locator('input[name="admin_enrollment_alert__email"]')).not.toBeChecked();
+    } finally {
+      await setRole(false);
+    }
   });
 
   test('an invalid phone blocks the whole save', async ({ page }) => {

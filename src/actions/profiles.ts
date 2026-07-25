@@ -133,6 +133,11 @@ export async function updateStudentAccount(
 
   // Read the current JSONB so a dual-role profile keeps its admin keys, and
   // so a hidden SMS checkbox doesn't wipe a stored SMS preference.
+  //
+  // Read-then-merge-then-write is not atomic: a dual-role user saving this form
+  // while /admin/notification-preferences saves in another tab is last-write-
+  // wins on the column. Accepted — it's one user editing their own row at a
+  // single-school scale. Move to jsonb_set (or an RPC) if that stops holding.
   const { data: existing } = await supabase
     .from('profiles')
     .select('notification_preferences')
