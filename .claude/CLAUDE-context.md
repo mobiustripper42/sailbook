@@ -168,6 +168,8 @@ The migration **discipline** lives in the shell's `## Migration Protocol`. This 
 
 Project-specific debugging gotchas. The shell's `## Workflow Notes` holds the universal rules.
 
+- **Phase 10 runs on `feature/ui-redesign` in the primary checkout — no dedicated worktree.** Cut every phase-10 task branch from `feature/ui-redesign` and base its PR there, not `main`. The phase lands on `main` as one integration merge at close (10.11). The old `/home/eric/sailbook-redesign` worktree is retired.
+- **Worktrees are for hotfixes on `main` only.** When something on `main` needs fixing mid-phase, cut a linked worktree for it (`git worktree add ../sailbook-hotfix -b task/<n>-fix main`) so the redesign checkout isn't disturbed, and remove it when the PR merges. The standing `.sessions-worktree/` (orphan `sessions` branch, DEC-S014) is separate and always stays.
 - **Before starting `npm run dev`:** run `curl -s -o /dev/null -w "%{http_code}" http://localhost:3300/` first. If it returns 200, skip the start — a server is already up. Only start a new one if the check fails.
 - **Bugs from Andy:** create a GitHub issue (`gh issue create`), tag `bug`, add to the current or next phase.
 - **Supabase OAuth redirect URLs — use `/**` not `/*`:** in the Supabase Dashboard (Authentication → URL Configuration → Redirect URLs), use a double-star glob (`https://<domain>/**`). `/*` matches only one path segment, so `/auth/callback` fails to match and Supabase silently falls back to Site URL, landing the user on `/?code=...` with the callback route never running. Symptom: "auth almost works" but OAuth codes don't get exchanged.
