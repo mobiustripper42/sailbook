@@ -136,11 +136,14 @@ test.describe('Instructor — student link from roster', () => {
     await expect(page.getByText('ASA 101 - Weekend (April)')).toBeVisible();
   });
 
-  test('course title is not linked (no instructor course route yet)', async ({ page }) => {
+  test('course title links to the instructor course view', async ({ page }) => {
+    // 10.6b (#187) added /instructor/courses/[id], so the course title is a
+    // link here now — it used to be plain text for want of a route.
     await loginAs(page, 'mike@ltsc.test', '/instructor/dashboard');
     await page.goto(`/instructor/students/${SAM_ID}`);
-    await expect(page.getByText('ASA 101 - Weekend (April)')).toBeVisible();
-    await expect(page.getByRole('link', { name: 'ASA 101 - Weekend (April)' })).toHaveCount(0);
+    const courseLink = page.getByRole('link', { name: 'ASA 101 - Weekend (April)' });
+    await expect(courseLink).toBeVisible();
+    await expect(courseLink).toHaveAttribute('href', /^\/instructor\/courses\/[0-9a-f-]+$/);
   });
 
   test('instructor student view back link returns to dashboard', async ({ page }) => {

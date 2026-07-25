@@ -43,8 +43,9 @@ test.describe('Account — one save for the whole page', () => {
     await page.goto('/student/account');
 
     // The AC for 10.7: profile, address, and notifications are sections of one
-    // form, not three forms with three Save buttons.
-    await expect(page.locator('form button[type="submit"]')).toHaveCount(1);
+    // form, not three forms with three Save buttons. Scoped to main — the app
+    // shell's sign-out forms carry submit buttons of their own.
+    await expect(page.getByRole('main').locator('form button[type="submit"]')).toHaveCount(1);
     await expect(page.getByRole('button', { name: 'Save changes' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Save address' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Save preferences' })).toHaveCount(0);
