@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { logEvent } from '@/lib/events'
 
 export async function joinWaitlist(courseId: string): Promise<{ error: string | null }> {
   const supabase = await createClient()
@@ -39,6 +40,18 @@ export async function joinWaitlist(courseId: string): Promise<{ error: string | 
   // 23505 = unique violation. Treat double-clicks as success.
   if (error && error.code !== '23505') return { error: error.message }
 
+  // Only log a genuine join — a swallowed 23505 means they were already on
+  // the list, and a second identical row in the feed is noise, not history.
+  if (!error) {
+    await logEvent(supabase, {
+      type: 'waitlist.joined',
+      entityType: 'course',
+      entityId: courseId,
+      summary: 'Student joined the waitlist',
+      metadata: { student_id: user.id },
+    })
+  }
+
   revalidatePath(`/student/courses/${courseId}`)
   return { error: null }
 }
@@ -55,6 +68,14 @@ export async function leaveWaitlist(courseId: string): Promise<{ error: string |
     .eq('student_id', user.id)
 
   if (error) return { error: error.message }
+
+  await logEvent(supabase, {
+    type: 'waitlist.left',
+    entityType: 'course',
+    entityId: courseId,
+    summary: 'Student left the waitlist',
+    metadata: { student_id: user.id },
+  })
 
   revalidatePath(`/student/courses/${courseId}`)
   return { error: null }

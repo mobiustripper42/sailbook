@@ -7,6 +7,7 @@ import {
   Users,
   Flag,
   Bell,
+  ScrollText,
   Search,
   GraduationCap,
   CircleUser,
@@ -51,6 +52,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/missed-sessions', label: 'Missed Sessions', icon: Flag },
     { href: '/admin/notification-preferences', label: 'Notifications', icon: Bell },
+    { href: '/admin/activity', label: 'Activity', icon: ScrollText },
   ],
   instructor: [
     { href: '/instructor/dashboard', label: 'Dashboard', icon: LayoutDashboard },

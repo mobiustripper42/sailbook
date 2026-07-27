@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { MANUAL_PAYMENT_METHODS } from '@/lib/constants'
 import { notifyEnrollmentConfirmed, notifyWaitlistSpotOpened } from '@/lib/notifications/triggers'
+import { logEvent } from '@/lib/events'
 
 export async function adminEnrollStudent(
   _: unknown,
@@ -100,6 +101,21 @@ export async function adminEnrollStudent(
 
   await notifyEnrollmentConfirmed(enrollment.id)
 
+  // Emitted through the user-session client, not adminClient, so the RPC
+  // reads the acting admin from auth.uid() instead of us naming them.
+  await logEvent(supabase, {
+    type: 'enrollment.created',
+    entityType: 'enrollment',
+    entityId: enrollment.id,
+    summary: 'Admin enrolled a student directly',
+    metadata: {
+      course_id: courseId,
+      student_id: studentId,
+      payment_method: paymentMethod,
+      amount_cents: amountCents,
+    },
+  })
+
   revalidatePath(`/admin/courses/${courseId}`)
   // Also reachable from the student's page (#137) — refresh that view's
   // course history and its enrollable-course picker.
@@ -133,6 +149,14 @@ export async function confirmEnrollment(enrollmentId: string, courseId: string) 
   }
 
   await notifyEnrollmentConfirmed(enrollmentId)
+
+  await logEvent(supabase, {
+    type: 'enrollment.confirmed',
+    entityType: 'enrollment',
+    entityId: enrollmentId,
+    summary: 'Enrollment confirmed',
+    metadata: { course_id: courseId, student_id: enrollmentRow?.student_id ?? null },
+  })
 
   revalidatePath(`/admin/courses/${courseId}`)
   return { error: null }
@@ -173,6 +197,17 @@ export async function cancelEnrollment(enrollmentId: string, courseId: string) {
   if (heldASpot) {
     await notifyWaitlistSpotOpened(courseId)
   }
+
+  // prior_status is the detail that makes this row worth having — a
+  // cancellation off a confirmed seat and one off an expired hold look
+  // identical in the enrollments table afterwards.
+  await logEvent(supabase, {
+    type: 'enrollment.cancelled',
+    entityType: 'enrollment',
+    entityId: enrollmentId,
+    summary: 'Enrollment cancelled',
+    metadata: { course_id: courseId, prior_status: prior?.status ?? null, held_a_spot: heldASpot },
+  })
 
   revalidatePath(`/admin/courses/${courseId}`)
   return { error: null }
@@ -233,6 +268,14 @@ export async function restoreEnrollment(enrollmentId: string, courseId: string):
       .in('session_id', scheduledSessions.map((s) => s.id))
   }
 
+  await logEvent(supabase, {
+    type: 'enrollment.restored',
+    entityType: 'enrollment',
+    entityId: enrollmentId,
+    summary: 'Cancelled enrollment restored',
+    metadata: { course_id: courseId },
+  })
+
   revalidatePath(`/admin/courses/${courseId}`)
   return { error: null }
 }
@@ -258,6 +301,14 @@ export async function requestCancellation(enrollmentId: string, courseId: string
     .eq('id', enrollmentId)
 
   if (error) return { error: error.message }
+
+  await logEvent(supabase, {
+    type: 'enrollment.cancel_requested',
+    entityType: 'enrollment',
+    entityId: enrollmentId,
+    summary: 'Student requested cancellation',
+    metadata: { course_id: courseId },
+  })
 
   revalidatePath(`/student/courses/${courseId}`)
   revalidatePath('/student/courses')
