@@ -77,10 +77,10 @@ test.describe('Student courses — view switcher', () => {
     expect(labelBox.x).toBeGreaterThan(toggleBox.x);
     expect(Math.abs(labelBox.y - toggleBox.y)).toBeLessThan(toggleBox.height);
 
-    // Pager stays put in list view — the header row is shared.
+    // Pager is calendar-only — the list isn't month-scoped, so it goes away.
     await page.getByTestId('view-toggle-list').click();
     await expect(page.getByTestId('courses-view-content')).toHaveAttribute('data-active-view', 'list');
-    await expect(label).toBeVisible();
+    await expect(label).toBeHidden();
   });
 
   test('desktop: prev/next month navigation updates label', async ({ page }) => {

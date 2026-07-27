@@ -21,7 +21,7 @@ export function CoursesSchedule({ courses }: { courses: CourseCardData[] }) {
 
   return (
     <CoursesViewSwitcher
-      endSlot={
+      calendarSlot={
         <MonthNavigator
           label={label}
           onPrev={() => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}

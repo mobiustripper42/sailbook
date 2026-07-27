@@ -11,13 +11,15 @@ type View = 'calendar' | 'list'
 export function CoursesViewSwitcher({
   calendar,
   list,
-  endSlot,
+  calendarSlot,
 }: {
   calendar: ReactNode
   list: ReactNode
-  // Rendered beside the toggle in the header row (e.g. the month pager), so the
+  // Rendered beside the toggle in the header row (the month pager), so the
   // controls cluster on the left exactly as they do on the admin Schedule.
-  endSlot?: ReactNode
+  // Calendar view only: unlike admin, the month drives the calendar alone, so
+  // in List the pager would sit inert.
+  calendarSlot?: ReactNode
 }) {
   const [view, setView] = useState<View>('calendar')
   const [hydrated, setHydrated] = useState(false)
@@ -43,7 +45,7 @@ export function CoursesViewSwitcher({
       {/* Hidden until hydrated to avoid rendering with wrong selected state */}
       {hydrated && (
         // Toggle + month navigator cluster on the left (findable), not drifting right.
-        <div className={cn('mb-4', endSlot && 'flex flex-wrap items-center gap-x-5 gap-y-3')}>
+        <div className={cn('mb-4', calendarSlot && 'flex flex-wrap items-center gap-x-5 gap-y-3')}>
           <div
             className="inline-flex items-center gap-1 rounded-md border bg-card p-0.5"
             data-testid="courses-view-toggle"
@@ -73,7 +75,7 @@ export function CoursesViewSwitcher({
               List
             </Button>
           </div>
-          {endSlot}
+          {view === 'calendar' && calendarSlot}
         </div>
       )}
 
