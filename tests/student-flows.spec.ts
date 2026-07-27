@@ -128,6 +128,33 @@ test.describe('Account — one save for the whole page', () => {
     await expect(page.getByText('Enter a valid 10-digit US phone number.')).toBeVisible();
     await expect(page.getByText('Account updated.')).toHaveCount(0);
   });
+
+  // Same useUnsavedChanges guard the admin course/course-type forms carry.
+  test('leaving with unsaved edits prompts; leaving after a save does not', async ({ page }) => {
+    await loginAs(page, 'pw_student3@ltsc.test', '/student/dashboard');
+    await page.goto('/student/account');
+
+    let prompts = 0;
+    // Dismiss = Cancel, so the guard blocks the navigation and we stay put.
+    page.on('dialog', async (d) => {
+      prompts++;
+      await d.dismiss();
+    });
+
+    await page.getByLabel(/Note for your instructor/).fill('Guard check');
+    await page.getByRole('link', { name: 'My Courses' }).click();
+    await expect.poll(() => prompts).toBe(1);
+    await expect(page).toHaveURL(/\/student\/account/);
+
+    // Saving clears the dirty flag — Account doesn't redirect away, so a stale
+    // flag here would nag about changes already written.
+    await page.getByRole('button', { name: 'Save changes' }).click();
+    await expect(page.getByText('Account updated.')).toBeVisible();
+
+    await page.getByRole('link', { name: 'My Courses' }).click();
+    await expect(page).toHaveURL(/\/student\/my-courses/);
+    expect(prompts).toBe(1);
+  });
 });
 
 test.describe('Admin — enroll a student from their own page (#137)', () => {

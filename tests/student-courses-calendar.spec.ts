@@ -56,6 +56,33 @@ test.describe('Student courses — view switcher', () => {
     await expect(page.getByTestId('courses-calendar')).toBeVisible();
   });
 
+  // Layout parity with /admin/schedule: the month pager lives in the header row
+  // beside the view toggle, not inside the calendar card.
+  test('desktop: month pager sits beside the toggle, outside the calendar card', async ({ page }) => {
+    test.skip(test.info().project.name !== 'desktop');
+
+    await page.goto('/student/courses');
+
+    const toggle = page.getByTestId('courses-view-toggle');
+    const label = page.getByTestId('calendar-month-label');
+    await expect(toggle).toBeVisible();
+    await expect(label).toBeVisible();
+
+    // Pager is NOT a descendant of the calendar grid...
+    await expect(page.getByTestId('courses-calendar').getByTestId('calendar-month-label')).toHaveCount(0);
+
+    // ...and it sits to the RIGHT of the toggle, on the same row.
+    const toggleBox = (await toggle.boundingBox())!;
+    const labelBox = (await label.boundingBox())!;
+    expect(labelBox.x).toBeGreaterThan(toggleBox.x);
+    expect(Math.abs(labelBox.y - toggleBox.y)).toBeLessThan(toggleBox.height);
+
+    // Pager is calendar-only — the list isn't month-scoped, so it goes away.
+    await page.getByTestId('view-toggle-list').click();
+    await expect(page.getByTestId('courses-view-content')).toHaveAttribute('data-active-view', 'list');
+    await expect(label).toBeHidden();
+  });
+
   test('desktop: prev/next month navigation updates label', async ({ page }) => {
     test.skip(test.info().project.name !== 'desktop');
 

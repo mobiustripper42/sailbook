@@ -9,6 +9,7 @@ import AccountProfileFields, {
 } from '@/components/student/account-profile-fields'
 import AccountNotificationFields from '@/components/student/account-notification-fields'
 import { updateStudentAccount } from '@/actions/profiles'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import type { MailingAddress } from '@/lib/address'
 
 type Profile = {
@@ -45,12 +46,20 @@ export default function StudentAccountForm({
   // an error. Both null-on-success and null-on-mount look the same, so derive
   // a "just succeeded" flag from the pending → idle transition with state=null.
   const [hasSubmitted, setHasSubmitted] = useState(false)
+  const [isDirty, setIsDirty] = useState(false)
   const prevPending = useRef(false)
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (prevPending.current && !pending) setHasSubmitted(true)
+    if (prevPending.current && !pending) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setHasSubmitted(true)
+      // Unlike the admin forms, Account stays put after a save — clear the
+      // guard here or it would warn about changes already written.
+      if (state === null) setIsDirty(false)
+    }
     prevPending.current = pending
-  }, [pending])
+  }, [pending, state])
+
+  useUnsavedChanges(isDirty)
 
   const showSuccess = hasSubmitted && state === null && !pending
 
@@ -72,7 +81,7 @@ export default function StudentAccountForm({
   const [prefs, setPrefs] = useState(initialPrefs)
 
   return (
-    <form action={action} className="space-y-8 max-w-md">
+    <form action={action} onChange={() => setIsDirty(true)} className="space-y-8 max-w-md">
       {state && <p className="text-sm text-destructive">{state}</p>}
       {showSuccess && <p className="text-sm text-primary">Account updated.</p>}
 
