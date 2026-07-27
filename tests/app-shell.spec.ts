@@ -38,8 +38,12 @@ test.describe('unified app shell — nav per role', () => {
     test.skip((page.viewportSize()?.width ?? 768) < 768, 'sidebar is md+ only')
 
     const aside = page.locator('aside')
-    for (const label of ['Dashboard', 'Browse Courses', 'My Courses', 'Attendance', 'Experience', 'Account']) {
+    for (const label of ['Dashboard', 'Browse Courses', 'My Courses', 'Account']) {
       await expect(aside.getByRole('link', { name: label })).toBeVisible()
+    }
+    // Attendance + Experience folded into My Courses (10.7) — no stale tabs.
+    for (const label of ['Attendance', 'Experience']) {
+      await expect(aside.getByRole('link', { name: label })).toHaveCount(0)
     }
     // No admin-only item leaks into the student shell.
     await expect(aside.getByRole('link', { name: 'Users' })).toHaveCount(0)

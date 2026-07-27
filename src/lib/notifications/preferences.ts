@@ -118,3 +118,22 @@ export function normalizeStudentPreferences(
     email: isStudentChannelEnabled(prefs, 'email'),
   }
 }
+
+/**
+ * Merge a student's new channel choices into their existing JSONB, preserving
+ * any admin keys on a dual-role profile. When SMS is globally disabled the
+ * checkbox isn't rendered, so `sms` comes back undefined and the stored value
+ * is kept rather than silently wiped.
+ */
+export function mergeStudentPreferences(
+  existing: unknown,
+  next: { sms?: boolean; email: boolean },
+): Record<string, unknown> {
+  const base = existing && typeof existing === 'object' ? { ...(existing as Record<string, unknown>) } : {}
+  const prior = (base[STUDENT_GLOBAL_KEY] as { sms?: boolean } | undefined) ?? {}
+  base[STUDENT_GLOBAL_KEY] = {
+    sms: next.sms ?? prior.sms ?? true,
+    email: next.email,
+  }
+  return base
+}

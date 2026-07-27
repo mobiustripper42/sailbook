@@ -31,10 +31,10 @@ test.describe('student account page', () => {
     await page.locator('input[name="first_name"]').fill('PlaywrightFirst')
     await page.locator('input[name="last_name"]').fill('PlaywrightLast')
     await page.getByRole('button', { name: 'Save changes' }).click()
-    await expect(page.getByText('Profile updated.')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('Account updated.')).toBeVisible({ timeout: 5000 })
 
     // Restore original values (seed: pw_student first/last).
-    // "Profile updated." is already visible from the first submit so we can't use it as a
+    // "Account updated." is already visible from the first submit so we can't use it as a
     // completion signal. Instead wait for the button to cycle through "Saving…" → "Save changes"
     // to confirm the second action actually ran.
     await page.locator('input[name="first_name"]').fill('PW')
@@ -53,12 +53,12 @@ test.describe('student account page', () => {
 
     await page.locator('textarea[name="instructor_notes"]').fill('I have a bad knee and cannot sit cross-legged.')
     await page.getByRole('button', { name: 'Save changes' }).click()
-    await expect(page.getByText('Profile updated.')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('Account updated.')).toBeVisible({ timeout: 5000 })
 
     // Clear it so we don't pollute other tests
     await page.locator('textarea[name="instructor_notes"]').fill('')
     await page.getByRole('button', { name: 'Save changes' }).click()
-    await expect(page.getByText('Profile updated.')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('Account updated.')).toBeVisible({ timeout: 5000 })
   })
 
   test('student can update ASA number and experience level', async ({ page, viewport }) => {
@@ -70,13 +70,13 @@ test.describe('student account page', () => {
     await page.locator('input[name="asa_number"]').fill('999888')
     await page.locator('select[name="experience_level"]').selectOption('intermediate')
     await page.getByRole('button', { name: 'Save changes' }).click()
-    await expect(page.getByText('Profile updated.')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('Account updated.')).toBeVisible({ timeout: 5000 })
 
     // Clear to avoid polluting other tests
     await page.locator('input[name="asa_number"]').fill('')
     await page.locator('select[name="experience_level"]').selectOption('')
     await page.getByRole('button', { name: 'Save changes' }).click()
-    await expect(page.getByText('Profile updated.')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('Account updated.')).toBeVisible({ timeout: 5000 })
   })
 })
 
@@ -117,7 +117,7 @@ test.describe('instructor roster — notes indicator', () => {
       await studentPage.goto('/student/account')
       await studentPage.locator('textarea[name="instructor_notes"]').fill('Afraid of large waves.')
       await studentPage.getByRole('button', { name: 'Save changes' }).click()
-      await expect(studentPage.getByText('Profile updated.')).toBeVisible({ timeout: 5000 })
+      await expect(studentPage.getByText('Account updated.')).toBeVisible({ timeout: 5000 })
     } finally {
       await studentCtx.close()
     }
@@ -151,7 +151,7 @@ test.describe('instructor roster — notes indicator', () => {
       await cleanupPage.goto('/student/account')
       await cleanupPage.locator('textarea[name="instructor_notes"]').fill('')
       await cleanupPage.getByRole('button', { name: 'Save changes' }).click()
-      await expect(cleanupPage.getByText('Profile updated.')).toBeVisible({ timeout: 5000 })
+      await expect(cleanupPage.getByText('Account updated.')).toBeVisible({ timeout: 5000 })
     } finally {
       await cleanupCtx.close()
     }

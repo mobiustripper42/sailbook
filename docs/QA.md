@@ -157,7 +157,7 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 
 **Navigate to attendance**
 - [X ] Log in as alice@ltsc.test → sidebar shows "Attendance" link
-- [x ] Click "Attendance" → `/student/attendance` loads with title and subtitle
+- [x ] Click "Attendance" → `/student/my-courses` loads with title and subtitle
 - [x ] Page grouped by course, each course in its own card
 
 **Alice (mixed statuses, no missed needing makeup)**
@@ -169,29 +169,29 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 - [x ] No "needs makeup" badges on any course card
 
 **Bob (missed sessions needing makeup + cancelled enrollment)**
-- [ X] Log in as bob@ltsc.test → go to `/student/attendance`
+- [ X] Log in as bob@ltsc.test → go to `/student/my-courses`
 - [ x] Alert banner appears: "You have X missed sessions that need a makeup..."
 - [ x] Evening Series (c002): d003 shows "Missed" badge + "Needs makeup" text, d004–d006 show "Upcoming"
 - [ x] Course card has red badge showing missed count needing makeup
 - [ x] **Edge case:** Check whether cancelled enrollment (c001) attendance shows — Bob has 2 missed records from cancelled enrollment e006. Note behavior for follow-up.
 
 **Carol (missed session with makeup scheduled)**
-- [ ] Log in as carol@ltsc.test → go to `/student/attendance`
+- [ ] Log in as carol@ltsc.test → go to `/student/my-courses`
 - [ ] No alert banner (Carol's missed session has a makeup linked)
 - [ ] Evening Series (c002): d003 shows "Missed" + "Makeup scheduled", rest show "Upcoming"
 - [ ] No "needs makeup" badge on course card
 
 **Sarah (excused, instructor+student)**
-- [ x] Log in as sarah@ltsc.test → go to `/student/attendance`
+- [ x] Log in as sarah@ltsc.test → go to `/student/my-courses`
 - [ x] Evening Series (c002): d003 shows "Excused" badge (not "Missed")
 - [ x] No alert banner (excused is not "missed needing makeup")
 
 **Dan (no enrollments — empty state)**
-- [ x] Log in as dan@ltsc.test → go to `/student/attendance`
+- [ x] Log in as dan@ltsc.test → go to `/student/my-courses`
 - [ x] Shows "No attendance records yet. Enroll in a course to get started."
 
 **Eve (completed course, all attended)**
-- [ x] Log in as eve@ltsc.test → go to `/student/attendance`
+- [ x] Log in as eve@ltsc.test → go to `/student/my-courses`
 - [ x] ASA 101 March (c006): 2 sessions, both showing "Attended" badge
 - [ x] No alert banner, no missed badges
 
@@ -206,7 +206,7 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 
 **After admin schedules a makeup**
 - [ x] Admin schedules makeup for d003 (links to Bob/Carol)
-- [ x] Bob/Carol reload `/student/attendance` → missed session now shows "Makeup scheduled" instead of "Needs makeup"
+- [ x] Bob/Carol reload `/student/my-courses` → missed session now shows "Makeup scheduled" instead of "Needs makeup"
 - [ x] Alert banner count decreases (or disappears if all resolved)
 
 ### 3.9 — RLS policies for session_attendance table
@@ -219,12 +219,12 @@ Manual test cases by task. Prerequisites unless noted: seed data loaded, logged 
 - [ x] Go to `/admin/missed-sessions` → all missed records across all students load
 
 **Student read — own attendance only (alice@ltsc.test)**
-- [x] Go to `/student/attendance` → shows Alice's attendance records grouped by course
+- [x] Go to `/student/my-courses` → shows Alice's attendance records grouped by course
 - [x ] Records match what's in the database for Alice's enrollments
 - [x ] No records from other students leak through (verify: Alice should NOT see Bob's or Carol's attendance)
 
 **Student read — another student (bob@ltsc.test)**
-- [ x] Log in as bob@ltsc.test → `/student/attendance` → shows only Bob's records
+- [ x] Log in as bob@ltsc.test → `/student/my-courses` → shows only Bob's records
 - [ x] Bob sees his missed sessions, not Alice's or Carol's
 
 **Instructor read — own courses (sarah@ltsc.test)**
@@ -668,7 +668,7 @@ RESET request.jwt.claims;
 - [X ] **No error message appears** (this was the bug — error appeared before the fix)
 - [X ] Page reloads enrolled state: "Enrolled" badge visible, Attendance column added to sessions table
 - [X ] All sessions show "Upcoming" badge in the Attendance column
-- [ X] Navigate to `/student/attendance` → Dan's course appears with one row per session, all `expected`
+- [ X] Navigate to `/student/my-courses` → Dan's course appears with one row per session, all `expected`
 
 **Admin confirms the enrollment is complete**
 
@@ -682,7 +682,7 @@ RESET request.jwt.claims;
 - [x ] As andy@ltsc.test, cancel Dan's enrollment from the course detail page
 - [x ] Log in as dan@ltsc.test → re-enroll in the same course
 - [x ] No error appears
-- [x ] Navigate to `/student/attendance` → attendance records show "Upcoming" (reset from "Missed" back to "expected")
+- [x ] Navigate to `/student/my-courses` → attendance records show "Upcoming" (reset from "Missed" back to "expected")
 - [x ] Check via SQL: `SELECT status FROM session_attendance WHERE enrollment_id = '<dan-enrollment-id>'` → all rows show `expected` (not duplicated)
 
 ---
@@ -1240,7 +1240,7 @@ Bob (bob@ltsc.test) has:
 
 **Registered enrollment — alice@ltsc.test → c001**
 
-- [ ] Log in as alice@ltsc.test → go to `/student/attendance`
+- [ ] Log in as alice@ltsc.test → go to `/student/my-courses`
 - [ ] ASA 101 Weekend Intensive card header shows badge **"Pending confirmation"** (secondary/gray variant)
 - [ ] Badge does NOT read "registered" (raw DB value)
 
@@ -1256,13 +1256,13 @@ Bob (bob@ltsc.test) has:
 
 **Enrollment badge + "needs makeup" badge coexist**
 
-- [ ] Log in as bob@ltsc.test → go to `/student/attendance`
+- [ ] Log in as bob@ltsc.test → go to `/student/my-courses`
 - [ ] ASA 101 Evening Series card shows **both** the enrollment status badge ("Pending confirmation") AND the "needs makeup" badge
 - [ ] Badges render side-by-side without overlap or wrapping issues
 
 **Completed enrollment — eve@ltsc.test → c006**
 
-- [ ] Log in as eve@ltsc.test → go to `/student/attendance`
+- [ ] Log in as eve@ltsc.test → go to `/student/my-courses`
 - [ ] ASA 101 March card shows badge **"Completed"** (outline variant)
 
 **SQL verification**

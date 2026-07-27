@@ -56,24 +56,34 @@ test.describe('Admin — attendance marking', () => {
   });
 });
 
-// ─── Student — Attendance History Page ───────────────────────────────────────
+// ─── Student — attendance on My Courses (10.7) ───────────────────────────────
 //
 // Uses seed data: jordan@ltsc.test attended c004 Day 1, missed Day 2 (no makeup).
+// Attendance folded into My Courses; /student/attendance is a redirect.
 // Read-only — safe to run on all viewports.
 
-test.describe('Student — attendance history page', () => {
+test.describe('Student — attendance on My Courses', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'jordan@ltsc.test', '/student/dashboard');
   });
 
-  test('shows missed session alert banner', async ({ page }) => {
+  test('/student/attendance redirects to My Courses', async ({ page }) => {
     await page.goto('/student/attendance');
-    // Banner: "You have 1 missed session that needs a makeup."
+    await page.waitForURL('/student/my-courses');
+    await expect(page.getByRole('heading', { name: 'My Courses' })).toBeVisible();
+  });
+
+  test('shows missed session alert banner', async ({ page }) => {
+    await page.goto('/student/my-courses');
+    // Banner counts every course, not just the filtered view:
+    // "You have 1 missed session that needs a makeup."
     await expect(page.getByText(/You have 1 missed session/)).toBeVisible();
   });
 
   test('course card shows Missed badge, Needs makeup text, and "1 needs makeup" chip', async ({ page }) => {
-    await page.goto('/student/attendance');
+    await page.goto('/student/my-courses');
+    // The April course is finished — it lives under the past/all filter.
+    await page.getByRole('button', { name: 'all' }).click();
 
     // Card for the April course Jordan was enrolled in
     const card = page.locator('[data-slot="card"]').filter({ hasText: 'ASA 101 - Weekend (April)' });

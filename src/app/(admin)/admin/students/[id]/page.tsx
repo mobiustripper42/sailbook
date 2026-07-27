@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { fetchStudentHistory } from '@/lib/student-history'
 import StudentHistoryList from '@/components/student/student-history-list'
+import AdminEnrollCoursePanel from '@/components/admin/admin-enroll-course-panel'
 
 export default async function AdminStudentViewPage({
   params,
@@ -22,6 +23,34 @@ export default async function AdminStudentViewPage({
   if (!profile) notFound()
 
   const { data: courses, error } = await fetchStudentHistory(supabase, id)
+
+  // Courses this student could still be enrolled in (#137) — active courses
+  // minus the ones they already hold a non-cancelled enrollment in, so the
+  // picker can't offer a duplicate the action would just reject.
+  const [{ data: activeCourses }, { data: heldEnrollments }] = await Promise.all([
+    supabase
+      .from('courses')
+      .select('id, title, price, course_types ( name )')
+      .eq('status', 'active')
+      .order('title'),
+    supabase
+      .from('enrollments')
+      .select('course_id')
+      .eq('student_id', id)
+      .neq('status', 'cancelled'),
+  ])
+
+  const takenCourseIds = new Set((heldEnrollments ?? []).map((e) => e.course_id))
+  const enrollableCourses = (activeCourses ?? [])
+    .filter((c) => !takenCourseIds.has(c.id))
+    .map((c) => {
+      const type = c.course_types as unknown as { name: string } | null
+      return {
+        id: c.id,
+        title: c.title ?? type?.name ?? 'Course',
+        priceCents: c.price != null ? Math.round(c.price * 100) : null,
+      }
+    })
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -62,6 +91,8 @@ export default async function AdminStudentViewPage({
           </div>
         )}
       </div>
+
+      <AdminEnrollCoursePanel studentId={id} courses={enrollableCourses} />
 
       <div className="space-y-3">
         <h2 className="text-base font-semibold">Course History</h2>

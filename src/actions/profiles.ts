@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { INVALID_PHONE_MESSAGE, isValidPhone, normalizePhone } from '@/lib/phone'
 import { addressInputToColumns, readAddressForm, validateAddressInput } from '@/lib/address'
+import { isSMSEnabled, mergeStudentPreferences } from '@/lib/notifications/preferences'
 
 export async function updateUserProfile(formData: FormData) {
   const supabase = await createClient()
@@ -94,7 +95,17 @@ export async function updateUserProfile(formData: FormData) {
   return { success: true }
 }
 
-export async function updateStudentProfile(
+/**
+ * The student Account page's single save (10.7). Profile fields, mailing
+ * address, and notification preferences used to be three independent forms
+ * with three Save buttons — a student who edited their address and their
+ * phone had to press Save twice or lose one of the edits. This writes all
+ * three in one `profiles` UPDATE, so a partial save isn't representable.
+ *
+ * Address is optional here (not every student is in an ASA course), but a
+ * partially-filled one must still be complete — same rule as the admin path.
+ */
+export async function updateStudentAccount(
   _: unknown,
   formData: FormData,
 ): Promise<string | null> {
@@ -116,6 +127,31 @@ export async function updateStudentProfile(
     return 'Notes must be 2000 characters or fewer.'
   }
 
+  const parsedAddress = readAddressForm(formData)
+  const addressError = validateAddressInput(parsedAddress, { required: false })
+  if (addressError) return addressError
+
+  // Read the current JSONB so a dual-role profile keeps its admin keys, and
+  // so a hidden SMS checkbox doesn't wipe a stored SMS preference.
+  //
+  // Read-then-merge-then-write is not atomic: a dual-role user saving this form
+  // while /admin/notification-preferences saves in another tab is last-write-
+  // wins on the column. Accepted — it's one user editing their own row at a
+  // single-school scale. Move to jsonb_set (or an RPC) if that stops holding.
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('notification_preferences')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const notification_preferences = mergeStudentPreferences(
+    existing?.notification_preferences,
+    {
+      sms: isSMSEnabled() ? formData.get('student_sms') === 'on' : undefined,
+      email: formData.get('student_email') === 'on',
+    },
+  )
+
   const { error } = await supabase
     .from('profiles')
     .update({
@@ -125,6 +161,8 @@ export async function updateStudentProfile(
       asa_number,
       experience_level: experience_level === '—' ? null : experience_level,
       instructor_notes,
+      ...addressInputToColumns(parsedAddress),
+      notification_preferences,
       updated_at: new Date().toISOString(),
     })
     .eq('id', user.id)

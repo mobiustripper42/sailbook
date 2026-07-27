@@ -2,15 +2,14 @@
 
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { updateStudentProfile } from '@/actions/profiles'
-
-type ExperienceCode = {
-  value: string
-  label: string
-  description: string | null
-}
+import AddressFields, { type AddressValue } from '@/components/shared/address-fields'
+import AccountProfileFields, {
+  type AccountProfileValue,
+  type ExperienceCode,
+} from '@/components/student/account-profile-fields'
+import AccountNotificationFields from '@/components/student/account-notification-fields'
+import { updateStudentAccount } from '@/actions/profiles'
+import type { MailingAddress } from '@/lib/address'
 
 type Profile = {
   first_name: string
@@ -21,16 +20,26 @@ type Profile = {
   instructor_notes: string | null
 }
 
+/**
+ * The whole Account page as one form with one Save (10.7). Profile, mailing
+ * address, and notification preferences are sections, not separate forms —
+ * every field posts to `updateStudentAccount` in a single submit. This shell
+ * owns the action state and the submit button; the sections are dumb inputs.
+ */
 export default function StudentAccountForm({
   profile,
+  address,
+  initialPrefs,
   experienceCodes,
   smsEnabled = false,
 }: {
   profile: Profile
+  address: MailingAddress | null
+  initialPrefs: { sms: boolean; email: boolean }
   experienceCodes: ExperienceCode[]
   smsEnabled?: boolean
 }) {
-  const [state, action, pending] = useActionState(updateStudentProfile, null)
+  const [state, action, pending] = useActionState(updateStudentAccount, null)
 
   // DEC-015 form actions return `string | null` — null is success, string is
   // an error. Both null-on-success and null-on-mount look the same, so derive
@@ -45,103 +54,51 @@ export default function StudentAccountForm({
 
   const showSuccess = hasSubmitted && state === null && !pending
 
-  const [firstName, setFirstName] = useState(profile.first_name)
-  const [lastName, setLastName] = useState(profile.last_name)
-  const [phone, setPhone] = useState(profile.phone ?? '')
-  const [asaNumber, setAsaNumber] = useState(profile.asa_number ?? '')
-  const [experienceLevel, setExperienceLevel] = useState(profile.experience_level ?? '')
-  const [instructorNotes, setInstructorNotes] = useState(profile.instructor_notes ?? '')
+  const [profileValue, setProfileValue] = useState<AccountProfileValue>({
+    firstName: profile.first_name,
+    lastName: profile.last_name,
+    phone: profile.phone ?? '',
+    asaNumber: profile.asa_number ?? '',
+    experienceLevel: profile.experience_level ?? '',
+    instructorNotes: profile.instructor_notes ?? '',
+  })
+  const [addressValue, setAddressValue] = useState<AddressValue>({
+    line1: address?.address_line1 ?? '',
+    line2: address?.address_line2 ?? '',
+    city: address?.city ?? '',
+    state: address?.state ?? '',
+    postal: address?.postal_code ?? '',
+  })
+  const [prefs, setPrefs] = useState(initialPrefs)
 
   return (
-    <form action={action} className="space-y-5 max-w-md">
+    <form action={action} className="space-y-8 max-w-md">
       {state && <p className="text-sm text-destructive">{state}</p>}
-      {showSuccess && <p className="text-sm text-primary">Profile updated.</p>}
+      {showSuccess && <p className="text-sm text-primary">Account updated.</p>}
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-2">
-          <Label htmlFor="first_name">First name</Label>
-          <Input
-            id="first_name"
-            name="first_name"
-            required
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="last_name">Last name</Label>
-          <Input
-            id="last_name"
-            name="last_name"
-            required
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-        </div>
-      </div>
+      <AccountProfileFields
+        value={profileValue}
+        onChange={setProfileValue}
+        smsEnabled={smsEnabled}
+        experienceCodes={experienceCodes}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="phone">Phone</Label>
-        <Input
-          id="phone"
-          name="phone"
-          type="tel"
-          required
-          autoComplete="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-        />
-        {smsEnabled && (
-          <p className="text-xs text-muted-foreground">
-            By providing your phone number you consent to receive SMS messages from Learn to Sail Cleveland (Riverfront Marine) about your enrollment, session reminders, and cancellations. Msg frequency varies. Msg &amp; data rates may apply. Reply STOP to cancel, HELP for help.
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold">Mailing address</h2>
+          <p className="text-sm text-muted-foreground">
+            Where we ship ASA course textbooks. Keep this current so your books reach you.
           </p>
-        )}
-      </div>
+        </div>
+        <AddressFields value={addressValue} onChange={setAddressValue} disabled={pending} />
+      </section>
 
-      <div className="space-y-2">
-        <Label htmlFor="asa_number">ASA number</Label>
-        <Input
-          id="asa_number"
-          name="asa_number"
-          value={asaNumber}
-          onChange={(e) => setAsaNumber(e.target.value)}
-          placeholder="Optional"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="experience_level">Sailing experience</Label>
-        <select
-          id="experience_level"
-          name="experience_level"
-          value={experienceLevel}
-          onChange={(e) => setExperienceLevel(e.target.value)}
-          className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <option value="">Select experience level</option>
-          {experienceCodes.map((code) => (
-            <option key={code.value} value={code.value}>
-              {code.description ? `${code.label} — ${code.description}` : code.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="instructor_notes">
-          Note for your instructor{' '}
-          <span className="text-muted-foreground font-normal">(optional)</span>
-        </Label>
-        <textarea
-          id="instructor_notes"
-          name="instructor_notes"
-          rows={4}
-          value={instructorNotes}
-          onChange={(e) => setInstructorNotes(e.target.value)}
-          className="flex w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
-          placeholder="Prior sailing experience, medical conditions, seasickness, etc."
-        />
-      </div>
+      <AccountNotificationFields
+        sms={prefs.sms}
+        email={prefs.email}
+        onChange={setPrefs}
+        smsEnabled={smsEnabled}
+      />
 
       <Button type="submit" disabled={pending}>
         {pending ? 'Saving…' : 'Save changes'}

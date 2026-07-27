@@ -1,35 +1,8 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { fetchStudentHistory } from '@/lib/student-history'
-import StudentHistoryList from '@/components/student/student-history-list'
+import { permanentRedirect } from 'next/navigation'
 
-export default async function StudentHistoryPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('asa_number')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  const { data: courses, error } = await fetchStudentHistory(supabase, user.id)
-  if (error) return <p className="text-sm text-destructive">{error}</p>
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Experience</h1>
-        {profile?.asa_number && (
-          <p className="text-sm text-muted-foreground mt-1">ASA #: {profile.asa_number}</p>
-        )}
-      </div>
-      <StudentHistoryList
-        courses={courses}
-        emptyMessage="No course history yet. Enroll in a course to get started."
-        courseBasePath="/student/courses"
-      />
-    </div>
-  )
+// The "Experience" page folded into My Courses (10.7): past courses are the
+// `past` filter there, and the ASA number moved to the My Courses header.
+// Kept as a redirect so bookmarks don't 404.
+export default function StudentHistoryRedirect() {
+  permanentRedirect('/student/my-courses')
 }
