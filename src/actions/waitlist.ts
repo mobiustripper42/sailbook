@@ -61,21 +61,26 @@ export async function leaveWaitlist(courseId: string): Promise<{ error: string |
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated.' }
 
-  const { error } = await supabase
+  const { data: removed, error } = await supabase
     .from('waitlist_entries')
     .delete()
     .eq('course_id', courseId)
     .eq('student_id', user.id)
+    .select('id')
 
   if (error) return { error: error.message }
 
-  await logEvent(supabase, {
-    type: 'waitlist.left',
-    entityType: 'course',
-    entityId: courseId,
-    summary: 'Student left the waitlist',
-    metadata: { student_id: user.id },
-  })
+  // Same rule as joinWaitlist's swallowed 23505: leaving a list you were never
+  // on deletes nothing, and a "left the waitlist" entry for it is fiction.
+  if (removed?.length) {
+    await logEvent(supabase, {
+      type: 'waitlist.left',
+      entityType: 'course',
+      entityId: courseId,
+      summary: 'Student left the waitlist',
+      metadata: { student_id: user.id },
+    })
+  }
 
   revalidatePath(`/student/courses/${courseId}`)
   return { error: null }

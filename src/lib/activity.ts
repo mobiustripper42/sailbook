@@ -70,6 +70,19 @@ function idFromMetadata(metadata: Record<string, unknown> | null, key: string): 
   return typeof value === 'string' ? value : null
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * The cursor arrives from the client via a server action and is interpolated
+ * into a PostgREST `.or()` string, where a comma or paren would change the
+ * filter's meaning. RLS still limits the caller to their own visibility, so
+ * this isn't a data leak — but an unvalidated cursor turns a bad request into
+ * an opaque query error instead of a clean rejection.
+ */
+export function isValidCursor(cursor: ActivityCursor): boolean {
+  return UUID_RE.test(cursor.id) && !Number.isNaN(Date.parse(cursor.occurredAt))
+}
+
 export function isEventType(value: string): value is EventType {
   return Object.hasOwn(EVENT_TYPES, value)
 }
@@ -105,6 +118,9 @@ export async function fetchActivity(
   // `to` is inclusive of the whole day, so compare against the next midnight.
   if (filters.to) query = query.lt('occurred_at', `${filters.to}T23:59:59.999`)
   if (cursor) {
+    if (!isValidCursor(cursor)) {
+      return { rows: [], hasMore: false, error: 'Invalid pagination cursor.' }
+    }
     query = query.or(
       `occurred_at.lt.${cursor.occurredAt},and(occurred_at.eq.${cursor.occurredAt},id.lt.${cursor.id})`,
     )
