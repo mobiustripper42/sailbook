@@ -11,9 +11,13 @@ type View = 'calendar' | 'list'
 export function CoursesViewSwitcher({
   calendar,
   list,
+  endSlot,
 }: {
   calendar: ReactNode
   list: ReactNode
+  // Rendered beside the toggle in the header row (e.g. the month pager), so the
+  // controls cluster on the left exactly as they do on the admin Schedule.
+  endSlot?: ReactNode
 }) {
   const [view, setView] = useState<View>('calendar')
   const [hydrated, setHydrated] = useState(false)
@@ -38,34 +42,38 @@ export function CoursesViewSwitcher({
     <>
       {/* Hidden until hydrated to avoid rendering with wrong selected state */}
       {hydrated && (
-        <div
-          className="mb-4 inline-flex items-center gap-1 rounded-md border bg-card p-0.5"
-          data-testid="courses-view-toggle"
-          role="group"
-          aria-label="Course view"
-        >
-          <Button
-            type="button"
-            size="sm"
-            variant={view === 'calendar' ? 'secondary' : 'ghost'}
-            onClick={() => pickView('calendar')}
-            data-testid="view-toggle-calendar"
-            aria-pressed={view === 'calendar'}
-            className={cn('h-7 px-3', view === 'calendar' && 'shadow-sm')}
+        // Toggle + month navigator cluster on the left (findable), not drifting right.
+        <div className={cn('mb-4', endSlot && 'flex flex-wrap items-center gap-x-5 gap-y-3')}>
+          <div
+            className="inline-flex items-center gap-1 rounded-md border bg-card p-0.5"
+            data-testid="courses-view-toggle"
+            role="group"
+            aria-label="Course view"
           >
-            Calendar
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant={view === 'list' ? 'secondary' : 'ghost'}
-            onClick={() => pickView('list')}
-            data-testid="view-toggle-list"
-            aria-pressed={view === 'list'}
-            className={cn('h-7 px-3', view === 'list' && 'shadow-sm')}
-          >
-            List
-          </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={view === 'calendar' ? 'secondary' : 'ghost'}
+              onClick={() => pickView('calendar')}
+              data-testid="view-toggle-calendar"
+              aria-pressed={view === 'calendar'}
+              className={cn('h-7 px-3', view === 'calendar' && 'shadow-sm')}
+            >
+              Calendar
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={view === 'list' ? 'secondary' : 'ghost'}
+              onClick={() => pickView('list')}
+              data-testid="view-toggle-list"
+              aria-pressed={view === 'list'}
+              className={cn('h-7 px-3', view === 'list' && 'shadow-sm')}
+            >
+              List
+            </Button>
+          </div>
+          {endSlot}
         </div>
       )}
 

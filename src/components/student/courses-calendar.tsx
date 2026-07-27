@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import type { CourseCardData } from './courses-card-list'
 
@@ -68,60 +67,19 @@ function pillVariantClasses(c: CourseCardData): string {
   return 'bg-accent text-accent-foreground hover:bg-accent/80 border-border'
 }
 
-export function CoursesCalendar({ courses }: { courses: CourseCardData[] }) {
-  const [viewDate, setViewDate] = useState<Date>(() => {
-    const now = new Date()
-    return new Date(now.getFullYear(), now.getMonth(), 1)
-  })
-
+// Month grid for `viewDate` (controlled — the pager lives in <MonthNavigator>,
+// owned by <CoursesSchedule> so it sits beside the view toggle, as on admin).
+export function CoursesCalendar({
+  courses,
+  viewDate,
+}: {
+  courses: CourseCardData[]
+  viewDate: Date
+}) {
   const cells = useMemo(() => buildMonthGrid(viewDate, courses), [viewDate, courses])
-
-  const monthLabel = viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-
-  function goPrev() {
-    setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))
-  }
-  function goNext() {
-    setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
-  }
-  function goToday() {
-    const now = new Date()
-    setViewDate(new Date(now.getFullYear(), now.getMonth(), 1))
-  }
 
   return (
     <div data-testid="courses-calendar" className="rounded-md border bg-card">
-      <div className="flex items-center justify-between gap-2 border-b p-3">
-        <h2 className="text-base font-semibold" data-testid="calendar-month-label">
-          {monthLabel}
-        </h2>
-        <div className="flex items-center gap-1">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={goPrev}
-            aria-label="Previous month"
-            data-testid="calendar-prev"
-          >
-            ‹
-          </Button>
-          <Button type="button" variant="outline" size="sm" onClick={goToday}>
-            Today
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={goNext}
-            aria-label="Next month"
-            data-testid="calendar-next"
-          >
-            ›
-          </Button>
-        </div>
-      </div>
-
       <div className="grid grid-cols-7 border-b text-xs font-medium text-muted-foreground">
         {WEEKDAYS.map((w) => (
           <div key={w} className="px-2 py-1.5 text-center">

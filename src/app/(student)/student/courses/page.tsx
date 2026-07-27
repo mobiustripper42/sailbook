@@ -3,9 +3,7 @@ export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { type CourseCardData, type CourseSession } from '@/components/student/courses-card-list'
-import { CoursesAgendaList } from '@/components/student/courses-agenda-list'
-import { CoursesCalendar } from '@/components/student/courses-calendar'
-import { CoursesViewSwitcher } from '@/components/student/courses-view-switcher'
+import { CoursesSchedule } from '@/components/student/courses-schedule'
 
 export default async function CourseBrowsePage() {
   const supabase = await createClient()
@@ -93,10 +91,7 @@ export default async function CourseBrowsePage() {
         <h1 className="text-2xl font-semibold">Available Courses</h1>
       </div>
 
-      <CoursesViewSwitcher
-        calendar={<CoursesCalendar courses={cardData} />}
-        list={<CoursesAgendaList courses={cardData} />}
-      />
+      <CoursesSchedule courses={cardData} />
     </div>
   )
 }
