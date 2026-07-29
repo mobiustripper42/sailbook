@@ -425,6 +425,40 @@ INSERT INTO public.session_attendance (session_id, enrollment_id, status) VALUES
   ('d1000000-0000-0000-0000-000000000010', 'e1000000-0000-0000-0000-000000000006', 'expected');
 
 -- ============================================================
+-- AUDIT LOG (task 10.8, #144)
+-- ============================================================
+-- A handful of historical events so the admin feed has deterministic content
+-- for filter/pagination tests. Live events are written only through
+-- log_event(); these are seeded as the table owner, which bypasses RLS.
+-- Deliberately spread across several days so a date-range filter has
+-- something to actually exclude.
+INSERT INTO public.events (id, occurred_at, actor_id, actor_kind, event_type, entity_type, entity_id, summary, metadata) VALUES
+
+  ('e5000000-0000-0000-0000-000000000001', NOW() - INTERVAL '1 day',
+   'a1000000-0000-0000-0000-000000000001', 'user',
+   'enrollment.confirmed', 'enrollment', 'e1000000-0000-0000-0000-000000000001',
+   'Enrollment confirmed',
+   '{"course_id":"c1000000-0000-0000-0000-000000000001","student_id":"a1000000-0000-0000-0000-000000000005"}'::jsonb),
+
+  ('e5000000-0000-0000-0000-000000000002', NOW() - INTERVAL '3 days',
+   'a1000000-0000-0000-0000-000000000001', 'user',
+   'enrollment.created', 'enrollment', 'e1000000-0000-0000-0000-000000000002',
+   'Admin enrolled a student directly',
+   '{"course_id":"c1000000-0000-0000-0000-000000000001","student_id":"a1000000-0000-0000-0000-000000000006"}'::jsonb),
+
+  ('e5000000-0000-0000-0000-000000000003', NOW() - INTERVAL '5 days',
+   'a1000000-0000-0000-0000-000000000005', 'user',
+   'waitlist.joined', 'course', 'c1000000-0000-0000-0000-000000000002',
+   'Student joined the waitlist',
+   '{"student_id":"a1000000-0000-0000-0000-000000000005"}'::jsonb),
+
+  ('e5000000-0000-0000-0000-000000000004', NOW() - INTERVAL '20 days',
+   NULL, 'system',
+   'enrollment.cancelled', 'enrollment', 'e1000000-0000-0000-0000-000000000002',
+   'Enrollment cancelled',
+   '{"course_id":"c1000000-0000-0000-0000-000000000001","prior_status":"pending_payment","held_a_spot":false}'::jsonb);
+
+-- ============================================================
 -- QUICK REFERENCE
 -- ============================================================
 -- Logins (all password: Sailbook12345)

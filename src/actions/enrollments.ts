@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { MANUAL_PAYMENT_METHODS } from '@/lib/constants'
 import { notifyEnrollmentConfirmed, notifyWaitlistSpotOpened } from '@/lib/notifications/triggers'
+import { logEvent } from '@/lib/events'
 
 export async function adminEnrollStudent(
   _: unknown,
@@ -100,6 +101,21 @@ export async function adminEnrollStudent(
 
   await notifyEnrollmentConfirmed(enrollment.id)
 
+  // Emitted through the user-session client, not adminClient, so the RPC
+  // reads the acting admin from auth.uid() instead of us naming them.
+  await logEvent(supabase, {
+    type: 'enrollment.created',
+    entityType: 'enrollment',
+    entityId: enrollment.id,
+    summary: 'Admin enrolled a student directly',
+    metadata: {
+      course_id: courseId,
+      student_id: studentId,
+      payment_method: paymentMethod,
+      amount_cents: amountCents,
+    },
+  })
+
   revalidatePath(`/admin/courses/${courseId}`)
   // Also reachable from the student's page (#137) — refresh that view's
   // course history and its enrollable-course picker.
@@ -118,10 +134,14 @@ export async function confirmEnrollment(enrollmentId: string, courseId: string) 
     .eq('id', enrollmentId)
     .maybeSingle()
 
-  const { error } = await supabase
+  // .select() so we can tell a real update from an RLS no-op: a caller without
+  // rights to this row gets 0 rows and no error, and an audit entry for a
+  // status change that never happened is worse than no entry at all.
+  const { data: updated, error } = await supabase
     .from('enrollments')
     .update({ status: 'confirmed', updated_at: new Date().toISOString() })
     .eq('id', enrollmentId)
+    .select('id')
   if (error) return { error: error.message }
 
   if (enrollmentRow?.student_id) {
@@ -133,6 +153,16 @@ export async function confirmEnrollment(enrollmentId: string, courseId: string) 
   }
 
   await notifyEnrollmentConfirmed(enrollmentId)
+
+  if (updated?.length) {
+    await logEvent(supabase, {
+      type: 'enrollment.confirmed',
+      entityType: 'enrollment',
+      entityId: enrollmentId,
+      summary: 'Enrollment confirmed',
+      metadata: { course_id: courseId, student_id: enrollmentRow?.student_id ?? null },
+    })
+  }
 
   revalidatePath(`/admin/courses/${courseId}`)
   return { error: null }
@@ -155,10 +185,15 @@ export async function cancelEnrollment(enrollmentId: string, courseId: string) {
 
   const heldASpot = prior?.status === 'confirmed' || prior?.status === 'cancel_requested'
 
-  const { error } = await supabase
+  // .select() distinguishes a real cancellation from an RLS no-op — see the
+  // note in confirmEnrollment. (The comment above says we bail early on a
+  // hidden row; we don't, and the notification path predates this task. Only
+  // the audit write is gated here.)
+  const { data: cancelled, error } = await supabase
     .from('enrollments')
     .update({ status: 'cancelled', updated_at: new Date().toISOString() })
     .eq('id', enrollmentId)
+    .select('id')
   if (error) return { error: error.message }
 
   // Flip outstanding attendance records to 'missed'
@@ -172,6 +207,19 @@ export async function cancelEnrollment(enrollmentId: string, courseId: string) {
   // never held a confirmed seat, so we don't blast on no-op cancels.
   if (heldASpot) {
     await notifyWaitlistSpotOpened(courseId)
+  }
+
+  // prior_status is the detail that makes this row worth having — a
+  // cancellation off a confirmed seat and one off an expired hold look
+  // identical in the enrollments table afterwards.
+  if (cancelled?.length) {
+    await logEvent(supabase, {
+      type: 'enrollment.cancelled',
+      entityType: 'enrollment',
+      entityId: enrollmentId,
+      summary: 'Enrollment cancelled',
+      metadata: { course_id: courseId, prior_status: prior?.status ?? null, held_a_spot: heldASpot },
+    })
   }
 
   revalidatePath(`/admin/courses/${courseId}`)
@@ -209,11 +257,15 @@ export async function restoreEnrollment(enrollmentId: string, courseId: string):
     return { error: 'Course is at capacity — cannot restore enrollment.' }
   }
 
-  const { error } = await adminClient
+  // The .eq('status','cancelled') guard means a double-click or a restore of a
+  // non-cancelled row updates nothing without erroring — .select() is what
+  // keeps the audit log from claiming a restoration that never happened.
+  const { data: restored, error } = await adminClient
     .from('enrollments')
     .update({ status: 'confirmed', updated_at: new Date().toISOString() })
     .eq('id', enrollmentId)
     .eq('status', 'cancelled')
+    .select('id')
 
   if (error) return { error: error.message }
 
@@ -231,6 +283,16 @@ export async function restoreEnrollment(enrollmentId: string, courseId: string):
       .eq('enrollment_id', enrollmentId)
       .eq('status', 'missed')
       .in('session_id', scheduledSessions.map((s) => s.id))
+  }
+
+  if (restored?.length) {
+    await logEvent(supabase, {
+      type: 'enrollment.restored',
+      entityType: 'enrollment',
+      entityId: enrollmentId,
+      summary: 'Cancelled enrollment restored',
+      metadata: { course_id: courseId },
+    })
   }
 
   revalidatePath(`/admin/courses/${courseId}`)
@@ -258,6 +320,14 @@ export async function requestCancellation(enrollmentId: string, courseId: string
     .eq('id', enrollmentId)
 
   if (error) return { error: error.message }
+
+  await logEvent(supabase, {
+    type: 'enrollment.cancel_requested',
+    entityType: 'enrollment',
+    entityId: enrollmentId,
+    summary: 'Student requested cancellation',
+    metadata: { course_id: courseId },
+  })
 
   revalidatePath(`/student/courses/${courseId}`)
   revalidatePath('/student/courses')

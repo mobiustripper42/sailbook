@@ -330,6 +330,50 @@ export type Database = {
           },
         ]
       }
+      events: {
+        Row: {
+          actor_id: string | null
+          actor_kind: string
+          entity_id: string | null
+          entity_type: string
+          event_type: string
+          id: string
+          metadata: Json
+          occurred_at: string
+          summary: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_kind?: string
+          entity_id?: string | null
+          entity_type: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          occurred_at?: string
+          summary: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_kind?: string
+          entity_id?: string | null
+          entity_type?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          occurred_at?: string
+          summary?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invites: {
         Row: {
           created_at: string
@@ -441,8 +485,6 @@ export type Database = {
           city: string | null
           created_at: string | null
           email: string
-          postal_code: string | null
-          state: string | null
           experience_level: string | null
           first_name: string
           id: string
@@ -455,6 +497,8 @@ export type Database = {
           last_name: string
           notification_preferences: Json | null
           phone: string | null
+          postal_code: string | null
+          state: string | null
           stripe_customer_id: string | null
           theme_preference: string
           updated_at: string | null
@@ -467,8 +511,6 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           email: string
-          postal_code?: string | null
-          state?: string | null
           experience_level?: string | null
           first_name: string
           id: string
@@ -481,6 +523,8 @@ export type Database = {
           last_name: string
           notification_preferences?: Json | null
           phone?: string | null
+          postal_code?: string | null
+          state?: string | null
           stripe_customer_id?: string | null
           theme_preference?: string
           updated_at?: string | null
@@ -493,8 +537,6 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           email?: string
-          postal_code?: string | null
-          state?: string | null
           experience_level?: string | null
           first_name?: string
           id?: string
@@ -507,6 +549,8 @@ export type Database = {
           last_name?: string
           notification_preferences?: Json | null
           phone?: string | null
+          postal_code?: string | null
+          state?: string | null
           stripe_customer_id?: string | null
           theme_preference?: string
           updated_at?: string | null
@@ -705,6 +749,18 @@ export type Database = {
         Returns: string[]
       }
       get_waitlist_position: { Args: { p_course_id: string }; Returns: number }
+      log_event: {
+        Args: {
+          p_actor_id?: string
+          p_actor_kind?: string
+          p_entity_id: string
+          p_entity_type: string
+          p_event_type: string
+          p_metadata?: Json
+          p_summary: string
+        }
+        Returns: string
+      }
       profile_auth_source_unchanged: {
         Args: { p_auth_source: string; p_id: string }
         Returns: boolean
