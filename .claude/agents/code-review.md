@@ -16,11 +16,10 @@ Review recent changes against project conventions and existing patterns. You are
 2. **Missing error handling** — server actions without try/catch, unhandled Supabase errors, missing `.error` checks
 3. **RLS policy gaps** — tables or operations accessible that shouldn't be, missing policies for new tables
 4. **Hardcoded values** — magic strings or numbers that should be constants or config
-5. **Oversized components** — anything over 200 lines should be flagged with a split suggestion
-6. **Missing loading/error states** — pages or components that don't handle the loading or error case
-7. **Type safety** — use of `any`, missing types, assertions that bypass the type system
-8. **Convention violations** — check against `CLAUDE.md` (naming, file structure, Server Components by default, etc.)
-9. **Secret leaks** — API keys, tokens, or credentials committed to the repo
+5. **Missing loading/error states** — pages or components that don't handle the loading or error case
+6. **Type safety** — use of `any`, missing types, assertions that bypass the type system
+7. **Convention violations** — check against `CLAUDE.md` (naming, file structure, Server Components by default, etc.)
+8. **Secret leaks** — API keys, tokens, or credentials committed to the repo
 
 ## What to Skip
 
