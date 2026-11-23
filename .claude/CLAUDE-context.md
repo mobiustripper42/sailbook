@@ -114,7 +114,7 @@ The migration **discipline** lives in the shell's `## Migration Protocol`. This 
 ### Components
 - Server Components by default. Add `'use client'` only when needed.
 - shadcn/ui components in `components/ui/` — don't edit directly.
-- Feature components in `components/[feature]/`. Keep components under 200 lines; split if larger.
+- Feature components in `components/[feature]/`.
 
 ### Data Fetching
 - Server Components fetch directly via Supabase server client.
